@@ -1,0 +1,3122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <!-- =====================================================
+         BASIC WEBSITE SETTINGS
+    ====================================================== -->
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Kurios Stores - Your One-Stop Multipurpose Store"
+    >
+
+    <title>Kurios Stores | Campus Convenience</title>
+
+
+    <!-- =====================================================
+         GOOGLE FONT
+    ====================================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- =====================================================
+         FONT AWESOME ICONS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+
+    <!-- =====================================================
+         OUR CSS FILE
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         NAVIGATION BAR
+    ====================================================== -->
+
+    <header class="navbar">
+
+        <div class="nav-container">
+
+
+            <!-- LOGO -->
+
+            <a
+                href="#home"
+                class="logo-link"
+            >
+
+                <img
+                    src="logo.png"
+                    alt="Kurios Stores"
+                    class="nav-logo"
+                >
+
+            </a>
+
+
+            <!-- DESKTOP NAVIGATION -->
+
+            <nav class="main-nav">
+
+                <a
+                    href="#home"
+                    class="nav-link active"
+                >
+                    Home
+                </a>
+
+                <a
+                    href="#shop"
+                    class="nav-link"
+                >
+                    Shop
+                </a>
+
+                <a
+                    href="#categories"
+                    class="nav-link"
+                >
+                    Categories
+                </a>
+
+                <a
+                    href="#rewards"
+                    class="nav-link"
+                >
+                    Rewards
+                </a>
+
+                <a
+                    href="#chat"
+                    class="nav-link"
+                >
+                    Chat
+                </a>
+
+            </nav>
+
+
+            <!-- NAVIGATION ACTIONS -->
+
+            <div class="nav-actions">
+
+
+                <!-- NOTIFICATIONS -->
+
+                <button
+                    class="nav-icon-button"
+                    id="notificationButton"
+                    aria-label="Notifications"
+                >
+
+                    <i class="fa-regular fa-bell"></i>
+
+                    <span
+                        class="notification-badge"
+                        id="notificationBadge"
+                    >
+                        0
+                    </span>
+
+                </button>
+
+
+                <!-- CART -->
+
+                <button
+                    class="nav-icon-button"
+                    id="cartButton"
+                    aria-label="Shopping Cart"
+                >
+
+                    <i class="fa-solid fa-cart-shopping"></i>
+
+                    <span
+                        class="cart-badge"
+                        id="cartBadge"
+                    >
+                        0
+                    </span>
+
+                </button>
+
+
+                <!-- SIGN IN -->
+
+                <button
+                    class="signin-nav-button"
+                    id="openSignIn"
+                >
+
+                    <i class="fa-regular fa-user"></i>
+
+                    <span>
+                        Sign In
+                    </span>
+
+                </button>
+
+           <!-- =====================================================
+     STUDENT ACCOUNT MENU
+====================================================== -->
+
+<div
+    class="student-account-menu"
+    id="studentAccountMenu"
+>
+
+    <!-- ACCOUNT HEADER -->
+
+    <div class="account-menu-header">
+
+        <div class="account-menu-icon">
+
+            <i class="fa-regular fa-user"></i>
+
+        </div>
+
+
+        <div class="account-menu-info">
+
+            <strong id="accountMenuName">
+                Student
+            </strong>
+
+            <span id="accountMenuStudentInfo">
+                Student account
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="account-menu-divider"></div>
+
+
+    <!-- MY PROFILE -->
+
+    <button
+        type="button"
+        id="accountProfile"
+    >
+
+        <i class="fa-regular fa-user"></i>
+
+        <span>
+            My Profile
+        </span>
+
+    </button>
+
+
+    <!-- MY ORDERS -->
+
+    <button
+        type="button"
+        id="accountOrders"
+    >
+
+        <i class="fa-solid fa-box"></i>
+
+        <span>
+            My Orders
+        </span>
+
+    </button>
+
+
+    <!-- WISHLIST -->
+
+    <button
+        type="button"
+        id="accountWishlist"
+    >
+
+        <i class="fa-regular fa-heart"></i>
+
+        <span>
+            Wishlist
+        </span>
+
+    </button>
+
+
+    <!-- WALLET -->
+
+    <button
+        type="button"
+        id="accountWallet"
+    >
+
+        <i class="fa-solid fa-wallet"></i>
+
+        <span>
+            Wallet
+        </span>
+
+    </button>
+
+
+    <!-- ACCOUNT SETTINGS -->
+
+    <button
+        type="button"
+        id="accountSettings"
+    >
+
+        <i class="fa-solid fa-gear"></i>
+
+        <span>
+            Account Settings
+        </span>
+
+    </button>
+
+
+    <div class="account-menu-divider"></div>
+
+
+    <!-- SIGN OUT -->
+
+    <button
+        type="button"
+        id="signOutButton"
+        class="sign-out-button"
+    >
+
+        <i class="fa-solid fa-right-from-bracket"></i>
+
+        <span>
+            Sign Out
+        </span>
+
+    </button>
+
+</div>    
+
+                <!-- MOBILE MENU -->
+
+                <button
+                    class="mobile-menu-button"
+                    id="mobileMenuButton"
+                    aria-label="Open Menu"
+                >
+
+                    <i class="fa-solid fa-bars"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- MOBILE NAVIGATION -->
+
+        <div
+            class="mobile-menu"
+            id="mobileMenu"
+        >
+
+            <a href="#home">
+                Home
+            </a>
+
+            <a href="#shop">
+                Shop
+            </a>
+
+            <a href="#categories">
+                Categories
+            </a>
+
+            <a href="#rewards">
+                Rewards
+            </a>
+
+            <a href="#chat">
+                Chat
+            </a>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =====================================================
+         NOTIFICATION PANEL
+    ====================================================== -->
+
+    <aside
+        class="notification-panel"
+        id="notificationPanel"
+    >
+
+        <div class="notification-header">
+
+            <div>
+
+                <h3>
+                    Notifications
+                </h3>
+
+                <p>
+                    Stay updated with Kurios Stores
+                </p>
+
+            </div>
+
+
+            <button
+                id="closeNotifications"
+                class="panel-close"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+
+        <div
+            class="notification-list"
+            id="notificationList"
+        >
+
+            <!-- JavaScript will insert notifications here -->
+
+            <div class="empty-state">
+
+                <i class="fa-regular fa-bell-slash"></i>
+
+                <h4>
+                    No notifications
+                </h4>
+
+                <p>
+                    You're all caught up.
+                </p>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         MAIN WEBSITE
+    ====================================================== -->
+
+    <main>
+
+
+        <!-- =================================================
+             HERO SECTION
+        ================================================== -->
+
+        <section
+            class="hero"
+            id="home"
+        >
+
+           <div class="hero-content">
+
+
+    <!-- ========================================
+         LOGGED-OUT HERO
+    ========================================= -->
+
+    <div id="loggedOutHero">
+
+        <span class="hero-label">
+
+            KURIOS STORES LTD
+
+        </span>
+
+
+        <h1>
+
+            Your Campus.
+            <br>
+
+            <span>
+                Your Store.
+            </span>
+
+        </h1>
+
+
+        <p>
+
+            Your One-Stop Multipurpose Store,
+            made for you.
+
+        </p>
+
+
+        <p class="hero-subtext">
+
+            Quality products. Greater value.
+            A better campus experience.
+
+        </p>
+
+
+        <div class="hero-buttons">
+
+            <a
+                href="#shop"
+                class="primary-button"
+            >
+
+                Shop Now
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </a>
+
+
+            <a
+                href="#categories"
+                class="secondary-button"
+            >
+
+                Explore Categories
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ========================================
+         LOGGED-IN HERO
+    ========================================= -->
+
+    <!-- =====================================================
+     LOGGED-IN STUDENT DASHBOARD
+====================================================== -->
+
+<div id="loggedInHero" class="logged-in-dashboard">
+
+    <!-- TOP WELCOME -->
+
+    <div class="dashboard-welcome">
+
+        <div class="welcome-content">
+
+            <span class="hero-label">
+                <i class="fa-solid fa-check"></i>
+                WELCOME BACK
+            </span>
+
+            <h1>
+                Hello,
+                <br>
+
+                <span id="heroStudentName">
+                    Student
+                </span>.
+            </h1>
+
+            <p>
+                Everything you need for your campus life, all in one place.
+            </p>
+
+            <div
+                class="student-campus-info"
+                id="heroStudentInfo"
+            >
+                <span class="campus-status-dot"></span>
+
+                <span id="heroStudentCampus">
+                    Your campus
+                </span>
+
+                <span class="campus-info-divider">
+                    |
+                </span>
+
+                <i class="fa-solid fa-box"></i>
+
+                <span id="heroActiveOrders">
+                    0 active orders
+                </span>
+            </div>
+
+            <div class="hero-buttons">
+
+                <a
+                    href="#shop"
+                    class="primary-button"
+                >
+                    Shop Now
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+
+                <button
+                    type="button"
+                    id="dashboardMyOrders"
+                    class="secondary-button"
+                >
+                    My Orders
+                    <span
+                        class="button-badge"
+                        id="heroOrdersBadge"
+                    >
+                        0
+                    </span>
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         QUICK ACCOUNT STATS
+    ================================================== -->
+
+    <div class="dashboard-stats">
+
+
+        <!-- WALLET -->
+
+        <div class="stat-card stat-card--wallet">
+
+            <div class="stat-icon">
+                <i class="fa-solid fa-credit-card"></i>
+            </div>
+
+            <div class="stat-text">
+                <div class="stat-value">
+                    ₦<span id="dashboardWalletBalance">0.00</span>
+                </div>
+
+                <span class="stat-label">
+                    Wallet Balance
+                </span>
+            </div>
+
+        </div>
+
+
+        <!-- WISHLIST -->
+
+        <div class="stat-card stat-card--wishlist">
+
+            <div class="stat-icon">
+                <i class="fa-regular fa-heart"></i>
+            </div>
+
+            <div class="stat-text">
+                <div class="stat-value">
+                    <span id="dashboardWishlistCount">0</span>
+                </div>
+
+                <span class="stat-label">
+                    Wishlist Items
+                </span>
+            </div>
+
+        </div>
+
+
+        <!-- REWARDS -->
+
+        <div class="stat-card stat-card--rewards">
+
+            <div class="stat-icon">
+                <i class="fa-solid fa-sparkles"></i>
+            </div>
+
+            <div class="stat-text">
+                <div class="stat-value">
+                    <span id="dashboardRewardTier">
+                        Starter
+                    </span>
+                </div>
+
+                <span class="stat-label">
+                    Reward Tier
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             CATEGORIES
+        ================================================== -->
+
+        <section
+            class="section"
+            id="categories"
+        >
+
+            <div class="section-heading">
+
+                <span>
+                    EXPLORE
+                </span>
+
+                <h2>
+                    Shop by Category
+                </h2>
+
+                <p>
+                    Everything you need, right here on campus.
+                </p>
+
+            </div>
+
+
+            <div class="category-grid">
+
+
+                <button
+                    class="category-card"
+                    data-category="Food"
+                >
+
+                    <div class="category-icon">
+
+                        <i class="fa-solid fa-utensils"></i>
+
+                    </div>
+
+                    <h3>
+                        Food & Drinks
+                    </h3>
+
+                    <p>
+                        Snacks, drinks and everyday essentials.
+                    </p>
+
+                </button>
+
+
+                <button
+                    class="category-card"
+                    data-category="School"
+                >
+
+                    <div class="category-icon">
+
+                        <i class="fa-solid fa-book"></i>
+
+                    </div>
+
+                    <h3>
+                        School Supplies
+                    </h3>
+
+                    <p>
+                        Everything you need for your studies.
+                    </p>
+
+                </button>
+
+
+                <button
+                    class="category-card"
+                    data-category="Electronics"
+                >
+
+                    <div class="category-icon">
+
+                        <i class="fa-solid fa-headphones"></i>
+
+                    </div>
+
+                    <h3>
+                        Electronics
+                    </h3>
+
+                    <p>
+                        Useful gadgets and accessories.
+                    </p>
+
+                </button>
+
+
+                <button
+                    class="category-card"
+                    data-category="Personal Care"
+                >
+
+                    <div class="category-icon">
+
+                        <i class="fa-solid fa-heart"></i>
+
+                    </div>
+
+                    <h3>
+                        Personal Care
+                    </h3>
+
+                    <p>
+                        Personal and everyday care products.
+                    </p>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             SHOP / PRODUCTS
+        ================================================== -->
+
+        <section
+            class="section shop-section"
+            id="shop"
+        >
+
+            <div class="section-heading">
+
+                <span>
+                    SHOP
+                </span>
+
+                <h2>
+                    Popular Products
+                </h2>
+
+                <p>
+                    Great products at student-friendly prices.
+                </p>
+
+            </div>
+
+
+            <!-- CATEGORY FILTER -->
+
+            <div class="product-filters">
+
+                <button
+                    class="filter-button active"
+                    data-filter="all"
+                >
+                    All
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-filter="Food"
+                >
+                    Food
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-filter="School"
+                >
+                    School
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-filter="Electronics"
+                >
+                    Electronics
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-filter="Personal Care"
+                >
+                    Personal Care
+                </button>
+
+            </div>
+
+
+            <!-- PRODUCTS -->
+
+            <div
+                class="product-grid"
+                id="productGrid"
+            >
+
+                <!-- Product 1 -->
+
+                <article
+                    class="product-card"
+                    data-category="Electronics"
+                >
+
+                    <div class="product-image">
+
+                        <span class="product-tag">
+                            Popular
+                        </span>
+
+                        <i class="fa-solid fa-headphones"></i>
+
+                    </div>
+
+
+                    <div class="product-info">
+
+                        <span class="product-category">
+                            Electronics
+                        </span>
+
+                        <h3>
+                            Premium Headphones
+                        </h3>
+
+                        <p>
+                            Quality sound for study and entertainment.
+                        </p>
+
+
+                        <div class="product-bottom">
+
+                            <strong>
+                                ₦12,500
+                            </strong>
+
+                            <button
+                                class="add-to-cart"
+                                data-product="Premium Headphones"
+                                data-price="12500"
+                            >
+
+                                <i class="fa-solid fa-plus"></i>
+
+                                Add
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+
+                <!-- Product 2 -->
+
+                <article
+                    class="product-card"
+                    data-category="School"
+                >
+
+                    <div class="product-image">
+
+                        <i class="fa-solid fa-book"></i>
+
+                    </div>
+
+
+                    <div class="product-info">
+
+                        <span class="product-category">
+                            School
+                        </span>
+
+                        <h3>
+                            Lecture Notebook
+                        </h3>
+
+                        <p>
+                            Perfect for lectures and personal notes.
+                        </p>
+
+
+                        <div class="product-bottom">
+
+                            <strong>
+                                ₦1,500
+                            </strong>
+
+                            <button
+                                class="add-to-cart"
+                                data-product="Lecture Notebook"
+                                data-price="1500"
+                            >
+
+                                <i class="fa-solid fa-plus"></i>
+
+                                Add
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+
+                <!-- Product 3 -->
+
+                <article
+                    class="product-card"
+                    data-category="Food"
+                >
+
+                    <div class="product-image">
+
+                        <span class="product-tag">
+                            Student Favourite
+                        </span>
+
+                        <i class="fa-solid fa-bottle-water"></i>
+
+                    </div>
+
+
+                    <div class="product-info">
+
+                        <span class="product-category">
+                            Food & Drinks
+                        </span>
+
+                        <h3>
+                            Chilled Water
+                        </h3>
+
+                        <p>
+                            Stay refreshed throughout the day.
+                        </p>
+
+
+                        <div class="product-bottom">
+
+                            <strong>
+                                ₦300
+                            </strong>
+
+                            <button
+                                class="add-to-cart"
+                                data-product="Chilled Water"
+                                data-price="300"
+                            >
+
+                                <i class="fa-solid fa-plus"></i>
+
+                                Add
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+
+                <!-- Product 4 -->
+
+                <article
+                    class="product-card"
+                    data-category="Personal Care"
+                >
+
+                    <div class="product-image">
+
+                        <i class="fa-solid fa-pump-soap"></i>
+
+                    </div>
+
+
+                    <div class="product-info">
+
+                        <span class="product-category">
+                            Personal Care
+                        </span>
+
+                        <h3>
+                            Personal Care Kit
+                        </h3>
+
+                        <p>
+                            Everyday essentials for campus life.
+                        </p>
+
+
+                        <div class="product-bottom">
+
+                            <strong>
+                                ₦4,500
+                            </strong>
+
+                            <button
+                                class="add-to-cart"
+                                data-product="Personal Care Kit"
+                                data-price="4500"
+                            >
+
+                                <i class="fa-solid fa-plus"></i>
+
+                                Add
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             REWARDS
+        ================================================== -->
+
+        <section
+            class="rewards-section"
+            id="rewards"
+        >
+
+            <div class="rewards-container">
+
+
+                <div class="rewards-content">
+
+                    <span class="section-label">
+                        KURIOS REWARDS
+                    </span>
+
+                    <h2>
+                        Shop. Earn.
+                        <span>Get Rewarded.</span>
+                    </h2>
+
+                    <p>
+                        Every purchase brings you closer to
+                        exciting rewards and exclusive student
+                        benefits.
+                    </p>
+
+
+                    <button
+                        class="primary-button"
+                        id="joinRewardsButton"
+                    >
+
+                        Join Kurios Rewards
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </button>
+
+                </div>
+
+
+                <div class="rewards-card">
+
+                    <div class="reward-icon">
+
+                        <i class="fa-solid fa-gift"></i>
+
+                    </div>
+
+                    <strong>
+                        0 Points
+                    </strong>
+
+                    <span>
+                        Your rewards balance
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             CHAT SECTION
+        ================================================== -->
+
+        <section
+            class="section chat-section"
+            id="chat"
+        >
+
+            <div class="section-heading">
+
+                <span>
+                    COMMUNITY
+                </span>
+
+                <h2>
+                    Campus Chat
+                </h2>
+
+                <p>
+                    Connect with students and chat directly
+                    with Elkurios.
+                </p>
+
+            </div>
+
+
+            <div class="chat-preview">
+
+
+                <!-- CHAT CONTACTS -->
+
+                <div class="chat-sidebar">
+
+                    <div class="chat-sidebar-header">
+
+                        <h3>
+                            Messages
+                        </h3>
+
+                        <button
+                            id="newChatButton"
+                            aria-label="New Chat"
+                        >
+
+                            <i class="fa-solid fa-pen"></i>
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="chat-search">
+
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                        <input
+                            type="text"
+                            id="chatSearch"
+                            placeholder="Search students..."
+                        >
+
+                    </div>
+
+
+                    <!-- ELKURIOS -->
+
+                    <button
+                        class="chat-contact active"
+                        data-contact="Elkurios"
+                    >
+
+                        <div class="chat-avatar owner-avatar">
+
+                            E
+
+                        </div>
+
+
+                        <div class="chat-contact-info">
+
+                            <strong>
+                                Elkurios
+                            </strong>
+
+                            <span>
+                                Store Owner
+                            </span>
+
+                        </div>
+
+
+                        <span class="online-dot"></span>
+
+                    </button>
+
+
+                    <!-- SAMPLE STUDENTS -->
+
+                    <button
+                        class="chat-contact"
+                        data-contact="Chisom"
+                    >
+
+                        <div class="chat-avatar">
+                            C
+                        </div>
+
+                        <div class="chat-contact-info">
+
+                            <strong>
+                                Chisom
+                            </strong>
+
+                            <span>
+                                Student
+                            </span>
+
+                        </div>
+
+                    </button>
+
+
+                    <button
+                        class="chat-contact"
+                        data-contact="Daniel"
+                    >
+
+                        <div class="chat-avatar">
+                            D
+                        </div>
+
+                        <div class="chat-contact-info">
+
+                            <strong>
+                                Daniel
+                            </strong>
+
+                            <span>
+                                Student
+                            </span>
+
+                        </div>
+
+                    </button>
+
+                </div>
+
+
+
+                <!-- CHAT WINDOW -->
+
+                <div class="chat-window">
+
+
+                    <div class="chat-window-header">
+
+                        <div class="chat-user">
+
+                            <div
+                                class="chat-avatar owner-avatar"
+                                id="activeChatAvatar"
+                            >
+                                E
+                            </div>
+
+
+                            <div>
+
+                                <strong id="activeChatName">
+                                    Elkurios
+                                </strong>
+
+                                <span id="activeChatStatus">
+                                    Store Owner
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            class="chat-more-button"
+                            id="chatMoreButton"
+                        >
+
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+
+                        </button>
+
+                    </div>
+
+
+
+                    <!-- MESSAGES -->
+
+                    <div
+                        class="messages"
+                        id="messages"
+                    >
+
+                        <div class="message received">
+
+                            <div class="message-bubble">
+
+                                Hi! Welcome to Kurios Stores.
+                                How can we help you?
+
+                            </div>
+
+                            <span>
+                                Elkurios • 10:30 AM
+                            </span>
+
+                        </div>
+
+
+                        <div class="message sent">
+
+                            <div class="message-bubble">
+
+                                Hello! I want to know if you
+                                have phone chargers available.
+
+                            </div>
+
+                            <span>
+                                You • 10:32 AM
+                            </span>
+
+                        </div>
+
+
+                        <div class="message received">
+
+                            <div class="message-bubble">
+
+                                Yes, we do. You can check our
+                                Electronics section.
+
+                            </div>
+
+                            <span>
+                                Elkurios • 10:33 AM
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- MESSAGE INPUT -->
+
+                    <form
+                        class="message-form"
+                        id="messageForm"
+                    >
+
+                        <button
+                            type="button"
+                            id="attachButton"
+                            aria-label="Attach File"
+                        >
+
+                            <i class="fa-solid fa-paperclip"></i>
+
+                        </button>
+
+
+                        <input
+                            type="text"
+                            id="messageInput"
+                            placeholder="Type a message..."
+                            autocomplete="off"
+                        >
+
+
+                        <button
+                            type="submit"
+                            class="send-message-button"
+                            aria-label="Send Message"
+                        >
+
+                            <i class="fa-solid fa-paper-plane"></i>
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             WHY CHOOSE KURIOS
+        ================================================== -->
+
+        <section class="why-section">
+
+            <div class="section-heading">
+
+                <span>
+                    WHY KURIOS?
+                </span>
+
+                <h2>
+                    Made for Campus Life
+                </h2>
+
+            </div>
+
+
+            <div class="why-grid">
+
+
+                <div class="why-card">
+
+                    <div class="why-icon">
+
+                        <i class="fa-solid fa-star"></i>
+
+                    </div>
+
+                    <h3>
+                        Quality Products
+                    </h3>
+
+                    <p>
+                        Products selected with students
+                        in mind.
+                    </p>
+
+                </div>
+
+
+                <div class="why-card">
+
+                    <div class="why-icon">
+
+                        <i class="fa-solid fa-naira-sign"></i>
+
+                    </div>
+
+                    <h3>
+                        Greater Value
+                    </h3>
+
+                    <p>
+                        Get great products at prices
+                        that work for students.
+                    </p>
+
+                </div>
+
+
+                <div class="why-card">
+
+                    <div class="why-icon">
+
+                        <i class="fa-solid fa-bolt"></i>
+
+                    </div>
+
+                    <h3>
+                        Campus Convenience
+                    </h3>
+
+                    <p>
+                        Everything you need, closer
+                        and easier.
+                    </p>
+
+                </div>
+
+
+                <div class="why-card">
+
+                    <div class="why-icon">
+
+                        <i class="fa-solid fa-users"></i>
+
+                    </div>
+
+                    <h3>
+                        Student Community
+                    </h3>
+
+                    <p>
+                        Connect, chat and build a
+                        better campus experience.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =====================================================
+         SHOPPING CART
+    ====================================================== -->
+
+    <div
+        class="cart-overlay"
+        id="cartOverlay"
+    >
+
+        <div class="cart-panel">
+
+
+            <div class="cart-header">
+
+                <div>
+
+                    <h2>
+                        Your Cart
+                    </h2>
+
+                    <p>
+                        Review your items
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="closeCart"
+                    class="close-cart"
+                >
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            </div>
+
+
+            <div
+                class="cart-items"
+                id="cartItems"
+            >
+
+                <div class="empty-cart">
+
+                    <i class="fa-solid fa-cart-shopping"></i>
+
+                    <h3>
+                        Your cart is empty
+                    </h3>
+
+                    <p>
+                        Add some products to get started.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="cart-footer">
+
+                <div class="cart-total">
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong id="cartTotal">
+                        ₦0
+                    </strong>
+
+                </div>
+
+
+                <button
+                    class="checkout-button"
+                    id="checkoutButton"
+                >
+
+                    Proceed to Checkout
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MY PROFILE PANEL
+    ====================================================== -->
+
+    <div
+        class="profile-overlay"
+        id="profileOverlay"
+    >
+
+        <div
+            class="profile-panel"
+            id="profilePanel"
+        >
+
+
+            <div class="profile-panel-header">
+
+                <div>
+
+                    <h2>
+                        My Profile
+                    </h2>
+
+                    <p>
+                        Your registered student information
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="closeProfile"
+                    class="close-cart"
+                >
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            </div>
+
+
+            <div class="profile-panel-body" id="profilePanelBody">
+
+                <!-- AVATAR + NAME + STATUS -->
+
+                <div
+                    class="profile-avatar-block"
+                    id="profileAvatarBlock"
+                >
+
+                    <div
+                        class="profile-avatar-circle"
+                        id="profileAvatarCircle"
+                    >
+                        <i class="fa-regular fa-user"></i>
+
+                        <div
+                            class="profile-avatar-edit-badge"
+                            id="profileAvatarEditBadge"
+                        >
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+
+                    </div>
+
+                    <input
+                        type="file"
+                        id="profilePictureInput"
+                        accept="image/png, image/jpeg, image/webp"
+                        hidden
+                    >
+
+                    <div class="profile-avatar-info">
+
+                        <h3 id="profileFullName">
+                            Student
+                        </h3>
+
+                        <span
+                            class="profile-status-badge"
+                            id="profileAccountStatus"
+                        >
+                            Active
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- EDIT BUTTON (view mode only) -->
+
+                <div class="profile-edit-actions">
+
+                    <button
+                        type="button"
+                        id="editProfileButton"
+                        class="profile-edit-button"
+                    >
+                        <i class="fa-solid fa-pen"></i>
+                        Edit Profile
+                    </button>
+
+                </div>
+
+
+                <!-- REGISTERED INFORMATION -->
+
+                <div class="profile-field-list">
+
+                    <div class="profile-field">
+
+                        <span class="profile-field-label">
+                            <i class="fa-solid fa-id-card"></i>
+                            Student ID
+                        </span>
+
+                        <span
+                            class="profile-field-value"
+                            id="profileStudentId"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <div class="profile-field">
+
+                        <span class="profile-field-label">
+                            <i class="fa-solid fa-building-columns"></i>
+                            University
+                        </span>
+
+                        <span
+                            class="profile-field-value"
+                            id="profileUniversity"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <div class="profile-field">
+
+                        <span class="profile-field-label">
+                            <i class="fa-solid fa-envelope"></i>
+                            Email
+                        </span>
+
+                        <span
+                            class="profile-field-value"
+                            id="profileEmail"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <!-- PHONE — has a matching editable row below -->
+
+                    <div class="profile-field editable-field">
+
+                        <span class="profile-field-label">
+                            <i class="fa-solid fa-phone"></i>
+                            Phone Number
+                        </span>
+
+                        <span
+                            class="profile-field-value"
+                            id="profilePhone"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+                    <div class="profile-field-editable">
+
+                        <label for="profilePhoneInput">
+                            <i class="fa-solid fa-phone"></i>
+                            Phone Number
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="profilePhoneInput"
+                            placeholder="Phone number"
+                        >
+
+                    </div>
+
+
+                    <!-- DATE OF BIRTH — has a matching editable row below -->
+
+                    <div class="profile-field editable-field">
+
+                        <span class="profile-field-label">
+                            <i class="fa-solid fa-cake-candles"></i>
+                            Date of Birth
+                        </span>
+
+                        <span
+                            class="profile-field-value"
+                            id="profileDob"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+                    <div class="profile-field-editable">
+
+                        <label for="profileDobInput">
+                            <i class="fa-solid fa-cake-candles"></i>
+                            Date of Birth
+                        </label>
+
+                        <input
+                            type="date"
+                            id="profileDobInput"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- PROFILE PICTURE NOTE (view mode only) -->
+
+                <div
+                    class="profile-note"
+                    id="profilePictureNote"
+                >
+
+                    <i class="fa-solid fa-circle-info"></i>
+
+                    <span>
+                        Tap Edit Profile to add a profile picture, phone number, or date of birth.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- SAVE / CANCEL (edit mode only) -->
+
+            <div class="profile-panel-footer" id="profilePanelFooter">
+
+                <button
+                    type="button"
+                    id="cancelProfileEdit"
+                    class="profile-cancel-button"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    id="saveProfileEdit"
+                    class="profile-save-button"
+                >
+                    Save Changes
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+
+    <!-- =====================================================
+         MY ORDERS PANEL
+    ====================================================== -->
+
+    <div
+        class="orders-overlay"
+        id="ordersOverlay"
+    >
+
+        <div class="orders-panel">
+
+
+            <div class="orders-panel-header">
+
+                <div>
+
+                    <h2>
+                        My Orders
+                    </h2>
+
+                    <p>
+                        Your order history
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="closeOrders"
+                    class="close-cart"
+                >
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            </div>
+
+
+            <div
+                class="orders-panel-body"
+                id="ordersPanelBody"
+            >
+
+                <div class="empty-cart">
+
+                    <i class="fa-solid fa-box"></i>
+
+                    <h3>
+                        No orders yet
+                    </h3>
+
+                    <p>
+                        Your past orders will show up here once you check out.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+
+    <!-- =====================================================
+         SIGN IN MODAL
+    ====================================================== -->
+
+    <div
+        class="modal-overlay"
+        id="signInModal"
+    >
+
+        <div class="auth-modal">
+
+
+            <button
+                class="modal-close"
+                id="closeSignIn"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+
+            <div class="auth-header">
+
+                <div class="auth-icon">
+
+                    <i class="fa-regular fa-user"></i>
+
+                </div>
+
+                <h2>
+                    Welcome Back
+                </h2>
+
+                <p>
+                    Sign in to your Kurios Stores account.
+                </p>
+
+            </div>
+
+
+            <form id="signinForm">
+
+
+                <div class="form-group">
+
+                    <label for="signinEmail">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="signinEmail"
+                        placeholder="you@example.com"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="signinPassword">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="signinPassword"
+                        placeholder="Enter your password"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-options">
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            id="rememberMe"
+                        >
+
+                        Remember me
+
+                    </label>
+
+
+                    <a
+                        href="#"
+                        id="forgotPassword"
+                    >
+                        Forgot password?
+                    </a>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="auth-button"
+                >
+
+                    Sign In
+
+                </button>
+
+
+                <p class="signup-prompt">
+
+                    Don't have an account?
+
+                    <a
+                        href="#"
+                        id="openSignUp"
+                    >
+                        Create one
+                    </a>
+
+                </p>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         SIGN UP MODAL
+    ====================================================== -->
+
+    <div
+        class="modal-overlay"
+        id="signUpModal"
+    >
+
+        <div class="auth-modal">
+
+
+            <button
+                class="modal-close"
+                id="closeSignUp"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+
+            <div class="auth-header">
+
+                <div class="auth-icon">
+
+                    <i class="fa-solid fa-user-plus"></i>
+
+                </div>
+
+<h2 id="accountModalTitle">
+    Create Account
+</h2>
+
+<p id="accountModalSubtitle">
+    Join the Kurios campus community.
+</p>
+
+<!-- ========================================
+     ACCOUNT CREATED SUCCESS SCREEN
+======================================== -->
+
+<!-- =====================================================
+     ACCOUNT CREATED SUCCESSFULLY
+===================================================== -->
+
+<div
+    id="accountCreatedSuccessScreen"
+    style="
+        display: none;
+        text-align: center;
+        margin-top: 25px;
+    "
+>
+
+    <div
+        id="accountCreatedSuccessMessage"
+        style="
+            font-size: 16px;
+            line-height: 1.7;
+            color: #555;
+        "
+    >
+
+        <p>
+            Welcome to Kurios Stores — your campus experience
+            just got more convenient.
+        </p>
+
+        <p>
+
+            <a
+                href="#"
+                id="successLoginLink"
+                style="
+                    color: #5b21b6;
+                    font-weight: 700;
+                    text-decoration: underline;
+                    cursor: pointer;
+                "
+            >
+                Log in
+            </a>
+
+            now to access your account and discover a smarter,
+            simpler way to shop and connect on campus.
+
+        </p>
+
+    </div>
+
+</div>
+
+            </div>
+
+
+            <form id="signupForm">
+
+    <!-- PERSONAL INFORMATION -->
+    <div class="form-group">
+
+        <label for="signupFirstName">
+            First Name *
+        </label>
+
+        <input
+            type="text"
+            id="signupFirstName"
+            name="firstName"
+            placeholder="Enter your first name"
+            required
+        >
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label for="signupLastName">
+            Last Name *
+        </label>
+
+        <input
+            type="text"
+            id="signupLastName"
+            name="lastName"
+            placeholder="Enter your last name"
+            required
+        >
+
+    </div>
+
+
+    <!-- CONTACT INFORMATION -->
+    <div class="form-group">
+
+        <label for="signupEmail">
+            Email Address *
+        </label>
+
+        <input
+            type="email"
+            id="signupEmail"
+            name="email"
+            placeholder="Enter your email address"
+            required
+        >
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label for="signupPhone">
+            Phone Number *
+        </label>
+
+        <input
+            type="tel"
+            id="signupPhone"
+            name="phone"
+            placeholder="Enter your phone number"
+            required
+        >
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label for="signupWhatsapp">
+            WhatsApp Number
+        </label>
+
+        <input
+            type="tel"
+            id="signupWhatsapp"
+            name="whatsappNumber"
+            placeholder="WhatsApp number (optional)"
+        >
+
+    </div>
+
+
+    <!-- STUDENT INFORMATION -->
+    <div class="form-group">
+
+        <label for="signupUniversity">
+            University / Institution *
+        </label>
+
+        <input
+            type="text"
+            id="signupUniversity"
+            name="university"
+            placeholder="Enter your institution"
+            required
+        >
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label for="signupStudentId">
+            Student ID / Matric Number *
+        </label>
+
+        <input
+            type="text"
+            id="signupStudentId"
+            name="studentId"
+            placeholder="Enter your student ID or matric number"
+            required
+        >
+
+    </div>
+
+
+    <!-- PASSWORD -->
+    <div class="form-group">
+
+        <label for="signupPassword">
+            Password *
+        </label>
+
+        <input
+            type="password"
+            id="signupPassword"
+            name="password"
+            placeholder="Create a password"
+            required
+            minlength="6"
+        >
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label for="signupConfirmPassword">
+            Confirm Password *
+        </label>
+
+        <input
+            type="password"
+            id="signupConfirmPassword"
+            name="confirmPassword"
+            placeholder="Confirm your password"
+            required
+            minlength="6"
+        >
+
+    </div>
+
+
+    <!-- VERIFICATION -->
+    <div class="form-checkbox">
+
+        <label>
+
+            <input
+                type="checkbox"
+                id="agreedStudent"
+                name="agreedStudent"
+                required
+            >
+
+            I confirm that I am a student of the institution provided.
+
+        </label>
+
+    </div>
+
+
+    <div class="form-checkbox">
+
+        <label>
+
+            <input
+                type="checkbox"
+                id="agreedTerms"
+                name="agreedTerms"
+                required
+            >
+
+            I agree to the Store's Terms and Conditions.
+
+        </label>
+
+    </div>
+
+
+    <div class="form-checkbox">
+
+        <label>
+
+            <input
+                type="checkbox"
+                id="agreedPrivacy"
+                name="agreedPrivacy"
+                required
+            >
+
+            I agree to the Privacy Policy.
+
+        </label>
+
+    </div>
+
+
+    <div class="form-checkbox">
+
+        <label>
+
+            <input
+                type="checkbox"
+                id="receiveNotifications"
+                name="receiveNotifications"
+                checked
+            >
+
+            I agree to receive order updates and important account notifications.
+
+        </label>
+
+    </div>
+
+
+    <!-- SUBMIT -->
+    <button
+        type="submit"
+       class="btn btn-primary create-account-btn"
+        id="signupSubmit"
+    >
+       <i class="fa-solid fa-user-plus"></i>
+    <span>Create Student Account</span>
+    <i class="fa-solid fa-arrow-right"></i>   
+ </button>
+
+</form>
+
+
+<!-- =====================================================
+     EMAIL OTP VERIFICATION
+===================================================== -->
+
+<div
+    id="otpVerificationScreen"
+    style="display: none;"
+>
+
+    <!-- OTP HEADER -->
+
+    <div class="otp-header">
+
+        <h2>
+            Verify Your Email
+        </h2>
+
+        <p id="otpVerificationMessage">
+
+            We've sent a 6-digit verification code
+            to your email address.
+
+        </p>
+
+    </div>
+
+
+    <!-- OTP INPUT SECTION -->
+
+    <div class="otp-input-section">
+
+        <div class="otp-label-row">
+
+            <label>
+                Verification Code
+            </label>
+
+            <span>
+                6 DIGITS
+            </span>
+
+        </div>
+
+
+        <!-- SIX OTP BOXES -->
+
+        <div class="otp-input-container">
+
+            <input
+                type="text"
+                class="otp-digit"
+                maxlength="1"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+            >
+
+            <input
+                type="text"
+                class="otp-digit"
+                maxlength="1"
+                inputmode="numeric"
+            >
+
+            <input
+                type="text"
+                class="otp-digit"
+                maxlength="1"
+                inputmode="numeric"
+            >
+
+            <input
+                type="text"
+                class="otp-digit"
+                maxlength="1"
+                inputmode="numeric"
+            >
+
+            <input
+                type="text"
+                class="otp-digit"
+                maxlength="1"
+                inputmode="numeric"
+            >
+
+            <input
+                type="text"
+                class="otp-digit"
+                maxlength="1"
+                inputmode="numeric"
+            >
+
+        </div>
+
+
+        <!-- HIDDEN COMBINED OTP -->
+
+        <input
+            type="hidden"
+            id="otpInput"
+            name="otp"
+        >
+
+
+        <!-- OTP STATUS -->
+
+        <div
+            id="otpStatusMessage"
+            class="otp-status-message"
+        ></div>
+
+
+        <!-- VERIFY BUTTON -->
+
+        <button
+            type="button"
+            class="otp-verify-button"
+            id="verifyOtpButton"
+        >
+
+            <span class="otp-button-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+            </span>
+
+            <span class="otp-button-text">
+                Verify Account
+            </span>
+
+            <span class="otp-button-arrow">
+                <i class="fa-solid fa-arrow-right"></i>
+            </span>
+
+        </button>
+
+
+        <!-- RESEND OTP -->
+
+        <div class="otp-resend-container">
+
+            <span>
+                Didn't receive the code?
+            </span>
+
+            <button
+                type="button"
+                id="resendOtpButton"
+                class="otp-resend-button"
+            >
+
+                <i class="fa-solid fa-rotate"></i>
+
+                <span>
+                    Resend OTP
+                </span>
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- SECURITY MESSAGE -->
+
+    <div class="otp-security-box">
+
+        <div class="otp-security-icon">
+
+            <i class="fa-solid fa-shield-halved"></i>
+
+        </div>
+
+        <div class="otp-security-text">
+
+            <strong>
+                Your Security Matters
+            </strong>
+
+            <p>
+                We keep your information safe and secure.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ELKURIOS BROADCAST PANEL
+         
+         This will eventually be available only to
+         authenticated Elkurios/admin accounts.
+    ====================================================== -->
+
+    <div
+        class="modal-overlay"
+        id="broadcastModal"
+    >
+
+        <div class="auth-modal broadcast-modal">
+
+
+            <button
+                class="modal-close"
+                id="closeBroadcast"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+
+            <div class="auth-header">
+
+                <div class="auth-icon">
+
+                    <i class="fa-solid fa-bullhorn"></i>
+
+                </div>
+
+                <h2>
+                    Send Announcement
+                </h2>
+
+                <p>
+                    Send a message to all Kurios students.
+                </p>
+
+            </div>
+
+
+            <form id="broadcastForm">
+
+
+                <div class="form-group">
+
+                    <label for="broadcastTitle">
+                        Announcement Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="broadcastTitle"
+                        placeholder="e.g. Weekend Promotion"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="broadcastMessage">
+                        Message
+                    </label>
+
+                    <textarea
+                        id="broadcastMessage"
+                        rows="5"
+                        placeholder="Write your announcement..."
+                    ></textarea>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="auth-button"
+                >
+
+                    <i class="fa-solid fa-paper-plane"></i>
+
+                    Send to All Students
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="footer">
+
+
+        <div class="footer-container">
+
+
+            <!-- BRAND -->
+
+            <div class="footer-brand">
+
+                <img
+                    src="logo.png"
+                    alt="Kurios Stores"
+                    class="footer-logo"
+                >
+
+                <h3>
+                    KURIOS STORES LTD
+                </h3>
+
+                <p>
+                    Your One-Stop Multipurpose Store,
+                    made for you.
+                </p>
+
+                <p class="footer-tagline">
+                    Quality products. Greater value.
+                    <br>
+                    A better campus experience.
+                </p>
+
+            </div>
+
+
+
+            <!-- QUICK LINKS -->
+
+            <div class="footer-column">
+
+                <h4>
+                    Quick Links
+                </h4>
+
+                <div class="footer-title-line"></div>
+
+
+                <a href="#home">
+                    <i class="fa-solid fa-house"></i>
+                    Home
+                </a>
+
+
+                <a href="#shop">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    Shop
+                </a>
+
+
+                <a href="#rewards">
+                    <i class="fa-solid fa-gift"></i>
+                    Rewards
+                </a>
+
+
+                <a href="#chat">
+                    <i class="fa-regular fa-comments"></i>
+                    Chat
+                </a>
+
+
+                <a href="#signin">
+                    <i class="fa-regular fa-user"></i>
+                    Sign In
+                </a>
+
+            </div>
+
+
+
+            <!-- LOCATION -->
+
+            <div class="footer-column">
+
+                <h4>
+                    Our Location
+                </h4>
+
+                <div class="footer-title-line"></div>
+
+
+                <div class="footer-info">
+
+                    <i class="fa-solid fa-location-dot"></i>
+
+                    <div>
+
+                        <strong>
+                            University on the Niger,
+                            Umunya
+                        </strong>
+
+                        <span>
+                            Anambra State, Nigeria
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <h4 class="footer-subheading">
+                    Why Choose Us?
+                </h4>
+
+                <div class="footer-title-line"></div>
+
+
+                <div class="why-footer-item">
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    Quality Products
+
+                </div>
+
+
+                <div class="why-footer-item">
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    Greater Value
+
+                </div>
+
+
+                <div class="why-footer-item">
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    Better Campus Experience
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CONTACT -->
+
+            <div class="footer-column">
+
+                <h4>
+                    Get in Touch
+                </h4>
+
+                <div class="footer-title-line"></div>
+
+
+                <a href="tel:+2348167102471">
+
+                    <i class="fa-solid fa-phone"></i>
+
+                    +234 816 710 2471
+
+                </a>
+
+
+                <a href="mailto:support@kuriosstores.com">
+
+                    <i class="fa-solid fa-envelope"></i>
+
+                    support@kuriosstores.com
+
+                </a>
+
+
+                <div class="footer-contact-item">
+
+                    <i class="fa-regular fa-clock"></i>
+
+                    Mon - Sun: 8:00 AM - 9:00 PM
+
+                </div>
+
+
+                <h4 class="footer-subheading">
+                    Follow Us
+                </h4>
+
+                <div class="footer-title-line"></div>
+
+
+                <div class="social-links">
+
+                    <a
+                        href="#"
+                        aria-label="Instagram"
+                    >
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+
+
+                    <a
+                        href="#"
+                        aria-label="Facebook"
+                    >
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </a>
+
+
+                    <a
+                        href="#"
+                        aria-label="WhatsApp"
+                    >
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </a>
+
+
+                    <a
+                        href="#"
+                        aria-label="TikTok"
+                    >
+                        <i class="fa-brands fa-tiktok"></i>
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- FOOTER BOTTOM -->
+
+        <div class="footer-bottom">
+
+            <p>
+                © 2026 Kurios Stores. All rights reserved.
+            </p>
+
+
+            <div class="footer-policies">
+
+                <a href="#">
+                    Privacy Policy
+                </a>
+
+                <span>|</span>
+
+                <a href="#">
+                    Terms of Service
+                </a>
+
+                <span>|</span>
+
+                <a href="#">
+                    Refund Policy
+                </a>
+
+            </div>
+
+
+            <p class="footer-love">
+
+                Together for a Greater Campus
+
+                <i class="fa-regular fa-heart"></i>
+
+            </p>
+
+        </div>
+
+    </footer>
+
+
+
+    <!-- =====================================================
+         GENERAL TOAST NOTIFICATION
+    ====================================================== -->
+
+    <div
+        class="toast"
+        id="toast"
+    >
+
+        <i class="fa-solid fa-circle-info"></i>
+
+        <span id="toastMessage">
+            Notification
+        </span>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script src="https://sdk.monnify.com/plugin/monnify.js"></script>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
