@@ -2108,16 +2108,25 @@
 
                 <div class="form-group">
 
-                    <label for="signinPassword">
-                        Password
+                    <label for="signinPasscodeBoxes">
+                        Passcode
                     </label>
 
-                    <input
-                        type="password"
-                        id="signinPassword"
-                        placeholder="Enter your password"
-                        required
+                    <div
+                        class="otp-input-container passcode-input-container"
+                        id="signinPasscodeBoxes"
                     >
+
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+
+                    </div>
+
+                    <input type="hidden" id="signinPasscode" name="passcode">
 
                 </div>
 
@@ -2140,7 +2149,7 @@
                         href="#"
                         id="forgotPassword"
                     >
-                        Forgot password?
+                        Reset passcode?
                     </a>
 
                 </div>
@@ -2170,6 +2179,192 @@
                 </p>
 
             </form>
+
+
+            <!-- =====================================================
+                 RESET PASSCODE — STEP 1: EMAIL
+            ====================================================== -->
+
+            <div
+                id="resetPasscodeEmailScreen"
+                style="display: none;"
+            >
+
+                <p class="reset-passcode-intro">
+                    Enter the email on your account and we'll send you
+                    a code to set a new passcode.
+                </p>
+
+                <div class="form-group">
+
+                    <label for="resetPasscodeEmail">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="resetPasscodeEmail"
+                        placeholder="you@example.com"
+                        required
+                    >
+
+                </div>
+
+                <div
+                    id="resetPasscodeEmailStatus"
+                    class="otp-status-message"
+                ></div>
+
+                <button
+                    type="button"
+                    id="sendPasscodeResetButton"
+                    class="auth-button"
+                >
+                    Send Reset Code
+                </button>
+
+                <p class="signup-prompt">
+                    <a href="#" id="backToSignInFromReset">
+                        Back to sign in
+                    </a>
+                </p>
+
+            </div>
+
+
+            <!-- =====================================================
+                 RESET PASSCODE — STEP 2: OTP + NEW PASSCODE
+            ====================================================== -->
+
+            <div
+                id="resetPasscodeConfirmScreen"
+                style="display: none;"
+            >
+
+                <div class="otp-header">
+
+                    <h2>
+                        Set a new passcode
+                    </h2>
+
+                    <p id="resetPasscodeConfirmMessage">
+                        Enter the code sent to your email, then choose
+                        a new 6-digit passcode.
+                    </p>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="resetOtpBoxes">
+                        Verification Code
+                    </label>
+
+                    <div
+                        class="otp-input-container"
+                        id="resetOtpBoxes"
+                    >
+                        <input type="text" class="otp-digit reset-otp-digit" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+                        <input type="text" class="otp-digit reset-otp-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit reset-otp-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit reset-otp-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit reset-otp-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit reset-otp-digit" maxlength="1" inputmode="numeric">
+                    </div>
+
+                    <input type="hidden" id="resetOtpInput">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="newPasscodeBoxes">
+                        New 6-digit passcode
+                    </label>
+
+                    <div
+                        class="otp-input-container passcode-input-container"
+                        id="newPasscodeBoxes"
+                    >
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                    </div>
+
+                    <input type="hidden" id="newPasscodeInput">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="confirmNewPasscodeBoxes">
+                        Confirm new passcode
+                    </label>
+
+                    <div
+                        class="otp-input-container passcode-input-container"
+                        id="confirmNewPasscodeBoxes"
+                    >
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                    </div>
+
+                    <input type="hidden" id="confirmNewPasscodeInput">
+
+                    <p
+                        id="newPasscodeMismatchMessage"
+                        class="passcode-mismatch-message"
+                        style="display: none;"
+                    >
+                        Passcodes don't match.
+                    </p>
+
+                </div>
+
+                <div
+                    id="resetPasscodeConfirmStatus"
+                    class="otp-status-message"
+                ></div>
+
+                <button
+                    type="button"
+                    id="confirmPasscodeResetButton"
+                    class="otp-verify-button"
+                >
+                    <span class="otp-button-text">
+                        Set new passcode
+                    </span>
+                    <span class="otp-button-arrow">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </span>
+                </button>
+
+                <div class="otp-resend-container">
+                    <span>Didn't get a code?</span>
+                    <button
+                        type="button"
+                        id="resendResetOtpButton"
+                        class="otp-resend-button"
+                    >
+                        Resend it
+                    </button>
+                    <span
+                        id="resetResendCooldown"
+                        class="otp-resend-cooldown"
+                        style="display: none;"
+                    >
+                        Resend in <span id="resetResendCooldownTime">30</span>s
+                    </span>
+                </div>
+
+            </div>
 
         </div>
 
@@ -2396,39 +2591,61 @@
     </div>
 
 
-    <!-- PASSWORD -->
+    <!-- PASSCODE -->
     <div class="form-group">
 
-        <label for="signupPassword">
-            Password *
+        <label for="signupPasscodeBoxes">
+            Create a 6-digit passcode *
         </label>
 
-        <input
-            type="password"
-            id="signupPassword"
-            name="password"
-            placeholder="Create a password"
-            required
-            minlength="6"
+        <div
+            class="otp-input-container passcode-input-container"
+            id="signupPasscodeBoxes"
         >
+
+            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+
+        </div>
+
+        <input type="hidden" id="signupPasscode" name="passcode">
 
     </div>
 
 
     <div class="form-group">
 
-        <label for="signupConfirmPassword">
-            Confirm Password *
+        <label for="signupConfirmPasscodeBoxes">
+            Confirm your passcode *
         </label>
 
-        <input
-            type="password"
-            id="signupConfirmPassword"
-            name="confirmPassword"
-            placeholder="Confirm your password"
-            required
-            minlength="6"
+        <div
+            class="otp-input-container passcode-input-container"
+            id="signupConfirmPasscodeBoxes"
         >
+
+            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+
+        </div>
+
+        <input type="hidden" id="signupConfirmPasscode" name="confirmPasscode">
+
+        <p
+            id="passcodeMismatchMessage"
+            class="passcode-mismatch-message"
+            style="display: none;"
+        >
+            Passcodes don't match.
+        </p>
 
     </div>
 
