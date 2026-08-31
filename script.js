@@ -20,7 +20,7 @@
     C:\Users\HomePC\Desktop\kurios-stores-backend
 */
 
-const API_URL = "http://localhost:3000";
+const API_URL = "https://kurios-stores-backend.onrender.com";
 
 
 /*
@@ -2705,9 +2705,9 @@ if (signInForm) {
                 // ========================================
 
                 const response =
-                    await fetch(
-                        "http://localhost:3000/api/students/login",
-                        {
+                        await fetch(
+        API_URL + "/api/students/login",
+        {
 
                             method: "POST",
 
@@ -3167,9 +3167,8 @@ updateLoginState();
             try {
 
                 const response = await fetch(
-                    "http://localhost:3000/api/students/register",
+                    API_URL + "/api/students/register",
                     {
-
                         method: "POST",
 
                         headers: {
@@ -5225,9 +5224,9 @@ if (verifyOtpButton) {
                 // SEND OTP TO BACKEND
                 // ========================================
 
-                const response =
+               const response =
                     await fetch(
-                        "http://localhost:3000/api/students/verify-otp",
+                        API_URL + "/api/students/verify-otp",
                         {
 
                             method: "POST",
@@ -5500,7 +5499,7 @@ if (resendOtpButton) {
 
                 const response =
                     await fetch(
-                        "http://localhost:3000/api/students/resend-otp",
+                        API_URL + "/api/students/resend-otp",
                         {
 
                             method: "POST",
