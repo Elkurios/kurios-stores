@@ -297,6 +297,22 @@
     </button>
 
 
+    <!-- SELL ON KURIOS -->
+
+    <button
+        type="button"
+        id="accountBecomeSeller"
+    >
+
+        <i class="fa-solid fa-store"></i>
+
+        <span>
+            Sell on Kurios
+        </span>
+
+    </button>
+
+
     <!-- ACCOUNT SETTINGS -->
 
     <button
@@ -2011,6 +2027,249 @@
 
     </div>
 
+
+
+    <!-- =====================================================
+         BECOME A SELLER PANEL
+    ====================================================== -->
+
+    <div
+        class="profile-overlay"
+        id="sellerOverlay"
+    >
+
+        <div class="profile-panel">
+
+            <div class="profile-panel-header">
+
+                <div>
+
+                    <h2>
+                        Sell on Kurios
+                    </h2>
+
+                    <p>
+                        Set up your store on the Kurios marketplace
+                    </p>
+
+                </div>
+
+                <button
+                    id="closeSeller"
+                    class="close-cart"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+
+            <div class="profile-panel-body" id="sellerPanelBody">
+
+                <!-- LOADING -->
+
+                <p id="sellerLoadingState">
+                    Checking your seller status...
+                </p>
+
+
+                <!-- STATUS: PENDING -->
+
+                <div id="sellerPendingState" style="display: none;">
+
+                    <div class="profile-note">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                        <span>
+                            Your application for
+                            <strong id="sellerPendingStoreName"></strong>
+                            is under review. We'll notify you once
+                            it's approved.
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- STATUS: APPROVED -->
+
+                <div id="sellerApprovedState" style="display: none;">
+
+                    <div class="profile-note">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>
+                            <strong id="sellerApprovedStoreName"></strong>
+                            is live on Kurios Stores. Your seller
+                            dashboard is coming soon.
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- STATUS: SUSPENDED -->
+
+                <div id="sellerSuspendedState" style="display: none;">
+
+                    <div class="profile-note">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>
+                            <strong id="sellerSuspendedStoreName"></strong>
+                            has been suspended. Contact Kurios support
+                            for details.
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- APPLICATION FORM (new or re-applying after rejection) -->
+
+                <form id="sellerApplyForm" style="display: none;">
+
+                    <div
+                        id="sellerRejectedNote"
+                        class="profile-note"
+                        style="display: none;"
+                    >
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>
+                            Your previous application wasn't approved
+                            <span id="sellerRejectionReasonWrap">
+                                — <span id="sellerRejectionReason"></span>
+                            </span>. You can apply again below.
+                        </span>
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="sellerType">
+                            Seller Type *
+                        </label>
+
+                        <select id="sellerType" required>
+                            <option value="student_seller">Student Seller</option>
+                            <option value="vendor">Vendor / Merchant</option>
+                            <option value="restaurant">Restaurant / Food Seller</option>
+                            <option value="service_provider">Service Provider</option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="sellerStoreName">
+                            Store / Business Name *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="sellerStoreName"
+                            placeholder="e.g. Chioma's Store"
+                            required
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="sellerStoreDescription">
+                            Store Description
+                        </label>
+
+                        <textarea
+                            id="sellerStoreDescription"
+                            rows="3"
+                            placeholder="What do you sell?"
+                        ></textarea>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="sellerBusinessCategory">
+                            Category
+                        </label>
+
+                        <select id="sellerBusinessCategory">
+                            <option value="">Select a category</option>
+                            <option value="Fashion">Fashion</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Beauty">Beauty</option>
+                            <option value="Food">Food</option>
+                            <option value="Books">Books</option>
+                            <option value="School Materials">School Materials</option>
+                            <option value="Phones">Phones</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Health">Health</option>
+                            <option value="Home">Home</option>
+                            <option value="Services">Services</option>
+                            <option value="Others">Others</option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="sellerLocation">
+                            Location
+                        </label>
+
+                        <input
+                            type="text"
+                            id="sellerLocation"
+                            placeholder="e.g. Hostel Block C, Room 12"
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="sellerContactPhone">
+                            Contact Phone
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="sellerContactPhone"
+                            placeholder="Phone number"
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="sellerContactWhatsapp">
+                            Contact WhatsApp
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="sellerContactWhatsapp"
+                            placeholder="WhatsApp number"
+                        >
+
+                    </div>
+
+                    <div
+                        id="sellerApplyStatus"
+                        class="otp-status-message"
+                    ></div>
+
+                    <button
+                        type="submit"
+                        id="sellerApplySubmit"
+                        class="auth-button"
+                    >
+                        Submit Application
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
 
 
 
