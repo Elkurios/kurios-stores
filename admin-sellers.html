@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kurios Stores — Seller Admin</title>
+<style>
+
+    :root {
+        --purple: #6d28d9;
+        --purple-dark: #4c1d95;
+        --purple-soft: #f3e8ff;
+        --text: #27272a;
+        --muted: #6b7280;
+        --border: #e4e4e7;
+        --white: #ffffff;
+        --bg: #f9fafb;
+        --red: #dc2626;
+        --amber: #b45309;
+        --green: #15803d;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+    }
+
+    header {
+        background: var(--white);
+        border-bottom: 1px solid var(--border);
+        padding: 18px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    header h1 {
+        font-size: 18px;
+        margin: 0;
+    }
+
+    header h1 span {
+        color: var(--purple);
+    }
+
+    #logoutButton {
+        border: 1px solid var(--border);
+        background: var(--white);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    main {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+
+    /* KEY GATE */
+
+    #keyGate {
+        max-width: 400px;
+        margin: 80px auto;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 28px;
+        text-align: center;
+    }
+
+    #keyGate h2 {
+        margin: 0 0 8px;
+        font-size: 18px;
+    }
+
+    #keyGate p {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 0 0 18px;
+    }
+
+    #keyGate input {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 13px;
+        margin-bottom: 12px;
+    }
+
+    #keyGate button {
+        width: 100%;
+        border: none;
+        background: var(--purple);
+        color: white;
+        border-radius: 8px;
+        padding: 11px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    #keyGateError {
+        color: var(--red);
+        font-size: 13px;
+        margin-top: 10px;
+        min-height: 16px;
+    }
+
+    /* FILTER TABS */
+
+    .filter-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+    }
+
+    .filter-tab {
+        border: 1px solid var(--border);
+        background: var(--white);
+        border-radius: 999px;
+        padding: 7px 14px;
+        font-size: 13px;
+        cursor: pointer;
+        color: var(--muted);
+    }
+
+    .filter-tab.active {
+        background: var(--purple);
+        border-color: var(--purple);
+        color: white;
+        font-weight: 600;
+    }
+
+    /* SELLER CARD */
+
+    .seller-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 14px;
+    }
+
+    .seller-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+
+    .seller-card-top h3 {
+        margin: 0 0 4px;
+        font-size: 16px;
+    }
+
+    .seller-card-top p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+    }
+
+    .status-pill {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        padding: 4px 10px;
+        border-radius: 999px;
+        white-space: nowrap;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: var(--amber);
+    }
+
+    .status-approved {
+        background: #dcfce7;
+        color: var(--green);
+    }
+
+    .status-rejected,
+    .status-suspended {
+        background: #fee2e2;
+        color: var(--red);
+    }
+
+    .seller-detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 20px;
+        font-size: 13px;
+        margin-bottom: 12px;
+    }
+
+    .seller-detail-grid div strong {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+
+    .seller-description {
+        font-size: 13px;
+        color: var(--text);
+        background: var(--bg);
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+    }
+
+    .seller-card-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .seller-card-actions button {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-approve {
+        background: var(--green);
+        color: white;
+    }
+
+    .btn-reject {
+        background: var(--red);
+        color: white;
+    }
+
+    .btn-suspend {
+        background: var(--bg);
+        color: var(--text);
+        border: 1px solid var(--border) !important;
+    }
+
+    #emptyState,
+    #loadingState {
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+        padding: 40px 0;
+    }
+
+</style>
+</head>
+<body>
+
+<!-- ADMIN KEY GATE -->
+
+<div id="keyGate">
+    <h2>Seller Admin</h2>
+    <p>Enter the admin key to review seller applications.</p>
+    <input type="password" id="adminKeyInput" placeholder="Admin key">
+    <button id="adminKeySubmit">Unlock</button>
+    <div id="keyGateError"></div>
+</div>
+
+
+<!-- MAIN ADMIN VIEW -->
+
+<div id="adminView" style="display: none;">
+
+    <header>
+        <h1>Kurios <span>Seller Admin</span></h1>
+        <button id="logoutButton">Log out</button>
+    </header>
+
+    <main>
+
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-status="">All</button>
+            <button class="filter-tab" data-status="pending">Pending</button>
+            <button class="filter-tab" data-status="approved">Approved</button>
+            <button class="filter-tab" data-status="rejected">Rejected</button>
+            <button class="filter-tab" data-status="suspended">Suspended</button>
+        </div>
+
+        <div id="loadingState">Loading sellers...</div>
+        <div id="emptyState" style="display: none;">No sellers found for this filter.</div>
+        <div id="sellerList"></div>
+
+    </main>
+
+</div>
+
+
+<script>
+
+    const API_URL = "https://kurios-stores-backend.onrender.com";
+
+    const keyGate = document.getElementById("keyGate");
+    const adminView = document.getElementById("adminView");
+    const adminKeyInput = document.getElementById("adminKeyInput");
+    const adminKeySubmit = document.getElementById("adminKeySubmit");
+    const keyGateError = document.getElementById("keyGateError");
+    const logoutButton = document.getElementById("logoutButton");
+    const filterTabs = document.querySelectorAll(".filter-tab");
+    const loadingState = document.getElementById("loadingState");
+    const emptyState = document.getElementById("emptyState");
+    const sellerList = document.getElementById("sellerList");
+
+    let currentFilter = "";
+
+    function getAdminKey() {
+        return sessionStorage.getItem("kuriosAdminKey") || "";
+    }
+
+    function showAdminView() {
+        keyGate.style.display = "none";
+        adminView.style.display = "block";
+        loadSellers();
+    }
+
+    function showKeyGate(message) {
+        adminView.style.display = "none";
+        keyGate.style.display = "block";
+        keyGateError.textContent = message || "";
+    }
+
+    if (getAdminKey()) {
+        showAdminView();
+    }
+
+    adminKeySubmit.addEventListener("click", async function () {
+
+        const key = adminKeyInput.value.trim();
+
+        if (!key) {
+            keyGateError.textContent = "Please enter the admin key.";
+            return;
+        }
+
+        sessionStorage.setItem("kuriosAdminKey", key);
+
+        // Validate immediately by trying to load sellers.
+        const ok = await loadSellers(true);
+
+        if (ok) {
+            showAdminView();
+        } else {
+            sessionStorage.removeItem("kuriosAdminKey");
+        }
+
+    });
+
+    adminKeyInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            adminKeySubmit.click();
+        }
+    });
+
+    logoutButton.addEventListener("click", function () {
+        sessionStorage.removeItem("kuriosAdminKey");
+        showKeyGate("");
+    });
+
+    filterTabs.forEach(function (tab) {
+
+        tab.addEventListener("click", function () {
+
+            filterTabs.forEach(function (t) {
+                t.classList.remove("active");
+            });
+
+            tab.classList.add("active");
+            currentFilter = tab.dataset.status;
+            loadSellers();
+
+        });
+
+    });
+
+    function statusLabel(status) {
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+
+    function renderSellers(sellers) {
+
+        sellerList.innerHTML = "";
+
+        if (sellers.length === 0) {
+            emptyState.style.display = "block";
+            return;
+        }
+
+        emptyState.style.display = "none";
+
+        sellers.forEach(function (seller) {
+
+            const card = document.createElement("div");
+            card.className = "seller-card";
+
+            const studentName =
+                (seller.first_name || "") + " " + (seller.last_name || "");
+
+            card.innerHTML = `
+                <div class="seller-card-top">
+                    <div>
+                        <h3>${escapeHtml(seller.store_name)}</h3>
+                        <p>${escapeHtml(studentName.trim())} — ${escapeHtml(seller.student_email || "")}</p>
+                    </div>
+                    <span class="status-pill status-${seller.status}">${statusLabel(seller.status)}</span>
+                </div>
+
+                <div class="seller-detail-grid">
+                    <div><strong>Seller Type</strong>${escapeHtml(seller.seller_type || "—")}</div>
+                    <div><strong>Category</strong>${escapeHtml(seller.business_category || "—")}</div>
+                    <div><strong>University</strong>${escapeHtml(seller.university || "—")}</div>
+                    <div><strong>Location</strong>${escapeHtml(seller.location || "—")}</div>
+                    <div><strong>Phone</strong>${escapeHtml(seller.contact_phone || "—")}</div>
+                    <div><strong>WhatsApp</strong>${escapeHtml(seller.contact_whatsapp || "—")}</div>
+                </div>
+
+                ${seller.store_description ? `<div class="seller-description">${escapeHtml(seller.store_description)}</div>` : ""}
+
+                ${seller.status === "rejected" && seller.rejection_reason ? `<div class="seller-description">Rejection reason: ${escapeHtml(seller.rejection_reason)}</div>` : ""}
+
+                <div class="seller-card-actions"></div>
+            `;
+
+            const actions = card.querySelector(".seller-card-actions");
+
+            if (seller.status === "pending") {
+
+                const approveBtn = document.createElement("button");
+                approveBtn.className = "btn-approve";
+                approveBtn.textContent = "Approve";
+                approveBtn.addEventListener("click", function () {
+                    updateStatus(seller.id, "approve");
+                });
+
+                const rejectBtn = document.createElement("button");
+                rejectBtn.className = "btn-reject";
+                rejectBtn.textContent = "Reject";
+                rejectBtn.addEventListener("click", function () {
+                    const reason = prompt("Reason for rejecting this application (optional):") || "";
+                    updateStatus(seller.id, "reject", reason);
+                });
+
+                actions.appendChild(approveBtn);
+                actions.appendChild(rejectBtn);
+
+            } else if (seller.status === "approved") {
+
+                const suspendBtn = document.createElement("button");
+                suspendBtn.className = "btn-suspend";
+                suspendBtn.textContent = "Suspend";
+                suspendBtn.addEventListener("click", function () {
+                    if (confirm("Suspend " + seller.store_name + "?")) {
+                        updateStatus(seller.id, "suspend");
+                    }
+                });
+
+                actions.appendChild(suspendBtn);
+
+            } else if (seller.status === "suspended") {
+
+                const approveBtn = document.createElement("button");
+                approveBtn.className = "btn-approve";
+                approveBtn.textContent = "Reinstate";
+                approveBtn.addEventListener("click", function () {
+                    updateStatus(seller.id, "approve");
+                });
+
+                actions.appendChild(approveBtn);
+
+            }
+
+            sellerList.appendChild(card);
+
+        });
+
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text == null ? "" : String(text);
+        return div.innerHTML;
+    }
+
+    async function loadSellers(silent) {
+
+        loadingState.style.display = silent ? "none" : "block";
+        sellerList.innerHTML = "";
+        emptyState.style.display = "none";
+
+        try {
+
+            const url =
+                API_URL + "/api/admin/sellers" +
+                (currentFilter ? "?status=" + currentFilter : "");
+
+            const response = await fetch(url, {
+                headers: {
+                    "x-admin-key": getAdminKey()
+                }
+            });
+
+            if (response.status === 401) {
+
+                if (!silent) {
+                    showKeyGate("Invalid admin key.");
+                } else {
+                    keyGateError.textContent = "Invalid admin key.";
+                }
+
+                return false;
+
+            }
+
+            const data = await response.json();
+
+            loadingState.style.display = "none";
+
+            if (!data.success) {
+
+                if (silent) {
+                    keyGateError.textContent = data.message || "Could not connect.";
+                } else {
+                    emptyState.textContent = data.message || "Could not load sellers.";
+                    emptyState.style.display = "block";
+                }
+
+                return false;
+
+            }
+
+            renderSellers(data.sellers);
+            return true;
+
+        } catch (error) {
+
+            loadingState.style.display = "none";
+
+            const message = "Could not connect to Kurios Stores server.";
+
+            if (silent) {
+                keyGateError.textContent = message;
+            } else {
+                emptyState.textContent = message;
+                emptyState.style.display = "block";
+            }
+
+            return false;
+
+        }
+
+    }
+
+    async function updateStatus(sellerId, action, reason) {
+
+        try {
+
+            const response = await fetch(
+                API_URL + "/api/admin/sellers/" + sellerId + "/" + action,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-admin-key": getAdminKey()
+                    },
+                    body: JSON.stringify({ reason: reason || "" })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!data.success) {
+                alert(data.message || "Could not update seller status.");
+                return;
+            }
+
+            loadSellers();
+
+        } catch (error) {
+
+            alert("Could not connect to Kurios Stores server.");
+
+        }
+
+    }
+
+</script>
+
+</body>
+</html>
