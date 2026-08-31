@@ -284,8 +284,8 @@
     <h2>Kurios Admin</h2>
     <p>Sign in to review seller applications.</p>
 
-    <label for="adminEmailInput">Email</label>
-    <input type="email" id="adminEmailInput" placeholder="admin@kuriosstores.com">
+    <label for="adminUsernameInput">Username</label>
+    <input type="text" id="adminUsernameInput" placeholder="Username">
 
     <label for="adminPasswordInput">Password</label>
     <input type="password" id="adminPasswordInput" placeholder="Password">
@@ -329,7 +329,7 @@
 
     const keyGate = document.getElementById("keyGate");
     const adminView = document.getElementById("adminView");
-    const adminEmailInput = document.getElementById("adminEmailInput");
+    const adminUsernameInput = document.getElementById("adminUsernameInput");
     const adminPasswordInput = document.getElementById("adminPasswordInput");
     const adminLoginSubmit = document.getElementById("adminLoginSubmit");
     const keyGateError = document.getElementById("keyGateError");
@@ -363,11 +363,11 @@
 
     adminLoginSubmit.addEventListener("click", async function () {
 
-        const email = adminEmailInput.value.trim();
+        const username = adminUsernameInput.value.trim();
         const password = adminPasswordInput.value;
 
-        if (!email || !password) {
-            keyGateError.textContent = "Please enter your email and password.";
+        if (!username || !password) {
+            keyGateError.textContent = "Please enter your username and password.";
             return;
         }
 
@@ -382,13 +382,13 @@
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ email: email, password: password })
+                body: JSON.stringify({ username: username, password: password })
             });
 
             const data = await response.json();
 
             if (!data.success) {
-                keyGateError.textContent = data.message || "Invalid email or password.";
+                keyGateError.textContent = data.message || "Invalid username or password.";
                 return;
             }
 
@@ -408,7 +408,7 @@
 
     });
 
-    [adminEmailInput, adminPasswordInput].forEach(function (input) {
+    [adminUsernameInput, adminPasswordInput].forEach(function (input) {
 
         input.addEventListener("keydown", function (event) {
             if (event.key === "Enter") {
