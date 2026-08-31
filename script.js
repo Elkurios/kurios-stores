@@ -7824,6 +7824,18 @@ async function openSellerPanel() {
                 sellerApprovedState.style.display = "block";
             }
 
+            const logoPreview =
+                document.getElementById("storeLogoPreview");
+
+            if (logoPreview) {
+
+                logoPreview.innerHTML =
+                    seller.store_image ?
+                        `<img src="${API_URL + seller.store_image}" alt="Store logo">` :
+                        `<i class="fa-solid fa-store"></i>`;
+
+            }
+
             if (typeof loadSellerProducts === "function") {
                 loadSellerProducts(student.id);
             }
@@ -8580,6 +8592,18 @@ async function openStorefront(sellerId) {
 
         if (nameEl) nameEl.textContent = data.store.store_name;
 
+        const iconEl =
+            document.querySelector("#storefrontContent .storefront-icon");
+
+        if (iconEl) {
+
+            iconEl.innerHTML =
+                data.store.store_image ?
+                    `<img src="${API_URL + data.store.store_image}" alt="${data.store.store_name} logo">` :
+                    `<i class="fa-solid fa-store"></i>`;
+
+        }
+
         if (metaEl) {
 
             metaEl.textContent =
@@ -9141,5 +9165,103 @@ async function deleteProduct(product) {
         );
 
     }
+
+}
+
+
+// =========================================================
+// STORE LOGO UPLOAD
+// =========================================================
+
+const storeLogoInput =
+    document.getElementById("storeLogoInput");
+
+if (storeLogoInput) {
+
+    storeLogoInput.addEventListener(
+        "change",
+        async function () {
+
+            const file =
+                storeLogoInput.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            const statusEl =
+                document.getElementById("storeLogoStatus");
+
+            const previewEl =
+                document.getElementById("storeLogoPreview");
+
+            if (statusEl) {
+                statusEl.textContent = "Uploading...";
+            }
+
+            const formData = new FormData();
+
+            formData.append("studentId", currentSellerStudentId);
+            formData.append("logo", file);
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/sellers/logo",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (statusEl) {
+
+                        statusEl.textContent =
+                            data.message || "Could not update your logo.";
+
+                    }
+
+                    return;
+
+                }
+
+                if (statusEl) {
+                    statusEl.textContent = "Logo updated.";
+                }
+
+                if (previewEl && data.seller && data.seller.store_image) {
+
+                    previewEl.innerHTML =
+                        `<img src="${API_URL + data.seller.store_image}" alt="Store logo">`;
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Store logo upload error:",
+                    error
+                );
+
+                if (statusEl) {
+
+                    statusEl.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                storeLogoInput.value = "";
+
+            }
+
+        }
+    );
 
 }
