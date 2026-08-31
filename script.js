@@ -9367,6 +9367,74 @@ const confirmCsvImport =
 const cancelCsvImport =
     document.getElementById("cancelCsvImport");
 
+
+// ========================================
+// DOWNLOAD A SAMPLE CSV
+// ========================================
+
+const downloadSampleCsv =
+    document.getElementById("downloadSampleCsv");
+
+if (downloadSampleCsv) {
+
+    downloadSampleCsv.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            const headers =
+                ["Item Name", "Category", "Fixed Sell Price", "Stock", "SKU"];
+
+            const sampleRows = [
+                ["Bottled Water 50cl", "Drinks", "300", "50", "KUR-001"],
+                ["Instant Noodles", "Food", "450", "30", "KUR-002"],
+                ["A4 Notebook", "Stationary", "500", "20", "KUR-003"]
+            ];
+
+            function csvEscape(value) {
+
+                if (value.includes(",") || value.includes('"')) {
+
+                    return '"' + value.replace(/"/g, '""') + '"';
+
+                }
+
+                return value;
+
+            }
+
+            const lines = [headers.map(csvEscape).join(",")];
+
+            sampleRows.forEach(function (row) {
+                lines.push(row.map(csvEscape).join(","));
+            });
+
+            const csvContent = lines.join("\r\n");
+
+            const blob =
+                new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+            const url =
+                URL.createObjectURL(blob);
+
+            const link =
+                document.createElement("a");
+
+            link.href = url;
+            link.download = "kurios-stores-product-import-sample.csv";
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            URL.revokeObjectURL(url);
+
+        }
+    );
+
+}
+
 if (importCsvButton) {
 
     importCsvButton.addEventListener(
