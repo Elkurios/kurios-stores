@@ -2146,14 +2146,79 @@
 
                         <h3>My Products</h3>
 
-                        <button
-                            type="button"
-                            id="addProductButton"
-                            class="seller-dashboard-add-button"
-                        >
-                            <i class="fa-solid fa-plus"></i>
-                            Add Product
-                        </button>
+                        <div style="display: flex; gap: 8px;">
+
+                            <button
+                                type="button"
+                                id="importCsvButton"
+                                class="seller-dashboard-add-button seller-dashboard-secondary-button"
+                            >
+                                <i class="fa-solid fa-file-csv"></i>
+                                Import CSV
+                            </button>
+
+                            <button
+                                type="button"
+                                id="addProductButton"
+                                class="seller-dashboard-add-button"
+                            >
+                                <i class="fa-solid fa-plus"></i>
+                                Add Product
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CSV IMPORT PANEL -->
+
+                    <div id="csvImportPanel" style="display: none;">
+
+                        <div class="form-section-label">Import products from CSV</div>
+
+                        <p class="reset-passcode-intro">
+                            Works with a plain spreadsheet (Name, Category, Price,
+                            Stock columns), or a multi-location POS export —
+                            we'll detect the locations in your file and let you
+                            pick which one to import prices and stock from.
+                        </p>
+
+                        <div class="form-group">
+                            <label for="csvFileInput">CSV File</label>
+                            <input type="file" id="csvFileInput" accept=".csv,text/csv">
+                        </div>
+
+                        <div class="form-group" id="csvLocationGroup" style="display: none;">
+                            <label for="csvLocationSelect">Import prices &amp; stock from</label>
+                            <div class="select-wrap">
+                                <select id="csvLocationSelect"></select>
+                                <i class="fa-solid fa-chevron-down select-wrap-arrow"></i>
+                            </div>
+                        </div>
+
+                        <div id="csvImportStatus" class="otp-status-message"></div>
+
+                        <div class="seller-dashboard-form-actions">
+
+                            <button
+                                type="button"
+                                id="cancelCsvImport"
+                                class="profile-cancel-button"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                id="confirmCsvImport"
+                                class="profile-save-button"
+                                disabled
+                            >
+                                Import
+                            </button>
+
+                        </div>
 
                     </div>
 
