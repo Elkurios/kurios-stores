@@ -769,61 +769,28 @@ document.addEventListener("DOMContentLoaded", function () {
             Go through each product.
         */
 
+        const categoryIcons = {
+            "Fashion": "fa-shirt",
+            "Electronics": "fa-plug",
+            "Beauty": "fa-spray-can-sparkles",
+            "Food": "fa-utensils",
+            "Books": "fa-book",
+            "School Materials": "fa-pen",
+            "Phones": "fa-mobile-screen",
+            "Accessories": "fa-gem",
+            "Health": "fa-heart-pulse",
+            "Home": "fa-house",
+            "Services": "fa-screwdriver-wrench",
+            "Others": "fa-box"
+        };
+
         products.forEach(function (product) {
 
+            const category =
+                product.category || "General";
 
-            /*
-                Determine a category
-                for our current test products.
-            */
-
-            let category = "Food";
-
-            let icon =
-                "fa-utensils";
-
-
-            if (
-                product.name
-                    .toLowerCase()
-                    .includes("water")
-            ) {
-
-                category = "Food";
-
-                icon =
-                    "fa-bottle-water";
-
-            }
-
-
-            else if (
-                product.name
-                    .toLowerCase()
-                    .includes("noodle")
-            ) {
-
-                category = "Food";
-
-                icon =
-                    "fa-bowl-food";
-
-            }
-
-
-            else if (
-                product.name
-                    .toLowerCase()
-                    .includes("biscuit")
-            ) {
-
-                category = "Food";
-
-                icon =
-                    "fa-cookie-bite";
-
-            }
-
+            const icon =
+                categoryIcons[category] || "fa-box";
 
 
             /*
@@ -842,12 +809,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 category;
 
 
+            const imageMarkup =
+                product.image_url ?
+                    `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
+                    `<i class="fa-solid ${icon}"></i>`;
+
+            const soldByMarkup =
+                product.seller_id ?
+                    `<span class="product-sold-by" data-seller-id="${product.seller_id}">
+                        Sold by ${product.seller_store_name || "a Kurios seller"}
+                    </span>` :
+                    `<p>Available at Kurios Stores.</p>`;
 
             productCard.innerHTML = `
 
                 <div class="product-image">
 
-                    <i class="fa-solid ${icon}"></i>
+                    ${imageMarkup}
 
                 </div>
 
@@ -869,12 +847,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     </h3>
 
 
-                    <p>
-
-                        Available at
-                        Kurios Stores.
-
-                    </p>
+                    ${soldByMarkup}
 
 
                     <div class="product-bottom">
@@ -941,6 +914,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 }
             );
+
+
+            /*
+                Add click event to
+                the "Sold by" label.
+            */
+
+            const soldByLabel =
+                productCard.querySelector(
+                    ".product-sold-by"
+                );
+
+            if (soldByLabel) {
+
+                soldByLabel.addEventListener(
+                    "click",
+                    function () {
+
+                        history.pushState(
+                            null,
+                            "",
+                            "#store-" + product.seller_id
+                        );
+
+                        if (typeof openStorefront === "function") {
+                            openStorefront(product.seller_id);
+                        }
+
+                    }
+                );
+
+            }
 
         });
 
@@ -7819,6 +7824,10 @@ async function openSellerPanel() {
                 sellerApprovedState.style.display = "block";
             }
 
+            if (typeof loadSellerProducts === "function") {
+                loadSellerProducts(student.id);
+            }
+
             return;
 
         }
@@ -8437,6 +8446,699 @@ async function verifySellerApplicationPayment(paymentReference) {
                 "Unable to reach Kurios Stores server to confirm payment.";
 
         }
+
+    }
+
+}
+
+
+// =========================================================
+// SELLER STOREFRONT (public product listing)
+// =========================================================
+
+const storefrontPage =
+    document.getElementById("storefrontPage");
+
+const storefrontBackLink =
+    document.getElementById("storefrontBackLink");
+
+const STOREFRONT_CATEGORY_ICONS = {
+    "Fashion": "fa-shirt",
+    "Electronics": "fa-plug",
+    "Beauty": "fa-spray-can-sparkles",
+    "Food": "fa-utensils",
+    "Books": "fa-book",
+    "School Materials": "fa-pen",
+    "Phones": "fa-mobile-screen",
+    "Accessories": "fa-gem",
+    "Health": "fa-heart-pulse",
+    "Home": "fa-house",
+    "Services": "fa-screwdriver-wrench",
+    "Others": "fa-box"
+};
+
+function closeStorefrontPage() {
+
+    if (
+        window.location.hash &&
+        window.location.hash.indexOf("#store-") === 0
+    ) {
+
+        history.pushState(
+            null,
+            "",
+            window.location.pathname + window.location.search
+        );
+
+    }
+
+    if (storefrontPage) {
+        storefrontPage.style.display = "none";
+    }
+
+    const mainEl =
+        document.getElementById("mainContent");
+
+    if (mainEl) {
+        mainEl.style.display = "block";
+    }
+
+}
+
+if (storefrontBackLink) {
+
+    storefrontBackLink.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            closeStorefrontPage();
+
+        }
+    );
+
+}
+
+async function openStorefront(sellerId) {
+
+    const mainEl =
+        document.getElementById("mainContent");
+
+    const sellerPageEl =
+        document.getElementById("sellerPage");
+
+    if (sellerPageEl) {
+        sellerPageEl.style.display = "none";
+    }
+
+    if (mainEl) {
+        mainEl.style.display = "none";
+    }
+
+    if (storefrontPage) {
+        storefrontPage.style.display = "block";
+    }
+
+    window.scrollTo({ top: 0 });
+
+    const loadingEl =
+        document.getElementById("storefrontLoading");
+
+    const contentEl =
+        document.getElementById("storefrontContent");
+
+    const notFoundEl =
+        document.getElementById("storefrontNotFound");
+
+    if (loadingEl) loadingEl.style.display = "block";
+    if (contentEl) contentEl.style.display = "none";
+    if (notFoundEl) notFoundEl.style.display = "none";
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/store/" + sellerId);
+
+        const data = await response.json();
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+        if (!data.success) {
+
+            if (notFoundEl) notFoundEl.style.display = "block";
+
+            return;
+
+        }
+
+        if (contentEl) contentEl.style.display = "block";
+
+        const nameEl = document.getElementById("storefrontName");
+        const metaEl = document.getElementById("storefrontMeta");
+        const descEl = document.getElementById("storefrontDescription");
+
+        if (nameEl) nameEl.textContent = data.store.store_name;
+
+        if (metaEl) {
+
+            metaEl.textContent =
+                [
+                    data.store.business_category,
+                    data.store.location
+                ]
+                    .filter(Boolean)
+                    .join(" · ") || "Kurios Stores seller";
+
+        }
+
+        if (descEl) {
+
+            descEl.textContent =
+                data.store.store_description || "";
+
+        }
+
+        renderStorefrontProducts(data.products);
+
+    } catch (error) {
+
+        console.error(
+            "Load storefront error:",
+            error
+        );
+
+        if (loadingEl) loadingEl.style.display = "none";
+        if (notFoundEl) notFoundEl.style.display = "block";
+
+    }
+
+}
+
+function renderStorefrontProducts(products) {
+
+    const grid =
+        document.getElementById("storefrontProductGrid");
+
+    const emptyEl =
+        document.getElementById("storefrontEmpty");
+
+    if (!grid) {
+        return;
+    }
+
+    grid.innerHTML = "";
+
+    if (!products || products.length === 0) {
+
+        if (emptyEl) emptyEl.style.display = "block";
+
+        return;
+
+    }
+
+    if (emptyEl) emptyEl.style.display = "none";
+
+    products.forEach(function (product) {
+
+        const category =
+            product.category || "General";
+
+        const icon =
+            STOREFRONT_CATEGORY_ICONS[category] || "fa-box";
+
+        const imageMarkup =
+            product.image_url ?
+                `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
+                `<i class="fa-solid ${icon}"></i>`;
+
+        const card = document.createElement("article");
+        card.className = "product-card";
+
+        card.innerHTML = `
+            <div class="product-image">
+                ${imageMarkup}
+            </div>
+            <div class="product-info">
+                <span class="product-category">${category}</span>
+                <h3>${product.name}</h3>
+                <p>${product.description ? product.description : "&nbsp;"}</p>
+                <div class="product-bottom">
+                    <strong>₦${Number(product.price).toLocaleString()}</strong>
+                </div>
+            </div>
+        `;
+
+        grid.appendChild(card);
+
+    });
+
+}
+
+
+// ========================================
+// HASH ROUTING — INCLUDE #store-<id>
+// ========================================
+
+function checkStorefrontHash() {
+
+    const hash = window.location.hash;
+
+    if (hash.indexOf("#store-") === 0) {
+
+        const sellerId = hash.replace("#store-", "");
+
+        if (sellerId) {
+            openStorefront(sellerId);
+            return true;
+        }
+
+    }
+
+    return false;
+
+}
+
+window.addEventListener("popstate", function () {
+
+    if (!checkStorefrontHash()) {
+
+        if (storefrontPage) {
+            storefrontPage.style.display = "none";
+        }
+
+    }
+
+});
+
+window.addEventListener("hashchange", function () {
+
+    if (!checkStorefrontHash()) {
+
+        if (storefrontPage) {
+            storefrontPage.style.display = "none";
+        }
+
+    }
+
+});
+
+checkStorefrontHash();
+
+
+// =========================================================
+// SELLER PRODUCT MANAGEMENT (approved sellers only)
+// =========================================================
+
+const SELLER_CATEGORY_ICONS = {
+    "Fashion": "fa-shirt",
+    "Electronics": "fa-plug",
+    "Beauty": "fa-spray-can-sparkles",
+    "Food": "fa-utensils",
+    "Books": "fa-book",
+    "School Materials": "fa-pen",
+    "Phones": "fa-mobile-screen",
+    "Accessories": "fa-gem",
+    "Health": "fa-heart-pulse",
+    "Home": "fa-house",
+    "Services": "fa-screwdriver-wrench",
+    "Others": "fa-box"
+};
+
+let currentSellerStudentId = null;
+
+async function loadSellerProducts(studentId) {
+
+    currentSellerStudentId = studentId;
+
+    const loadingEl = document.getElementById("sellerProductsLoading");
+    const emptyEl = document.getElementById("sellerProductsEmpty");
+    const listEl = document.getElementById("sellerProductList");
+
+    if (loadingEl) loadingEl.style.display = "block";
+    if (emptyEl) emptyEl.style.display = "none";
+    if (listEl) listEl.innerHTML = "";
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/products?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+        if (!data.success) {
+            return;
+        }
+
+        if (data.products.length === 0) {
+
+            if (emptyEl) emptyEl.style.display = "block";
+
+            return;
+
+        }
+
+        renderSellerProductList(data.products);
+
+    } catch (error) {
+
+        console.error(
+            "Load seller products error:",
+            error
+        );
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+    }
+
+}
+
+function renderSellerProductList(products) {
+
+    const listEl = document.getElementById("sellerProductList");
+
+    if (!listEl) return;
+
+    listEl.innerHTML = "";
+
+    products.forEach(function (product) {
+
+        const category =
+            product.category || "General";
+
+        const icon =
+            SELLER_CATEGORY_ICONS[category] || "fa-box";
+
+        const thumbMarkup =
+            product.image_url ?
+                `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
+                `<i class="fa-solid ${icon}"></i>`;
+
+        const card = document.createElement("div");
+        card.className = "seller-product-card";
+
+        card.innerHTML = `
+            <div class="seller-product-thumb">${thumbMarkup}</div>
+            <div class="seller-product-info">
+                <h4>
+                    ${product.name}
+                    ${!product.is_active ? '<span class="seller-product-inactive-tag">Hidden</span>' : ""}
+                </h4>
+                <p>₦${Number(product.price).toLocaleString()} · Stock: ${product.stock_quantity}</p>
+            </div>
+            <div class="seller-product-actions">
+                <button type="button" class="toggle-active-btn" title="${product.is_active ? "Hide" : "Show"}">
+                    <i class="fa-solid ${product.is_active ? "fa-eye" : "fa-eye-slash"}"></i>
+                </button>
+                <button type="button" class="edit-product-btn" title="Edit">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button type="button" class="delete-product-btn" title="Delete">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        `;
+
+        card.querySelector(".toggle-active-btn").addEventListener(
+            "click",
+            function () {
+                toggleProductActive(product);
+            }
+        );
+
+        card.querySelector(".edit-product-btn").addEventListener(
+            "click",
+            function () {
+                openProductForm(product);
+            }
+        );
+
+        card.querySelector(".delete-product-btn").addEventListener(
+            "click",
+            function () {
+                deleteProduct(product);
+            }
+        );
+
+        listEl.appendChild(card);
+
+    });
+
+}
+
+
+// ========================================
+// ADD / EDIT PRODUCT FORM
+// ========================================
+
+function openProductForm(product) {
+
+    const formWrap = document.getElementById("sellerProductFormWrap");
+    const formTitle = document.getElementById("productFormTitle");
+    const editingIdField = document.getElementById("editingProductId");
+    const nameField = document.getElementById("productName");
+    const descField = document.getElementById("productDescription");
+    const priceField = document.getElementById("productPrice");
+    const stockField = document.getElementById("productStock");
+    const categoryField = document.getElementById("productCategory");
+    const imageField = document.getElementById("productImageInput");
+    const statusEl = document.getElementById("productFormStatus");
+
+    if (statusEl) statusEl.textContent = "";
+    if (imageField) imageField.value = "";
+
+    if (product) {
+
+        if (formTitle) formTitle.textContent = "Edit product";
+        if (editingIdField) editingIdField.value = product.id;
+        if (nameField) nameField.value = product.name || "";
+        if (descField) descField.value = product.description || "";
+        if (priceField) priceField.value = product.price || "";
+        if (stockField) stockField.value = product.stock_quantity || 0;
+        if (categoryField) categoryField.value = product.category || "";
+
+    } else {
+
+        if (formTitle) formTitle.textContent = "Add a product";
+        if (editingIdField) editingIdField.value = "";
+        if (nameField) nameField.value = "";
+        if (descField) descField.value = "";
+        if (priceField) priceField.value = "";
+        if (stockField) stockField.value = "";
+        if (categoryField) categoryField.value = "";
+
+    }
+
+    if (formWrap) formWrap.style.display = "block";
+
+    const listEl = document.getElementById("sellerProductList");
+    if (listEl) listEl.style.display = "none";
+
+    const addBtn = document.getElementById("addProductButton");
+    if (addBtn) addBtn.style.display = "none";
+
+}
+
+function closeProductForm() {
+
+    const formWrap = document.getElementById("sellerProductFormWrap");
+    if (formWrap) formWrap.style.display = "none";
+
+    const listEl = document.getElementById("sellerProductList");
+    if (listEl) listEl.style.display = "block";
+
+    const addBtn = document.getElementById("addProductButton");
+    if (addBtn) addBtn.style.display = "inline-flex";
+
+}
+
+const addProductButton = document.getElementById("addProductButton");
+
+if (addProductButton) {
+
+    addProductButton.addEventListener(
+        "click",
+        function () {
+            openProductForm(null);
+        }
+    );
+
+}
+
+const cancelProductForm = document.getElementById("cancelProductForm");
+
+if (cancelProductForm) {
+
+    cancelProductForm.addEventListener(
+        "click",
+        closeProductForm
+    );
+
+}
+
+const saveProductButton = document.getElementById("saveProductButton");
+
+if (saveProductButton) {
+
+    saveProductButton.addEventListener(
+        "click",
+        async function () {
+
+            const statusEl = document.getElementById("productFormStatus");
+
+            const editingId =
+                document.getElementById("editingProductId").value;
+
+            const name =
+                document.getElementById("productName").value.trim();
+
+            const price =
+                document.getElementById("productPrice").value;
+
+            if (!name || !price) {
+
+                if (statusEl) {
+                    statusEl.textContent = "Please enter a product name and price.";
+                }
+
+                return;
+
+            }
+
+            const formData = new FormData();
+
+            formData.append("studentId", currentSellerStudentId);
+            formData.append("name", name);
+            formData.append(
+                "description",
+                document.getElementById("productDescription").value.trim()
+            );
+            formData.append("price", price);
+            formData.append(
+                "category",
+                document.getElementById("productCategory").value
+            );
+            formData.append(
+                "stockQuantity",
+                document.getElementById("productStock").value || "0"
+            );
+
+            const imageInput = document.getElementById("productImageInput");
+
+            if (imageInput && imageInput.files[0]) {
+                formData.append("image", imageInput.files[0]);
+            }
+
+            saveProductButton.disabled = true;
+            saveProductButton.textContent = "Saving...";
+
+            try {
+
+                const url =
+                    editingId ?
+                        API_URL + "/api/sellers/products/" + editingId + "/update" :
+                        API_URL + "/api/sellers/products";
+
+                const response = await fetch(url, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (statusEl) {
+                        statusEl.textContent = data.message || "Could not save product.";
+                    }
+
+                    return;
+
+                }
+
+                closeProductForm();
+
+                loadSellerProducts(currentSellerStudentId);
+
+            } catch (error) {
+
+                console.error(
+                    "Save product error:",
+                    error
+                );
+
+                if (statusEl) {
+                    statusEl.textContent = "Unable to connect to Kurios Stores server.";
+                }
+
+            } finally {
+
+                saveProductButton.disabled = false;
+                saveProductButton.textContent = "Save Product";
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// TOGGLE ACTIVE / DELETE
+// ========================================
+
+async function toggleProductActive(product) {
+
+    const formData = new FormData();
+
+    formData.append("studentId", currentSellerStudentId);
+    formData.append("isActive", (!product.is_active).toString());
+
+    try {
+
+        const response = await fetch(
+            API_URL + "/api/sellers/products/" + product.id + "/update",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+            loadSellerProducts(currentSellerStudentId);
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Toggle product active error:",
+            error
+        );
+
+    }
+
+}
+
+async function deleteProduct(product) {
+
+    if (!confirm("Delete \"" + product.name + "\"? This can't be undone.")) {
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            API_URL + "/api/sellers/products/" + product.id + "/delete",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    studentId: currentSellerStudentId
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+            loadSellerProducts(currentSellerStudentId);
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Delete product error:",
+            error
+        );
 
     }
 
