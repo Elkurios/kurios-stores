@@ -1513,12 +1513,19 @@ if (signOutButton) {
         const passcodeStep =
             document.getElementById("signinPasscodeStep");
 
+        const adminPasswordStep =
+            document.getElementById("signinAdminPasswordStep");
+
         if (emailStep) {
             emailStep.style.display = "block";
         }
 
         if (passcodeStep) {
             passcodeStep.style.display = "none";
+        }
+
+        if (adminPasswordStep) {
+            adminPasswordStep.style.display = "none";
         }
 
     }
@@ -6759,6 +6766,53 @@ if (signinNextButton) {
             const passcodeStep =
                 document.getElementById("signinPasscodeStep");
 
+            const adminPasswordStep =
+                document.getElementById("signinAdminPasswordStep");
+
+
+            // ========================================
+            // NOT AN EMAIL/PHONE SHAPE — TREAT AS AN
+            // ADMIN USERNAME INSTEAD
+            // ========================================
+
+            if (
+                signinActiveTab === "email" &&
+                !identifier.includes("@")
+            ) {
+
+                const adminUsernameChip =
+                    document.getElementById("signinAdminUsernameChip");
+
+                if (adminUsernameChip) {
+                    adminUsernameChip.textContent = identifier;
+                }
+
+                if (emailStep) {
+                    emailStep.style.display = "none";
+                }
+
+                if (passcodeStep) {
+                    passcodeStep.style.display = "none";
+                }
+
+                if (adminPasswordStep) {
+                    adminPasswordStep.style.display = "block";
+                }
+
+                const adminPasswordField =
+                    document.getElementById("signinAdminPassword");
+
+                if (adminPasswordField) {
+
+                    adminPasswordField.value = "";
+                    adminPasswordField.focus();
+
+                }
+
+                return;
+
+            }
+
             const emailChip =
                 document.getElementById("signinEmailChip");
 
@@ -6813,6 +6867,168 @@ if (signinChangeEmail) {
             }
 
             signinPasscodeGroup.clear();
+
+        }
+    );
+
+}
+
+
+// ========================================
+// ADMIN PASSWORD STEP — "USE A DIFFERENT EMAIL"
+// ========================================
+
+const signinAdminChangeEmail =
+    document.getElementById("signinAdminChangeEmail");
+
+if (signinAdminChangeEmail) {
+
+    signinAdminChangeEmail.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            const emailStep =
+                document.getElementById("signinEmailStep");
+
+            const adminPasswordStep =
+                document.getElementById("signinAdminPasswordStep");
+
+            const adminStatus =
+                document.getElementById("signinAdminStatus");
+
+            if (adminPasswordStep) {
+                adminPasswordStep.style.display = "none";
+            }
+
+            if (adminStatus) {
+                adminStatus.textContent = "";
+            }
+
+            if (emailStep) {
+                emailStep.style.display = "block";
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// ADMIN SIGN IN SUBMIT
+// ========================================
+
+const signinAdminSubmit =
+    document.getElementById("signinAdminSubmit");
+
+if (signinAdminSubmit) {
+
+    signinAdminSubmit.addEventListener(
+        "click",
+        async function () {
+
+            const usernameChip =
+                document.getElementById("signinAdminUsernameChip");
+
+            const username =
+                usernameChip ? usernameChip.textContent.trim() : "";
+
+            const passwordField =
+                document.getElementById("signinAdminPassword");
+
+            const password =
+                passwordField ? passwordField.value : "";
+
+            const adminStatus =
+                document.getElementById("signinAdminStatus");
+
+            if (!username || !password) {
+
+                if (adminStatus) {
+
+                    adminStatus.textContent =
+                        "Please enter the admin password.";
+
+                }
+
+                return;
+
+            }
+
+            signinAdminSubmit.disabled = true;
+            signinAdminSubmit.textContent = "Signing in...";
+
+            if (adminStatus) {
+                adminStatus.textContent = "";
+            }
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/admin/login",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                username: username,
+                                password: password
+                            })
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (adminStatus) {
+
+                        adminStatus.textContent =
+                            data.message ||
+                            "Invalid username or password.";
+
+                    }
+
+                    return;
+
+                }
+
+                // Store the admin session and hand off to
+                // the admin dashboard — same origin, so the
+                // token carries over via sessionStorage.
+
+                sessionStorage.setItem(
+                    "kuriosAdminToken",
+                    data.token
+                );
+
+                window.location.href =
+                    "/admin-sellers.html";
+
+            } catch (error) {
+
+                console.error(
+                    "Admin login error:",
+                    error
+                );
+
+                if (adminStatus) {
+
+                    adminStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                signinAdminSubmit.disabled = false;
+                signinAdminSubmit.textContent = "Sign In as Admin";
+
+            }
 
         }
     );
@@ -7353,12 +7569,19 @@ function openSignInModalStandalone() {
     const passcodeStepEl =
         document.getElementById("signinPasscodeStep");
 
+    const adminPasswordStepEl =
+        document.getElementById("signinAdminPasswordStep");
+
     if (emailStepEl) {
         emailStepEl.style.display = "block";
     }
 
     if (passcodeStepEl) {
         passcodeStepEl.style.display = "none";
+    }
+
+    if (adminPasswordStepEl) {
+        adminPasswordStepEl.style.display = "none";
     }
 
 }
