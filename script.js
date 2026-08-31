@@ -4786,6 +4786,10 @@ if (closeSignUp) {
                 signUpModal.classList.remove("open");
             }
 
+            if (typeof stopOtpTimers === "function") {
+                stopOtpTimers();
+            }
+
         }
     );
 
@@ -4808,6 +4812,10 @@ if (backToSignIn) {
 
             if (signInModal) {
                 signInModal.classList.add("open");
+            }
+
+            if (typeof stopOtpTimers === "function") {
+                stopOtpTimers();
             }
 
         }
@@ -4886,6 +4894,172 @@ const resendOtpButton =
 
 const otpStatusMessage =
     document.getElementById("otpStatusMessage");
+
+const otpExpiryTime =
+    document.getElementById("otpExpiryTime");
+
+const otpExpiryCountdown =
+    document.getElementById("otpExpiryCountdown");
+
+const otpResendCooldown =
+    document.getElementById("otpResendCooldown");
+
+const otpResendCooldownTime =
+    document.getElementById("otpResendCooldownTime");
+
+
+// ========================================
+// COUNTDOWN TIMER STATE
+// ========================================
+
+let otpExpiryInterval = null;
+let otpResendInterval = null;
+
+
+// ========================================
+// START THE 10-MINUTE EXPIRY COUNTDOWN
+// ========================================
+
+function startOtpExpiryCountdown() {
+
+    clearInterval(otpExpiryInterval);
+
+    let secondsLeft = 10 * 60;
+
+    function render() {
+
+        const minutes =
+            Math.floor(secondsLeft / 60);
+
+        const seconds =
+            secondsLeft % 60;
+
+        if (otpExpiryTime) {
+
+            otpExpiryTime.textContent =
+                String(minutes).padStart(2, "0") +
+                ":" +
+                String(seconds).padStart(2, "0");
+
+        }
+
+        if (otpExpiryCountdown) {
+
+            otpExpiryCountdown.classList.toggle(
+                "otp-expiry-urgent",
+                secondsLeft <= 60
+            );
+
+        }
+
+    }
+
+    render();
+
+    otpExpiryInterval = setInterval(
+        function () {
+
+            secondsLeft = secondsLeft - 1;
+
+            if (secondsLeft <= 0) {
+
+                clearInterval(otpExpiryInterval);
+
+                secondsLeft = 0;
+
+                if (otpExpiryTime) {
+                    otpExpiryTime.textContent = "00:00";
+                }
+
+                if (otpStatusMessage) {
+
+                    otpStatusMessage.textContent =
+                        "This code has expired. Please resend a new one.";
+
+                }
+
+            }
+
+            render();
+
+        },
+        1000
+    );
+
+}
+
+
+// ========================================
+// START THE 30-SECOND RESEND COOLDOWN
+// ========================================
+
+function startOtpResendCooldown() {
+
+    clearInterval(otpResendInterval);
+
+    let secondsLeft = 30;
+
+    if (resendOtpButton) {
+        resendOtpButton.style.display = "none";
+    }
+
+    if (otpResendCooldown) {
+        otpResendCooldown.style.display = "inline";
+    }
+
+    function render() {
+
+        if (otpResendCooldownTime) {
+
+            otpResendCooldownTime.textContent =
+                secondsLeft;
+
+        }
+
+    }
+
+    render();
+
+    otpResendInterval = setInterval(
+        function () {
+
+            secondsLeft = secondsLeft - 1;
+
+            if (secondsLeft <= 0) {
+
+                clearInterval(otpResendInterval);
+
+                if (resendOtpButton) {
+                    resendOtpButton.style.display = "inline";
+                }
+
+                if (otpResendCooldown) {
+                    otpResendCooldown.style.display = "none";
+                }
+
+                return;
+
+            }
+
+            render();
+
+        },
+        1000
+    );
+
+}
+
+
+// ========================================
+// STOP BOTH TIMERS
+// ========================================
+
+function stopOtpTimers() {
+
+    clearInterval(otpExpiryInterval);
+    clearInterval(otpResendInterval);
+
+}
 
 
 // ========================================
@@ -4981,6 +5155,15 @@ function showOtpVerificationScreen(studentId, email) {
         otpDigits[0].focus();
 
     }
+
+
+    // ========================================
+    // START COUNTDOWNS
+    // ========================================
+
+    startOtpExpiryCountdown();
+
+    startOtpResendCooldown();
 
 }
 
@@ -5367,6 +5550,8 @@ if (verifyOtpButton) {
 
                 }
 
+                stopOtpTimers();
+
 
                 // ========================================
                 // UPDATE MODAL TITLE
@@ -5601,6 +5786,15 @@ if (resendOtpButton) {
                         "A new verification code has been sent to your email.";
 
                 }
+
+
+                // ========================================
+                // RESTART COUNTDOWNS
+                // ========================================
+
+                startOtpExpiryCountdown();
+
+                startOtpResendCooldown();
 
 
                 // ========================================
