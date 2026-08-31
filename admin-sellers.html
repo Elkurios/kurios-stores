@@ -156,6 +156,59 @@
 
     /* SELLER CARD */
 
+    .kurios-store-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 20px;
+    }
+
+    .kurios-store-logo {
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+        border-radius: 12px;
+        background: var(--purple-soft, #f3e8ff);
+        color: var(--purple);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        overflow: hidden;
+    }
+
+    .kurios-store-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .kurios-store-info h3 {
+        margin: 0 0 3px;
+        font-size: 14px;
+    }
+
+    .kurios-store-info p {
+        margin: 0 0 8px;
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    .kurios-store-logo-button {
+        display: inline-block;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
     .seller-card {
         background: var(--white);
         border: 1px solid var(--border);
@@ -454,6 +507,43 @@
 
         <div id="sellersPage" class="admin-page">
 
+            <div class="kurios-store-card" id="kuriosStoreCard">
+
+                <div class="kurios-store-logo" id="kuriosStoreLogo">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+
+                <div class="kurios-store-info">
+                    <h3>Kurios Stores (official)</h3>
+                    <p id="kuriosStoreLinkStatus">
+                        Not yet linked to a student account.
+                    </p>
+                    <label for="kuriosStoreLogoInput" class="kurios-store-logo-button">
+                        Change Logo
+                    </label>
+                    <input type="file" id="kuriosStoreLogoInput" accept="image/png, image/jpeg, image/webp" style="display: none;">
+                    <span id="kuriosStoreLogoStatus" style="font-size: 12px; margin-left: 8px;"></span>
+
+                    <div style="margin-top: 10px;">
+                        <input
+                            type="email"
+                            id="kuriosStoreLinkEmail"
+                            placeholder="student@example.com"
+                            style="border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12px; width: 200px;"
+                        >
+                        <button
+                            id="kuriosStoreLinkButton"
+                            class="kurios-store-logo-button"
+                            style="border: none; background: var(--purple); color: white; cursor: pointer;"
+                        >
+                            Link to Student Account
+                        </button>
+                        <span id="kuriosStoreLinkFormStatus" style="font-size: 12px; margin-left: 8px;"></span>
+                    </div>
+                </div>
+
+            </div>
+
             <div class="filter-tabs">
                 <button class="filter-tab active" data-status="">All</button>
                 <button class="filter-tab" data-status="pending">Pending</button>
@@ -544,6 +634,7 @@
         keyGate.style.display = "none";
         adminView.style.display = "block";
         loadSellers();
+        loadKuriosStore();
     }
 
     function showKeyGate(message) {
@@ -1178,6 +1269,206 @@
             announcementsEmptyState.style.display = "block";
 
         }
+
+    }
+
+
+    // =========================================================
+    // KURIOS STORES LOGO
+    // =========================================================
+
+    let kuriosStoreId = null;
+
+    async function loadKuriosStore() {
+
+        try {
+
+            const response = await fetch(API_URL + "/api/admin/kurios-store", {
+                headers: {
+                    "Authorization": "Bearer " + getAdminToken()
+                }
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                return;
+            }
+
+            kuriosStoreId = data.seller.id;
+
+            const logoEl = document.getElementById("kuriosStoreLogo");
+
+            if (logoEl && data.seller.store_image) {
+
+                logoEl.innerHTML =
+                    `<img src="${API_URL + data.seller.store_image}" alt="Kurios Stores logo">`;
+
+            }
+
+            const linkStatusEl = document.getElementById("kuriosStoreLinkStatus");
+
+            if (linkStatusEl) {
+
+                if (data.seller.student_id) {
+
+                    const linkedName =
+                        [data.seller.linked_first_name, data.seller.linked_last_name]
+                            .filter(Boolean)
+                            .join(" ");
+
+                    linkStatusEl.textContent =
+                        "Linked to " +
+                        (linkedName || "a student account") +
+                        (data.seller.linked_email ? " (" + data.seller.linked_email + ")" : "") +
+                        " — they can manage this store from their own dashboard.";
+
+                } else {
+
+                    linkStatusEl.textContent =
+                        "Not yet linked to a student account.";
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.error("Load Kurios Store error:", error);
+
+        }
+
+    }
+
+    const kuriosStoreLogoInput = document.getElementById("kuriosStoreLogoInput");
+
+    if (kuriosStoreLogoInput) {
+
+        kuriosStoreLogoInput.addEventListener("change", async function () {
+
+            const file = kuriosStoreLogoInput.files[0];
+
+            if (!file || !kuriosStoreId) {
+                return;
+            }
+
+            const statusEl = document.getElementById("kuriosStoreLogoStatus");
+
+            if (statusEl) statusEl.textContent = "Uploading...";
+
+            const formData = new FormData();
+            formData.append("logo", file);
+
+            try {
+
+                const response = await fetch(
+                    API_URL + "/api/admin/sellers/" + kuriosStoreId + "/logo",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Authorization": "Bearer " + getAdminToken()
+                        },
+                        body: formData
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (statusEl) statusEl.textContent = data.message || "Could not update logo.";
+
+                    return;
+
+                }
+
+                if (statusEl) statusEl.textContent = "Logo updated.";
+
+                const logoEl = document.getElementById("kuriosStoreLogo");
+
+                if (logoEl && data.seller.store_image) {
+
+                    logoEl.innerHTML =
+                        `<img src="${API_URL + data.seller.store_image}" alt="Kurios Stores logo">`;
+
+                }
+
+            } catch (error) {
+
+                if (statusEl) statusEl.textContent = "Could not connect to server.";
+
+            } finally {
+
+                kuriosStoreLogoInput.value = "";
+
+            }
+
+        });
+
+    }
+
+
+    const kuriosStoreLinkButton = document.getElementById("kuriosStoreLinkButton");
+
+    if (kuriosStoreLinkButton) {
+
+        kuriosStoreLinkButton.addEventListener("click", async function () {
+
+            const emailInput = document.getElementById("kuriosStoreLinkEmail");
+            const statusEl = document.getElementById("kuriosStoreLinkFormStatus");
+
+            const identifier = emailInput ? emailInput.value.trim() : "";
+
+            if (!identifier) {
+
+                if (statusEl) statusEl.textContent = "Enter the student's email first.";
+
+                return;
+
+            }
+
+            kuriosStoreLinkButton.disabled = true;
+
+            if (statusEl) statusEl.textContent = "Linking...";
+
+            try {
+
+                const response = await fetch(API_URL + "/api/admin/kurios-store/link", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + getAdminToken()
+                    },
+                    body: JSON.stringify({ identifier: identifier })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (statusEl) statusEl.textContent = data.message || "Could not link that account.";
+
+                    return;
+
+                }
+
+                if (statusEl) statusEl.textContent = "Linked.";
+
+                if (emailInput) emailInput.value = "";
+
+                loadKuriosStore();
+
+            } catch (error) {
+
+                if (statusEl) statusEl.textContent = "Could not connect to server.";
+
+            } finally {
+
+                kuriosStoreLinkButton.disabled = false;
+
+            }
+
+        });
 
     }
 
