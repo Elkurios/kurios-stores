@@ -93,7 +93,20 @@
         border-radius: 8px;
         padding: 10px 12px;
         font-size: 13px;
-        margin-bottom: 12px;
+        margin-bottom: 4px;
+    }
+
+    #keyGate label {
+        display: block;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        margin-top: 14px;
+    }
+
+    #keyGate label:first-of-type {
+        margin-top: 0;
     }
 
     #keyGate button {
@@ -265,13 +278,19 @@
 </head>
 <body>
 
-<!-- ADMIN KEY GATE -->
+<!-- ADMIN LOGIN -->
 
 <div id="keyGate">
-    <h2>Seller Admin</h2>
-    <p>Enter the admin key to review seller applications.</p>
-    <input type="password" id="adminKeyInput" placeholder="Admin key">
-    <button id="adminKeySubmit">Unlock</button>
+    <h2>Kurios Admin</h2>
+    <p>Sign in to review seller applications.</p>
+
+    <label for="adminEmailInput">Email</label>
+    <input type="email" id="adminEmailInput" placeholder="admin@kuriosstores.com">
+
+    <label for="adminPasswordInput">Password</label>
+    <input type="password" id="adminPasswordInput" placeholder="Password">
+
+    <button id="adminLoginSubmit" style="margin-top: 16px;">Sign In</button>
     <div id="keyGateError"></div>
 </div>
 
@@ -310,8 +329,9 @@
 
     const keyGate = document.getElementById("keyGate");
     const adminView = document.getElementById("adminView");
-    const adminKeyInput = document.getElementById("adminKeyInput");
-    const adminKeySubmit = document.getElementById("adminKeySubmit");
+    const adminEmailInput = document.getElementById("adminEmailInput");
+    const adminPasswordInput = document.getElementById("adminPasswordInput");
+    const adminLoginSubmit = document.getElementById("adminLoginSubmit");
     const keyGateError = document.getElementById("keyGateError");
     const logoutButton = document.getElementById("logoutButton");
     const filterTabs = document.querySelectorAll(".filter-tab");
@@ -321,8 +341,8 @@
 
     let currentFilter = "";
 
-    function getAdminKey() {
-        return sessionStorage.getItem("kuriosAdminKey") || "";
+    function getAdminToken() {
+        return sessionStorage.getItem("kuriosAdminToken") || "";
     }
 
     function showAdminView() {
@@ -337,40 +357,69 @@
         keyGateError.textContent = message || "";
     }
 
-    if (getAdminKey()) {
+    if (getAdminToken()) {
         showAdminView();
     }
 
-    adminKeySubmit.addEventListener("click", async function () {
+    adminLoginSubmit.addEventListener("click", async function () {
 
-        const key = adminKeyInput.value.trim();
+        const email = adminEmailInput.value.trim();
+        const password = adminPasswordInput.value;
 
-        if (!key) {
-            keyGateError.textContent = "Please enter the admin key.";
+        if (!email || !password) {
+            keyGateError.textContent = "Please enter your email and password.";
             return;
         }
 
-        sessionStorage.setItem("kuriosAdminKey", key);
+        adminLoginSubmit.disabled = true;
+        adminLoginSubmit.textContent = "Signing in...";
+        keyGateError.textContent = "";
 
-        // Validate immediately by trying to load sellers.
-        const ok = await loadSellers(true);
+        try {
 
-        if (ok) {
+            const response = await fetch(API_URL + "/api/admin/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email: email, password: password })
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                keyGateError.textContent = data.message || "Invalid email or password.";
+                return;
+            }
+
+            sessionStorage.setItem("kuriosAdminToken", data.token);
             showAdminView();
-        } else {
-            sessionStorage.removeItem("kuriosAdminKey");
+
+        } catch (error) {
+
+            keyGateError.textContent = "Could not connect to Kurios Stores server.";
+
+        } finally {
+
+            adminLoginSubmit.disabled = false;
+            adminLoginSubmit.textContent = "Sign In";
+
         }
 
     });
 
-    adminKeyInput.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-            adminKeySubmit.click();
-        }
+    [adminEmailInput, adminPasswordInput].forEach(function (input) {
+
+        input.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                adminLoginSubmit.click();
+            }
+        });
+
     });
 
     logoutButton.addEventListener("click", function () {
-        sessionStorage.removeItem("kuriosAdminKey");
+        sessionStorage.removeItem("kuriosAdminToken");
         showKeyGate("");
     });
 
@@ -512,16 +561,18 @@
 
             const response = await fetch(url, {
                 headers: {
-                    "x-admin-key": getAdminKey()
+                    "Authorization": "Bearer " + getAdminToken()
                 }
             });
 
             if (response.status === 401) {
 
+                sessionStorage.removeItem("kuriosAdminToken");
+
                 if (!silent) {
-                    showKeyGate("Invalid admin key.");
+                    showKeyGate("Your session expired. Please sign in again.");
                 } else {
-                    keyGateError.textContent = "Invalid admin key.";
+                    keyGateError.textContent = "Your session expired. Please sign in again.";
                 }
 
                 return false;
@@ -577,7 +628,7 @@
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "x-admin-key": getAdminKey()
+                        "Authorization": "Bearer " + getAdminToken()
                     },
                     body: JSON.stringify({ reason: reason || "" })
                 }
