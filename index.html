@@ -467,7 +467,7 @@
          MAIN WEBSITE
     ====================================================== -->
 
-    <main>
+    <main id="mainContent">
 
 
         <!-- =================================================
@@ -2030,15 +2030,25 @@
 
 
     <!-- =====================================================
-         BECOME A SELLER PANEL
+         BECOME A SELLER — FULL PAGE
     ====================================================== -->
 
-    <div
-        class="profile-overlay"
-        id="sellerOverlay"
+    <section
+        class="full-page-section"
+        id="sellerPage"
+        style="display: none;"
     >
 
-        <div class="profile-panel">
+        <div class="full-page-back-row">
+
+            <a href="#" id="sellerBackLink" class="full-page-back-link">
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to Kurios Stores
+            </a>
+
+        </div>
+
+        <div class="full-page-panel">
 
             <div class="profile-panel-header">
 
@@ -2140,13 +2150,55 @@
                         </span>
                     </div>
 
+                    <!-- SELLER TYPE — CARD PICKER -->
+
                     <div class="form-group">
 
-                        <label for="sellerType">
+                        <label>
                             Seller Type *
                         </label>
 
-                        <select id="sellerType" required>
+                        <div class="seller-type-grid" id="sellerTypeGrid">
+
+                            <button
+                                type="button"
+                                class="seller-type-card active"
+                                data-value="student_seller"
+                            >
+                                <i class="fa-solid fa-graduation-cap"></i>
+                                <span>Student Seller</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="seller-type-card"
+                                data-value="vendor"
+                            >
+                                <i class="fa-solid fa-shop"></i>
+                                <span>Vendor / Merchant</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="seller-type-card"
+                                data-value="restaurant"
+                            >
+                                <i class="fa-solid fa-utensils"></i>
+                                <span>Restaurant / Food</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="seller-type-card"
+                                data-value="service_provider"
+                            >
+                                <i class="fa-solid fa-screwdriver-wrench"></i>
+                                <span>Service Provider</span>
+                            </button>
+
+                        </div>
+
+                        <select id="sellerType" required style="display: none;">
                             <option value="student_seller">Student Seller</option>
                             <option value="vendor">Vendor / Merchant</option>
                             <option value="restaurant">Restaurant / Food Seller</option>
@@ -2154,6 +2206,11 @@
                         </select>
 
                     </div>
+
+
+                    <!-- BUSINESS DETAILS -->
+
+                    <div class="form-section-label">Business details</div>
 
                     <div class="form-group">
 
@@ -2190,23 +2247,34 @@
                             Category
                         </label>
 
-                        <select id="sellerBusinessCategory">
-                            <option value="">Select a category</option>
-                            <option value="Fashion">Fashion</option>
-                            <option value="Electronics">Electronics</option>
-                            <option value="Beauty">Beauty</option>
-                            <option value="Food">Food</option>
-                            <option value="Books">Books</option>
-                            <option value="School Materials">School Materials</option>
-                            <option value="Phones">Phones</option>
-                            <option value="Accessories">Accessories</option>
-                            <option value="Health">Health</option>
-                            <option value="Home">Home</option>
-                            <option value="Services">Services</option>
-                            <option value="Others">Others</option>
-                        </select>
+                        <div class="select-wrap">
+
+                            <select id="sellerBusinessCategory">
+                                <option value="">Select a category</option>
+                                <option value="Fashion">Fashion</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Beauty">Beauty</option>
+                                <option value="Food">Food</option>
+                                <option value="Books">Books</option>
+                                <option value="School Materials">School Materials</option>
+                                <option value="Phones">Phones</option>
+                                <option value="Accessories">Accessories</option>
+                                <option value="Health">Health</option>
+                                <option value="Home">Home</option>
+                                <option value="Services">Services</option>
+                                <option value="Others">Others</option>
+                            </select>
+
+                            <i class="fa-solid fa-chevron-down select-wrap-arrow"></i>
+
+                        </div>
 
                     </div>
+
+
+                    <!-- LOCATION & CONTACT -->
+
+                    <div class="form-section-label">Location &amp; contact</div>
 
                     <div class="form-group">
 
@@ -2222,39 +2290,49 @@
 
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-row-2">
 
-                        <label for="sellerContactPhone">
-                            Contact Phone
-                        </label>
+                        <div class="form-group">
 
-                        <input
-                            type="tel"
-                            id="sellerContactPhone"
-                            placeholder="Phone number"
-                        >
+                            <label for="sellerContactPhone">
+                                Contact Phone
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="sellerContactPhone"
+                                placeholder="Phone number"
+                            >
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="sellerContactWhatsapp">
+                                Contact WhatsApp
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="sellerContactWhatsapp"
+                                placeholder="WhatsApp number"
+                            >
+
+                        </div>
 
                     </div>
 
-                    <div class="form-group">
 
-                        <label for="sellerContactWhatsapp">
-                            Contact WhatsApp
-                        </label>
+                    <!-- FEE NOTICE -->
 
-                        <input
-                            type="tel"
-                            id="sellerContactWhatsapp"
-                            placeholder="WhatsApp number"
-                        >
-
+                    <div class="seller-fee-note">
+                        <i class="fa-solid fa-tag"></i>
+                        <span>
+                            A one-time <strong>₦1,500</strong> application fee
+                            applies. You'll be asked to pay before your
+                            application is submitted for review.
+                        </span>
                     </div>
-
-                    <p class="reset-passcode-intro">
-                        A one-time ₦1,500 application fee applies.
-                        You'll be asked to pay before your
-                        application is submitted for review.
-                    </p>
 
                     <div
                         id="sellerApplyStatus"
@@ -2266,7 +2344,8 @@
                         id="sellerApplySubmit"
                         class="auth-button"
                     >
-                        Pay ₦1,500 & Submit Application
+                        <i class="fa-solid fa-store"></i>
+                        Pay ₦1,500 &amp; Submit Application
                     </button>
 
                 </form>
@@ -2275,7 +2354,7 @@
 
         </div>
 
-    </div>
+    </section>
 
 
 
