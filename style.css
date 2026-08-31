@@ -4616,6 +4616,181 @@ img {
 }
 
 
+/* SELLER — FULL PAGE (not a drawer) */
+
+.full-page-section {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+}
+
+.full-page-back-row {
+    margin-bottom: 20px;
+}
+
+.full-page-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted, #6b7280);
+}
+
+.full-page-back-link:hover {
+    color: var(--purple);
+}
+
+.full-page-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+}
+
+.full-page-panel .close-cart {
+    display: none;
+}
+
+@media (max-width: 600px) {
+
+    .full-page-section {
+        padding: 20px 16px 60px;
+    }
+
+    .full-page-panel {
+        padding: 20px;
+        border-radius: 12px;
+    }
+
+}
+
+
+/* SELLER TYPE CARD PICKER */
+
+.seller-type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.seller-type-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--white);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.seller-type-card i {
+    font-size: 16px;
+    color: #9ca3af;
+}
+
+.seller-type-card span {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+}
+
+.seller-type-card:hover {
+    border-color: var(--purple-light);
+}
+
+.seller-type-card.active {
+    border-color: var(--purple);
+    background: var(--purple-soft);
+}
+
+.seller-type-card.active i {
+    color: var(--purple);
+}
+
+
+/* FORM SECTION LABEL */
+
+.form-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding-top: 16px;
+    margin-bottom: 4px;
+    border-top: 1px solid var(--border);
+}
+
+
+/* TWO-COLUMN FORM ROW */
+
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+@media (max-width: 480px) {
+
+    .form-row-2 {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+/* STYLED SELECT */
+
+.select-wrap {
+    position: relative;
+}
+
+.select-wrap select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 34px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.select-wrap-arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+
+/* SELLER FEE NOTICE */
+
+.seller-fee-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 13px 14px;
+    border-radius: 10px;
+    background: var(--purple-soft);
+    color: var(--purple-dark);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.seller-fee-note i {
+    margin-top: 2px;
+    font-size: 13px;
+}
+
+
 /* PASSCODE MISMATCH */
 
 .passcode-mismatch-message {
