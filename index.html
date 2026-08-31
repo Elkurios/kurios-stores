@@ -2534,13 +2534,14 @@
     <div class="otp-header">
 
         <h2>
-            Verify Your Email
+            Verify your email
         </h2>
 
         <p id="otpVerificationMessage">
 
-            We've sent a 6-digit verification code
-            to your email address.
+            We sent a 6-digit code to
+            <span class="otp-email-chip">your email address</span>.
+            Enter it below to activate your account.
 
         </p>
 
@@ -2550,19 +2551,6 @@
     <!-- OTP INPUT SECTION -->
 
     <div class="otp-input-section">
-
-        <div class="otp-label-row">
-
-            <label>
-                Verification Code
-            </label>
-
-            <span>
-                6 DIGITS
-            </span>
-
-        </div>
-
 
         <!-- SIX OTP BOXES -->
 
@@ -2639,12 +2627,8 @@
             id="verifyOtpButton"
         >
 
-            <span class="otp-button-icon">
-                <i class="fa-solid fa-shield-halved"></i>
-            </span>
-
             <span class="otp-button-text">
-                Verify Account
+                Verify account
             </span>
 
             <span class="otp-button-arrow">
@@ -2659,7 +2643,7 @@
         <div class="otp-resend-container">
 
             <span>
-                Didn't receive the code?
+                Didn't get a code?
             </span>
 
             <button
@@ -2667,13 +2651,7 @@
                 id="resendOtpButton"
                 class="otp-resend-button"
             >
-
-                <i class="fa-solid fa-rotate"></i>
-
-                <span>
-                    Resend OTP
-                </span>
-
+                Resend it
             </button>
 
         </div>
@@ -2681,29 +2659,12 @@
     </div>
 
 
-    <!-- SECURITY MESSAGE -->
+    <!-- FOOTER NOTE -->
 
-    <div class="otp-security-box">
-
-        <div class="otp-security-icon">
-
-            <i class="fa-solid fa-shield-halved"></i>
-
-        </div>
-
-        <div class="otp-security-text">
-
-            <strong>
-                Your Security Matters
-            </strong>
-
-            <p>
-                We keep your information safe and secure.
-            </p>
-
-        </div>
-
-    </div>
+    <p class="otp-footer-note">
+        Codes expire after 10 minutes. Kurios Stores will never ask
+        you to share this code with anyone.
+    </p>
 
 </div>
 
