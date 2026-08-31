@@ -4666,6 +4666,40 @@ img {
 }
 
 
+/* STOREFRONT HEADER */
+
+.storefront-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.storefront-icon {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    border-radius: 14px;
+    background: var(--purple-soft);
+    color: var(--purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.storefront-header h2 {
+    margin: 0 0 4px;
+    font-size: 18px;
+}
+
+.storefront-header p {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+
 /* OPAY BUTTON */
 
 .opay-button {
@@ -4674,6 +4708,155 @@ img {
 
 .opay-button:hover {
     background: #147d49;
+}
+
+
+/* SELLER DASHBOARD */
+
+.seller-dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 24px 0 14px;
+}
+
+.seller-dashboard-header h3 {
+    font-size: 15px;
+    margin: 0;
+}
+
+.seller-dashboard-add-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    background: var(--purple);
+    color: white;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.seller-dashboard-add-button:hover {
+    background: var(--purple-dark);
+}
+
+.seller-product-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.seller-product-thumb {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    border-radius: 8px;
+    background: var(--purple-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--purple);
+    font-size: 18px;
+    overflow: hidden;
+}
+
+.seller-product-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.seller-product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.seller-product-info h4 {
+    margin: 0 0 3px;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.seller-product-info p {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.seller-product-inactive-tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #fee2e2;
+    color: #dc2626;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.seller-product-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.seller-product-actions button {
+    border: 1px solid var(--border);
+    background: var(--white);
+    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.seller-product-actions button:hover {
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+.seller-dashboard-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.seller-dashboard-form-actions button {
+    flex: 1;
+}
+
+
+/* PRODUCT CARD — SELLER ATTRIBUTION */
+
+.product-sold-by {
+    display: block;
+    font-size: 11px;
+    color: var(--purple);
+    font-weight: 600;
+    margin: 2px 0 6px;
+    cursor: pointer;
+}
+
+.product-sold-by:hover {
+    text-decoration: underline;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
 }
 
 
