@@ -2705,9 +2705,9 @@ if (signInForm) {
                 // ========================================
 
                 const response =
-                        await fetch(
-        API_URL + "/api/students/login",
-        {
+                    await fetch(
+                        API_URL + "/api/students/login",
+                        {
 
                             method: "POST",
 
@@ -2746,6 +2746,36 @@ if (signInForm) {
                     !response.ok ||
                     !data.success
                 ) {
+
+                    // ====================================
+                    // UNVERIFIED EMAIL — SEND THEM TO
+                    // THE OTP VERIFICATION SCREEN
+                    // ====================================
+
+                    if (
+                        data.requiresVerification &&
+                        data.studentId &&
+                        data.email
+                    ) {
+
+                        closeSignInModal();
+
+                        openSignUpModal();
+
+                        showOtpVerificationScreen(
+                            data.studentId,
+                            data.email
+                        );
+
+                        if (resendOtpButton) {
+
+                            resendOtpButton.click();
+
+                        }
+
+                        return;
+
+                    }
 
                     showMessage(
                         data.message ||
@@ -3169,6 +3199,7 @@ updateLoginState();
                 const response = await fetch(
                     API_URL + "/api/students/register",
                     {
+
                         method: "POST",
 
                         headers: {
@@ -5224,7 +5255,7 @@ if (verifyOtpButton) {
                 // SEND OTP TO BACKEND
                 // ========================================
 
-               const response =
+                const response =
                     await fetch(
                         API_URL + "/api/students/verify-otp",
                         {
