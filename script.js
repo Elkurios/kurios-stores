@@ -7500,8 +7500,14 @@ if (confirmPasscodeResetButton) {
 // BECOME A SELLER — APPLICATION FLOW
 // =========================================================
 
-const sellerOverlay =
-    document.getElementById("sellerOverlay");
+const sellerPage =
+    document.getElementById("sellerPage");
+
+const mainContent =
+    document.getElementById("mainContent");
+
+const sellerBackLink =
+    document.getElementById("sellerBackLink");
 
 const closeSeller =
     document.getElementById("closeSeller");
@@ -7552,8 +7558,22 @@ function hideAllSellerStates() {
 
 function closeSellerPanel() {
 
-    if (sellerOverlay) {
-        sellerOverlay.classList.remove("open");
+    if (window.location.hash === "#sell") {
+
+        history.pushState(
+            null,
+            "",
+            window.location.pathname + window.location.search
+        );
+
+    }
+
+    if (sellerPage) {
+        sellerPage.style.display = "none";
+    }
+
+    if (mainContent) {
+        mainContent.style.display = "block";
     }
 
 }
@@ -7624,15 +7644,29 @@ async function openSellerPanel() {
 
     if (!student) {
 
+        // Not logged in — don't show the seller page,
+        // just prompt sign-in and clear the #sell hash
+        // so the URL doesn't claim to be on that page.
+
+        if (window.location.hash === "#sell") {
+            history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+
         openSignInModalStandalone();
 
         return;
 
     }
 
-    if (sellerOverlay) {
-        sellerOverlay.classList.add("open");
+    if (sellerPage) {
+        sellerPage.style.display = "block";
     }
+
+    if (mainContent) {
+        mainContent.style.display = "none";
+    }
+
+    window.scrollTo({ top: 0 });
 
     hideAllSellerStates();
 
@@ -7822,7 +7856,13 @@ if (accountBecomeSeller) {
 
     accountBecomeSeller.addEventListener(
         "click",
-        openSellerPanel
+        function () {
+
+            history.pushState(null, "", "#sell");
+
+            openSellerPanel();
+
+        }
     );
 
 }
@@ -7836,18 +7876,94 @@ if (closeSeller) {
 
 }
 
-if (sellerOverlay) {
+if (sellerBackLink) {
 
-    sellerOverlay.addEventListener(
+    sellerBackLink.addEventListener(
         "click",
         function (event) {
 
-            if (event.target === sellerOverlay) {
-                closeSellerPanel();
-            }
+            event.preventDefault();
+
+            closeSellerPanel();
 
         }
     );
+
+}
+
+
+// ========================================
+// SELLER PAGE — BROWSER BACK/FORWARD
+// AND DIRECT-LINK (#sell) SUPPORT
+// ========================================
+
+function syncSellerPageWithHash() {
+
+    if (window.location.hash === "#sell") {
+
+        openSellerPanel();
+
+    } else {
+
+        if (sellerPage) {
+            sellerPage.style.display = "none";
+        }
+
+        if (mainContent) {
+            mainContent.style.display = "block";
+        }
+
+    }
+
+}
+
+window.addEventListener("popstate", syncSellerPageWithHash);
+
+// Covers plain <a href="#shop"> style nav links too,
+// which change the hash without going through pushState.
+
+window.addEventListener("hashchange", syncSellerPageWithHash);
+
+if (window.location.hash === "#sell") {
+    openSellerPanel();
+}
+
+
+// ========================================
+// SELLER TYPE CARD PICKER
+// ========================================
+
+const sellerTypeGrid =
+    document.getElementById("sellerTypeGrid");
+
+if (sellerTypeGrid) {
+
+    const sellerTypeCards =
+        sellerTypeGrid.querySelectorAll(".seller-type-card");
+
+    const sellerTypeSelect =
+        document.getElementById("sellerType");
+
+    sellerTypeCards.forEach(function (card) {
+
+        card.addEventListener(
+            "click",
+            function () {
+
+                sellerTypeCards.forEach(function (c) {
+                    c.classList.remove("active");
+                });
+
+                card.classList.add("active");
+
+                if (sellerTypeSelect) {
+                    sellerTypeSelect.value = card.dataset.value;
+                }
+
+            }
+        );
+
+    });
 
 }
 
