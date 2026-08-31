@@ -2108,9 +2108,182 @@
                         <i class="fa-solid fa-circle-check"></i>
                         <span>
                             <strong id="sellerApprovedStoreName"></strong>
-                            is live on Kurios Stores. Your seller
-                            dashboard is coming soon.
+                            is live on Kurios Stores.
                         </span>
+                    </div>
+
+
+                    <!-- PRODUCT LIST -->
+
+                    <div class="seller-dashboard-header">
+
+                        <h3>My Products</h3>
+
+                        <button
+                            type="button"
+                            id="addProductButton"
+                            class="seller-dashboard-add-button"
+                        >
+                            <i class="fa-solid fa-plus"></i>
+                            Add Product
+                        </button>
+
+                    </div>
+
+                    <p id="sellerProductsLoading" class="reset-passcode-intro">
+                        Loading your products...
+                    </p>
+
+                    <p id="sellerProductsEmpty" class="reset-passcode-intro" style="display: none;">
+                        You haven't added any products yet.
+                    </p>
+
+                    <div id="sellerProductList"></div>
+
+
+                    <!-- ADD / EDIT PRODUCT FORM -->
+
+                    <div id="sellerProductFormWrap" style="display: none;">
+
+                        <div class="form-section-label" id="productFormTitle">Add a product</div>
+
+                        <input type="hidden" id="editingProductId">
+
+                        <div class="form-group">
+
+                            <label for="productName">
+                                Product Name *
+                            </label>
+
+                            <input
+                                type="text"
+                                id="productName"
+                                placeholder="e.g. Wireless Earbuds"
+                                required
+                            >
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="productDescription">
+                                Description
+                            </label>
+
+                            <textarea
+                                id="productDescription"
+                                rows="3"
+                                placeholder="Describe your product"
+                            ></textarea>
+
+                        </div>
+
+                        <div class="form-row-2">
+
+                            <div class="form-group">
+
+                                <label for="productPrice">
+                                    Price (₦) *
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="productPrice"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    required
+                                >
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <label for="productStock">
+                                    Stock Quantity
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="productStock"
+                                    min="0"
+                                    step="1"
+                                    placeholder="0"
+                                >
+
+                            </div>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="productCategory">
+                                Category
+                            </label>
+
+                            <div class="select-wrap">
+
+                                <select id="productCategory">
+                                    <option value="">Select a category</option>
+                                    <option value="Fashion">Fashion</option>
+                                    <option value="Electronics">Electronics</option>
+                                    <option value="Beauty">Beauty</option>
+                                    <option value="Food">Food</option>
+                                    <option value="Books">Books</option>
+                                    <option value="School Materials">School Materials</option>
+                                    <option value="Phones">Phones</option>
+                                    <option value="Accessories">Accessories</option>
+                                    <option value="Health">Health</option>
+                                    <option value="Home">Home</option>
+                                    <option value="Services">Services</option>
+                                    <option value="Others">Others</option>
+                                </select>
+
+                                <i class="fa-solid fa-chevron-down select-wrap-arrow"></i>
+
+                            </div>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="productImageInput">
+                                Product Image
+                            </label>
+
+                            <input
+                                type="file"
+                                id="productImageInput"
+                                accept="image/png, image/jpeg, image/webp"
+                            >
+
+                        </div>
+
+                        <div
+                            id="productFormStatus"
+                            class="otp-status-message"
+                        ></div>
+
+                        <div class="seller-dashboard-form-actions">
+
+                            <button
+                                type="button"
+                                id="cancelProductForm"
+                                class="profile-cancel-button"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                id="saveProductButton"
+                                class="profile-save-button"
+                            >
+                                Save Product
+                            </button>
+
+                        </div>
+
                     </div>
 
                 </div>
@@ -2387,6 +2560,66 @@
                 </div>
 
             </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         SELLER STOREFRONT — FULL PAGE
+    ====================================================== -->
+
+    <section
+        class="full-page-section"
+        id="storefrontPage"
+        style="display: none;"
+    >
+
+        <div class="full-page-back-row">
+
+            <a href="#" id="storefrontBackLink" class="full-page-back-link">
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to Kurios Stores
+            </a>
+
+        </div>
+
+        <div class="full-page-panel">
+
+            <p id="storefrontLoading">Loading store...</p>
+
+            <div id="storefrontContent" style="display: none;">
+
+                <div class="storefront-header">
+
+                    <div class="storefront-icon">
+                        <i class="fa-solid fa-store"></i>
+                    </div>
+
+                    <div>
+                        <h2 id="storefrontName"></h2>
+                        <p id="storefrontMeta"></p>
+                    </div>
+
+                </div>
+
+                <p id="storefrontDescription" class="reset-passcode-intro" style="text-align: left;"></p>
+
+                <div class="form-section-label">Products</div>
+
+                <div id="storefrontProductGrid" class="product-grid"></div>
+
+                <p id="storefrontEmpty" style="display: none; color: #6b7280; font-size: 13px;">
+                    This store hasn't listed any products yet.
+                </p>
+
+            </div>
+
+            <p id="storefrontNotFound" style="display: none;">
+                This store could not be found.
+            </p>
 
         </div>
 
