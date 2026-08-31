@@ -1396,6 +1396,20 @@ updateLoginState();
 
         }
 
+        const emailStep =
+            document.getElementById("signinEmailStep");
+
+        const passcodeStep =
+            document.getElementById("signinPasscodeStep");
+
+        if (emailStep) {
+            emailStep.style.display = "block";
+        }
+
+        if (passcodeStep) {
+            passcodeStep.style.display = "none";
+        }
+
     }
 
 
@@ -6310,6 +6324,99 @@ function startResetResendCooldown() {
 
         },
         1000
+    );
+
+}
+
+
+// ========================================
+// SIGN IN — EMAIL STEP "NEXT" BUTTON
+// ========================================
+
+const signinNextButton =
+    document.getElementById("signinNextButton");
+
+if (signinNextButton) {
+
+    signinNextButton.addEventListener(
+        "click",
+        function () {
+
+            const emailField =
+                document.getElementById("signinEmail");
+
+            const email =
+                emailField ? emailField.value.trim() : "";
+
+            if (!email) {
+
+                emailField.focus();
+                return;
+
+            }
+
+            const emailStep =
+                document.getElementById("signinEmailStep");
+
+            const passcodeStep =
+                document.getElementById("signinPasscodeStep");
+
+            const emailChip =
+                document.getElementById("signinEmailChip");
+
+            if (emailChip) {
+                emailChip.textContent = email;
+            }
+
+            if (emailStep) {
+                emailStep.style.display = "none";
+            }
+
+            if (passcodeStep) {
+                passcodeStep.style.display = "block";
+            }
+
+            signinPasscodeGroup.clear();
+            signinPasscodeGroup.focusFirst();
+
+        }
+    );
+
+}
+
+
+// ========================================
+// SIGN IN — "USE A DIFFERENT EMAIL"
+// ========================================
+
+const signinChangeEmail =
+    document.getElementById("signinChangeEmail");
+
+if (signinChangeEmail) {
+
+    signinChangeEmail.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            const emailStep =
+                document.getElementById("signinEmailStep");
+
+            const passcodeStep =
+                document.getElementById("signinPasscodeStep");
+
+            if (passcodeStep) {
+                passcodeStep.style.display = "none";
+            }
+
+            if (emailStep) {
+                emailStep.style.display = "block";
+            }
+
+            signinPasscodeGroup.clear();
+
+        }
     );
 
 }
