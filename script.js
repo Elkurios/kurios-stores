@@ -4935,10 +4935,9 @@ function showOtpVerificationScreen(studentId, email) {
     if (otpMessage) {
 
         otpMessage.innerHTML = `
-            We've sent a 6-digit verification code to
-            <strong>${email}</strong>.<br><br>
-            Please enter the code below to activate
-            your account.
+            We sent a 6-digit code to
+            <span class="otp-email-chip">${email}</span>.
+            Enter it below to activate your account.
         `;
 
     }
