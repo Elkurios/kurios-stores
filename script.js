@@ -2876,7 +2876,7 @@ if (signInForm) {
 
             const identifier =
                 document.getElementById(
-                    "signinEmail"
+                    "signinIdentifierValue"
                 ).value.trim();
 
             const passcode =
@@ -6547,7 +6547,86 @@ function startResetResendCooldown() {
 
 
 // ========================================
-// SIGN IN — EMAIL STEP "NEXT" BUTTON
+// SIGN IN — EMAIL / PHONE TABS
+// ========================================
+
+const signinTabEmail =
+    document.getElementById("signinTabEmail");
+
+const signinTabPhone =
+    document.getElementById("signinTabPhone");
+
+const signinEmailPanel =
+    document.getElementById("signinEmailPanel");
+
+const signinPhonePanel =
+    document.getElementById("signinPhonePanel");
+
+const signinTabsIndicator =
+    document.getElementById("signinTabsIndicator");
+
+let signinActiveTab = "email";
+
+function setSigninTab(tab) {
+
+    signinActiveTab = tab;
+
+    const isEmail = tab === "email";
+
+    if (signinTabEmail) {
+        signinTabEmail.classList.toggle("active", isEmail);
+    }
+
+    if (signinTabPhone) {
+        signinTabPhone.classList.toggle("active", !isEmail);
+    }
+
+    if (signinEmailPanel) {
+        signinEmailPanel.style.display = isEmail ? "block" : "none";
+    }
+
+    if (signinPhonePanel) {
+        signinPhonePanel.style.display = isEmail ? "none" : "block";
+    }
+
+    if (signinTabsIndicator) {
+        signinTabsIndicator.classList.toggle("tab-phone", !isEmail);
+    }
+
+    const identifierStatus =
+        document.getElementById("signinIdentifierStatus");
+
+    if (identifierStatus) {
+        identifierStatus.textContent = "";
+    }
+
+}
+
+if (signinTabEmail) {
+
+    signinTabEmail.addEventListener(
+        "click",
+        function () {
+            setSigninTab("email");
+        }
+    );
+
+}
+
+if (signinTabPhone) {
+
+    signinTabPhone.addEventListener(
+        "click",
+        function () {
+            setSigninTab("phone");
+        }
+    );
+
+}
+
+
+// ========================================
+// SIGN IN — EMAIL/PHONE STEP "NEXT" BUTTON
 // ========================================
 
 const signinNextButton =
@@ -6559,17 +6638,81 @@ if (signinNextButton) {
         "click",
         function () {
 
-            const emailField =
-                document.getElementById("signinEmail");
+            const identifierStatus =
+                document.getElementById("signinIdentifierStatus");
 
-            const email =
-                emailField ? emailField.value.trim() : "";
+            let identifier = "";
+            let displayValue = "";
 
-            if (!email) {
+            if (signinActiveTab === "email") {
 
-                emailField.focus();
-                return;
+                const emailField =
+                    document.getElementById("signinEmail");
 
+                identifier =
+                    emailField ? emailField.value.trim() : "";
+
+                displayValue = identifier;
+
+                if (!identifier) {
+
+                    if (identifierStatus) {
+                        identifierStatus.textContent =
+                            "Please enter your email address.";
+                    }
+
+                    if (emailField) {
+                        emailField.focus();
+                    }
+
+                    return;
+
+                }
+
+            } else {
+
+                const phoneField =
+                    document.getElementById("signinPhone");
+
+                const rawDigits =
+                    phoneField ?
+                        phoneField.value.replace(/\D/g, "") :
+                        "";
+
+                if (!rawDigits) {
+
+                    if (identifierStatus) {
+                        identifierStatus.textContent =
+                            "Please enter your phone number.";
+                    }
+
+                    if (phoneField) {
+                        phoneField.focus();
+                    }
+
+                    return;
+
+                }
+
+                // Strip a leading 0 (local format) before
+                // attaching the country code.
+
+                const localDigits =
+                    rawDigits.replace(/^0+/, "");
+
+                identifier =
+                    "+234" + localDigits;
+
+                displayValue =
+                    "+234 " + localDigits;
+
+            }
+
+            const identifierValueField =
+                document.getElementById("signinIdentifierValue");
+
+            if (identifierValueField) {
+                identifierValueField.value = identifier;
             }
 
             const emailStep =
@@ -6582,7 +6725,7 @@ if (signinNextButton) {
                 document.getElementById("signinEmailChip");
 
             if (emailChip) {
-                emailChip.textContent = email;
+                emailChip.textContent = displayValue;
             }
 
             if (emailStep) {
