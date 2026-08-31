@@ -2648,9 +2648,9 @@ if (signInForm) {
                     "signinEmail"
                 ).value.trim();
 
-            const password =
+            const passcode =
                 document.getElementById(
-                    "signinPassword"
+                    "signinPasscode"
                 ).value;
 
 
@@ -2660,11 +2660,11 @@ if (signInForm) {
 
             if (
                 email === "" ||
-                password === ""
+                passcode.length !== 6
             ) {
 
                 showMessage(
-                    "Please fill in all fields."
+                    "Please enter your email and 6-digit passcode."
                 );
 
                 return;
@@ -2721,8 +2721,8 @@ if (signInForm) {
                                 email:
                                     email,
 
-                                password:
-                                    password
+                                passcode:
+                                    passcode
 
                             })
 
@@ -2870,19 +2870,10 @@ updateLoginState();
 
 
                 // ========================================
-                // CLEAR PASSWORD
+                // CLEAR PASSCODE
                 // ========================================
 
-                const passwordInput =
-                    document.getElementById(
-                        "signinPassword"
-                    );
-
-                if (passwordInput) {
-
-                    passwordInput.value = "";
-
-                }
+                signinPasscodeGroup.clear();
 
 
                 // ========================================
@@ -3086,11 +3077,11 @@ updateLoginState();
             const studentId =
                 document.getElementById("signupStudentId").value.trim();
 
-            const password =
-                document.getElementById("signupPassword").value;
+            const passcode =
+                document.getElementById("signupPasscode").value;
 
-            const confirmPassword =
-                document.getElementById("signupConfirmPassword").value;
+            const confirmPasscode =
+                document.getElementById("signupConfirmPasscode").value;
 
             const agreedStudent =
                 document.getElementById("agreedStudent").checked;
@@ -3116,8 +3107,8 @@ updateLoginState();
                 !phone ||
                 !university ||
                 !studentId ||
-                !password ||
-                !confirmPassword
+                !passcode ||
+                !confirmPasscode
             ) {
 
                 showMessage(
@@ -3129,23 +3120,23 @@ updateLoginState();
 
 
             // ========================================
-            // PASSWORD CHECK
+            // PASSCODE CHECK
             // ========================================
 
-            if (password !== confirmPassword) {
+            if (!/^\d{6}$/.test(passcode)) {
 
                 showMessage(
-                    "Passwords do not match."
+                    "Your passcode must be exactly 6 digits."
                 );
 
                 return;
             }
 
 
-            if (password.length < 6) {
+            if (passcode !== confirmPasscode) {
 
                 showMessage(
-                    "Password must be at least 6 characters."
+                    "Passcodes do not match."
                 );
 
                 return;
@@ -3229,10 +3220,10 @@ updateLoginState();
 
                             studentId: studentId,
 
-                            password: password,
+                            passcode: passcode,
 
-                            confirmPassword:
-                                confirmPassword,
+                            confirmPasscode:
+                                confirmPasscode,
 
                             agreedStudent:
                                 agreedStudent,
@@ -5954,6 +5945,804 @@ if (successLoginLink) {
 
                 accountModalSubtitle.textContent =
                     "Sign in to your Kurios Stores account.";
+
+            }
+
+        }
+    );
+
+}
+
+// =========================================================
+// PASSCODE ENTRY (SIGNUP, SIGNIN, RESET) + RESET FLOW
+// =========================================================
+
+// ========================================
+// GENERIC DIGIT-BOX GROUP WIRING
+// (auto-advance, backspace, arrows, paste)
+// ========================================
+
+function wireDigitGroup(digitInputs, hiddenInput, onChange) {
+
+    const inputs = Array.prototype.slice.call(digitInputs);
+
+    function updateCombined() {
+
+        let combined = "";
+
+        inputs.forEach(function (input) {
+            combined += input.value;
+        });
+
+        if (hiddenInput) {
+            hiddenInput.value = combined;
+        }
+
+        if (typeof onChange === "function") {
+            onChange(combined);
+        }
+
+        return combined;
+
+    }
+
+    inputs.forEach(function (input, index) {
+
+        input.addEventListener(
+            "input",
+            function () {
+
+                this.value =
+                    this.value.replace(/\D/g, "");
+
+                if (this.value.length > 1) {
+                    this.value = this.value.slice(-1);
+                }
+
+                updateCombined();
+
+                if (
+                    this.value &&
+                    index < inputs.length - 1
+                ) {
+                    inputs[index + 1].focus();
+                }
+
+            }
+        );
+
+        input.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Backspace" &&
+                    !this.value &&
+                    index > 0
+                ) {
+                    inputs[index - 1].focus();
+                }
+
+                if (
+                    event.key === "ArrowLeft" &&
+                    index > 0
+                ) {
+                    inputs[index - 1].focus();
+                }
+
+                if (
+                    event.key === "ArrowRight" &&
+                    index < inputs.length - 1
+                ) {
+                    inputs[index + 1].focus();
+                }
+
+            }
+        );
+
+        input.addEventListener(
+            "paste",
+            function (event) {
+
+                event.preventDefault();
+
+                const pastedText =
+                    event.clipboardData
+                        .getData("text")
+                        .replace(/\D/g, "")
+                        .slice(0, inputs.length);
+
+                if (!pastedText) {
+                    return;
+                }
+
+                pastedText
+                    .split("")
+                    .forEach(function (digit, digitIndex) {
+
+                        if (inputs[digitIndex]) {
+                            inputs[digitIndex].value = digit;
+                        }
+
+                    });
+
+                updateCombined();
+
+                const focusIndex =
+                    Math.min(
+                        pastedText.length,
+                        inputs.length - 1
+                    );
+
+                inputs[focusIndex].focus();
+
+            }
+        );
+
+    });
+
+    return {
+
+        updateCombined: updateCombined,
+
+        clear: function () {
+
+            inputs.forEach(function (input) {
+                input.value = "";
+            });
+
+            if (hiddenInput) {
+                hiddenInput.value = "";
+            }
+
+        },
+
+        focusFirst: function () {
+
+            if (inputs.length > 0) {
+                inputs[0].focus();
+            }
+
+        }
+
+    };
+
+}
+
+
+// ========================================
+// SIGNUP PASSCODE + CONFIRM MISMATCH CHECK
+// ========================================
+
+const passcodeMismatchMessage =
+    document.getElementById("passcodeMismatchMessage");
+
+function checkSignupPasscodeMatch() {
+
+    const a =
+        document.getElementById("signupPasscode").value;
+
+    const b =
+        document.getElementById("signupConfirmPasscode").value;
+
+    if (!passcodeMismatchMessage) {
+        return;
+    }
+
+    if (a.length === 6 && b.length === 6 && a !== b) {
+
+        passcodeMismatchMessage.style.display = "block";
+
+    } else {
+
+        passcodeMismatchMessage.style.display = "none";
+
+    }
+
+}
+
+const signupPasscodeGroup =
+    wireDigitGroup(
+        document.querySelectorAll("#signupPasscodeBoxes .passcode-digit"),
+        document.getElementById("signupPasscode"),
+        checkSignupPasscodeMatch
+    );
+
+const signupConfirmPasscodeGroup =
+    wireDigitGroup(
+        document.querySelectorAll("#signupConfirmPasscodeBoxes .passcode-digit"),
+        document.getElementById("signupConfirmPasscode"),
+        checkSignupPasscodeMatch
+    );
+
+
+// ========================================
+// SIGNIN PASSCODE
+// ========================================
+
+const signinPasscodeGroup =
+    wireDigitGroup(
+        document.querySelectorAll("#signinPasscodeBoxes .passcode-digit"),
+        document.getElementById("signinPasscode")
+    );
+
+
+// ========================================
+// RESET FLOW — NEW PASSCODE MISMATCH CHECK
+// ========================================
+
+const newPasscodeMismatchMessage =
+    document.getElementById("newPasscodeMismatchMessage");
+
+function checkNewPasscodeMatch() {
+
+    const a =
+        document.getElementById("newPasscodeInput").value;
+
+    const b =
+        document.getElementById("confirmNewPasscodeInput").value;
+
+    if (!newPasscodeMismatchMessage) {
+        return;
+    }
+
+    if (a.length === 6 && b.length === 6 && a !== b) {
+
+        newPasscodeMismatchMessage.style.display = "block";
+
+    } else {
+
+        newPasscodeMismatchMessage.style.display = "none";
+
+    }
+
+}
+
+const resetOtpGroup =
+    wireDigitGroup(
+        document.querySelectorAll("#resetOtpBoxes .reset-otp-digit"),
+        document.getElementById("resetOtpInput")
+    );
+
+const newPasscodeGroup =
+    wireDigitGroup(
+        document.querySelectorAll("#newPasscodeBoxes .passcode-digit"),
+        document.getElementById("newPasscodeInput"),
+        checkNewPasscodeMatch
+    );
+
+const confirmNewPasscodeGroup =
+    wireDigitGroup(
+        document.querySelectorAll("#confirmNewPasscodeBoxes .passcode-digit"),
+        document.getElementById("confirmNewPasscodeInput"),
+        checkNewPasscodeMatch
+    );
+
+
+// ========================================
+// RESET PASSCODE — SCREEN ELEMENTS
+// ========================================
+
+const resetPasscodeEmailScreen =
+    document.getElementById("resetPasscodeEmailScreen");
+
+const resetPasscodeConfirmScreen =
+    document.getElementById("resetPasscodeConfirmScreen");
+
+const resetPasscodeEmailStatus =
+    document.getElementById("resetPasscodeEmailStatus");
+
+const resetPasscodeConfirmStatus =
+    document.getElementById("resetPasscodeConfirmStatus");
+
+const sendPasscodeResetButton =
+    document.getElementById("sendPasscodeResetButton");
+
+const confirmPasscodeResetButton =
+    document.getElementById("confirmPasscodeResetButton");
+
+const resendResetOtpButton =
+    document.getElementById("resendResetOtpButton");
+
+const resetResendCooldown =
+    document.getElementById("resetResendCooldown");
+
+const resetResendCooldownTime =
+    document.getElementById("resetResendCooldownTime");
+
+const backToSignInFromReset =
+    document.getElementById("backToSignInFromReset");
+
+const forgotPasswordLink =
+    document.getElementById("forgotPassword");
+
+let currentResetStudentId = null;
+let currentResetEmail = null;
+let resetResendInterval = null;
+
+
+function startResetResendCooldown() {
+
+    clearInterval(resetResendInterval);
+
+    let secondsLeft = 30;
+
+    if (resendResetOtpButton) {
+        resendResetOtpButton.style.display = "none";
+    }
+
+    if (resetResendCooldown) {
+        resetResendCooldown.style.display = "inline";
+    }
+
+    function render() {
+
+        if (resetResendCooldownTime) {
+            resetResendCooldownTime.textContent = secondsLeft;
+        }
+
+    }
+
+    render();
+
+    resetResendInterval = setInterval(
+        function () {
+
+            secondsLeft = secondsLeft - 1;
+
+            if (secondsLeft <= 0) {
+
+                clearInterval(resetResendInterval);
+
+                if (resendResetOtpButton) {
+                    resendResetOtpButton.style.display = "inline";
+                }
+
+                if (resetResendCooldown) {
+                    resetResendCooldown.style.display = "none";
+                }
+
+                return;
+
+            }
+
+            render();
+
+        },
+        1000
+    );
+
+}
+
+
+// ========================================
+// OPEN RESET FLOW FROM SIGN IN
+// ========================================
+
+if (forgotPasswordLink) {
+
+    forgotPasswordLink.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            const signinForm =
+                document.getElementById("signinForm");
+
+            if (signinForm) {
+                signinForm.style.display = "none";
+            }
+
+            if (resetPasscodeConfirmScreen) {
+                resetPasscodeConfirmScreen.style.display = "none";
+            }
+
+            if (resetPasscodeEmailScreen) {
+                resetPasscodeEmailScreen.style.display = "block";
+            }
+
+            if (resetPasscodeEmailStatus) {
+                resetPasscodeEmailStatus.textContent = "";
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// BACK TO SIGN IN FROM RESET
+// ========================================
+
+if (backToSignInFromReset) {
+
+    backToSignInFromReset.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            clearInterval(resetResendInterval);
+
+            const signinForm =
+                document.getElementById("signinForm");
+
+            if (resetPasscodeEmailScreen) {
+                resetPasscodeEmailScreen.style.display = "none";
+            }
+
+            if (resetPasscodeConfirmScreen) {
+                resetPasscodeConfirmScreen.style.display = "none";
+            }
+
+            if (signinForm) {
+                signinForm.style.display = "block";
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// SEND PASSCODE RESET CODE
+// ========================================
+
+if (sendPasscodeResetButton) {
+
+    sendPasscodeResetButton.addEventListener(
+        "click",
+        async function () {
+
+            const email =
+                document.getElementById("resetPasscodeEmail").value.trim();
+
+            if (!email) {
+
+                if (resetPasscodeEmailStatus) {
+
+                    resetPasscodeEmailStatus.textContent =
+                        "Please enter your email address.";
+
+                }
+
+                return;
+
+            }
+
+            sendPasscodeResetButton.disabled = true;
+
+            sendPasscodeResetButton.innerHTML =
+                `<i class="fa-solid fa-spinner fa-spin"></i> Sending...`;
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/students/request-passcode-reset",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ email: email })
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+
+                    if (resetPasscodeEmailStatus) {
+
+                        resetPasscodeEmailStatus.textContent =
+                            data.message ||
+                            "Unable to send a reset code.";
+
+                    }
+
+                    return;
+
+                }
+
+                currentResetStudentId = data.studentId;
+                currentResetEmail = data.email;
+
+                const resetPasscodeConfirmMessage =
+                    document.getElementById("resetPasscodeConfirmMessage");
+
+                if (resetPasscodeConfirmMessage) {
+
+                    resetPasscodeConfirmMessage.innerHTML =
+                        `Enter the code sent to
+                        <span class="otp-email-chip">${data.email}</span>,
+                        then choose a new 6-digit passcode.`;
+
+                }
+
+                resetOtpGroup.clear();
+                newPasscodeGroup.clear();
+                confirmNewPasscodeGroup.clear();
+
+                if (newPasscodeMismatchMessage) {
+                    newPasscodeMismatchMessage.style.display = "none";
+                }
+
+                if (resetPasscodeConfirmStatus) {
+                    resetPasscodeConfirmStatus.textContent = "";
+                }
+
+                if (resetPasscodeEmailScreen) {
+                    resetPasscodeEmailScreen.style.display = "none";
+                }
+
+                if (resetPasscodeConfirmScreen) {
+                    resetPasscodeConfirmScreen.style.display = "block";
+                }
+
+                resetOtpGroup.focusFirst();
+
+                startResetResendCooldown();
+
+            } catch (error) {
+
+                console.error(
+                    "Passcode reset request error:",
+                    error.message
+                );
+
+                if (resetPasscodeEmailStatus) {
+
+                    resetPasscodeEmailStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                sendPasscodeResetButton.disabled = false;
+                sendPasscodeResetButton.textContent = "Send Reset Code";
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// RESEND RESET OTP
+// ========================================
+
+if (resendResetOtpButton) {
+
+    resendResetOtpButton.addEventListener(
+        "click",
+        async function () {
+
+            if (!currentResetEmail) {
+                return;
+            }
+
+            resendResetOtpButton.disabled = true;
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/students/request-passcode-reset",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ email: currentResetEmail })
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (resetPasscodeConfirmStatus) {
+
+                    resetPasscodeConfirmStatus.textContent =
+                        data.success ?
+                            "A new code has been sent to your email." :
+                            (data.message || "Unable to resend code.");
+
+                }
+
+                if (data.success) {
+                    startResetResendCooldown();
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Resend reset OTP error:",
+                    error.message
+                );
+
+                if (resetPasscodeConfirmStatus) {
+
+                    resetPasscodeConfirmStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                resendResetOtpButton.disabled = false;
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// CONFIRM PASSCODE RESET
+// ========================================
+
+if (confirmPasscodeResetButton) {
+
+    confirmPasscodeResetButton.addEventListener(
+        "click",
+        async function () {
+
+            const otp =
+                document.getElementById("resetOtpInput").value;
+
+            const newPasscode =
+                document.getElementById("newPasscodeInput").value;
+
+            const confirmNewPasscode =
+                document.getElementById("confirmNewPasscodeInput").value;
+
+            if (
+                otp.length !== 6 ||
+                newPasscode.length !== 6 ||
+                confirmNewPasscode.length !== 6
+            ) {
+
+                if (resetPasscodeConfirmStatus) {
+
+                    resetPasscodeConfirmStatus.textContent =
+                        "Please fill in the code and your new passcode.";
+
+                }
+
+                return;
+
+            }
+
+            if (newPasscode !== confirmNewPasscode) {
+
+                if (newPasscodeMismatchMessage) {
+                    newPasscodeMismatchMessage.style.display = "block";
+                }
+
+                return;
+
+            }
+
+            confirmPasscodeResetButton.disabled = true;
+
+            confirmPasscodeResetButton.innerHTML =
+                `<span class="otp-button-text">Setting passcode...</span>`;
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/students/reset-passcode",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                studentId: currentResetStudentId,
+                                otp: otp,
+                                newPasscode: newPasscode,
+                                confirmNewPasscode: confirmNewPasscode
+                            })
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+
+                    if (resetPasscodeConfirmStatus) {
+
+                        resetPasscodeConfirmStatus.textContent =
+                            data.message ||
+                            "Unable to reset your passcode.";
+
+                    }
+
+                    return;
+
+                }
+
+                clearInterval(resetResendInterval);
+
+                if (resetPasscodeConfirmScreen) {
+                    resetPasscodeConfirmScreen.style.display = "none";
+                }
+
+                const signinForm =
+                    document.getElementById("signinForm");
+
+                if (signinForm) {
+
+                    signinForm.style.display = "block";
+
+                    const signinEmailField =
+                        document.getElementById("signinEmail");
+
+                    if (signinEmailField && currentResetEmail) {
+                        signinEmailField.value = currentResetEmail;
+                    }
+
+                    signinPasscodeGroup.clear();
+
+                }
+
+                let resetToast =
+                    document.getElementById("kuriosToast");
+
+                if (!resetToast) {
+
+                    resetToast =
+                        document.createElement("div");
+
+                    resetToast.id = "kuriosToast";
+                    resetToast.className = "kurios-toast";
+
+                    document.body.appendChild(resetToast);
+
+                }
+
+                resetToast.textContent =
+                    "Your passcode has been reset. Please sign in with your new passcode.";
+
+                resetToast.classList.add("show");
+
+                setTimeout(
+                    function () {
+                        resetToast.classList.remove("show");
+                    },
+                    3000
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Confirm passcode reset error:",
+                    error.message
+                );
+
+                if (resetPasscodeConfirmStatus) {
+
+                    resetPasscodeConfirmStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                confirmPasscodeResetButton.disabled = false;
+
+                confirmPasscodeResetButton.innerHTML =
+                    `<span class="otp-button-text">Set new passcode</span>
+                     <span class="otp-button-arrow"><i class="fa-solid fa-arrow-right"></i></span>`;
 
             }
 
