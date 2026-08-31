@@ -2345,10 +2345,46 @@
                         class="auth-button"
                     >
                         <i class="fa-solid fa-store"></i>
-                        Pay ₦1,500 &amp; Submit Application
+                        Continue to Payment
                     </button>
 
                 </form>
+
+
+                <!-- PAYMENT METHOD CHOICE -->
+
+                <div id="sellerPaymentChoiceState" style="display: none;">
+
+                    <p class="reset-passcode-intro">
+                        Pay the <strong>₦1,500</strong> application fee to
+                        submit your application for review.
+                    </p>
+
+                    <div
+                        id="sellerPaymentChoiceStatus"
+                        class="otp-status-message"
+                    ></div>
+
+                    <button
+                        type="button"
+                        id="payWithMonnifyButton"
+                        class="auth-button"
+                        style="margin-bottom: 10px;"
+                    >
+                        <i class="fa-solid fa-credit-card"></i>
+                        Pay with Monnify
+                    </button>
+
+                    <button
+                        type="button"
+                        id="payWithOpayButton"
+                        class="auth-button opay-button"
+                    >
+                        <i class="fa-solid fa-wallet"></i>
+                        Pay with OPay
+                    </button>
+
+                </div>
 
             </div>
 
