@@ -7668,6 +7668,25 @@ async function openSellerPanel() {
 
     window.scrollTo({ top: 0 });
 
+
+    // ========================================
+    // RESUME AN OPAY PAYMENT IF WE'RE RETURNING
+    // FROM THE OPAY CHECKOUT PAGE
+    // ========================================
+
+    const pendingOpayRef =
+        localStorage.getItem("kuriosPendingOpaySellerRef");
+
+    if (pendingOpayRef) {
+
+        localStorage.removeItem("kuriosPendingOpaySellerRef");
+
+        await verifySellerApplicationPayment(pendingOpayRef);
+
+        return;
+
+    }
+
     hideAllSellerStates();
 
     if (sellerLoadingState) {
@@ -7973,6 +7992,8 @@ if (sellerTypeGrid) {
 // (pay ₦1,500 application fee, then submit)
 // ========================================
 
+let currentSellerPaymentReference = null;
+
 if (sellerApplyForm) {
 
     sellerApplyForm.addEventListener(
@@ -8033,7 +8054,7 @@ if (sellerApplyForm) {
             if (sellerApplySubmit) {
 
                 sellerApplySubmit.disabled = true;
-                sellerApplySubmit.textContent = "Starting payment...";
+                sellerApplySubmit.textContent = "Starting...";
 
             }
 
@@ -8067,16 +8088,111 @@ if (sellerApplyForm) {
 
                 }
 
+                currentSellerPaymentReference =
+                    data.paymentReference;
 
-                // ========================================
-                // HAND OFF TO MONNIFY FOR THE ₦1,500 FEE
-                // ========================================
+                sellerApplyForm.style.display = "none";
+
+                const choiceState =
+                    document.getElementById("sellerPaymentChoiceState");
+
+                if (choiceState) {
+                    choiceState.style.display = "block";
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Seller application submit error:",
+                    error
+                );
+
+                if (sellerApplyStatus) {
+
+                    sellerApplyStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                if (sellerApplySubmit) {
+
+                    sellerApplySubmit.disabled = false;
+                    sellerApplySubmit.textContent = "Continue to Payment";
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// PAY WITH MONNIFY
+// ========================================
+
+const payWithMonnifyButton =
+    document.getElementById("payWithMonnifyButton");
+
+if (payWithMonnifyButton) {
+
+    payWithMonnifyButton.addEventListener(
+        "click",
+        async function () {
+
+            const choiceStatus =
+                document.getElementById("sellerPaymentChoiceStatus");
+
+            if (!currentSellerPaymentReference) {
+                return;
+            }
+
+            payWithMonnifyButton.disabled = true;
+
+            if (choiceStatus) {
+                choiceStatus.textContent = "";
+            }
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/sellers/apply/pay/monnify",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                paymentReference: currentSellerPaymentReference
+                            })
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (choiceStatus) {
+
+                        choiceStatus.textContent =
+                            data.message || "Could not start Monnify checkout.";
+
+                    }
+
+                    return;
+
+                }
 
                 if (typeof MonnifySDK === "undefined") {
 
-                    if (sellerApplyStatus) {
+                    if (choiceStatus) {
 
-                        sellerApplyStatus.textContent =
+                        choiceStatus.textContent =
                             "Payment could not load. Please refresh and try again.";
 
                     }
@@ -8114,9 +8230,9 @@ if (sellerApplyForm) {
 
                     onClose: function () {
 
-                        if (sellerApplyStatus) {
+                        if (choiceStatus) {
 
-                            sellerApplyStatus.textContent =
+                            choiceStatus.textContent =
                                 "Payment was not completed. You can try again.";
 
                         }
@@ -8128,25 +8244,118 @@ if (sellerApplyForm) {
             } catch (error) {
 
                 console.error(
-                    "Seller application submit error:",
+                    "Monnify checkout error:",
                     error
                 );
 
-                if (sellerApplyStatus) {
+                if (choiceStatus) {
 
-                    sellerApplyStatus.textContent =
+                    choiceStatus.textContent =
                         "Unable to connect to Kurios Stores server.";
 
                 }
 
             } finally {
 
-                if (sellerApplySubmit) {
+                payWithMonnifyButton.disabled = false;
 
-                    sellerApplySubmit.disabled = false;
-                    sellerApplySubmit.textContent = "Pay ₦1,500 & Submit Application";
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// PAY WITH OPAY
+// ========================================
+
+const payWithOpayButton =
+    document.getElementById("payWithOpayButton");
+
+if (payWithOpayButton) {
+
+    payWithOpayButton.addEventListener(
+        "click",
+        async function () {
+
+            const choiceStatus =
+                document.getElementById("sellerPaymentChoiceStatus");
+
+            if (!currentSellerPaymentReference) {
+                return;
+            }
+
+            payWithOpayButton.disabled = true;
+
+            if (choiceStatus) {
+                choiceStatus.textContent = "Redirecting to OPay...";
+            }
+
+            try {
+
+                const returnUrl =
+                    window.location.origin + "/#sell";
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/sellers/apply/pay/opay",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                paymentReference: currentSellerPaymentReference,
+                                returnUrl: returnUrl
+                            })
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!data.success || !data.cashierUrl) {
+
+                    if (choiceStatus) {
+
+                        choiceStatus.textContent =
+                            data.message || "Could not start OPay checkout.";
+
+                    }
+
+                    payWithOpayButton.disabled = false;
+
+                    return;
 
                 }
+
+                // Remember which application this was, so we
+                // can verify it automatically once OPay sends
+                // the student back to this page.
+
+                localStorage.setItem(
+                    "kuriosPendingOpaySellerRef",
+                    currentSellerPaymentReference
+                );
+
+                window.location.href = data.cashierUrl;
+
+            } catch (error) {
+
+                console.error(
+                    "OPay checkout error:",
+                    error
+                );
+
+                if (choiceStatus) {
+
+                    choiceStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+                payWithOpayButton.disabled = false;
 
             }
 
