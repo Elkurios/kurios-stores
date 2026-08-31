@@ -4752,11 +4752,33 @@ img {
 }
 
 .select-wrap select {
+
     appearance: none;
     -webkit-appearance: none;
-    padding-right: 34px;
+    -moz-appearance: none;
+
     width: 100%;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    padding: 11px 34px 11px 12px;
+
+    outline: none;
+
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--text);
+
+    background: var(--white);
+
     cursor: pointer;
+
+}
+
+.select-wrap select:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.08);
 }
 
 .select-wrap-arrow {
