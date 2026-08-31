@@ -7608,6 +7608,7 @@ if (sellerOverlay) {
 
 // ========================================
 // SUBMIT SELLER APPLICATION
+// (pay ₦1,500 application fee, then submit)
 // ========================================
 
 if (sellerApplyForm) {
@@ -7670,7 +7671,7 @@ if (sellerApplyForm) {
             if (sellerApplySubmit) {
 
                 sellerApplySubmit.disabled = true;
-                sellerApplySubmit.textContent = "Submitting...";
+                sellerApplySubmit.textContent = "Starting payment...";
 
             }
 
@@ -7696,7 +7697,7 @@ if (sellerApplyForm) {
 
                         sellerApplyStatus.textContent =
                             data.message ||
-                            "Could not submit your application.";
+                            "Could not start your application.";
 
                     }
 
@@ -7704,18 +7705,63 @@ if (sellerApplyForm) {
 
                 }
 
-                hideAllSellerStates();
 
-                const nameEl =
-                    document.getElementById("sellerPendingStoreName");
+                // ========================================
+                // HAND OFF TO MONNIFY FOR THE ₦1,500 FEE
+                // ========================================
 
-                if (nameEl) {
-                    nameEl.textContent = data.seller.store_name;
+                if (typeof MonnifySDK === "undefined") {
+
+                    if (sellerApplyStatus) {
+
+                        sellerApplyStatus.textContent =
+                            "Payment could not load. Please refresh and try again.";
+
+                    }
+
+                    return;
+
                 }
 
-                if (sellerPendingState) {
-                    sellerPendingState.style.display = "block";
-                }
+                MonnifySDK.initialize({
+
+                    amount: data.amount,
+
+                    currency: "NGN",
+
+                    reference: data.paymentReference,
+
+                    customerFullName: data.customerName,
+
+                    customerEmail: data.customerEmail,
+
+                    apiKey: data.apiKey,
+
+                    contractCode: data.contractCode,
+
+                    paymentDescription:
+                        "Kurios Stores seller application fee",
+
+                    onComplete: async function () {
+
+                        await verifySellerApplicationPayment(
+                            data.paymentReference
+                        );
+
+                    },
+
+                    onClose: function () {
+
+                        if (sellerApplyStatus) {
+
+                            sellerApplyStatus.textContent =
+                                "Payment was not completed. You can try again.";
+
+                        }
+
+                    }
+
+                });
 
             } catch (error) {
 
@@ -7736,7 +7782,7 @@ if (sellerApplyForm) {
                 if (sellerApplySubmit) {
 
                     sellerApplySubmit.disabled = false;
-                    sellerApplySubmit.textContent = "Submit Application";
+                    sellerApplySubmit.textContent = "Pay ₦1,500 & Submit Application";
 
                 }
 
@@ -7744,5 +7790,83 @@ if (sellerApplyForm) {
 
         }
     );
+
+}
+
+
+// ========================================
+// CONFIRM THE SELLER APPLICATION PAYMENT
+// (never trust the widget's onComplete alone)
+// ========================================
+
+async function verifySellerApplicationPayment(paymentReference) {
+
+    if (sellerApplyStatus) {
+
+        sellerApplyStatus.textContent =
+            "Confirming your payment...";
+
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/apply/verify-payment",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        paymentReference: paymentReference
+                    })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            if (sellerApplyStatus) {
+
+                sellerApplyStatus.textContent =
+                    data.message ||
+                    "We couldn't confirm your payment yet. If you completed payment, please try again shortly.";
+
+            }
+
+            return;
+
+        }
+
+        hideAllSellerStates();
+
+        const nameEl =
+            document.getElementById("sellerPendingStoreName");
+
+        if (nameEl && data.seller) {
+            nameEl.textContent = data.seller.store_name;
+        }
+
+        if (sellerPendingState) {
+            sellerPendingState.style.display = "block";
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Seller payment verify error:",
+            error
+        );
+
+        if (sellerApplyStatus) {
+
+            sellerApplyStatus.textContent =
+                "Unable to reach Kurios Stores server to confirm payment.";
+
+        }
+
+    }
 
 }
