@@ -3690,17 +3690,11 @@ showOtpVerificationScreen(
 
 
     /*
-        Temporary local notifications.
-
-        Later these will come from PostgreSQL.
+        Notifications now come from the server —
+        every student sees the same admin announcements.
     */
 
-    let notifications =
-        JSON.parse(
-            localStorage.getItem(
-                "kuriosNotifications"
-            )
-        ) || [];
+    let notifications = [];
 
 
 
@@ -4971,10 +4965,39 @@ showOtpVerificationScreen(
 
 
     /*
-        Show saved notifications.
+        Load notifications from the server.
     */
 
-    renderNotifications();
+    async function loadNotificationsFromServer() {
+
+        try {
+
+            const response =
+                await fetch(API_URL + "/api/notifications");
+
+            const data =
+                await response.json();
+
+            if (data.success) {
+
+                notifications = data.notifications;
+
+                renderNotifications();
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Load notifications error:",
+                error
+            );
+
+        }
+
+    }
+
+    loadNotificationsFromServer();
 
 
 
