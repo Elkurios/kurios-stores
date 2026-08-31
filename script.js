@@ -9265,3 +9265,322 @@ if (storeLogoInput) {
     );
 
 }
+
+
+// =========================================================
+// CSV PRODUCT IMPORT
+// =========================================================
+
+let csvImportFile = null;
+
+function parseCsvHeaderLine(line) {
+
+    // Simple quoted-field-aware split for a
+    // single header line (good enough for
+    // detecting column names).
+
+    const fields = [];
+    let field = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+
+        const char = line[i];
+
+        if (inQuotes) {
+
+            if (char === '"') {
+
+                if (line[i + 1] === '"') {
+                    field += '"';
+                    i++;
+                } else {
+                    inQuotes = false;
+                }
+
+            } else {
+
+                field += char;
+
+            }
+
+        } else {
+
+            if (char === '"') {
+                inQuotes = true;
+            } else if (char === ",") {
+                fields.push(field);
+                field = "";
+            } else {
+                field += char;
+            }
+
+        }
+
+    }
+
+    fields.push(field);
+
+    return fields.map(function (f) {
+        return f.trim();
+    });
+
+}
+
+function detectCsvLocations(headers) {
+
+    const locations = new Set();
+
+    headers.forEach(function (header) {
+
+        const match =
+            header.match(/^Fixed Sell Price \[(.+)\]$/);
+
+        if (match) {
+            locations.add(match[1]);
+        }
+
+    });
+
+    return Array.from(locations);
+
+}
+
+const importCsvButton =
+    document.getElementById("importCsvButton");
+
+const csvImportPanel =
+    document.getElementById("csvImportPanel");
+
+const csvFileInput =
+    document.getElementById("csvFileInput");
+
+const csvLocationGroup =
+    document.getElementById("csvLocationGroup");
+
+const csvLocationSelect =
+    document.getElementById("csvLocationSelect");
+
+const confirmCsvImport =
+    document.getElementById("confirmCsvImport");
+
+const cancelCsvImport =
+    document.getElementById("cancelCsvImport");
+
+if (importCsvButton) {
+
+    importCsvButton.addEventListener(
+        "click",
+        function () {
+
+            csvImportFile = null;
+
+            if (csvFileInput) csvFileInput.value = "";
+
+            if (csvLocationGroup) csvLocationGroup.style.display = "none";
+
+            if (confirmCsvImport) confirmCsvImport.disabled = true;
+
+            const statusEl = document.getElementById("csvImportStatus");
+
+            if (statusEl) statusEl.textContent = "";
+
+            if (csvImportPanel) csvImportPanel.style.display = "block";
+
+            const listEl = document.getElementById("sellerProductList");
+            if (listEl) listEl.style.display = "none";
+
+            if (importCsvButton) importCsvButton.style.display = "none";
+
+            const addBtn = document.getElementById("addProductButton");
+            if (addBtn) addBtn.style.display = "none";
+
+        }
+    );
+
+}
+
+function closeCsvImportPanel() {
+
+    if (csvImportPanel) csvImportPanel.style.display = "none";
+
+    const listEl = document.getElementById("sellerProductList");
+    if (listEl) listEl.style.display = "block";
+
+    if (importCsvButton) importCsvButton.style.display = "inline-flex";
+
+    const addBtn = document.getElementById("addProductButton");
+    if (addBtn) addBtn.style.display = "inline-flex";
+
+}
+
+if (cancelCsvImport) {
+
+    cancelCsvImport.addEventListener(
+        "click",
+        closeCsvImportPanel
+    );
+
+}
+
+if (csvFileInput) {
+
+    csvFileInput.addEventListener(
+        "change",
+        function () {
+
+            const file = csvFileInput.files[0];
+
+            const statusEl = document.getElementById("csvImportStatus");
+
+            if (!file) {
+                return;
+            }
+
+            csvImportFile = file;
+
+            if (statusEl) statusEl.textContent = "";
+
+            // Read just enough of the file to get
+            // the header line, to detect locations.
+
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+
+                const text = event.target.result;
+
+                const firstLine =
+                    text.split(/\r\n|\n|\r/)[0] || "";
+
+                const headers =
+                    parseCsvHeaderLine(firstLine);
+
+                const locations =
+                    detectCsvLocations(headers);
+
+                if (locations.length > 0) {
+
+                    if (csvLocationSelect) {
+
+                        csvLocationSelect.innerHTML =
+                            locations.map(function (loc) {
+                                return `<option value="${loc}">${loc}</option>`;
+                            }).join("") +
+                            `<option value="">Don't use a location (general columns)</option>`;
+
+                    }
+
+                    if (csvLocationGroup) csvLocationGroup.style.display = "block";
+
+                } else {
+
+                    if (csvLocationGroup) csvLocationGroup.style.display = "none";
+
+                }
+
+                if (confirmCsvImport) confirmCsvImport.disabled = false;
+
+            };
+
+            // Only need the first ~64kb to reliably
+            // capture the header line.
+
+            reader.readAsText(file.slice(0, 65536));
+
+        }
+    );
+
+}
+
+if (confirmCsvImport) {
+
+    confirmCsvImport.addEventListener(
+        "click",
+        async function () {
+
+            if (!csvImportFile) {
+                return;
+            }
+
+            const statusEl =
+                document.getElementById("csvImportStatus");
+
+            const location =
+                csvLocationSelect ? csvLocationSelect.value : "";
+
+            confirmCsvImport.disabled = true;
+            confirmCsvImport.textContent = "Importing...";
+
+            if (statusEl) {
+                statusEl.textContent = "Importing your products — this can take a moment for large files...";
+            }
+
+            const formData = new FormData();
+
+            formData.append("studentId", currentSellerStudentId);
+            formData.append("file", csvImportFile);
+
+            if (location) {
+                formData.append("location", location);
+            }
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/sellers/products/import",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (statusEl) {
+
+                        statusEl.textContent =
+                            data.message || "Could not import that file.";
+
+                    }
+
+                    return;
+
+                }
+
+                if (statusEl) {
+                    statusEl.textContent = data.message;
+                }
+
+                loadSellerProducts(currentSellerStudentId);
+
+                setTimeout(closeCsvImportPanel, 2000);
+
+            } catch (error) {
+
+                console.error(
+                    "CSV import error:",
+                    error
+                );
+
+                if (statusEl) {
+
+                    statusEl.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                confirmCsvImport.disabled = false;
+                confirmCsvImport.textContent = "Import";
+
+            }
+
+        }
+    );
+
+}
