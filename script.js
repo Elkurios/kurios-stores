@@ -7255,3 +7255,494 @@ if (confirmPasscodeResetButton) {
     );
 
 }
+
+
+// =========================================================
+// BECOME A SELLER — APPLICATION FLOW
+// =========================================================
+
+const sellerOverlay =
+    document.getElementById("sellerOverlay");
+
+const closeSeller =
+    document.getElementById("closeSeller");
+
+const accountBecomeSeller =
+    document.getElementById("accountBecomeSeller");
+
+const sellerLoadingState =
+    document.getElementById("sellerLoadingState");
+
+const sellerPendingState =
+    document.getElementById("sellerPendingState");
+
+const sellerApprovedState =
+    document.getElementById("sellerApprovedState");
+
+const sellerSuspendedState =
+    document.getElementById("sellerSuspendedState");
+
+const sellerApplyForm =
+    document.getElementById("sellerApplyForm");
+
+const sellerApplyStatus =
+    document.getElementById("sellerApplyStatus");
+
+const sellerApplySubmit =
+    document.getElementById("sellerApplySubmit");
+
+
+function hideAllSellerStates() {
+
+    [
+        sellerLoadingState,
+        sellerPendingState,
+        sellerApprovedState,
+        sellerSuspendedState,
+        sellerApplyForm
+    ].forEach(function (el) {
+
+        if (el) {
+            el.style.display = "none";
+        }
+
+    });
+
+}
+
+
+function closeSellerPanel() {
+
+    if (sellerOverlay) {
+        sellerOverlay.classList.remove("open");
+    }
+
+}
+
+
+function getStoredStudent() {
+
+    const storedStudent =
+        localStorage.getItem("kuriosLoggedInStudent") ||
+        sessionStorage.getItem("kuriosLoggedInStudent");
+
+    if (!storedStudent) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(storedStudent);
+    } catch (error) {
+        return null;
+    }
+
+}
+
+function openSignInModalStandalone() {
+
+    const signInModalEl =
+        document.getElementById("signInModal");
+
+    if (signInModalEl) {
+        signInModalEl.classList.add("open");
+    }
+
+    const emailStepEl =
+        document.getElementById("signinEmailStep");
+
+    const passcodeStepEl =
+        document.getElementById("signinPasscodeStep");
+
+    if (emailStepEl) {
+        emailStepEl.style.display = "block";
+    }
+
+    if (passcodeStepEl) {
+        passcodeStepEl.style.display = "none";
+    }
+
+}
+
+
+async function openSellerPanel() {
+
+    const student =
+        getStoredStudent();
+
+    const accountMenu =
+        document.getElementById("studentAccountMenu");
+
+    if (accountMenu) {
+        accountMenu.classList.remove("open");
+    }
+
+    if (!student) {
+
+        openSignInModalStandalone();
+
+        return;
+
+    }
+
+    if (sellerOverlay) {
+        sellerOverlay.classList.add("open");
+    }
+
+    hideAllSellerStates();
+
+    if (sellerLoadingState) {
+        sellerLoadingState.style.display = "block";
+    }
+
+    // Prefill contact fields from the student's
+    // own profile, in case they end up on the form.
+
+    const phoneField =
+        document.getElementById("sellerContactPhone");
+
+    const whatsappField =
+        document.getElementById("sellerContactWhatsapp");
+
+    if (phoneField) {
+        phoneField.value = student.phone || "";
+    }
+
+    if (whatsappField) {
+
+        whatsappField.value =
+            student.whatsapp_number ||
+            student.whatsappNumber ||
+            "";
+
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/me?studentId=" + student.id
+            );
+
+        const data = await response.json();
+
+        hideAllSellerStates();
+
+        if (!data.success) {
+
+            if (sellerApplyStatus) {
+
+                sellerApplyStatus.textContent =
+                    data.message || "Could not check your seller status.";
+
+            }
+
+            if (sellerApplyForm) {
+                sellerApplyForm.style.display = "block";
+            }
+
+            return;
+
+        }
+
+        const seller = data.seller;
+
+        if (!seller || seller.status === "rejected") {
+
+            const rejectedNote =
+                document.getElementById("sellerRejectedNote");
+
+            const reasonWrap =
+                document.getElementById("sellerRejectionReasonWrap");
+
+            const reasonText =
+                document.getElementById("sellerRejectionReason");
+
+            if (seller && seller.status === "rejected") {
+
+                if (rejectedNote) {
+                    rejectedNote.style.display = "block";
+                }
+
+                if (seller.rejection_reason && reasonWrap && reasonText) {
+
+                    reasonText.textContent =
+                        seller.rejection_reason;
+
+                    reasonWrap.style.display = "inline";
+
+                } else if (reasonWrap) {
+
+                    reasonWrap.style.display = "none";
+
+                }
+
+            } else if (rejectedNote) {
+
+                rejectedNote.style.display = "none";
+
+            }
+
+            if (sellerApplyForm) {
+                sellerApplyForm.style.display = "block";
+            }
+
+            return;
+
+        }
+
+        if (seller.status === "pending") {
+
+            const nameEl =
+                document.getElementById("sellerPendingStoreName");
+
+            if (nameEl) {
+                nameEl.textContent = seller.store_name;
+            }
+
+            if (sellerPendingState) {
+                sellerPendingState.style.display = "block";
+            }
+
+            return;
+
+        }
+
+        if (seller.status === "approved") {
+
+            const nameEl =
+                document.getElementById("sellerApprovedStoreName");
+
+            if (nameEl) {
+                nameEl.textContent = seller.store_name;
+            }
+
+            if (sellerApprovedState) {
+                sellerApprovedState.style.display = "block";
+            }
+
+            return;
+
+        }
+
+        if (seller.status === "suspended") {
+
+            const nameEl =
+                document.getElementById("sellerSuspendedStoreName");
+
+            if (nameEl) {
+                nameEl.textContent = seller.store_name;
+            }
+
+            if (sellerSuspendedState) {
+                sellerSuspendedState.style.display = "block";
+            }
+
+            return;
+
+        }
+
+        // Fallback — unexpected status, show the form.
+
+        if (sellerApplyForm) {
+            sellerApplyForm.style.display = "block";
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Seller status check error:",
+            error
+        );
+
+        hideAllSellerStates();
+
+        if (sellerApplyStatus) {
+
+            sellerApplyStatus.textContent =
+                "Unable to connect to Kurios Stores server.";
+
+        }
+
+        if (sellerApplyForm) {
+            sellerApplyForm.style.display = "block";
+        }
+
+    }
+
+}
+
+
+if (accountBecomeSeller) {
+
+    accountBecomeSeller.addEventListener(
+        "click",
+        openSellerPanel
+    );
+
+}
+
+if (closeSeller) {
+
+    closeSeller.addEventListener(
+        "click",
+        closeSellerPanel
+    );
+
+}
+
+if (sellerOverlay) {
+
+    sellerOverlay.addEventListener(
+        "click",
+        function (event) {
+
+            if (event.target === sellerOverlay) {
+                closeSellerPanel();
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// SUBMIT SELLER APPLICATION
+// ========================================
+
+if (sellerApplyForm) {
+
+    sellerApplyForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            const student =
+                getStoredStudent();
+
+            if (!student) {
+                return;
+            }
+
+            const storeName =
+                document.getElementById("sellerStoreName").value.trim();
+
+            if (!storeName) {
+
+                if (sellerApplyStatus) {
+
+                    sellerApplyStatus.textContent =
+                        "Please enter your store or business name.";
+
+                }
+
+                return;
+
+            }
+
+            const payload = {
+
+                studentId: student.id,
+
+                sellerType:
+                    document.getElementById("sellerType").value,
+
+                storeName: storeName,
+
+                storeDescription:
+                    document.getElementById("sellerStoreDescription").value.trim(),
+
+                businessCategory:
+                    document.getElementById("sellerBusinessCategory").value,
+
+                location:
+                    document.getElementById("sellerLocation").value.trim(),
+
+                contactPhone:
+                    document.getElementById("sellerContactPhone").value.trim(),
+
+                contactWhatsapp:
+                    document.getElementById("sellerContactWhatsapp").value.trim()
+
+            };
+
+            if (sellerApplySubmit) {
+
+                sellerApplySubmit.disabled = true;
+                sellerApplySubmit.textContent = "Submitting...";
+
+            }
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/sellers/apply",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(payload)
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (sellerApplyStatus) {
+
+                        sellerApplyStatus.textContent =
+                            data.message ||
+                            "Could not submit your application.";
+
+                    }
+
+                    return;
+
+                }
+
+                hideAllSellerStates();
+
+                const nameEl =
+                    document.getElementById("sellerPendingStoreName");
+
+                if (nameEl) {
+                    nameEl.textContent = data.seller.store_name;
+                }
+
+                if (sellerPendingState) {
+                    sellerPendingState.style.display = "block";
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Seller application submit error:",
+                    error
+                );
+
+                if (sellerApplyStatus) {
+
+                    sellerApplyStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                if (sellerApplySubmit) {
+
+                    sellerApplySubmit.disabled = false;
+                    sellerApplySubmit.textContent = "Submit Application";
+
+                }
+
+            }
+
+        }
+    );
+
+}
