@@ -1733,6 +1733,9 @@ const saveProfileEdit =
 const profilePhoneInput =
     document.getElementById("profilePhoneInput");
 
+const profileWhatsappInput =
+    document.getElementById("profileWhatsappInput");
+
 const profileDobInput =
     document.getElementById("profileDobInput");
 
@@ -1840,6 +1843,15 @@ function renderProfilePanel(student) {
             student.whatsapp_number ||
             student.whatsappNumber ||
             "Not provided";
+
+    }
+
+    if (profileWhatsappInput) {
+
+        profileWhatsappInput.value =
+            student.whatsapp_number ||
+            student.whatsappNumber ||
+            "";
 
     }
 
@@ -2200,6 +2212,15 @@ if (saveProfileEdit) {
                 formData.append(
                     "phone",
                     profilePhoneInput.value.trim()
+                );
+
+            }
+
+            if (profileWhatsappInput) {
+
+                formData.append(
+                    "whatsappNumber",
+                    profileWhatsappInput.value.trim()
                 );
 
             }
