@@ -4666,6 +4666,17 @@ img {
 }
 
 
+/* OPAY BUTTON */
+
+.opay-button {
+    background: #1a9c5b;
+}
+
+.opay-button:hover {
+    background: #147d49;
+}
+
+
 /* SELLER TYPE CARD PICKER */
 
 .seller-type-grid {
