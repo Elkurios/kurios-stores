@@ -2572,6 +2572,57 @@
                 </div>
 
 
+                <!-- STEP 2b: ADMIN PASSWORD -->
+                <!-- (shown instead of the passcode step when
+                     the entered identifier looks like an admin
+                     username rather than an email address) -->
+
+                <div
+                    id="signinAdminPasswordStep"
+                    style="display: none;"
+                >
+
+                    <p class="reset-passcode-intro">
+                        Enter the admin password for
+                        <span class="otp-email-chip" id="signinAdminUsernameChip"></span>
+                    </p>
+
+                    <div class="form-group">
+
+                        <label for="signinAdminPassword">
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="signinAdminPassword"
+                            placeholder="Admin password"
+                        >
+
+                    </div>
+
+                    <div
+                        id="signinAdminStatus"
+                        class="otp-status-message"
+                    ></div>
+
+                    <button
+                        type="button"
+                        id="signinAdminSubmit"
+                        class="auth-button"
+                    >
+                        Sign In as Admin
+                    </button>
+
+                    <p class="signup-prompt">
+                        <a href="#" id="signinAdminChangeEmail">
+                            Use a different email
+                        </a>
+                    </p>
+
+                </div>
+
+
                 <p class="signup-prompt">
 
                     Don't have an account?
