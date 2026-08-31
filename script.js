@@ -1356,6 +1356,70 @@ function updateLoginState() {
 
 updateLoginState();
 
+
+// ========================================
+// SIGN OUT
+// ========================================
+
+const signOutButton =
+    document.getElementById("signOutButton");
+
+if (signOutButton) {
+
+    signOutButton.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            localStorage.removeItem(
+                "kuriosLoggedInStudent"
+            );
+
+            sessionStorage.removeItem(
+                "kuriosLoggedInStudent"
+            );
+
+            updateLoginState();
+
+            const studentAccountMenu =
+                document.getElementById(
+                    "studentAccountMenu"
+                );
+
+            if (studentAccountMenu) {
+
+                studentAccountMenu.classList.remove(
+                    "open"
+                );
+
+            }
+
+            const notificationsPanel =
+                document.getElementById(
+                    "notificationsPanel"
+                );
+
+            if (notificationsPanel) {
+
+                notificationsPanel.classList.remove(
+                    "open"
+                );
+
+            }
+
+            window.location.hash = "";
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+        }
+    );
+
+}
+
     /* =====================================================
        12. SIGN IN MODAL
        ===================================================== */
