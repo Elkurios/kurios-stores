@@ -2199,6 +2199,22 @@ if (saveProfileEdit) {
             }
 
 
+            if (
+                profileWhatsappInput &&
+                !profileWhatsappInput.value.trim()
+            ) {
+
+                showMessage(
+                    "WhatsApp number is required."
+                );
+
+                profileWhatsappInput.focus();
+
+                return;
+
+            }
+
+
             const formData =
                 new FormData();
 
@@ -3357,6 +3373,7 @@ updateLoginState();
                 !lastName ||
                 !email ||
                 !phone ||
+                !whatsappNumber ||
                 !university ||
                 !studentId ||
                 !passcode ||
@@ -3466,7 +3483,7 @@ updateLoginState();
                             phone: phone,
 
                             whatsappNumber:
-                                whatsappNumber || null,
+                                whatsappNumber,
 
                             university: university,
 
