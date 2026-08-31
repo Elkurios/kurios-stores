@@ -274,6 +274,143 @@
         padding: 40px 0;
     }
 
+    /* PAGE TABS */
+
+    .page-tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .page-tab {
+        border: none;
+        background: transparent;
+        padding: 10px 16px;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--muted);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+    }
+
+    .page-tab.active {
+        color: var(--purple);
+        border-bottom-color: var(--purple);
+    }
+
+    /* STUDENTS PAGE */
+
+    .admin-search {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 13px;
+        margin-bottom: 18px;
+    }
+
+    .student-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .student-card-info h4 {
+        margin: 0 0 4px;
+        font-size: 15px;
+    }
+
+    .student-card-info p {
+        margin: 0;
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    .student-card-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    /* ANNOUNCEMENTS PAGE */
+
+    .announce-form {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+
+    .announce-form label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        margin-top: 14px;
+    }
+
+    .announce-form label:first-of-type {
+        margin-top: 0;
+    }
+
+    .announce-form input,
+    .announce-form textarea {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 13px;
+        font-family: inherit;
+        resize: vertical;
+    }
+
+    .announce-form button {
+        margin-top: 16px;
+        border: none;
+        background: var(--purple);
+        color: white;
+        border-radius: 8px;
+        padding: 11px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .announce-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 10px;
+    }
+
+    .announce-card h4 {
+        margin: 0 0 4px;
+        font-size: 14px;
+    }
+
+    .announce-card p {
+        margin: 0 0 6px;
+        font-size: 13px;
+        color: var(--text);
+    }
+
+    .announce-card time {
+        font-size: 11px;
+        color: var(--muted);
+    }
+
 </style>
 </head>
 <body>
@@ -300,23 +437,81 @@
 <div id="adminView" style="display: none;">
 
     <header>
-        <h1>Kurios <span>Seller Admin</span></h1>
+        <h1>Kurios <span>Admin</span></h1>
         <button id="logoutButton">Log out</button>
     </header>
 
     <main>
 
-        <div class="filter-tabs">
-            <button class="filter-tab active" data-status="">All</button>
-            <button class="filter-tab" data-status="pending">Pending</button>
-            <button class="filter-tab" data-status="approved">Approved</button>
-            <button class="filter-tab" data-status="rejected">Rejected</button>
-            <button class="filter-tab" data-status="suspended">Suspended</button>
+        <div class="page-tabs">
+            <button class="page-tab active" data-page="sellers">Sellers</button>
+            <button class="page-tab" data-page="students">Students</button>
+            <button class="page-tab" data-page="announcements">Announcements</button>
         </div>
 
-        <div id="loadingState">Loading sellers...</div>
-        <div id="emptyState" style="display: none;">No sellers found for this filter.</div>
-        <div id="sellerList"></div>
+
+        <!-- SELLERS PAGE -->
+
+        <div id="sellersPage" class="admin-page">
+
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-status="">All</button>
+                <button class="filter-tab" data-status="pending">Pending</button>
+                <button class="filter-tab" data-status="approved">Approved</button>
+                <button class="filter-tab" data-status="rejected">Rejected</button>
+                <button class="filter-tab" data-status="suspended">Suspended</button>
+            </div>
+
+            <div id="loadingState">Loading sellers...</div>
+            <div id="emptyState" style="display: none;">No sellers found for this filter.</div>
+            <div id="sellerList"></div>
+
+        </div>
+
+
+        <!-- STUDENTS PAGE -->
+
+        <div id="studentsPage" class="admin-page" style="display: none;">
+
+            <input
+                type="text"
+                id="studentSearchInput"
+                class="admin-search"
+                placeholder="Search by name, email, university, student ID, or phone..."
+            >
+
+            <div id="studentsLoadingState">Loading students...</div>
+            <div id="studentsEmptyState" style="display: none;">No students found.</div>
+            <div id="studentList"></div>
+
+        </div>
+
+
+        <!-- ANNOUNCEMENTS PAGE -->
+
+        <div id="announcementsPage" class="admin-page" style="display: none;">
+
+            <div class="announce-form">
+
+                <label for="announceTitle">Title</label>
+                <input type="text" id="announceTitle" placeholder="e.g. New products just dropped!">
+
+                <label for="announceMessage">Message</label>
+                <textarea id="announceMessage" rows="4" placeholder="What do you want to tell every student?"></textarea>
+
+                <div id="announceStatus" style="font-size: 13px; margin-top: 10px;"></div>
+
+                <button id="sendAnnouncementButton">Send to All Students</button>
+
+            </div>
+
+            <h3 style="font-size: 15px; margin-bottom: 12px;">Sent Announcements</h3>
+
+            <div id="announcementsLoadingState">Loading...</div>
+            <div id="announcementsEmptyState" style="display: none; color: var(--muted); font-size: 13px;">No announcements sent yet.</div>
+            <div id="announcementList"></div>
+
+        </div>
 
     </main>
 
@@ -646,6 +841,341 @@
         } catch (error) {
 
             alert("Could not connect to Kurios Stores server.");
+
+        }
+
+    }
+
+
+    // =========================================================
+    // PAGE TABS (Sellers / Students / Announcements)
+    // =========================================================
+
+    const pageTabs = document.querySelectorAll(".page-tab");
+    const adminPages = document.querySelectorAll(".admin-page");
+
+    pageTabs.forEach(function (tab) {
+
+        tab.addEventListener("click", function () {
+
+            pageTabs.forEach(function (t) {
+                t.classList.remove("active");
+            });
+
+            tab.classList.add("active");
+
+            const targetPage = tab.dataset.page;
+
+            adminPages.forEach(function (page) {
+                page.style.display = "none";
+            });
+
+            const targetEl =
+                document.getElementById(targetPage + "Page");
+
+            if (targetEl) {
+                targetEl.style.display = "block";
+            }
+
+            if (targetPage === "students") {
+                loadStudents();
+            } else if (targetPage === "announcements") {
+                loadAnnouncements();
+            }
+
+        });
+
+    });
+
+
+    // =========================================================
+    // STUDENTS PAGE
+    // =========================================================
+
+    const studentSearchInput = document.getElementById("studentSearchInput");
+    const studentsLoadingState = document.getElementById("studentsLoadingState");
+    const studentsEmptyState = document.getElementById("studentsEmptyState");
+    const studentList = document.getElementById("studentList");
+
+    let studentSearchTimer = null;
+
+    if (studentSearchInput) {
+
+        studentSearchInput.addEventListener("input", function () {
+
+            clearTimeout(studentSearchTimer);
+
+            studentSearchTimer = setTimeout(function () {
+                loadStudents();
+            }, 350);
+
+        });
+
+    }
+
+    async function loadStudents() {
+
+        studentsLoadingState.style.display = "block";
+        studentsEmptyState.style.display = "none";
+        studentList.innerHTML = "";
+
+        try {
+
+            const search = studentSearchInput ? studentSearchInput.value.trim() : "";
+
+            const url =
+                API_URL + "/api/admin/students" +
+                (search ? "?search=" + encodeURIComponent(search) : "");
+
+            const response = await fetch(url, {
+                headers: {
+                    "Authorization": "Bearer " + getAdminToken()
+                }
+            });
+
+            if (response.status === 401) {
+                sessionStorage.removeItem("kuriosAdminToken");
+                showKeyGate("Your session expired. Please sign in again.");
+                return;
+            }
+
+            const data = await response.json();
+
+            studentsLoadingState.style.display = "none";
+
+            if (!data.success) {
+                studentsEmptyState.textContent = data.message || "Could not load students.";
+                studentsEmptyState.style.display = "block";
+                return;
+            }
+
+            renderStudents(data.students);
+
+        } catch (error) {
+
+            studentsLoadingState.style.display = "none";
+            studentsEmptyState.textContent = "Could not connect to Kurios Stores server.";
+            studentsEmptyState.style.display = "block";
+
+        }
+
+    }
+
+    function renderStudents(students) {
+
+        studentList.innerHTML = "";
+
+        if (students.length === 0) {
+            studentsEmptyState.textContent = "No students found.";
+            studentsEmptyState.style.display = "block";
+            return;
+        }
+
+        studentsEmptyState.style.display = "none";
+
+        students.forEach(function (student) {
+
+            const card = document.createElement("div");
+            card.className = "student-card";
+
+            const fullName =
+                ((student.first_name || "") + " " + (student.last_name || "")).trim();
+
+            const suspendedBadge =
+                student.is_suspended ?
+                    `<span class="status-pill status-suspended">Suspended</span>` :
+                    (student.email_verified ?
+                        `<span class="status-pill status-approved">Active</span>` :
+                        `<span class="status-pill status-pending">Unverified</span>`);
+
+            card.innerHTML = `
+                <div class="student-card-info">
+                    <h4>${escapeHtml(fullName || "—")} ${suspendedBadge}</h4>
+                    <p>${escapeHtml(student.email || "")} · ${escapeHtml(student.phone || "—")}</p>
+                    <p>${escapeHtml(student.university || "—")} · ${escapeHtml(student.student_id || "—")}</p>
+                </div>
+                <div class="student-card-actions"></div>
+            `;
+
+            const actions = card.querySelector(".student-card-actions");
+
+            const toggleBtn = document.createElement("button");
+
+            if (student.is_suspended) {
+
+                toggleBtn.className = "btn-approve";
+                toggleBtn.textContent = "Reinstate";
+                toggleBtn.addEventListener("click", function () {
+                    updateStudentSuspension(student.id, false);
+                });
+
+            } else {
+
+                toggleBtn.className = "btn-reject";
+                toggleBtn.textContent = "Suspend";
+                toggleBtn.addEventListener("click", function () {
+
+                    if (confirm("Suspend " + (fullName || "this student") + "? They won't be able to sign in.")) {
+                        updateStudentSuspension(student.id, true);
+                    }
+
+                });
+
+            }
+
+            actions.appendChild(toggleBtn);
+
+            studentList.appendChild(card);
+
+        });
+
+    }
+
+    async function updateStudentSuspension(studentId, suspend) {
+
+        try {
+
+            const response = await fetch(
+                API_URL + "/api/admin/students/" + studentId + "/" + (suspend ? "suspend" : "unsuspend"),
+                {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + getAdminToken()
+                    }
+                }
+            );
+
+            const data = await response.json();
+
+            if (!data.success) {
+                alert(data.message || "Could not update this student's account.");
+                return;
+            }
+
+            loadStudents();
+
+        } catch (error) {
+
+            alert("Could not connect to Kurios Stores server.");
+
+        }
+
+    }
+
+
+    // =========================================================
+    // ANNOUNCEMENTS PAGE
+    // =========================================================
+
+    const announceTitle = document.getElementById("announceTitle");
+    const announceMessage = document.getElementById("announceMessage");
+    const announceStatus = document.getElementById("announceStatus");
+    const sendAnnouncementButton = document.getElementById("sendAnnouncementButton");
+    const announcementsLoadingState = document.getElementById("announcementsLoadingState");
+    const announcementsEmptyState = document.getElementById("announcementsEmptyState");
+    const announcementList = document.getElementById("announcementList");
+
+    if (sendAnnouncementButton) {
+
+        sendAnnouncementButton.addEventListener("click", async function () {
+
+            const title = announceTitle.value.trim();
+            const message = announceMessage.value.trim();
+
+            if (!title || !message) {
+                announceStatus.textContent = "Please enter a title and a message.";
+                return;
+            }
+
+            sendAnnouncementButton.disabled = true;
+            sendAnnouncementButton.textContent = "Sending...";
+            announceStatus.textContent = "";
+
+            try {
+
+                const response = await fetch(API_URL + "/api/admin/notifications", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + getAdminToken()
+                    },
+                    body: JSON.stringify({ title: title, message: message })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    announceStatus.textContent = data.message || "Could not send the announcement.";
+                    return;
+                }
+
+                announceTitle.value = "";
+                announceMessage.value = "";
+                announceStatus.textContent = "Sent to all students.";
+
+                loadAnnouncements();
+
+            } catch (error) {
+
+                announceStatus.textContent = "Could not connect to Kurios Stores server.";
+
+            } finally {
+
+                sendAnnouncementButton.disabled = false;
+                sendAnnouncementButton.textContent = "Send to All Students";
+
+            }
+
+        });
+
+    }
+
+    async function loadAnnouncements() {
+
+        announcementsLoadingState.style.display = "block";
+        announcementsEmptyState.style.display = "none";
+        announcementList.innerHTML = "";
+
+        try {
+
+            const response = await fetch(API_URL + "/api/notifications", {
+                headers: {
+                    "Authorization": "Bearer " + getAdminToken()
+                }
+            });
+
+            const data = await response.json();
+
+            announcementsLoadingState.style.display = "none";
+
+            if (!data.success || data.notifications.length === 0) {
+                announcementsEmptyState.style.display = "block";
+                return;
+            }
+
+            data.notifications.forEach(function (note) {
+
+                const card = document.createElement("div");
+                card.className = "announce-card";
+
+                const sentDate =
+                    new Date(note.created_at).toLocaleString();
+
+                card.innerHTML = `
+                    <h4>${escapeHtml(note.title)}</h4>
+                    <p>${escapeHtml(note.message)}</p>
+                    <time>${escapeHtml(sentDate)}</time>
+                `;
+
+                announcementList.appendChild(card);
+
+            });
+
+        } catch (error) {
+
+            announcementsLoadingState.style.display = "none";
+            announcementsEmptyState.textContent = "Could not connect to Kurios Stores server.";
+            announcementsEmptyState.style.display = "block";
 
         }
 
