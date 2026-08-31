@@ -2874,7 +2874,7 @@ if (signInForm) {
             // GET FORM VALUES
             // ========================================
 
-            const email =
+            const identifier =
                 document.getElementById(
                     "signinEmail"
                 ).value.trim();
@@ -2890,12 +2890,12 @@ if (signInForm) {
             // ========================================
 
             if (
-                email === "" ||
+                identifier === "" ||
                 passcode.length !== 6
             ) {
 
                 showMessage(
-                    "Please enter your email and 6-digit passcode."
+                    "Please enter your email/phone and 6-digit passcode."
                 );
 
                 return;
@@ -2949,8 +2949,8 @@ if (signInForm) {
 
                             body: JSON.stringify({
 
-                                email:
-                                    email,
+                                identifier:
+                                    identifier,
 
                                 passcode:
                                     passcode
