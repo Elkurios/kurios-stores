@@ -1348,6 +1348,53 @@ function updateLoginState() {
         </span>
     `;
 
+
+    // ========================================
+    // ACCOUNT DROPDOWN MENU HEADER
+    // ========================================
+
+    const accountMenuName =
+        document.getElementById("accountMenuName");
+
+    const accountMenuStudentInfo =
+        document.getElementById("accountMenuStudentInfo");
+
+    if (accountMenuName) {
+
+        const fullName =
+            `${firstName} ${lastName}`.trim();
+
+        accountMenuName.textContent =
+            fullName || "Student";
+
+    }
+
+    if (accountMenuStudentInfo) {
+
+        const university =
+            student.university || "";
+
+        const studentIdValue =
+            student.student_id ||
+            student.studentId ||
+            "";
+
+        if (university && studentIdValue) {
+
+            accountMenuStudentInfo.textContent =
+                university + " · " + studentIdValue;
+
+        } else {
+
+            accountMenuStudentInfo.textContent =
+                university ||
+                studentIdValue ||
+                "Student account";
+
+        }
+
+    }
+
 }
 
 // ========================================
@@ -1777,6 +1824,21 @@ function renderProfilePanel(student) {
 
         emailEl.textContent =
             student.email ||
+            "Not provided";
+
+    }
+
+
+    // WHATSAPP NUMBER
+
+    const whatsappEl =
+        document.getElementById("profileWhatsapp");
+
+    if (whatsappEl) {
+
+        whatsappEl.textContent =
+            student.whatsapp_number ||
+            student.whatsappNumber ||
             "Not provided";
 
     }
@@ -2317,6 +2379,97 @@ if (profileOverlay) {
 
             }
 
+        }
+    );
+
+}
+
+
+// ========================================
+// ACCOUNT SETTINGS — OPENS PROFILE IN EDIT MODE
+// ========================================
+
+const accountSettings =
+    document.getElementById("accountSettings");
+
+if (accountSettings) {
+
+    accountSettings.addEventListener(
+        "click",
+        function () {
+
+            openProfilePanel();
+
+            if (typeof enterProfileEditMode === "function") {
+                enterProfileEditMode();
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// WISHLIST / WALLET — NOT BUILT YET
+// (show a toast instead of doing nothing)
+// ========================================
+
+function showComingSoonToast(featureName) {
+
+    let toast =
+        document.getElementById("kuriosToast");
+
+    if (!toast) {
+
+        toast = document.createElement("div");
+        toast.id = "kuriosToast";
+        toast.className = "kurios-toast";
+        document.body.appendChild(toast);
+
+    }
+
+    toast.textContent =
+        featureName + " is coming soon.";
+
+    toast.classList.add("show");
+
+    setTimeout(
+        function () {
+            toast.classList.remove("show");
+        },
+        3000
+    );
+
+    if (studentAccountMenu) {
+        studentAccountMenu.classList.remove("open");
+    }
+
+}
+
+const accountWishlist =
+    document.getElementById("accountWishlist");
+
+if (accountWishlist) {
+
+    accountWishlist.addEventListener(
+        "click",
+        function () {
+            showComingSoonToast("Wishlist");
+        }
+    );
+
+}
+
+const accountWallet =
+    document.getElementById("accountWallet");
+
+if (accountWallet) {
+
+    accountWallet.addEventListener(
+        "click",
+        function () {
+            showComingSoonToast("Wallet");
         }
     );
 
