@@ -2619,6 +2619,16 @@
         ></div>
 
 
+        <!-- EXPIRY COUNTDOWN -->
+
+        <p
+            id="otpExpiryCountdown"
+            class="otp-expiry-countdown"
+        >
+            Code expires in <span id="otpExpiryTime">10:00</span>
+        </p>
+
+
         <!-- VERIFY BUTTON -->
 
         <button
@@ -2654,6 +2664,14 @@
                 Resend it
             </button>
 
+            <span
+                id="otpResendCooldown"
+                class="otp-resend-cooldown"
+                style="display: none;"
+            >
+                Resend in <span id="otpResendCooldownTime">30</span>s
+            </span>
+
         </div>
 
     </div>
@@ -2662,8 +2680,7 @@
     <!-- FOOTER NOTE -->
 
     <p class="otp-footer-note">
-        Codes expire after 10 minutes. Kurios Stores will never ask
-        you to share this code with anyone.
+        Kurios Stores will never ask you to share this code with anyone.
     </p>
 
 </div>
