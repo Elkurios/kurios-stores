@@ -2760,7 +2760,13 @@ if (signInForm) {
 
                         closeSignInModal();
 
-                        openSignUpModal();
+                        if (signUpModal) {
+
+                            signUpModal.classList.add(
+                                "open"
+                            );
+
+                        }
 
                         showOtpVerificationScreen(
                             data.studentId,
