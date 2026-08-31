@@ -4616,6 +4616,27 @@ img {
 }
 
 
+/* PASSCODE MISMATCH */
+
+.passcode-mismatch-message {
+    margin: 8px 0 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #dc2626;
+}
+
+
+/* RESET PASSCODE INTRO */
+
+.reset-passcode-intro {
+    margin: 0 0 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #6b7280;
+    text-align: center;
+}
+
+
 /* EXPIRY COUNTDOWN */
 
 .otp-expiry-countdown {
