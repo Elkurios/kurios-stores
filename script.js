@@ -8713,6 +8713,40 @@ async function openSellerPanel() {
                 sellerApprovedState.style.display = "block";
             }
 
+            window.__kuriosCurrentSeller = seller;
+
+            const studentDisplayName =
+                [student.first_name, student.last_name].filter(Boolean).join(" ").trim() ||
+                seller.store_name ||
+                "Seller";
+
+            const firstNameOnly =
+                studentDisplayName.split(" ")[0] || "Seller";
+
+            const setDashText = function (id, text) {
+                const el = document.getElementById(id);
+                if (el) el.textContent = text;
+            };
+
+            setDashText("sellerDashboardStoreName", seller.store_name || "Your Store");
+            setDashText("sellerDashboardWelcomeName", firstNameOnly);
+            setDashText("sellerDashboardTopName", firstNameOnly);
+
+            const dashAvatarMarkup =
+                seller.store_image ?
+                    `<img src="${API_URL + seller.store_image}" alt="Store logo">` :
+                    `<i class="fa-solid fa-store"></i>`;
+
+            ["sellerDashboardAvatar", "sellerDashboardTopAvatar"].forEach(function (id) {
+
+                const el = document.getElementById(id);
+
+                if (el) {
+                    el.innerHTML = dashAvatarMarkup;
+                }
+
+            });
+
             const logoPreview =
                 document.getElementById("storeLogoPreview");
 
@@ -11107,43 +11141,139 @@ async function loadDashboardWalletBalance(studentId) {
 
 
 // =========================================================
-// SELLER DASHBOARD — TAB SWITCHING
+// SELLER DASHBOARD — TAB SWITCHING + NAV ACTIONS
 // =========================================================
 
-document.querySelectorAll(".seller-dash-nav-item[data-seller-tab]").forEach(function (button) {
+function switchSellerDashTab(targetTab) {
 
-    button.addEventListener(
+    document.querySelectorAll("[data-seller-tab]").forEach(function (btn) {
+        btn.classList.remove("active");
+    });
+
+    document.querySelectorAll('[data-seller-tab="' + targetTab + '"]').forEach(function (btn) {
+        btn.classList.add("active");
+    });
+
+    document.querySelectorAll(".seller-dash-tab").forEach(function (tab) {
+        tab.style.display = "none";
+    });
+
+    const targetEl =
+        document.getElementById(
+            "sellerTab" +
+            targetTab.charAt(0).toUpperCase() +
+            targetTab.slice(1)
+        );
+
+    if (targetEl) {
+        targetEl.style.display = "block";
+    }
+
+}
+
+document.addEventListener("click", function (event) {
+
+    const tabTrigger =
+        event.target.closest("[data-seller-tab]");
+
+    if (tabTrigger) {
+
+        event.preventDefault();
+        switchSellerDashTab(tabTrigger.dataset.sellerTab);
+        return;
+
+    }
+
+    const actionTrigger =
+        event.target.closest("[data-seller-action]");
+
+    if (!actionTrigger) {
+        return;
+    }
+
+    const action =
+        actionTrigger.dataset.sellerAction;
+
+    if (action === "wallet") {
+
+        window.location.hash = "wallet";
+
+    } else if (action === "messages") {
+
+        window.location.hash = "chat";
+
+    } else if (action === "store") {
+
+        const seller = window.__kuriosCurrentSeller;
+
+        if (seller && seller.id) {
+            window.location.hash = "store-" + seller.id;
+        }
+
+    } else if (action === "marketing" || action === "discounts") {
+
+        showMessage(
+            "This seller tool isn't built yet — coming in a future update."
+        );
+
+    } else if (action === "notifications" || action === "profile") {
+
+        // These duplicate features already available
+        // elsewhere on the site (the header's own
+        // notification bell / account menu) — no
+        // separate handling needed here.
+
+    }
+
+});
+
+document.addEventListener("click", function (event) {
+
+    const addProductShortcut =
+        event.target.closest("#sellerDashboardAddProduct");
+
+    if (!addProductShortcut) {
+        return;
+    }
+
+    switchSellerDashTab("products");
+
+    setTimeout(
+        function () {
+
+            const existingButton =
+                document.getElementById("addProductButton");
+
+            if (existingButton) {
+                existingButton.click();
+            }
+
+        },
+        0
+    );
+
+});
+
+const ksSellerSidebarToggle =
+    document.getElementById("ksSellerSidebarToggle");
+
+if (ksSellerSidebarToggle) {
+
+    ksSellerSidebarToggle.addEventListener(
         "click",
         function () {
 
-            const targetTab =
-                button.dataset.sellerTab;
+            const app =
+                document.querySelector(".ks-seller-app");
 
-            document.querySelectorAll(".seller-dash-nav-item[data-seller-tab]").forEach(function (btn) {
-                btn.classList.remove("active");
-            });
-
-            button.classList.add("active");
-
-            document.querySelectorAll(".seller-dash-tab").forEach(function (tab) {
-                tab.style.display = "none";
-            });
-
-            const targetEl =
-                document.getElementById(
-                    "sellerTab" +
-                    targetTab.charAt(0).toUpperCase() +
-                    targetTab.slice(1)
-                );
-
-            if (targetEl) {
-                targetEl.style.display = "block";
+            if (app) {
+                app.classList.toggle("sidebar-open");
             }
 
         }
     );
 
-});
+}
 
 
 // =========================================================
