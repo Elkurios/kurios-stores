@@ -8882,12 +8882,17 @@ if (accountBecomeSeller) {
         "click",
         function () {
 
-            if (
-                __kuriosInSellerDashboard &&
-                typeof goHome === "function"
-            ) {
+            if (typeof switchDashboardWithReload === "function") {
 
-                goHome();
+                if (__kuriosInSellerDashboard) {
+
+                    switchDashboardWithReload(null);
+
+                } else {
+
+                    switchDashboardWithReload("sell");
+
+                }
 
             } else {
 
@@ -11269,13 +11274,13 @@ document.addEventListener("click", function (event) {
 
     } else if (action === "switch-to-student") {
 
-        if (typeof goHome === "function") {
+        if (typeof switchDashboardWithReload === "function") {
+
+            switchDashboardWithReload(null);
+
+        } else if (typeof goHome === "function") {
 
             goHome();
-
-        } else if (typeof closeSellerPanel === "function") {
-
-            closeSellerPanel();
 
         }
 
@@ -11864,6 +11869,26 @@ async function loadReviewablePrompts(studentId) {
 let __kuriosApprovedSellerCache = null;
 let __kuriosInSellerDashboard = false;
 
+function switchDashboardWithReload(hash) {
+
+    if (hash) {
+
+        window.location.hash = hash;
+
+    } else if (window.location.hash) {
+
+        history.replaceState(
+            null,
+            "",
+            window.location.pathname + window.location.search
+        );
+
+    }
+
+    window.location.reload();
+
+}
+
 function setAccountMenuContext(inSellerDashboard) {
 
     __kuriosInSellerDashboard = inSellerDashboard;
@@ -11986,8 +12011,14 @@ if (dashboardChoiceStudent) {
 
             closeDashboardChoiceModal();
 
-            if (typeof goHome === "function") {
+            if (typeof switchDashboardWithReload === "function") {
+
+                switchDashboardWithReload(null);
+
+            } else if (typeof goHome === "function") {
+
                 goHome();
+
             }
 
         }
@@ -12006,7 +12037,15 @@ if (dashboardChoiceSeller) {
 
             closeDashboardChoiceModal();
 
-            window.location.hash = "sell";
+            if (typeof switchDashboardWithReload === "function") {
+
+                switchDashboardWithReload("sell");
+
+            } else {
+
+                window.location.hash = "sell";
+
+            }
 
         }
     );
