@@ -1279,92 +1279,57 @@
                         <input
                             type="text"
                             id="chatSearch"
-                            placeholder="Search students..."
+                            placeholder="Search conversations..."
                         >
 
                     </div>
 
 
-                    <!-- ELKURIOS -->
+                    <!-- ADD NEW CHAT BY PHONE NUMBER -->
 
-                    <button
-                        class="chat-contact active"
-                        data-contact="Elkurios"
+                    <div id="newChatForm" style="display: none;">
+
+                        <input
+                            type="tel"
+                            id="newChatPhoneInput"
+                            placeholder="Enter their phone number"
+                            class="new-chat-phone-input"
+                        >
+
+                        <button
+                            type="button"
+                            id="newChatFindButton"
+                            class="new-chat-find-button"
+                        >
+                            Find
+                        </button>
+
+                        <p
+                            id="newChatStatus"
+                            class="new-chat-status"
+                        ></p>
+
+                    </div>
+
+
+                    <p
+                        id="chatContactsLoading"
+                        class="chat-contacts-status"
                     >
+                        Loading conversations...
+                    </p>
 
-                        <div class="chat-avatar owner-avatar">
-
-                            E
-
-                        </div>
-
-
-                        <div class="chat-contact-info">
-
-                            <strong>
-                                Elkurios
-                            </strong>
-
-                            <span>
-                                Store Owner
-                            </span>
-
-                        </div>
-
-
-                        <span class="online-dot"></span>
-
-                    </button>
-
-
-                    <!-- SAMPLE STUDENTS -->
-
-                    <button
-                        class="chat-contact"
-                        data-contact="Chisom"
+                    <p
+                        id="chatContactsEmpty"
+                        class="chat-contacts-status"
+                        style="display: none;"
                     >
+                        No conversations yet. Tap
+                        <i class="fa-solid fa-pen"></i>
+                        above to message someone by phone number.
+                    </p>
 
-                        <div class="chat-avatar">
-                            C
-                        </div>
-
-                        <div class="chat-contact-info">
-
-                            <strong>
-                                Chisom
-                            </strong>
-
-                            <span>
-                                Student
-                            </span>
-
-                        </div>
-
-                    </button>
-
-
-                    <button
-                        class="chat-contact"
-                        data-contact="Daniel"
-                    >
-
-                        <div class="chat-avatar">
-                            D
-                        </div>
-
-                        <div class="chat-contact-info">
-
-                            <strong>
-                                Daniel
-                            </strong>
-
-                            <span>
-                                Student
-                            </span>
-
-                        </div>
-
-                    </button>
+                    <div id="chatContactList"></div>
 
                 </div>
 
@@ -1383,18 +1348,18 @@
                                 class="chat-avatar owner-avatar"
                                 id="activeChatAvatar"
                             >
-                                E
+                                <i class="fa-solid fa-comments"></i>
                             </div>
 
 
                             <div>
 
                                 <strong id="activeChatName">
-                                    Elkurios
+                                    Select a conversation
                                 </strong>
 
                                 <span id="activeChatStatus">
-                                    Store Owner
+                                    or start a new one
                                 </span>
 
                             </div>
@@ -1422,52 +1387,10 @@
                         id="messages"
                     >
 
-                        <div class="message received">
-
-                            <div class="message-bubble">
-
-                                Hi! Welcome to Kurios Stores.
-                                How can we help you?
-
-                            </div>
-
-                            <span>
-                                Elkurios • 10:30 AM
-                            </span>
-
-                        </div>
-
-
-                        <div class="message sent">
-
-                            <div class="message-bubble">
-
-                                Hello! I want to know if you
-                                have phone chargers available.
-
-                            </div>
-
-                            <span>
-                                You • 10:32 AM
-                            </span>
-
-                        </div>
-
-
-                        <div class="message received">
-
-                            <div class="message-bubble">
-
-                                Yes, we do. You can check our
-                                Electronics section.
-
-                            </div>
-
-                            <span>
-                                Elkurios • 10:33 AM
-                            </span>
-
-                        </div>
+                        <p class="chat-contacts-status" style="padding: 20px;">
+                            Select a conversation on the left, or start a
+                            new one with someone's phone number.
+                        </p>
 
                     </div>
 
