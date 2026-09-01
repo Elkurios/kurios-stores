@@ -319,29 +319,6 @@
     </button>
 
 
-    <!-- SWITCH TO SELLER -->
-
-    <button
-        type="button"
-        id="accountSwitchToSeller"
-        class="account-role-switch"
-        style="display: none;"
-        aria-label="Switch to Seller account"
-    >
-
-        <i class="fa-solid fa-right-left"></i>
-
-        <span>
-            Switch to Seller
-        </span>
-
-        <small>
-            Seller Center
-        </small>
-
-    </button>
-
-
     <!-- ACCOUNT SETTINGS -->
 
     <button
@@ -2137,144 +2114,208 @@
 
 <div id="sellerApprovedState" style="display: none;">
 
-    <div class="ks-seller-app">
+    <div class="profile-note" style="margin-bottom: 20px;">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>
+            <strong id="sellerApprovedStoreName"></strong>
+            is live on Kurios Stores.
+        </span>
+    </div>
 
-        <aside class="ks-seller-sidebar" id="ksSellerSidebar">
-            <div class="ks-seller-brand">
-                <div class="ks-seller-brand-mark"><i class="fa-solid fa-cart-shopping"></i></div>
-                <div>
-                    <strong>KURIOS</strong>
-                    <span>STORES</span>
-                </div>
-            </div>
 
-            <div class="ks-seller-profile">
-                <div class="ks-seller-avatar" id="sellerDashboardAvatar"><i class="fa-solid fa-store"></i></div>
-                <div class="ks-seller-profile-copy">
-                    <strong id="sellerDashboardStoreName">Your Store</strong>
-                    <span>Approved Seller <i class="fa-solid fa-circle-check"></i></span>
-                </div>
-            </div>
+    <div class="seller-dash-layout">
 
-            <nav class="ks-seller-nav">
-                <button type="button" class="ks-seller-nav-item active" data-seller-tab="overview"><i class="fa-solid fa-grid-2"></i><span>Dashboard</span></button>
-                <button type="button" class="ks-seller-nav-item" data-seller-tab="sales"><i class="fa-solid fa-bag-shopping"></i><span>Orders</span><b id="sellerOrdersBadge" style="display:none;"></b></button>
-                <button type="button" class="ks-seller-nav-item" data-seller-tab="products"><i class="fa-solid fa-box"></i><span>Products</span></button>
-                <button type="button" class="ks-seller-nav-item" data-seller-tab="products"><i class="fa-solid fa-boxes-stacked"></i><span>Inventory</span></button>
-                <button type="button" class="ks-seller-nav-item" data-seller-tab="overview"><i class="fa-solid fa-users"></i><span>Customers</span></button>
-                <button type="button" class="ks-seller-nav-item" data-seller-tab="overview"><i class="fa-solid fa-chart-column"></i><span>Analytics</span></button>
-                <button type="button" class="ks-seller-nav-item ks-seller-nav-link" data-seller-action="wallet"><i class="fa-solid fa-circle-dollar-to-slot"></i><span>Payouts</span></button>
-                <button type="button" class="ks-seller-nav-item ks-seller-nav-link" data-seller-action="marketing"><i class="fa-solid fa-bullhorn"></i><span>Marketing</span><i class="fa-solid fa-chevron-right ks-nav-chevron"></i></button>
-                <button type="button" class="ks-seller-nav-item ks-seller-nav-link" data-seller-action="discounts"><i class="fa-solid fa-heart"></i><span>Discounts</span></button>
-                <button type="button" class="ks-seller-nav-item ks-seller-nav-link" data-seller-action="messages"><i class="fa-regular fa-message"></i><span>Messages</span></button>
-                <button type="button" class="ks-seller-nav-item ks-seller-nav-link" data-seller-action="reviews"><i class="fa-regular fa-star"></i><span>Reviews</span></button>
-                <button type="button" class="ks-seller-nav-item" data-seller-tab="settings"><i class="fa-solid fa-gear"></i><span>Store Settings</span></button>
-                <button type="button" class="ks-seller-nav-item ks-seller-nav-link" data-seller-action="store"><i class="fa-solid fa-store"></i><span>My Store</span><i class="fa-solid fa-arrow-up-right-from-square ks-nav-chevron"></i></button>
-            </nav>
 
-            <div class="ks-grow-card">
-                <strong>Grow Your Sales</strong>
-                <p>Run promotions and boost your store visibility.</p>
-                <button type="button" data-seller-action="marketing">Create Promotion</button>
-                <span class="ks-grow-icon"><i class="fa-solid fa-rocket"></i></span>
-            </div>
+        <!-- SIDEBAR -->
 
-            <div class="ks-help-card">
-                <i class="fa-solid fa-headset"></i>
-                <div><strong>Need Help?</strong><span>Visit our Help Center</span></div>
-            </div>
-        </aside>
+        <div class="seller-dash-sidebar">
 
-        <section class="ks-seller-content">
-            <div class="ks-seller-topbar">
-                <button type="button" class="ks-sidebar-toggle" id="ksSellerSidebarToggle" aria-label="Toggle seller menu"><i class="fa-solid fa-bars"></i></button>
-                <div class="ks-seller-search"><i class="fa-solid fa-magnifying-glass"></i><input id="sellerDashboardSearch" type="search" placeholder="Search anything..."></div>
-                <div class="ks-topbar-actions">
-                    <button type="button" class="ks-icon-btn" data-seller-action="notifications" aria-label="Notifications"><i class="fa-regular fa-bell"></i><span class="ks-notification-dot"></span></button>
-                    <button type="button" class="ks-icon-btn" data-seller-action="messages" aria-label="Messages"><i class="fa-regular fa-comments"></i></button>
-                    <button type="button" class="ks-add-product-top" id="sellerDashboardAddProduct"><i class="fa-solid fa-plus"></i> Add Product <i class="fa-solid fa-chevron-down"></i></button>
-                    <button type="button" class="ks-user-menu" id="sellerDashboardUserMenu" aria-expanded="false"><span class="ks-user-avatar" id="sellerDashboardTopAvatar"><i class="fa-solid fa-user"></i></span><span id="sellerDashboardTopName">Elkurios</span><i class="fa-solid fa-chevron-down"></i></button>
-                    <div class="ks-seller-account-menu" id="ksSellerAccountMenu">
-                        <div class="ks-seller-account-head">
-                            <span class="ks-seller-account-avatar" id="ksSellerAccountAvatar"><i class="fa-solid fa-store"></i></span>
-                            <div>
-                                <strong id="ksSellerAccountName">Seller</strong>
-                                <span id="ksSellerAccountStore">Seller account</span>
-                            </div>
-                        </div>
-                        <div class="ks-seller-account-divider"></div>
-                        <button type="button" id="sellerSwitchToStudent">
-                            <i class="fa-solid fa-right-left"></i>
-                            <span>Switch to Student</span>
-                        </button>
-                        <button type="button" id="sellerAccountProfile">
-                            <i class="fa-regular fa-user"></i>
-                            <span>My Profile</span>
-                        </button>
-                        <div class="ks-seller-account-divider"></div>
-                        <button type="button" id="sellerAccountSignOut" class="ks-seller-account-signout">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                            <span>Sign Out</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <button type="button" class="seller-dash-nav-item active" data-seller-tab="overview">
+                <i class="fa-solid fa-grid-2"></i>
+                Overview
+            </button>
 
-            <div class="ks-seller-page-head">
-                <div>
-                    <h2>Welcome back, <span id="sellerDashboardWelcomeName">Seller</span>! <span class="ks-wave">👋</span></h2>
-                    <p>Here's what's happening with your store today.</p>
-                </div>
-                <div class="ks-date-control"><i class="fa-regular fa-calendar"></i><span id="sellerDashboardDateRange">Last 7 days</span><i class="fa-solid fa-chevron-down"></i></div>
-            </div>
+            <button type="button" class="seller-dash-nav-item" data-seller-tab="products">
+                <i class="fa-solid fa-box"></i>
+                Products
+            </button>
+
+            <button type="button" class="seller-dash-nav-item" data-seller-tab="sales">
+                <i class="fa-solid fa-receipt"></i>
+                Sales
+            </button>
+
+            <a href="#wallet" class="seller-dash-nav-item">
+                <i class="fa-solid fa-wallet"></i>
+                Wallet
+            </a>
+
+            <button type="button" class="seller-dash-nav-item" data-seller-tab="settings">
+                <i class="fa-solid fa-gear"></i>
+                Store Settings
+            </button>
+
+        </div>
+
+
+        <!-- MAIN CONTENT -->
+
+        <div class="seller-dash-main">
+
+
+            <!-- ==================================================
+                 OVERVIEW TAB
+            =================================================== -->
 
             <div class="seller-dash-tab active" id="sellerTabOverview">
-                <p id="sellerStatsLoading" class="reset-passcode-intro">Loading your dashboard...</p>
-                <div id="sellerStatsContent" style="display:none;">
-                    <div class="ks-metric-grid">
-                        <article class="ks-metric-card"><div class="ks-metric-icon sales"><i class="fa-solid fa-sack-dollar"></i></div><div><span>Total Sales</span><strong id="statTotalSales">₦0</strong><small class="ks-trend positive" id="sellerSalesTrend">Real-time seller sales</small></div></article>
-                        <article class="ks-metric-card"><div class="ks-metric-icon orders"><i class="fa-solid fa-cart-shopping"></i></div><div><span>Orders</span><strong id="statOrderCount">0</strong><small class="ks-trend positive">Seller orders</small></div></article>
-                        <article class="ks-metric-card"><div class="ks-metric-icon customers"><i class="fa-solid fa-users"></i></div><div><span>Total Customers</span><strong id="statCustomerCount">0</strong><small class="ks-trend positive">Unique paid customers</small></div></article>
-                        <article class="ks-metric-card"><div class="ks-metric-icon products"><i class="fa-solid fa-box-open"></i></div><div><span>Products</span><strong id="statProductCount">0</strong><small class="ks-trend">Products in your store</small></div></article>
-                        <article class="ks-metric-card"><div class="ks-metric-icon rating"><i class="fa-solid fa-star"></i></div><div><span>Store Rating</span><strong id="statStoreRating">No ratings yet</strong><small class="ks-trend positive">Based on customer reviews</small></div></article>
-                    </div>
 
-                    <div class="ks-dashboard-grid ks-dashboard-grid-top">
-                        <section class="ks-panel ks-sales-overview">
-                            <div class="ks-panel-head"><div><h3>Sales Overview</h3><p>Paid sales from the last 7 days</p></div><div class="ks-panel-filter">Last 7 days <i class="fa-solid fa-chevron-down"></i></div></div>
-                            <div id="sellerSalesChart" class="ks-line-chart" aria-label="Sales over the last 7 days"></div>
-                        </section>
+                <p id="sellerStatsLoading" class="reset-passcode-intro">
+                    Loading your dashboard...
+                </p>
 
-                        <section class="ks-panel ks-order-summary">
-                            <div class="ks-panel-head"><div><h3>Orders Summary</h3><p>Current seller order statuses</p></div></div>
-                            <div class="ks-donut-wrap"><div id="sellerOrderDonut" class="ks-donut"><div><strong id="sellerDonutTotal">0</strong><span>Total Orders</span></div></div><div id="sellerStatusBreakdown" class="ks-donut-legend"></div></div>
-                        </section>
+                <div id="sellerStatsContent" style="display: none;">
 
-                        <section class="ks-panel ks-top-products">
-                            <div class="ks-panel-head"><h3>Top Selling Products</h3><button type="button" data-seller-tab="products">View all</button></div>
-                            <div id="sellerTopProducts"></div>
-                            <p id="sellerTopProductsEmpty" class="reset-passcode-intro" style="display:none;">No sales yet.</p>
-                        </section>
-                    </div>
+                    <div class="seller-stat-grid">
 
-                    <div class="ks-dashboard-grid ks-dashboard-grid-bottom">
-                        <section class="ks-panel ks-recent-orders">
-                            <div class="ks-panel-head"><h3>Recent Orders</h3><button type="button" data-seller-tab="sales">View all orders</button></div>
-                            <div id="sellerRecentOrdersTable"></div>
-                            <p id="sellerRecentOrdersEmpty" class="reset-passcode-intro" style="display:none;">No orders yet.</p>
-                        </section>
-                        <section class="ks-panel ks-performance">
-                            <div class="ks-panel-head"><h3>Store Performance</h3><button type="button" data-seller-tab="overview">View analytics</button></div>
-                            <div class="ks-performance-list">
-                                <div><i class="fa-regular fa-eye"></i><span>Wallet Balance</span><strong id="statWalletBalance">₦0</strong></div>
-                                <div><i class="fa-solid fa-box"></i><span>Products Listed</span><strong id="ksPerformanceProducts">0</strong></div>
-                                <div><i class="fa-solid fa-bag-shopping"></i><span>Paid Orders</span><strong id="ksPerformanceOrders">0</strong></div>
-                                <div><i class="fa-regular fa-star"></i><span>Reviews</span><strong id="ksPerformanceReviews">0</strong></div>
+                        <div class="seller-stat-card">
+                            <div class="seller-stat-icon" style="background:#dcfce7;color:#15803d;">
+                                <i class="fa-solid fa-sack-dollar"></i>
                             </div>
-                        </section>
+                            <div>
+                                <div class="seller-stat-value" id="statTotalSales">₦0</div>
+                                <div class="seller-stat-label">Total Sales</div>
+                            </div>
+                        </div>
+
+                        <div class="seller-stat-card">
+                            <div class="seller-stat-icon" style="background:#e0f2fe;color:#0284c7;">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                            </div>
+                            <div>
+                                <div class="seller-stat-value" id="statOrderCount">0</div>
+                                <div class="seller-stat-label">Orders</div>
+                            </div>
+                        </div>
+
+                        <div class="seller-stat-card">
+                            <div class="seller-stat-icon" style="background:var(--purple-soft);color:var(--purple);">
+                                <i class="fa-solid fa-box"></i>
+                            </div>
+                            <div>
+                                <div class="seller-stat-value" id="statProductCount">0</div>
+                                <div class="seller-stat-label">Products</div>
+                            </div>
+                        </div>
+
+                        <div class="seller-stat-card">
+                            <div class="seller-stat-icon" style="background:#fef3c7;color:#b45309;">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div>
+                                <div class="seller-stat-value" id="statCustomerCount">0</div>
+                                <div class="seller-stat-label">Customers</div>
+                            </div>
+                        </div>
+
+                        <div class="seller-stat-card">
+                            <div class="seller-stat-icon" style="background:#f3e8ff;color:#6d28d9;">
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                            <div>
+                                <div class="seller-stat-value" id="statWalletBalance">₦0</div>
+                                <div class="seller-stat-label">Wallet Balance</div>
+                            </div>
+                        </div>
+
+                        <div class="seller-stat-card">
+                            <div class="seller-stat-icon" style="background:#fef9c3;color:#b45309;">
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <div>
+                                <div class="seller-stat-value" id="statStoreRating">No ratings yet</div>
+                                <div class="seller-stat-label">Store Rating</div>
+                            </div>
+                        </div>
+
                     </div>
+
+
+                    <div class="seller-dash-row">
+
+                        <div class="seller-dash-panel seller-dash-chart-panel">
+
+                            <div class="seller-dash-panel-header">
+                                <h3>Sales — Last 7 Days</h3>
+                            </div>
+
+                            <div id="sellerSalesChart" class="seller-sales-chart"></div>
+
+                        </div>
+
+                        <div class="seller-dash-panel">
+
+                            <div class="seller-dash-panel-header">
+                                <h3>Order Status</h3>
+                            </div>
+
+                            <div class="seller-donut-wrap">
+
+                                <div class="seller-donut" id="sellerOrderDonut">
+                                    <div>
+                                        <strong id="sellerDonutTotal">0</strong>
+                                        <span>Orders</span>
+                                    </div>
+                                </div>
+
+                                <div id="sellerStatusBreakdown" class="seller-status-breakdown"></div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="seller-dash-row">
+
+                        <div class="seller-dash-panel">
+
+                            <div class="seller-dash-panel-header">
+                                <h3>Top Selling Products</h3>
+                            </div>
+
+                            <div id="sellerTopProducts"></div>
+
+                            <p id="sellerTopProductsEmpty" class="reset-passcode-intro" style="display:none;">
+                                No sales yet.
+                            </p>
+
+                        </div>
+
+                        <div class="seller-dash-panel">
+
+                            <div class="seller-dash-panel-header">
+                                <h3>Recent Orders</h3>
+                            </div>
+
+                            <div id="sellerRecentOrdersTable"></div>
+
+                            <p id="sellerRecentOrdersEmpty" class="reset-passcode-intro" style="display:none;">
+                                No orders yet.
+                            </p>
+
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
+
+
+            <!-- ==================================================
+                 PRODUCTS TAB
+            =================================================== -->
 
             <div class="seller-dash-tab" id="sellerTabProducts" style="display:none;">
 
@@ -2588,11 +2629,16 @@
 
             </div>
 
-        </section>
+        </div>
+
     </div>
+
 </div>
 
-<div id="sellerSuspendedState" style="display: none;">
+
+                <!-- STATUS: SUSPENDED -->
+
+                <div id="sellerSuspendedState" style="display: none;">
 
                     <div class="profile-note">
                         <i class="fa-solid fa-circle-exclamation"></i>
@@ -4589,43 +4635,6 @@
 
     </div>
 
-
-
-    <!-- =====================================================
-         DASHBOARD CHOOSER — APPROVED SELLERS
-    ====================================================== -->
-
-    <div class="ks-role-chooser" id="ksRoleChooser" aria-hidden="true">
-        <div class="ks-role-chooser-backdrop"></div>
-        <div class="ks-role-chooser-dialog" role="dialog" aria-modal="true" aria-labelledby="ksRoleChooserTitle">
-            <div class="ks-role-chooser-brand"><i class="fa-solid fa-cart-shopping"></i></div>
-            <p class="ks-role-chooser-eyebrow">WELCOME BACK</p>
-            <h2 id="ksRoleChooserTitle">Where would you like to go?</h2>
-            <p class="ks-role-chooser-subtitle">You have both a student account and an approved seller account. Choose the dashboard you want to access.</p>
-
-            <div class="ks-role-chooser-options">
-                <button type="button" class="ks-role-card student" id="ksChooseStudent">
-                    <span class="ks-role-card-icon"><i class="fa-solid fa-user-graduate"></i></span>
-                    <span class="ks-role-card-copy">
-                        <strong>Student Dashboard</strong>
-                        <small>Shop, manage orders, wallet, messages and your student account.</small>
-                    </span>
-                    <i class="fa-solid fa-arrow-right ks-role-card-arrow"></i>
-                </button>
-
-                <button type="button" class="ks-role-card seller" id="ksChooseSeller">
-                    <span class="ks-role-card-icon"><i class="fa-solid fa-store"></i></span>
-                    <span class="ks-role-card-copy">
-                        <strong>Seller Dashboard</strong>
-                        <small>Manage your store, products, orders, sales, inventory and wallet.</small>
-                    </span>
-                    <i class="fa-solid fa-arrow-right ks-role-card-arrow"></i>
-                </button>
-            </div>
-
-            <p class="ks-role-chooser-note"><i class="fa-solid fa-circle-check"></i> One login. Two dashboards. Your accounts stay linked.</p>
-        </div>
-    </div>
 
 
     <!-- =====================================================
