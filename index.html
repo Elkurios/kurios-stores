@@ -2112,186 +2112,341 @@
 
                 <!-- STATUS: APPROVED -->
 
-                <div id="sellerApprovedState" style="display: none;">
+<div id="sellerApprovedState" style="display: none;">
 
-                    <div class="profile-note">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <span>
-                            <strong id="sellerApprovedStoreName"></strong>
-                            is live on Kurios Stores.
-                        </span>
-                    </div>
-
-
-                    <!-- STORE LOGO -->
-
-                    <div class="store-logo-row">
-
-                        <div class="store-logo-preview" id="storeLogoPreview">
-                            <i class="fa-solid fa-store"></i>
-                        </div>
-
-                        <div class="store-logo-controls">
-
-                            <label for="storeLogoInput" class="store-logo-label">
-                                Store Logo
-                            </label>
-
-                            <input
-                                type="file"
-                                id="storeLogoInput"
-                                accept="image/png, image/jpeg, image/webp"
-                            >
-
-                            <span id="storeLogoStatus" class="otp-status-message"></span>
-
-                        </div>
-
-                    </div>
+    <div class="profile-note" style="margin-bottom: 20px;">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>
+            <strong id="sellerApprovedStoreName"></strong>
+            is live on Kurios Stores.
+        </span>
+    </div>
 
 
-                    <!-- PRODUCT LIST -->
-
-                    <div class="seller-dashboard-header">
-
-                        <h3>My Products</h3>
-
-                        <div style="display: flex; gap: 8px;">
-
-                            <button
-                                type="button"
-                                id="importCsvButton"
-                                class="seller-dashboard-add-button seller-dashboard-secondary-button"
-                            >
-                                <i class="fa-solid fa-file-csv"></i>
-                                Import CSV
-                            </button>
-
-                            <button
-                                type="button"
-                                id="addProductButton"
-                                class="seller-dashboard-add-button"
-                            >
-                                <i class="fa-solid fa-plus"></i>
-                                Add Product
-                            </button>
-
-                        </div>
-
-                    </div>
+    <div class="seller-dash-layout">
 
 
-                    <!-- CSV IMPORT PANEL -->
+        <!-- SIDEBAR -->
 
-                    <div id="csvImportPanel" style="display: none;">
+        <div class="seller-dash-sidebar">
 
-                        <div class="form-section-label">Import products from CSV</div>
+            <button type="button" class="seller-dash-nav-item active" data-seller-tab="overview">
+                <i class="fa-solid fa-grid-2"></i>
+                Overview
+            </button>
 
-                        <p class="reset-passcode-intro">
-                            Works with a plain spreadsheet (Name, Category, Price,
-                            Stock columns), or a multi-location POS export —
-                            we'll detect the locations in your file and let you
-                            pick which one to import prices and stock from.
-                        </p>
+            <button type="button" class="seller-dash-nav-item" data-seller-tab="products">
+                <i class="fa-solid fa-box"></i>
+                Products
+            </button>
 
-                        <p class="reset-passcode-intro">
-                            <a href="#" id="downloadSampleCsv" style="color: var(--purple); font-weight: 600;">
-                                <i class="fa-solid fa-download"></i>
-                                Download a sample CSV to fill in
-                            </a>
-                        </p>
+            <button type="button" class="seller-dash-nav-item" data-seller-tab="sales">
+                <i class="fa-solid fa-receipt"></i>
+                Sales
+            </button>
 
-                        <div class="form-group">
-                            <label for="csvFileInput">CSV File</label>
-                            <input type="file" id="csvFileInput" accept=".csv,text/csv">
-                        </div>
+            <a href="#wallet" class="seller-dash-nav-item">
+                <i class="fa-solid fa-wallet"></i>
+                Wallet
+            </a>
 
-                        <div class="form-group" id="csvLocationGroup" style="display: none;">
-                            <label for="csvLocationSelect">Import prices &amp; stock from</label>
-                            <div class="select-wrap">
-                                <select id="csvLocationSelect"></select>
-                                <i class="fa-solid fa-chevron-down select-wrap-arrow"></i>
+            <button type="button" class="seller-dash-nav-item" data-seller-tab="settings">
+                <i class="fa-solid fa-gear"></i>
+                Store Settings
+            </button>
+
+        </div>
+
+
+        <!-- MAIN CONTENT -->
+
+        <div class="seller-dash-main">
+
+
+            <!-- ==================================================
+                 OVERVIEW TAB
+            =================================================== -->
+
+            <div class="seller-dash-tab active" id="sellerTabOverview">
+
+                <p id="sellerStatsLoading" class="reset-passcode-intro">
+                    Loading your dashboard...
+                </p>
+
+                <div id="sellerStatsContent" style="display: none;">
+
+                    <div class="seller-stat-grid">
+
+                        <div class="seller-stat-card">
+                            <div class="seller-stat-icon" style="background:#dcfce7;color:#15803d;">
+                                <i class="fa-solid fa-sack-dollar"></i>
+                            </div>
+                            <div>
+                                <div class="seller-stat-value" id="statTotalSales">₦0</div>
+                                <div class="seller-stat-label">Total Sales</div>
                             </div>
                         </div>
 
-                        <div id="csvImportStatus" class="otp-status-message"></div>
+                        <div class="seller-stat-card">
+                            <div class="seller-stat-icon" style="background:#e0f2fe;color:#0284c7;">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                            </div>
+                            <div>
+                                <div class="seller-stat-value" id="statOrderCount">0</div>
+                                <div class="seller-stat-label">Orders</div>
+                            </div>
+                        </div>
 
-                        <div class="seller-dashboard-form-actions">
+                        <div class="seller-stat-card">
+                            <div class="seller-stat-icon" style="background:var(--purple-soft);color:var(--purple);">
+                                <i class="fa-solid fa-box"></i>
+                            </div>
+                            <div>
+                                <div class="seller-stat-value" id="statProductCount">0</div>
+                                <div class="seller-stat-label">Products</div>
+                            </div>
+                        </div>
 
-                            <button
-                                type="button"
-                                id="cancelCsvImport"
-                                class="profile-cancel-button"
-                            >
-                                Cancel
-                            </button>
+                        <div class="seller-stat-card">
+                            <div class="seller-stat-icon" style="background:#fef3c7;color:#b45309;">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div>
+                                <div class="seller-stat-value" id="statCustomerCount">0</div>
+                                <div class="seller-stat-label">Customers</div>
+                            </div>
+                        </div>
 
-                            <button
-                                type="button"
-                                id="confirmCsvImport"
-                                class="profile-save-button"
-                                disabled
-                            >
-                                Import
-                            </button>
+                        <div class="seller-stat-card">
+                            <div class="seller-stat-icon" style="background:#f3e8ff;color:#6d28d9;">
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                            <div>
+                                <div class="seller-stat-value" id="statWalletBalance">₦0</div>
+                                <div class="seller-stat-label">Wallet Balance</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="seller-dash-row">
+
+                        <div class="seller-dash-panel seller-dash-chart-panel">
+
+                            <div class="seller-dash-panel-header">
+                                <h3>Sales — Last 7 Days</h3>
+                            </div>
+
+                            <div id="sellerSalesChart" class="seller-sales-chart"></div>
+
+                        </div>
+
+                        <div class="seller-dash-panel">
+
+                            <div class="seller-dash-panel-header">
+                                <h3>Order Status</h3>
+                            </div>
+
+                            <div id="sellerStatusBreakdown" class="seller-status-breakdown"></div>
 
                         </div>
 
                     </div>
 
-                    <p id="sellerProductsLoading" class="reset-passcode-intro">
-                        Loading your products...
-                    </p>
 
-                    <p id="sellerProductsEmpty" class="reset-passcode-intro" style="display: none;">
-                        You haven't added any products yet.
-                    </p>
+                    <div class="seller-dash-row">
 
-                    <div id="sellerProductList"></div>
+                        <div class="seller-dash-panel">
 
+                            <div class="seller-dash-panel-header">
+                                <h3>Top Selling Products</h3>
+                            </div>
 
-                    <!-- MY SALES -->
+                            <div id="sellerTopProducts"></div>
 
-                    <div class="seller-dashboard-header" style="margin-top: 32px;">
+                            <p id="sellerTopProductsEmpty" class="reset-passcode-intro" style="display:none;">
+                                No sales yet.
+                            </p>
 
-                        <h3>My Sales</h3>
+                        </div>
+
+                        <div class="seller-dash-panel">
+
+                            <div class="seller-dash-panel-header">
+                                <h3>Recent Orders</h3>
+                            </div>
+
+                            <div id="sellerRecentOrdersTable"></div>
+
+                            <p id="sellerRecentOrdersEmpty" class="reset-passcode-intro" style="display:none;">
+                                No orders yet.
+                            </p>
+
+                        </div>
 
                     </div>
 
-                    <div class="seller-sales-summary" id="sellerSalesSummary" style="display: none;">
-                        <span>Total Revenue</span>
-                        <strong id="sellerTotalRevenue">₦0</strong>
+                </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 PRODUCTS TAB
+            =================================================== -->
+
+            <div class="seller-dash-tab" id="sellerTabProducts" style="display:none;">
+
+                <div class="seller-dashboard-header">
+
+                    <h3>My Products</h3>
+
+                    <div style="display: flex; gap: 8px;">
+
+                        <button
+                            type="button"
+                            id="importCsvButton"
+                            class="seller-dashboard-add-button seller-dashboard-secondary-button"
+                        >
+                            <i class="fa-solid fa-file-csv"></i>
+                            Import CSV
+                        </button>
+
+                        <button
+                            type="button"
+                            id="addProductButton"
+                            class="seller-dashboard-add-button"
+                        >
+                            <i class="fa-solid fa-plus"></i>
+                            Add Product
+                        </button>
+
                     </div>
 
-                    <p id="sellerSalesLoading" class="reset-passcode-intro">
-                        Loading your sales...
+                </div>
+
+
+                <!-- CSV IMPORT PANEL -->
+
+                <div id="csvImportPanel" style="display: none;">
+
+                    <div class="form-section-label">Import products from CSV</div>
+
+                    <p class="reset-passcode-intro">
+                        Works with a plain spreadsheet (Name, Category, Price,
+                        Stock columns), or a multi-location POS export —
+                        we'll detect the locations in your file and let you
+                        pick which one to import prices and stock from.
                     </p>
 
-                    <p id="sellerSalesEmpty" class="reset-passcode-intro" style="display: none;">
-                        No sales yet — orders containing your products will show up here.
+                    <p class="reset-passcode-intro">
+                        <a href="#" id="downloadSampleCsv" style="color: var(--purple); font-weight: 600;">
+                            <i class="fa-solid fa-download"></i>
+                            Download a sample CSV to fill in
+                        </a>
                     </p>
 
-                    <div id="sellerSalesList"></div>
+                    <div class="form-group">
+                        <label for="csvFileInput">CSV File</label>
+                        <input type="file" id="csvFileInput" accept=".csv,text/csv">
+                    </div>
+
+                    <div class="form-group" id="csvLocationGroup" style="display: none;">
+                        <label for="csvLocationSelect">Import prices &amp; stock from</label>
+                        <div class="select-wrap">
+                            <select id="csvLocationSelect"></select>
+                            <i class="fa-solid fa-chevron-down select-wrap-arrow"></i>
+                        </div>
+                    </div>
+
+                    <div id="csvImportStatus" class="otp-status-message"></div>
+
+                    <div class="seller-dashboard-form-actions">
+
+                        <button
+                            type="button"
+                            id="cancelCsvImport"
+                            class="profile-cancel-button"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="button"
+                            id="confirmCsvImport"
+                            class="profile-save-button"
+                            disabled
+                        >
+                            Import
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <p id="sellerProductsLoading" class="reset-passcode-intro">
+                    Loading your products...
+                </p>
+
+                <p id="sellerProductsEmpty" class="reset-passcode-intro" style="display: none;">
+                    You haven't added any products yet.
+                </p>
+
+                <div id="sellerProductList"></div>
 
 
-                    <!-- ADD / EDIT PRODUCT FORM -->
+                <!-- ADD / EDIT PRODUCT FORM -->
 
-                    <div id="sellerProductFormWrap" style="display: none;">
+                <div id="sellerProductFormWrap" style="display: none;">
 
-                        <div class="form-section-label" id="productFormTitle">Add a product</div>
+                    <div class="form-section-label" id="productFormTitle">Add a product</div>
 
-                        <input type="hidden" id="editingProductId">
+                    <input type="hidden" id="editingProductId">
+
+                    <div class="form-group">
+
+                        <label for="productName">
+                            Product Name *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="productName"
+                            placeholder="e.g. Wireless Earbuds"
+                            required
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="productDescription">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="productDescription"
+                            rows="3"
+                            placeholder="Describe your product"
+                        ></textarea>
+
+                    </div>
+
+                    <div class="form-row-2">
 
                         <div class="form-group">
 
-                            <label for="productName">
-                                Product Name *
+                            <label for="productPrice">
+                                Price (₦) *
                             </label>
 
                             <input
-                                type="text"
-                                id="productName"
-                                placeholder="e.g. Wireless Earbuds"
+                                type="number"
+                                id="productPrice"
+                                min="0"
+                                step="0.01"
+                                placeholder="0.00"
                                 required
                             >
 
@@ -2299,127 +2454,165 @@
 
                         <div class="form-group">
 
-                            <label for="productDescription">
-                                Description
-                            </label>
-
-                            <textarea
-                                id="productDescription"
-                                rows="3"
-                                placeholder="Describe your product"
-                            ></textarea>
-
-                        </div>
-
-                        <div class="form-row-2">
-
-                            <div class="form-group">
-
-                                <label for="productPrice">
-                                    Price (₦) *
-                                </label>
-
-                                <input
-                                    type="number"
-                                    id="productPrice"
-                                    min="0"
-                                    step="0.01"
-                                    placeholder="0.00"
-                                    required
-                                >
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <label for="productStock">
-                                    Stock Quantity
-                                </label>
-
-                                <input
-                                    type="number"
-                                    id="productStock"
-                                    min="0"
-                                    step="1"
-                                    placeholder="0"
-                                >
-
-                            </div>
-
-                        </div>
-
-                        <div class="form-group">
-
-                            <label for="productCategory">
-                                Category
-                            </label>
-
-                            <div class="select-wrap">
-
-                                <select id="productCategory">
-                                    <option value="">Select a category</option>
-                                    <option value="Fashion">Fashion</option>
-                                    <option value="Electronics">Electronics</option>
-                                    <option value="Beauty">Beauty</option>
-                                    <option value="Food">Food</option>
-                                    <option value="Books">Books</option>
-                                    <option value="School Materials">School Materials</option>
-                                    <option value="Phones">Phones</option>
-                                    <option value="Accessories">Accessories</option>
-                                    <option value="Health">Health</option>
-                                    <option value="Home">Home</option>
-                                    <option value="Services">Services</option>
-                                    <option value="Others">Others</option>
-                                </select>
-
-                                <i class="fa-solid fa-chevron-down select-wrap-arrow"></i>
-
-                            </div>
-
-                        </div>
-
-                        <div class="form-group">
-
-                            <label for="productImageInput">
-                                Product Image
+                            <label for="productStock">
+                                Stock Quantity
                             </label>
 
                             <input
-                                type="file"
-                                id="productImageInput"
-                                accept="image/png, image/jpeg, image/webp"
+                                type="number"
+                                id="productStock"
+                                min="0"
+                                step="1"
+                                placeholder="0"
                             >
-
-                        </div>
-
-                        <div
-                            id="productFormStatus"
-                            class="otp-status-message"
-                        ></div>
-
-                        <div class="seller-dashboard-form-actions">
-
-                            <button
-                                type="button"
-                                id="cancelProductForm"
-                                class="profile-cancel-button"
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                type="button"
-                                id="saveProductButton"
-                                class="profile-save-button"
-                            >
-                                Save Product
-                            </button>
 
                         </div>
 
                     </div>
 
+                    <div class="form-group">
+
+                        <label for="productCategory">
+                            Category
+                        </label>
+
+                        <div class="select-wrap">
+
+                            <select id="productCategory">
+                                <option value="">Select a category</option>
+                                <option value="Fashion">Fashion</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Beauty">Beauty</option>
+                                <option value="Food">Food</option>
+                                <option value="Books">Books</option>
+                                <option value="School Materials">School Materials</option>
+                                <option value="Phones">Phones</option>
+                                <option value="Accessories">Accessories</option>
+                                <option value="Health">Health</option>
+                                <option value="Home">Home</option>
+                                <option value="Services">Services</option>
+                                <option value="Others">Others</option>
+                            </select>
+
+                            <i class="fa-solid fa-chevron-down select-wrap-arrow"></i>
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="productImageInput">
+                            Product Image
+                        </label>
+
+                        <input
+                            type="file"
+                            id="productImageInput"
+                            accept="image/png, image/jpeg, image/webp"
+                        >
+
+                    </div>
+
+                    <div
+                        id="productFormStatus"
+                        class="otp-status-message"
+                    ></div>
+
+                    <div class="seller-dashboard-form-actions">
+
+                        <button
+                            type="button"
+                            id="cancelProductForm"
+                            class="profile-cancel-button"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="button"
+                            id="saveProductButton"
+                            class="profile-save-button"
+                        >
+                            Save Product
+                        </button>
+
+                    </div>
+
                 </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 SALES TAB
+            =================================================== -->
+
+            <div class="seller-dash-tab" id="sellerTabSales" style="display:none;">
+
+                <div class="seller-dashboard-header">
+                    <h3>My Sales</h3>
+                </div>
+
+                <div class="seller-sales-summary" id="sellerSalesSummary" style="display: none;">
+                    <span>Total Revenue</span>
+                    <strong id="sellerTotalRevenue">₦0</strong>
+                </div>
+
+                <p id="sellerSalesLoading" class="reset-passcode-intro">
+                    Loading your sales...
+                </p>
+
+                <p id="sellerSalesEmpty" class="reset-passcode-intro" style="display: none;">
+                    No sales yet — orders containing your products will show up here.
+                </p>
+
+                <div id="sellerSalesList"></div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 STORE SETTINGS TAB
+            =================================================== -->
+
+            <div class="seller-dash-tab" id="sellerTabSettings" style="display:none;">
+
+                <div class="seller-dashboard-header">
+                    <h3>Store Settings</h3>
+                </div>
+
+                <div class="store-logo-row">
+
+                    <div class="store-logo-preview" id="storeLogoPreview">
+                        <i class="fa-solid fa-store"></i>
+                    </div>
+
+                    <div class="store-logo-controls">
+
+                        <label for="storeLogoInput" class="store-logo-label">
+                            Store Logo
+                        </label>
+
+                        <input
+                            type="file"
+                            id="storeLogoInput"
+                            accept="image/png, image/jpeg, image/webp"
+                        >
+
+                        <span id="storeLogoStatus" class="otp-status-message"></span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 
                 <!-- STATUS: SUSPENDED -->
