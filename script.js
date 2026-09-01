@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     const cartCount =
-        document.getElementById("cartCount");
+        document.getElementById("cartBadge");
 
 
     const cartTotal =
@@ -4791,6 +4791,43 @@ showOtpVerificationScreen(
 
                         showMessage(
                             "Payment could not load. Please refresh and try again."
+                        );
+
+                        return;
+
+                    }
+
+                    if (
+                        !initiateData.amount ||
+                        isNaN(initiateData.amount) ||
+                        initiateData.amount <= 0
+                    ) {
+
+                        console.error(
+                            "Checkout error: invalid amount from server",
+                            initiateData
+                        );
+
+                        showMessage(
+                            "There was a problem with your order total. Please try again or contact support."
+                        );
+
+                        return;
+
+                    }
+
+                    if (
+                        !initiateData.apiKey ||
+                        !initiateData.contractCode
+                    ) {
+
+                        console.error(
+                            "Checkout error: missing Monnify credentials from server",
+                            initiateData
+                        );
+
+                        showMessage(
+                            "Payment is not fully configured yet. Please contact support."
                         );
 
                         return;
