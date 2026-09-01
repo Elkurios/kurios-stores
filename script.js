@@ -9652,3 +9652,102 @@ if (confirmCsvImport) {
     );
 
 }
+
+
+// =========================================================
+// PASSCODE REVEAL/HIDE TOGGLES
+// =========================================================
+
+document.querySelectorAll(".passcode-reveal-btn").forEach(function (button) {
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            const targetId =
+                button.dataset.target;
+
+            const container =
+                document.getElementById(targetId);
+
+            if (!container) {
+                return;
+            }
+
+            const digits =
+                container.querySelectorAll(".passcode-digit");
+
+            const icon =
+                button.querySelector("i");
+
+            const isCurrentlyHidden =
+                digits.length > 0 && digits[0].type === "password";
+
+            digits.forEach(function (digit) {
+                digit.type = isCurrentlyHidden ? "text" : "password";
+            });
+
+            if (icon) {
+
+                icon.classList.toggle("fa-eye", !isCurrentlyHidden);
+                icon.classList.toggle("fa-eye-slash", isCurrentlyHidden);
+
+            }
+
+            button.setAttribute(
+                "aria-label",
+                isCurrentlyHidden ? "Hide passcode" : "Show passcode"
+            );
+
+        }
+    );
+
+});
+
+document.querySelectorAll(".password-toggle-btn").forEach(function (button) {
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            const targetId =
+                button.dataset.target;
+
+            const input =
+                document.getElementById(targetId);
+
+            if (!input) {
+                return;
+            }
+
+            const icon =
+                button.querySelector("i");
+
+            if (input.type === "password") {
+
+                input.type = "text";
+
+                if (icon) {
+                    icon.classList.remove("fa-eye");
+                    icon.classList.add("fa-eye-slash");
+                }
+
+                button.setAttribute("aria-label", "Hide password");
+
+            } else {
+
+                input.type = "password";
+
+                if (icon) {
+                    icon.classList.remove("fa-eye-slash");
+                    icon.classList.add("fa-eye");
+                }
+
+                button.setAttribute("aria-label", "Show password");
+
+            }
+
+        }
+    );
+
+});
