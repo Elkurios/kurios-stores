@@ -11985,6 +11985,81 @@ async function updateSellerMenuLabel(studentId) {
 // not shown again on ordinary page reloads)
 // ========================================
 
+const DASHBOARD_CHOICE_TIMEOUT_MS = 60 * 1000;
+const DASHBOARD_CHOICE_STORAGE_KEY = "kuriosDashboardChoicePendingSince";
+
+let __kuriosDashboardChoiceTimer = null;
+
+function clearDashboardChoicePending() {
+
+    localStorage.removeItem(DASHBOARD_CHOICE_STORAGE_KEY);
+    sessionStorage.removeItem(DASHBOARD_CHOICE_STORAGE_KEY);
+
+    if (__kuriosDashboardChoiceTimer) {
+
+        clearTimeout(__kuriosDashboardChoiceTimer);
+        __kuriosDashboardChoiceTimer = null;
+
+    }
+
+}
+
+function autoLogoutFromPendingChoice() {
+
+    clearDashboardChoicePending();
+
+    localStorage.removeItem("kuriosLoggedInStudent");
+    sessionStorage.removeItem("kuriosLoggedInStudent");
+
+    const message =
+        "You were signed out after not choosing a dashboard in time. Please sign in again.";
+
+    if (typeof showMessage === "function") {
+
+        showMessage(message);
+
+    } else {
+
+        alert(message);
+
+    }
+
+    setTimeout(
+        function () {
+            window.location.reload();
+        },
+        1200
+    );
+
+}
+
+function startDashboardChoiceTimer(pendingSince) {
+
+    if (__kuriosDashboardChoiceTimer) {
+        clearTimeout(__kuriosDashboardChoiceTimer);
+    }
+
+    const elapsed =
+        Date.now() - pendingSince;
+
+    const remaining =
+        DASHBOARD_CHOICE_TIMEOUT_MS - elapsed;
+
+    if (remaining <= 0) {
+
+        autoLogoutFromPendingChoice();
+        return;
+
+    }
+
+    __kuriosDashboardChoiceTimer =
+        setTimeout(
+            autoLogoutFromPendingChoice,
+            remaining
+        );
+
+}
+
 function showDashboardChoiceModal(student) {
 
     const modal =
@@ -12009,6 +12084,34 @@ function showDashboardChoiceModal(student) {
 
     modal.classList.add("open");
 
+
+    // Remember that a decision is pending, with WHEN it
+    // started — so a page refresh can resume the same
+    // countdown instead of silently dropping into the
+    // student dashboard or restarting the clock.
+
+    const alreadyPendingSince =
+        parseInt(
+            localStorage.getItem(DASHBOARD_CHOICE_STORAGE_KEY) ||
+            sessionStorage.getItem(DASHBOARD_CHOICE_STORAGE_KEY) ||
+            "0",
+            10
+        );
+
+    const pendingSince =
+        alreadyPendingSince || Date.now();
+
+    if (!alreadyPendingSince) {
+
+        localStorage.setItem(
+            DASHBOARD_CHOICE_STORAGE_KEY,
+            String(pendingSince)
+        );
+
+    }
+
+    startDashboardChoiceTimer(pendingSince);
+
 }
 
 function closeDashboardChoiceModal() {
@@ -12020,7 +12123,74 @@ function closeDashboardChoiceModal() {
         modal.classList.remove("open");
     }
 
+    clearDashboardChoicePending();
+
 }
+
+
+// ========================================
+// RESUME A PENDING DECISION AFTER REFRESH
+// (runs on every page load — if a choice
+// was left unmade, re-show the splash +
+// modal and resume the countdown instead
+// of letting the dashboard render)
+// ========================================
+
+(function resumePendingDashboardChoice() {
+
+    const pendingSinceRaw =
+        localStorage.getItem(DASHBOARD_CHOICE_STORAGE_KEY) ||
+        sessionStorage.getItem(DASHBOARD_CHOICE_STORAGE_KEY);
+
+    if (!pendingSinceRaw) {
+        return;
+    }
+
+    const student =
+        typeof getStoredStudent === "function" ?
+            getStoredStudent() :
+            null;
+
+    if (!student) {
+
+        // No session to resume — clear the stale flag.
+
+        clearDashboardChoicePending();
+        return;
+
+    }
+
+    const pendingSince =
+        parseInt(pendingSinceRaw, 10);
+
+    const elapsed =
+        Date.now() - pendingSince;
+
+    if (elapsed >= DASHBOARD_CHOICE_TIMEOUT_MS) {
+
+        autoLogoutFromPendingChoice();
+        return;
+
+    }
+
+    const splashEl =
+        document.getElementById("postLoginSplash");
+
+    if (splashEl) {
+        splashEl.style.display = "flex";
+    }
+
+    const mainEl =
+        document.getElementById("mainContent");
+
+    if (mainEl) {
+        mainEl.style.display = "none";
+    }
+
+    showDashboardChoiceModal(student);
+
+})();
+
 
 const dashboardChoiceStudent =
     document.getElementById("dashboardChoiceStudent");
