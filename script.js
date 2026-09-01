@@ -438,6 +438,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function openCart() {
 
+        if (typeof closeNotificationPanel === "function") {
+            closeNotificationPanel();
+        }
+
         if (cartOverlay) {
 
             cartOverlay.classList.add("open");
@@ -1497,6 +1501,10 @@ if (signOutButton) {
 
     function openSignInModal() {
 
+        if (typeof closeNotificationPanel === "function") {
+            closeNotificationPanel();
+        }
+
         if (signInModal) {
 
             signInModal.classList.add(
@@ -1603,9 +1611,19 @@ if (openSignIn) {
 
             if (studentAccountMenu) {
 
+                const willOpen =
+                    !studentAccountMenu.classList.contains("open");
+
                 studentAccountMenu.classList.toggle(
                     "open"
                 );
+
+                if (
+                    willOpen &&
+                    typeof closeNotificationPanel === "function"
+                ) {
+                    closeNotificationPanel();
+                }
 
             }
 
@@ -3273,6 +3291,10 @@ updateLoginState();
 
     function openSignUpModal() {
 
+        if (typeof closeNotificationPanel === "function") {
+            closeNotificationPanel();
+        }
+
         if (signInModal) {
 
             signInModal.classList.remove(
@@ -3704,6 +3726,21 @@ showOtpVerificationScreen(
         document.getElementById(
             "notificationPanel"
         );
+
+
+    function closeNotificationPanel() {
+
+        if (notificationPanel) {
+
+            notificationPanel.classList.remove(
+                "open"
+            );
+
+        }
+
+    }
+
+    window.closeNotificationPanel = closeNotificationPanel;
 
 
     const closeNotifications =
@@ -5137,6 +5174,10 @@ showOtpVerificationScreen(
 
         const hash = window.location.hash;
 
+        if (typeof closeNotificationPanel === "function") {
+            closeNotificationPanel();
+        }
+
         if (hash === "#sell") {
 
             hideAllFullPages();
@@ -5195,6 +5236,12 @@ showOtpVerificationScreen(
         }
 
         // No matching hash — show the homepage.
+        // (This also covers plain section anchors like
+        // #shop, #categories, #rewards — the browser's
+        // native scroll-to-anchor can silently fail if
+        // that section was hidden at the moment the hash
+        // changed, e.g. coming back from another page, so
+        // we scroll to it manually here instead.)
 
         hideAllFullPages();
 
@@ -5203,6 +5250,24 @@ showOtpVerificationScreen(
 
         if (mainEl) {
             mainEl.style.display = "block";
+        }
+
+        if (hash && hash.length > 1) {
+
+            const targetEl =
+                document.getElementById(hash.slice(1));
+
+            if (targetEl) {
+
+                setTimeout(
+                    function () {
+                        targetEl.scrollIntoView({ behavior: "smooth" });
+                    },
+                    0
+                );
+
+            }
+
         }
 
     }
