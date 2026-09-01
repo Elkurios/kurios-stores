@@ -839,6 +839,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     </span>` :
                     `<p>Available at Kurios Stores.</p>`;
 
+            const ratingMarkup =
+                product.review_count > 0 ?
+                    `<span class="product-rating">
+                        <i class="fa-solid fa-star"></i>
+                        ${Number(product.avg_rating).toFixed(1)}
+                        <span class="product-rating-count">(${product.review_count})</span>
+                    </span>` :
+                    "";
+
             productCard.innerHTML = `
 
                 <div class="product-image">
@@ -863,6 +872,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         ${product.name}
 
                     </h3>
+
+
+                    ${ratingMarkup}
 
 
                     ${soldByMarkup}
@@ -2688,6 +2700,10 @@ async function loadOrdersIntoPanel(studentId) {
 
     if (!ordersPanelBody) {
         return;
+    }
+
+    if (typeof loadReviewablePrompts === "function") {
+        loadReviewablePrompts(studentId);
     }
 
     ordersPanelBody.innerHTML = `
@@ -9536,6 +9552,15 @@ function renderStorefrontProducts(products) {
         const card = document.createElement("article");
         card.className = "product-card";
 
+        const ratingMarkup =
+            product.review_count > 0 ?
+                `<span class="product-rating">
+                    <i class="fa-solid fa-star"></i>
+                    ${Number(product.avg_rating).toFixed(1)}
+                    <span class="product-rating-count">(${product.review_count})</span>
+                </span>` :
+                "";
+
         card.innerHTML = `
             <div class="product-image">
                 ${imageMarkup}
@@ -9543,6 +9568,7 @@ function renderStorefrontProducts(products) {
             <div class="product-info">
                 <span class="product-category">${category}</span>
                 <h3>${product.name}</h3>
+                ${ratingMarkup}
                 <p>${product.description ? product.description : "&nbsp;"}</p>
                 <div class="product-bottom">
                     <strong>₦${Number(product.price).toLocaleString()}</strong>
@@ -11172,6 +11198,13 @@ async function loadSellerDashboardStats(studentId) {
         setText("statCustomerCount", data.uniqueCustomers);
         setText("statWalletBalance", "₦" + Number(data.walletBalance).toLocaleString());
 
+        setText(
+            "statStoreRating",
+            data.storeReviewCount > 0 ?
+                data.storeRating.toFixed(1) + " ★ (" + data.storeReviewCount + ")" :
+                "No ratings yet"
+        );
+
 
         // ------------------------------------
         // SALES CHART (custom SVG-free bar chart)
@@ -11361,6 +11394,155 @@ async function loadSellerDashboardStats(studentId) {
         );
 
         loadingEl.style.display = "none";
+
+    }
+
+}
+
+
+// =========================================================
+// REVIEW PROMPTS (on My Orders page)
+// =========================================================
+
+async function loadReviewablePrompts(studentId) {
+
+    const container =
+        document.getElementById("reviewablePrompts");
+
+    if (!container) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/students/reviewable-products?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        if (!data.success || data.products.length === 0) {
+
+            container.style.display = "none";
+            container.innerHTML = "";
+
+            return;
+
+        }
+
+        container.style.display = "block";
+
+        container.innerHTML =
+            `<div class="form-section-label">Rate what you bought</div>` +
+            data.products.map(function (product) {
+
+                const thumbMarkup =
+                    product.image_url ?
+                        `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
+                        `<i class="fa-solid fa-box"></i>`;
+
+                return `
+                    <div class="review-prompt-card" data-product-id="${product.id}">
+                        <div class="review-prompt-thumb">${thumbMarkup}</div>
+                        <div class="review-prompt-info">
+                            <strong>${product.name}</strong>
+                        </div>
+                        <div class="review-star-picker" data-product-id="${product.id}">
+                            <i class="fa-solid fa-star" data-star="1"></i>
+                            <i class="fa-solid fa-star" data-star="2"></i>
+                            <i class="fa-solid fa-star" data-star="3"></i>
+                            <i class="fa-solid fa-star" data-star="4"></i>
+                            <i class="fa-solid fa-star" data-star="5"></i>
+                        </div>
+                    </div>
+                `;
+
+            }).join("");
+
+        container.querySelectorAll(".review-star-picker").forEach(function (picker) {
+
+            const stars =
+                picker.querySelectorAll("i");
+
+            stars.forEach(function (star) {
+
+                star.addEventListener(
+                    "click",
+                    async function () {
+
+                        const rating =
+                            parseInt(star.dataset.star, 10);
+
+                        const productId =
+                            picker.dataset.productId;
+
+                        stars.forEach(function (s) {
+                            s.classList.toggle(
+                                "active",
+                                parseInt(s.dataset.star, 10) <= rating
+                            );
+                        });
+
+                        const student =
+                            getStoredStudent();
+
+                        if (!student) {
+                            return;
+                        }
+
+                        try {
+
+                            await fetch(
+                                API_URL + "/api/products/" + productId + "/reviews",
+                                {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json"
+                                    },
+                                    body: JSON.stringify({
+                                        studentId: student.id,
+                                        rating: rating
+                                    })
+                                }
+                            );
+
+                            const card =
+                                picker.closest(".review-prompt-card");
+
+                            if (card) {
+
+                                setTimeout(function () {
+
+                                    card.style.opacity = "0.5";
+                                    picker.style.pointerEvents = "none";
+
+                                }, 300);
+
+                            }
+
+                        } catch (error) {
+
+                            console.error(
+                                "Submit review error:",
+                                error
+                            );
+
+                        }
+
+                    }
+                );
+
+            });
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Load reviewable prompts error:",
+            error
+        );
 
     }
 
