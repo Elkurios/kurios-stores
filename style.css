@@ -6909,3 +6909,54 @@ img {
 #sellerPage.seller-dashboard-active .full-page-panel>.profile-panel-header{display:none}
 #sellerPage.seller-dashboard-active .full-page-panel{padding:0;border:0;background:transparent;border-radius:0}
 #sellerPage.seller-dashboard-active #sellerPanelBody{padding:0}
+
+
+/* =========================================================
+   STUDENT <-> SELLER ROLE SWITCH
+   ========================================================= */
+.account-role-switch{
+    position:relative;
+    padding-right:42px !important;
+}
+.account-role-switch i:first-child{
+    color:#087b60 !important;
+}
+.account-role-switch small{
+    margin-left:auto;
+    color:#9ca3af;
+    font-size:10px;
+    font-weight:600;
+}
+.account-role-switch:hover small{color:#087b60}
+
+.ks-topbar-actions{position:relative}
+.ks-seller-account-menu{
+    position:absolute;
+    top:calc(100% + 10px);
+    right:0;
+    width:245px;
+    padding:10px;
+    background:#fff;
+    border:1px solid #e3e8e9;
+    border-radius:13px;
+    box-shadow:0 18px 45px rgba(15,23,42,.16);
+    z-index:1100;
+    display:none;
+}
+.ks-seller-account-menu.open{display:block;animation:accountMenuOpen .18s ease}
+.ks-seller-account-head{display:flex;align-items:center;gap:10px;padding:8px 7px 11px}
+.ks-seller-account-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#e8f5f0;color:#087b60;flex:none}
+.ks-seller-account-avatar img{width:100%;height:100%;object-fit:cover}
+.ks-seller-account-head strong,.ks-seller-account-head span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ks-seller-account-head strong{font-size:13px;color:#14252d}
+.ks-seller-account-head span{font-size:10px;color:#7b8990;margin-top:3px}
+.ks-seller-account-divider{height:1px;background:#edf0f1;margin:5px 2px}
+.ks-seller-account-menu>button{width:100%;border:0;background:transparent;display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:9px;color:#37474f;font:600 12px/1.2 inherit;text-align:left;cursor:pointer}
+.ks-seller-account-menu>button i{width:18px;text-align:center;color:#087b60}
+.ks-seller-account-menu>button:hover{background:#f0faf6;color:#075d4d}
+.ks-seller-account-signout,.ks-seller-account-signout i{color:#dc2626 !important}
+.ks-seller-account-signout:hover{background:#fef2f2 !important;color:#b91c1c !important}
+
+@media(max-width:620px){
+    .ks-seller-account-menu{right:-4px;width:225px}
+}
