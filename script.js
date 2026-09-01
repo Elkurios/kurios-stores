@@ -1187,6 +1187,8 @@ function updateLoginState() {
 
     if (!storedStudent) {
 
+    signInButton.classList.remove("has-avatar");
+
     signInButton.innerHTML = `
         <i class="fa-regular fa-user"></i>
 
@@ -1360,13 +1362,20 @@ function updateLoginState() {
     // UPDATE HEADER
     // ========================================
 
-    signInButton.innerHTML = `
-        <i class="fa-regular fa-user"></i>
+    const avatarMarkup =
+        student.profile_picture ?
+            `<img src="${API_URL + student.profile_picture}" alt="${displayName}">` :
+            `<span class="header-avatar-initial">${displayName.charAt(0).toUpperCase()}</span>`;
 
-        <span>
-            ${displayName}
+    signInButton.classList.add("has-avatar");
+
+    signInButton.innerHTML = `
+        <span class="header-avatar-circle">
+            ${avatarMarkup}
         </span>
     `;
+
+    signInButton.setAttribute("aria-label", displayName);
 
 
     // ========================================
@@ -3892,13 +3901,32 @@ showOtpVerificationScreen(
 
 
         /*
-            Update notification badge.
+            Update notification badge — only show
+            a count for notifications the student
+            hasn't seen yet (tracked locally).
         */
 
         if (notificationBadge) {
 
-            notificationBadge.textContent =
-                notifications.length;
+            const seenCount =
+                parseInt(
+                    localStorage.getItem("kuriosNotificationsSeenCount") || "0",
+                    10
+                );
+
+            const unseenCount =
+                Math.max(0, notifications.length - seenCount);
+
+            if (unseenCount > 0) {
+
+                notificationBadge.textContent = unseenCount;
+                notificationBadge.style.display = "";
+
+            } else {
+
+                notificationBadge.style.display = "none";
+
+            }
 
         }
 
@@ -3912,11 +3940,29 @@ showOtpVerificationScreen(
             "click",
             function () {
 
+                let willOpen = true;
+
                 if (notificationPanel) {
+
+                    willOpen =
+                        !notificationPanel.classList.contains("open");
 
                     notificationPanel.classList.toggle(
                         "open"
                     );
+
+                }
+
+                if (willOpen) {
+
+                    localStorage.setItem(
+                        "kuriosNotificationsSeenCount",
+                        notifications.length
+                    );
+
+                    if (notificationBadge) {
+                        notificationBadge.style.display = "none";
+                    }
 
                 }
 
@@ -5574,7 +5620,7 @@ showOtpVerificationScreen(
 
     function hideAllFullPages() {
 
-        ["sellerPage", "storefrontPage", "wishlistPage", "walletPage"]
+        ["sellerPage", "storefrontPage", "wishlistPage", "walletPage", "chatPage"]
             .forEach(function (id) {
 
                 const el = document.getElementById(id);
@@ -5701,6 +5747,18 @@ showOtpVerificationScreen(
         if (hash === "#wallet") {
 
             showSimplePage("walletPage");
+            return;
+
+        }
+
+        if (hash === "#chat") {
+
+            showSimplePage("chatPage");
+
+            if (typeof loadConversations === "function") {
+                loadConversations();
+            }
+
             return;
 
         }
