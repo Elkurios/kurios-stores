@@ -2212,6 +2212,21 @@ img {
 }
 
 
+@media (min-width: 900px) {
+
+    body.cart-open #mainContent {
+
+        padding-right: 430px;
+
+        transition: padding-right 0.3s ease;
+
+        box-sizing: border-box;
+
+    }
+
+}
+
+
 /* Cart panel */
 
 .cart-panel {
