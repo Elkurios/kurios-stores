@@ -2143,7 +2143,6 @@ img {
    13. CART
    ========================================================= */
 
-.cart-overlay,
 .modal-overlay {
 
     position: fixed;
@@ -2162,10 +2161,33 @@ img {
 }
 
 
-.cart-overlay.open,
 .modal-overlay.open {
 
     opacity: 1;
+
+    visibility: visible;
+}
+
+
+/* Cart coexists with shopping — no dimmed backdrop
+   blocking the page, and clicks pass straight through
+   to whatever's behind it except on the panel itself. */
+
+.cart-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 2000;
+
+    pointer-events: none;
+
+    visibility: hidden;
+}
+
+
+.cart-overlay.open {
 
     visibility: visible;
 }
@@ -2215,6 +2237,10 @@ img {
     transform: translateX(100%);
 
     transition: 0.3s ease;
+
+    pointer-events: auto;
+
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.12);
 }
 
 
