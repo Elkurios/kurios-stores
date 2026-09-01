@@ -932,15 +932,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     "click",
                     function () {
 
-                        history.pushState(
-                            null,
-                            "",
-                            "#store-" + product.seller_id
-                        );
-
-                        if (typeof openStorefront === "function") {
-                            openStorefront(product.seller_id);
-                        }
+                        window.location.hash =
+                            "store-" + product.seller_id;
 
                     }
                 );
@@ -1449,7 +1442,7 @@ if (signOutButton) {
 
             const notificationsPanel =
                 document.getElementById(
-                    "notificationsPanel"
+                    "notificationPanel"
                 );
 
             if (notificationsPanel) {
@@ -2013,6 +2006,16 @@ function openProfilePanel() {
 
         }
 
+        if (window.location.hash === "#profile") {
+
+            history.replaceState(
+                null,
+                "",
+                window.location.pathname + window.location.search
+            );
+
+        }
+
         openSignInModal();
 
         return;
@@ -2040,6 +2043,15 @@ function openProfilePanel() {
 
     }
 
+    const mainEl =
+        document.getElementById("mainContent");
+
+    if (mainEl) {
+        mainEl.style.display = "none";
+    }
+
+    window.scrollTo({ top: 0 });
+
 }
 
 
@@ -2054,6 +2066,10 @@ function closeProfilePanel() {
     }
 
     exitProfileEditMode();
+
+    if (typeof goHome === "function") {
+        goHome();
+    }
 
 }
 
@@ -2396,7 +2412,9 @@ if (accountProfile) {
 
     accountProfile.addEventListener(
         "click",
-        openProfilePanel
+        function () {
+            window.location.hash = "profile";
+        }
     );
 
 }
@@ -2447,6 +2465,12 @@ if (accountSettings) {
         "click",
         function () {
 
+            if (typeof hideAllFullPages === "function") {
+                hideAllFullPages();
+            }
+
+            history.pushState(null, "", "#profile");
+
             openProfilePanel();
 
             if (typeof enterProfileEditMode === "function") {
@@ -2460,41 +2484,9 @@ if (accountSettings) {
 
 
 // ========================================
-// WISHLIST / WALLET — NOT BUILT YET
-// (show a toast instead of doing nothing)
+// WISHLIST / WALLET
+// (real pages, feature itself isn't built yet)
 // ========================================
-
-function showComingSoonToast(featureName) {
-
-    let toast =
-        document.getElementById("kuriosToast");
-
-    if (!toast) {
-
-        toast = document.createElement("div");
-        toast.id = "kuriosToast";
-        toast.className = "kurios-toast";
-        document.body.appendChild(toast);
-
-    }
-
-    toast.textContent =
-        featureName + " is coming soon.";
-
-    toast.classList.add("show");
-
-    setTimeout(
-        function () {
-            toast.classList.remove("show");
-        },
-        3000
-    );
-
-    if (studentAccountMenu) {
-        studentAccountMenu.classList.remove("open");
-    }
-
-}
 
 const accountWishlist =
     document.getElementById("accountWishlist");
@@ -2504,7 +2496,13 @@ if (accountWishlist) {
     accountWishlist.addEventListener(
         "click",
         function () {
-            showComingSoonToast("Wishlist");
+
+            if (studentAccountMenu) {
+                studentAccountMenu.classList.remove("open");
+            }
+
+            window.location.hash = "wishlist";
+
         }
     );
 
@@ -2518,7 +2516,13 @@ if (accountWallet) {
     accountWallet.addEventListener(
         "click",
         function () {
-            showComingSoonToast("Wallet");
+
+            if (studentAccountMenu) {
+                studentAccountMenu.classList.remove("open");
+            }
+
+            window.location.hash = "wallet";
+
         }
     );
 
@@ -2715,6 +2719,16 @@ function openOrdersPanel() {
 
         }
 
+        if (window.location.hash === "#orders") {
+
+            history.replaceState(
+                null,
+                "",
+                window.location.pathname + window.location.search
+            );
+
+        }
+
         openSignInModal();
 
         return;
@@ -2737,6 +2751,15 @@ function openOrdersPanel() {
 
     }
 
+    const mainEl =
+        document.getElementById("mainContent");
+
+    if (mainEl) {
+        mainEl.style.display = "none";
+    }
+
+    window.scrollTo({ top: 0 });
+
     loadOrdersIntoPanel(
         student.id
     );
@@ -2752,6 +2775,10 @@ function closeOrdersPanel() {
             "open"
         );
 
+    }
+
+    if (typeof goHome === "function") {
+        goHome();
     }
 
 }
@@ -2817,7 +2844,9 @@ if (accountOrders) {
 
     accountOrders.addEventListener(
         "click",
-        openOrdersPanel
+        function () {
+            window.location.hash = "orders";
+        }
     );
 
 }
@@ -2827,7 +2856,9 @@ if (dashboardMyOrders) {
 
     dashboardMyOrders.addEventListener(
         "click",
-        openOrdersPanel
+        function () {
+            window.location.hash = "orders";
+        }
     );
 
 }
@@ -3829,7 +3860,7 @@ showOtpVerificationScreen(
                 if (notificationPanel) {
 
                     notificationPanel.classList.toggle(
-                        "active"
+                        "open"
                     );
 
                 }
@@ -3850,7 +3881,7 @@ showOtpVerificationScreen(
                 if (notificationPanel) {
 
                     notificationPanel.classList.remove(
-                        "active"
+                        "open"
                     );
 
                 }
@@ -5024,6 +5055,185 @@ showOtpVerificationScreen(
     */
 
     loadProducts();
+
+
+    // =====================================================
+    // UNIFIED FULL-PAGE ROUTER
+    // (single source of truth for every #hash-based full
+    // page: #sell, #store-<id>, #profile, #orders,
+    // #wishlist, #wallet — replaces the separate per-page
+    // listeners that used to duplicate this logic)
+    // =====================================================
+
+    function hideAllFullPages() {
+
+        ["sellerPage", "storefrontPage", "wishlistPage", "walletPage"]
+            .forEach(function (id) {
+
+                const el = document.getElementById(id);
+
+                if (el) {
+                    el.style.display = "none";
+                }
+
+            });
+
+        if (profileOverlay) {
+            profileOverlay.classList.remove("open");
+        }
+
+        if (ordersOverlay) {
+            ordersOverlay.classList.remove("open");
+        }
+
+    }
+
+    function goHome() {
+
+        if (window.location.hash) {
+
+            history.pushState(
+                null,
+                "",
+                window.location.pathname + window.location.search
+            );
+
+        }
+
+        hideAllFullPages();
+
+        const mainEl =
+            document.getElementById("mainContent");
+
+        if (mainEl) {
+            mainEl.style.display = "block";
+        }
+
+    }
+
+    function showSimplePage(pageId) {
+
+        hideAllFullPages();
+
+        const pageEl =
+            document.getElementById(pageId);
+
+        if (pageEl) {
+            pageEl.style.display = "block";
+        }
+
+        const mainEl =
+            document.getElementById("mainContent");
+
+        if (mainEl) {
+            mainEl.style.display = "none";
+        }
+
+        window.scrollTo({ top: 0 });
+
+    }
+
+    function syncPageFromHash() {
+
+        const hash = window.location.hash;
+
+        if (hash === "#sell") {
+
+            hideAllFullPages();
+
+            if (typeof openSellerPanel === "function") {
+                openSellerPanel();
+            }
+
+            return;
+
+        }
+
+        if (hash.indexOf("#store-") === 0) {
+
+            const sellerId =
+                hash.replace("#store-", "");
+
+            if (sellerId && typeof openStorefront === "function") {
+
+                hideAllFullPages();
+                openStorefront(sellerId);
+                return;
+
+            }
+
+        }
+
+        if (hash === "#profile") {
+
+            hideAllFullPages();
+            openProfilePanel();
+            return;
+
+        }
+
+        if (hash === "#orders") {
+
+            hideAllFullPages();
+            openOrdersPanel();
+            return;
+
+        }
+
+        if (hash === "#wishlist") {
+
+            showSimplePage("wishlistPage");
+            return;
+
+        }
+
+        if (hash === "#wallet") {
+
+            showSimplePage("walletPage");
+            return;
+
+        }
+
+        // No matching hash — show the homepage.
+
+        hideAllFullPages();
+
+        const mainEl =
+            document.getElementById("mainContent");
+
+        if (mainEl) {
+            mainEl.style.display = "block";
+        }
+
+    }
+
+    // Generic "Back to Kurios Stores" links on the
+    // simple coming-soon pages (Wishlist, Wallet).
+
+    document.querySelectorAll(".page-back-link").forEach(function (link) {
+
+        link.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                goHome();
+
+            }
+        );
+
+    });
+
+    // Make these reachable from outer-scope code too
+    // (e.g. closeSellerPanel calling goHome()).
+
+    window.goHome = goHome;
+    window.syncPageFromHash = syncPageFromHash;
+
+    window.addEventListener("popstate", syncPageFromHash);
+    window.addEventListener("hashchange", syncPageFromHash);
+
+    syncPageFromHash();
 
 
 });
@@ -7898,9 +8108,7 @@ if (accountBecomeSeller) {
         "click",
         function () {
 
-            history.pushState(null, "", "#sell");
-
-            openSellerPanel();
+            window.location.hash = "sell";
 
         }
     );
@@ -7935,38 +8143,9 @@ if (sellerBackLink) {
 // ========================================
 // SELLER PAGE — BROWSER BACK/FORWARD
 // AND DIRECT-LINK (#sell) SUPPORT
+// (handled centrally by the unified router
+// inside DOMContentLoaded — see syncPageFromHash)
 // ========================================
-
-function syncSellerPageWithHash() {
-
-    if (window.location.hash === "#sell") {
-
-        openSellerPanel();
-
-    } else {
-
-        if (sellerPage) {
-            sellerPage.style.display = "none";
-        }
-
-        if (mainContent) {
-            mainContent.style.display = "block";
-        }
-
-    }
-
-}
-
-window.addEventListener("popstate", syncSellerPageWithHash);
-
-// Covers plain <a href="#shop"> style nav links too,
-// which change the hash without going through pushState.
-
-window.addEventListener("hashchange", syncSellerPageWithHash);
-
-if (window.location.hash === "#sell") {
-    openSellerPanel();
-}
 
 
 // ========================================
@@ -8702,52 +8881,9 @@ function renderStorefrontProducts(products) {
 
 // ========================================
 // HASH ROUTING — INCLUDE #store-<id>
+// (handled centrally by the unified router
+// inside DOMContentLoaded — see syncPageFromHash)
 // ========================================
-
-function checkStorefrontHash() {
-
-    const hash = window.location.hash;
-
-    if (hash.indexOf("#store-") === 0) {
-
-        const sellerId = hash.replace("#store-", "");
-
-        if (sellerId) {
-            openStorefront(sellerId);
-            return true;
-        }
-
-    }
-
-    return false;
-
-}
-
-window.addEventListener("popstate", function () {
-
-    if (!checkStorefrontHash()) {
-
-        if (storefrontPage) {
-            storefrontPage.style.display = "none";
-        }
-
-    }
-
-});
-
-window.addEventListener("hashchange", function () {
-
-    if (!checkStorefrontHash()) {
-
-        if (storefrontPage) {
-            storefrontPage.style.display = "none";
-        }
-
-    }
-
-});
-
-checkStorefrontHash();
 
 
 // =========================================================
