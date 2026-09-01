@@ -11207,7 +11207,7 @@ async function loadSellerDashboardStats(studentId) {
 
 
         // ------------------------------------
-        // SALES CHART (custom SVG-free bar chart)
+        // SALES CHART — real SVG line chart
         // ------------------------------------
 
         const chartEl =
@@ -11215,72 +11215,163 @@ async function loadSellerDashboardStats(studentId) {
 
         if (chartEl) {
 
-            chartEl.innerHTML = "";
+            const days =
+                Array.isArray(data.salesByDay) ? data.salesByDay : [];
 
-            const maxValue =
-                Math.max(1, ...data.salesByDay.map(function (d) { return d.total; }));
+            if (days.length === 0) {
 
-            data.salesByDay.forEach(function (day) {
+                chartEl.innerHTML =
+                    '<div class="seller-chart-empty">No sales data yet.</div>';
 
-                const heightPercent =
-                    Math.max(3, Math.round((day.total / maxValue) * 100));
+            } else {
 
-                const wrap =
-                    document.createElement("div");
+                const width = 620;
+                const height = 160;
+                const pad = { left: 42, right: 12, top: 12, bottom: 26 };
+                const innerW = width - pad.left - pad.right;
+                const innerH = height - pad.top - pad.bottom;
 
-                wrap.className = "seller-chart-bar-wrap";
+                const maxValue =
+                    Math.max(1, ...days.map(function (d) { return Number(d.total) || 0; }));
 
-                wrap.innerHTML = `
-                    <div class="seller-chart-bar" style="height:${heightPercent}%;" title="₦${Number(day.total).toLocaleString()}"></div>
-                    <span class="seller-chart-bar-label">${day.label}</span>
-                `;
+                const points =
+                    days.map(function (d, i) {
 
-                chartEl.appendChild(wrap);
+                        const x =
+                            pad.left + (days.length === 1 ? innerW / 2 : (i * innerW) / (days.length - 1));
 
-            });
+                        const y =
+                            pad.top + innerH - ((Number(d.total) || 0) / maxValue) * innerH;
+
+                        return { x: x, y: y, label: d.label, value: Number(d.total) || 0 };
+
+                    });
+
+                const polyline =
+                    points.map(function (p) { return p.x + "," + p.y; }).join(" ");
+
+                const area =
+                    pad.left + "," + (pad.top + innerH) + " " +
+                    polyline + " " +
+                    points[points.length - 1].x + "," + (pad.top + innerH);
+
+                const gridLines =
+                    [0, 0.25, 0.5, 0.75, 1].map(function (r) {
+
+                        const y = pad.top + innerH - r * innerH;
+                        const value = Math.round(maxValue * r);
+                        const label = value >= 1000 ? Math.round(value / 1000) + "K" : value;
+
+                        return `<line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke="#f0f0f2" stroke-width="1"/>` +
+                            `<text x="${pad.left - 8}" y="${y + 3}" text-anchor="end" fill="#9ca3af" font-size="10">₦${label}</text>`;
+
+                    }).join("");
+
+                const dayLabels =
+                    points.map(function (p) {
+                        return `<text x="${p.x}" y="${height - 6}" text-anchor="middle" fill="#9ca3af" font-size="10">${p.label}</text>`;
+                    }).join("");
+
+                const dots =
+                    points.map(function (p) {
+                        return `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#6d28d9" stroke="#fff" stroke-width="2"><title>₦${p.value.toLocaleString()}</title></circle>`;
+                    }).join("");
+
+                chartEl.innerHTML =
+                    `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img">` +
+                    gridLines +
+                    `<polygon points="${area}" fill="rgba(109,40,217,0.08)"/>` +
+                    `<polyline points="${polyline}" fill="none" stroke="#6d28d9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
+                    dots +
+                    dayLabels +
+                    `</svg>`;
+
+            }
 
         }
 
 
         // ------------------------------------
-        // ORDER STATUS BREAKDOWN
+        // ORDER STATUS — real donut chart
         // ------------------------------------
+
+        const statusColors = {
+            paid: "#15803d",
+            pending: "#b45309",
+            failed: "#dc2626"
+        };
+
+        const statusEntries =
+            Object.entries(data.statusBreakdown || {});
+
+        const totalStatuses =
+            Math.max(1, statusEntries.reduce(function (sum, entry) { return sum + Number(entry[1] || 0); }, 0));
+
+        const donutEl =
+            document.getElementById("sellerOrderDonut");
 
         const statusEl =
             document.getElementById("sellerStatusBreakdown");
 
-        if (statusEl) {
+        let cursor = 0;
 
-            const statusColors = {
-                paid: "#15803d",
-                pending: "#b45309",
-                failed: "#dc2626"
-            };
+        const stops =
+            statusEntries.map(function (entry) {
 
-            statusEl.innerHTML = "";
+                const status = entry[0];
+                const value = Number(entry[1] || 0);
 
-            Object.keys(data.statusBreakdown).forEach(function (status) {
+                const startDeg = (cursor * 360) / totalStatuses;
+                cursor += value;
+                const endDeg = (cursor * 360) / totalStatuses;
 
-                const row =
-                    document.createElement("div");
-
-                row.className = "seller-status-row";
-
-                row.innerHTML = `
-                    <span class="seller-status-dot" style="background:${statusColors[status]};"></span>
-                    <span class="seller-status-row-label">${status}</span>
-                    <span class="seller-status-row-count">${data.statusBreakdown[status]}</span>
-                `;
-
-                statusEl.appendChild(row);
+                return (statusColors[status] || "#9ca3af") + " " + startDeg + "deg " + endDeg + "deg";
 
             });
+
+        if (donutEl) {
+
+            donutEl.style.background =
+                stops.length > 0 ?
+                    "conic-gradient(" + stops.join(",") + ")" :
+                    "conic-gradient(#e5e7eb 0deg 360deg)";
+
+        }
+
+        const donutTotalEl =
+            document.getElementById("sellerDonutTotal");
+
+        if (donutTotalEl) {
+
+            donutTotalEl.textContent =
+                statusEntries.reduce(function (sum, entry) { return sum + Number(entry[1] || 0); }, 0);
+
+        }
+
+        if (statusEl) {
+
+            statusEl.innerHTML =
+                statusEntries.map(function (entry) {
+
+                    const status = entry[0];
+                    const count = Number(entry[1] || 0);
+                    const pct = ((count / totalStatuses) * 100).toFixed(0);
+
+                    return `
+                        <div class="seller-status-row">
+                            <span class="seller-status-dot" style="background:${statusColors[status] || "#9ca3af"};"></span>
+                            <span class="seller-status-row-label">${status}</span>
+                            <span class="seller-status-row-count">${count} (${pct}%)</span>
+                        </div>
+                    `;
+
+                }).join("");
 
         }
 
 
         // ------------------------------------
-        // TOP SELLING PRODUCTS
+        // TOP SELLING PRODUCTS — with thumbnail + price
         // ------------------------------------
 
         const topProductsEl =
@@ -11291,9 +11382,12 @@ async function loadSellerDashboardStats(studentId) {
 
         if (topProductsEl) {
 
-            topProductsEl.innerHTML = "";
+            const topProducts =
+                Array.isArray(data.topProducts) ? data.topProducts : [];
 
-            if (data.topProducts.length === 0) {
+            if (topProducts.length === 0) {
+
+                topProductsEl.innerHTML = "";
 
                 if (topProductsEmptyEl) topProductsEmptyEl.style.display = "block";
 
@@ -11301,21 +11395,26 @@ async function loadSellerDashboardStats(studentId) {
 
                 if (topProductsEmptyEl) topProductsEmptyEl.style.display = "none";
 
-                data.topProducts.forEach(function (product) {
+                topProductsEl.innerHTML =
+                    topProducts.map(function (product) {
 
-                    const row =
-                        document.createElement("div");
+                        const thumbMarkup =
+                            product.image_url ?
+                                `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
+                                `<i class="fa-solid fa-box"></i>`;
 
-                    row.className = "seller-top-product-row";
+                        return `
+                            <div class="seller-top-product-row seller-top-product-row-with-thumb">
+                                <div class="seller-top-product-thumb">${thumbMarkup}</div>
+                                <div class="seller-top-product-details">
+                                    <strong>${product.name}</strong>
+                                    <span>₦${Number(product.price || 0).toLocaleString()}</span>
+                                </div>
+                                <span class="seller-top-product-qty">${product.quantitySold} sold</span>
+                            </div>
+                        `;
 
-                    row.innerHTML = `
-                        <strong>${product.name}</strong>
-                        <span class="seller-top-product-qty">${product.quantitySold} sold</span>
-                    `;
-
-                    topProductsEl.appendChild(row);
-
-                });
+                    }).join("");
 
             }
 
@@ -11323,7 +11422,7 @@ async function loadSellerDashboardStats(studentId) {
 
 
         // ------------------------------------
-        // RECENT ORDERS TABLE
+        // RECENT ORDERS TABLE — now with product
         // ------------------------------------
 
         const recentOrdersEl =
@@ -11334,7 +11433,10 @@ async function loadSellerDashboardStats(studentId) {
 
         if (recentOrdersEl) {
 
-            if (data.recentOrders.length === 0) {
+            const recentOrders =
+                Array.isArray(data.recentOrders) ? data.recentOrders : [];
+
+            if (recentOrders.length === 0) {
 
                 recentOrdersEl.innerHTML = "";
 
@@ -11345,7 +11447,12 @@ async function loadSellerDashboardStats(studentId) {
                 if (recentOrdersEmptyEl) recentOrdersEmptyEl.style.display = "none";
 
                 const rows =
-                    data.recentOrders.map(function (order) {
+                    recentOrders.map(function (order) {
+
+                        const firstItem =
+                            Array.isArray(order.items) && order.items[0] ?
+                                order.items[0].name :
+                                "Product";
 
                         const orderDate =
                             new Date(order.createdAt).toLocaleDateString(
@@ -11357,6 +11464,7 @@ async function loadSellerDashboardStats(studentId) {
                             <tr>
                                 <td>#${order.orderId}</td>
                                 <td>${order.buyerName}</td>
+                                <td>${firstItem}</td>
                                 <td>₦${Number(order.subtotal).toLocaleString()}</td>
                                 <td><span class="seller-order-status-pill ${order.status}">${order.status}</span></td>
                                 <td>${orderDate}</td>
@@ -11371,6 +11479,7 @@ async function loadSellerDashboardStats(studentId) {
                             <tr>
                                 <th>Order</th>
                                 <th>Customer</th>
+                                <th>Product</th>
                                 <th>Amount</th>
                                 <th>Status</th>
                                 <th>Date</th>
