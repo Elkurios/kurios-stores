@@ -2250,6 +2250,30 @@
                     <div id="sellerProductList"></div>
 
 
+                    <!-- MY SALES -->
+
+                    <div class="seller-dashboard-header" style="margin-top: 32px;">
+
+                        <h3>My Sales</h3>
+
+                    </div>
+
+                    <div class="seller-sales-summary" id="sellerSalesSummary" style="display: none;">
+                        <span>Total Revenue</span>
+                        <strong id="sellerTotalRevenue">₦0</strong>
+                    </div>
+
+                    <p id="sellerSalesLoading" class="reset-passcode-intro">
+                        Loading your sales...
+                    </p>
+
+                    <p id="sellerSalesEmpty" class="reset-passcode-intro" style="display: none;">
+                        No sales yet — orders containing your products will show up here.
+                    </p>
+
+                    <div id="sellerSalesList"></div>
+
+
                     <!-- ADD / EDIT PRODUCT FORM -->
 
                     <div id="sellerProductFormWrap" style="display: none;">
@@ -2780,10 +2804,54 @@
             </a>
         </div>
 
-        <div class="full-page-panel coming-soon-panel">
-            <i class="fa-regular fa-credit-card"></i>
-            <h2>Wallet</h2>
-            <p>Your Kurios wallet is coming soon.</p>
+        <div class="full-page-panel">
+
+            <div class="profile-panel-header">
+                <div>
+                    <h2>Wallet</h2>
+                    <p>Your Kurios Stores earnings</p>
+                </div>
+            </div>
+
+            <div class="profile-panel-body">
+
+                <p id="walletLoading" class="reset-passcode-intro">
+                    Loading your wallet...
+                </p>
+
+                <!-- NOT A SELLER -->
+
+                <div id="walletNotSellerState" style="display: none;" class="coming-soon-panel">
+                    <i class="fa-regular fa-credit-card"></i>
+                    <h2>No wallet yet</h2>
+                    <p>
+                        Wallets are earned by selling on Kurios.
+                        <a href="#sell" style="color: var(--purple); font-weight: 700;">Become a seller</a>
+                        to start building a balance.
+                    </p>
+                </div>
+
+                <!-- SELLER WALLET -->
+
+                <div id="walletSellerState" style="display: none;">
+
+                    <div class="wallet-balance-card">
+                        <span>Available Balance</span>
+                        <strong id="walletBalance">₦0</strong>
+                    </div>
+
+                    <div class="form-section-label">Transaction History</div>
+
+                    <p id="walletTransactionsEmpty" class="reset-passcode-intro" style="display: none;">
+                        No transactions yet.
+                    </p>
+
+                    <div id="walletTransactionList"></div>
+
+                </div>
+
+            </div>
+
         </div>
 
     </section>
