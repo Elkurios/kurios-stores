@@ -303,7 +303,7 @@
     </button>
 
 
-    <!-- SELL ON KURIOS -->
+    <!-- SELL ON KURIOS / SWITCH TO SELLER -->
 
     <button
         type="button"
@@ -312,7 +312,7 @@
 
         <i class="fa-solid fa-store"></i>
 
-        <span>
+        <span id="accountBecomeSellerLabel">
             Sell on Kurios
         </span>
 
@@ -2144,6 +2144,7 @@
                 <button type="button" class="ks-seller-nav-item ks-seller-nav-link" data-seller-action="messages"><i class="fa-regular fa-message"></i><span>Messages</span></button>
                 <button type="button" class="ks-seller-nav-item" data-seller-tab="settings"><i class="fa-solid fa-gear"></i><span>Store Settings</span></button>
                 <button type="button" class="ks-seller-nav-item ks-seller-nav-link" data-seller-action="store"><i class="fa-solid fa-store"></i><span>My Store</span><i class="fa-solid fa-arrow-up-right-from-square ks-nav-chevron"></i></button>
+                <button type="button" class="ks-seller-nav-item ks-seller-nav-link" data-seller-action="switch-to-student"><i class="fa-solid fa-arrow-right-arrow-left"></i><span>Switch to Student</span></button>
             </nav>
 
             <div class="ks-grow-card">
@@ -3580,6 +3581,66 @@
                 </div>
 
             </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         DASHBOARD CHOICE MODAL
+         (shown right after login, only for approved sellers)
+    ====================================================== -->
+
+    <div
+        class="modal-overlay"
+        id="dashboardChoiceModal"
+    >
+
+        <div class="auth-modal dashboard-choice-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-grid-2"></i>
+            </div>
+
+            <h2 id="dashboardChoiceGreeting">
+                Welcome back!
+            </h2>
+
+            <p>
+                Where would you like to go?
+            </p>
+
+            <button
+                type="button"
+                id="dashboardChoiceStudent"
+                class="dashboard-choice-card"
+            >
+                <div class="dashboard-choice-icon">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </div>
+                <div>
+                    <strong>Student Dashboard</strong>
+                    <span>Shop, orders, wallet, messages, profile</span>
+                </div>
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+
+            <button
+                type="button"
+                id="dashboardChoiceSeller"
+                class="dashboard-choice-card"
+            >
+                <div class="dashboard-choice-icon">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <div>
+                    <strong>Seller Dashboard</strong>
+                    <span>Manage your store, products, orders, sales</span>
+                </div>
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
 
         </div>
 
