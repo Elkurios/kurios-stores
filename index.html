@@ -319,6 +319,29 @@
     </button>
 
 
+    <!-- SWITCH TO SELLER -->
+
+    <button
+        type="button"
+        id="accountSwitchToSeller"
+        class="account-role-switch"
+        style="display: none;"
+        aria-label="Switch to Seller account"
+    >
+
+        <i class="fa-solid fa-right-left"></i>
+
+        <span>
+            Switch to Seller
+        </span>
+
+        <small>
+            Seller Center
+        </small>
+
+    </button>
+
+
     <!-- ACCOUNT SETTINGS -->
 
     <button
@@ -2170,7 +2193,30 @@
                     <button type="button" class="ks-icon-btn" data-seller-action="notifications" aria-label="Notifications"><i class="fa-regular fa-bell"></i><span class="ks-notification-dot"></span></button>
                     <button type="button" class="ks-icon-btn" data-seller-action="messages" aria-label="Messages"><i class="fa-regular fa-comments"></i></button>
                     <button type="button" class="ks-add-product-top" id="sellerDashboardAddProduct"><i class="fa-solid fa-plus"></i> Add Product <i class="fa-solid fa-chevron-down"></i></button>
-                    <button type="button" class="ks-user-menu" data-seller-action="profile"><span class="ks-user-avatar" id="sellerDashboardTopAvatar"><i class="fa-solid fa-user"></i></span><span id="sellerDashboardTopName">Elkurios</span><i class="fa-solid fa-chevron-down"></i></button>
+                    <button type="button" class="ks-user-menu" id="sellerDashboardUserMenu" aria-expanded="false"><span class="ks-user-avatar" id="sellerDashboardTopAvatar"><i class="fa-solid fa-user"></i></span><span id="sellerDashboardTopName">Elkurios</span><i class="fa-solid fa-chevron-down"></i></button>
+                    <div class="ks-seller-account-menu" id="ksSellerAccountMenu">
+                        <div class="ks-seller-account-head">
+                            <span class="ks-seller-account-avatar" id="ksSellerAccountAvatar"><i class="fa-solid fa-store"></i></span>
+                            <div>
+                                <strong id="ksSellerAccountName">Seller</strong>
+                                <span id="ksSellerAccountStore">Seller account</span>
+                            </div>
+                        </div>
+                        <div class="ks-seller-account-divider"></div>
+                        <button type="button" id="sellerSwitchToStudent">
+                            <i class="fa-solid fa-right-left"></i>
+                            <span>Switch to Student</span>
+                        </button>
+                        <button type="button" id="sellerAccountProfile">
+                            <i class="fa-regular fa-user"></i>
+                            <span>My Profile</span>
+                        </button>
+                        <div class="ks-seller-account-divider"></div>
+                        <button type="button" id="sellerAccountSignOut" class="ks-seller-account-signout">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span>Sign Out</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
