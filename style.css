@@ -5237,14 +5237,12 @@ img {
 /* SALES CHART (custom SVG bars) */
 
 .seller-sales-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 8px;
     height: 160px;
     padding-top: 10px;
-}
-
-.seller-sales-chart svg {
-    width: 100%;
-    height: 100%;
-    display: block;
 }
 
 .seller-chart-bar-wrap {
@@ -5278,51 +5276,6 @@ img {
 
 
 /* ORDER STATUS BREAKDOWN */
-
-.seller-donut-wrap {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.seller-donut {
-    width: 130px;
-    height: 130px;
-    min-width: 130px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    background: conic-gradient(#e5e7eb 0deg 360deg);
-}
-
-.seller-donut::after {
-    content: "";
-    position: absolute;
-    inset: 22px;
-    background: white;
-    border-radius: 50%;
-}
-
-.seller-donut > div {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-}
-
-.seller-donut strong {
-    display: block;
-    font-size: 22px;
-    color: #111827;
-}
-
-.seller-donut span {
-    display: block;
-    font-size: 10px;
-    color: #9ca3af;
-    margin-top: 2px;
-}
 
 .seller-status-breakdown {
     display: flex;
@@ -5358,54 +5311,6 @@ img {
 
 
 /* TOP PRODUCTS LIST */
-
-.seller-chart-empty {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #9ca3af;
-    font-size: 12px;
-}
-
-.seller-top-product-row-with-thumb {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.seller-top-product-thumb {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    border-radius: 8px;
-    background: var(--purple-soft);
-    color: var(--purple);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    font-size: 13px;
-}
-
-.seller-top-product-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.seller-top-product-details {
-    flex: 1;
-    min-width: 0;
-}
-
-.seller-top-product-details span {
-    display: block;
-    font-size: 11px;
-    color: #9ca3af;
-    margin-top: 2px;
-}
-
 
 .seller-top-product-row {
     display: flex;
@@ -6983,3 +6888,24 @@ img {
     }
 
 }
+
+/* =========================================================
+   KURIOS SELLER CENTER — MODERN E-COMMERCE DASHBOARD
+   Visual implementation based on the approved seller dashboard reference.
+   Existing seller IDs and API-backed tabs are preserved.
+   ========================================================= */
+.ks-seller-app{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:calc(100vh - 20px);background:#f8fafb;border:1px solid #e5e7eb;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(15,23,42,.08);margin:0 auto;max-width:1500px;color:#10212a}
+.ks-seller-sidebar{background:linear-gradient(180deg,#063f36 0%,#005448 55%,#006454 100%);color:#fff;padding:18px 12px 14px;display:flex;flex-direction:column;min-width:0}
+.ks-seller-brand{display:flex;align-items:center;gap:10px;padding:4px 12px 17px;border-bottom:1px solid rgba(255,255,255,.13);margin-bottom:18px}
+.ks-seller-brand-mark{font-size:25px;color:#49e58b}.ks-seller-brand strong{display:block;font-size:21px;line-height:1;font-weight:900;letter-spacing:.3px}.ks-seller-brand span{display:block;color:#27d47a;font-size:16px;font-weight:900;letter-spacing:.5px}.ks-seller-profile{display:flex;gap:10px;align-items:center;padding:0 9px 16px}.ks-seller-avatar,.ks-user-avatar{border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#e8f5f0;color:#0a6b5a}.ks-seller-avatar{width:43px;height:43px;flex:none}.ks-seller-avatar img,.ks-user-avatar img{width:100%;height:100%;object-fit:cover}.ks-seller-profile-copy strong{display:block;font-size:13px;color:#fff}.ks-seller-profile-copy span{font-size:11px;color:#c9e9df}.ks-seller-profile-copy i{color:#31db83;margin-left:2px}.ks-seller-nav{display:flex;flex-direction:column;gap:3px}.ks-seller-nav-item{width:100%;display:flex;align-items:center;gap:12px;border:0;background:transparent;color:#edf9f5;padding:10px 12px;border-radius:8px;font:600 12px/1.2 inherit;text-align:left;cursor:pointer}.ks-seller-nav-item i:first-child{width:16px;text-align:center;font-size:14px}.ks-seller-nav-item:hover{background:rgba(255,255,255,.09)}.ks-seller-nav-item.active{background:#0c9b70;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}.ks-seller-nav-item span{flex:1}.ks-seller-nav-item b{min-width:21px;height:21px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#075d4d;font-size:10px}.ks-nav-chevron{font-size:9px!important;width:auto!important}.ks-grow-card{position:relative;margin:18px 0 14px;padding:15px 14px;border-radius:9px;background:linear-gradient(135deg,#079c70,#0e765e);overflow:hidden}.ks-grow-card strong{font-size:13px}.ks-grow-card p{font-size:11px;line-height:1.55;color:#d9fff0;margin:7px 0 11px;max-width:150px}.ks-grow-card button{border:0;background:#fff;color:#08755d;border-radius:5px;padding:7px 10px;font-size:10px;font-weight:800;cursor:pointer}.ks-grow-icon{position:absolute;right:7px;bottom:18px;font-size:34px;transform:rotate(-18deg);opacity:.25}.ks-help-card{margin-top:auto;border-top:1px solid rgba(255,255,255,.12);padding:17px 9px 4px;display:flex;gap:12px;align-items:center}.ks-help-card>i{font-size:20px}.ks-help-card strong,.ks-help-card span{display:block}.ks-help-card strong{font-size:12px}.ks-help-card span{font-size:10px;color:#bfe7dc;margin-top:3px}
+.ks-seller-content{min-width:0;background:#fbfcfd}.ks-seller-topbar{height:66px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:18px;padding:0 24px}.ks-sidebar-toggle{border:0;background:transparent;font-size:18px;color:#182b34;cursor:pointer}.ks-seller-search{width:min(340px,42vw);height:36px;border:1px solid #dce2e5;border-radius:7px;display:flex;align-items:center;gap:9px;padding:0 11px;color:#5d6b73;margin-left:auto}.ks-seller-search input{border:0;outline:0;width:100%;font:500 12px inherit;color:#152831;background:transparent}.ks-topbar-actions{display:flex;align-items:center;gap:13px}.ks-icon-btn{position:relative;border:0;background:transparent;color:#172b34;font-size:17px;cursor:pointer}.ks-notification-dot{position:absolute;right:-1px;top:0;width:5px;height:5px;border-radius:50%;background:#ef4444}.ks-add-product-top{border:0;background:#079d6e;color:#fff;border-radius:6px;padding:9px 12px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:7px;cursor:pointer}.ks-add-product-top i:last-child{font-size:8px;margin-left:3px}.ks-user-menu{border:0;background:transparent;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#1b2c34;cursor:pointer}.ks-user-avatar{width:30px;height:30px}.ks-user-menu>i{font-size:8px;color:#71808a}.ks-seller-page-head{padding:22px 28px 17px;display:flex;justify-content:space-between;align-items:flex-end;gap:18px}.ks-seller-page-head h2{font-size:24px;line-height:1.2;margin:0 0 5px;font-weight:800;letter-spacing:-.6px}.ks-seller-page-head p{margin:0;color:#6d7a83;font-size:13px}.ks-wave{font-size:21px}.ks-date-control{border:1px solid #dce2e5;border-radius:7px;background:#fff;padding:9px 12px;display:flex;align-items:center;gap:10px;font-size:11px;color:#263841;white-space:nowrap}.ks-date-control i{color:#52636c}.ks-seller-app .seller-dash-tab{padding:0 28px 26px}.ks-metric-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:15px;margin-bottom:18px}.ks-metric-card{background:#fff;border:1px solid #e1e6e9;border-radius:10px;padding:16px 14px;display:flex;align-items:center;gap:11px;min-height:105px}.ks-metric-icon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:15px}.ks-metric-icon.sales{background:#d8fae9;color:#08a66d}.ks-metric-icon.orders{background:#e1efff;color:#2585e8}.ks-metric-icon.customers{background:#eee4ff;color:#7441db}.ks-metric-icon.products{background:#ffeadb;color:#e27d2b}.ks-metric-icon.rating{background:#fff2bd;color:#dfaa00}.ks-metric-card span{display:block;color:#1f3039;font-size:11px;margin-bottom:4px}.ks-metric-card strong{display:block;color:#0e1e27;font-size:17px;line-height:1.2}.ks-metric-card small{display:block;margin-top:6px;font-size:9px;color:#7a8790}.ks-trend.positive{color:#0b9e69}.ks-dashboard-grid{display:grid;gap:16px;margin-bottom:16px}.ks-dashboard-grid-top{grid-template-columns:minmax(0,1.55fr) minmax(260px,1fr) minmax(250px,1.08fr)}.ks-dashboard-grid-bottom{grid-template-columns:minmax(0,1.7fr) minmax(270px,.72fr)}.ks-panel{background:#fff;border:1px solid #e1e6e9;border-radius:10px;padding:17px 18px;min-width:0;overflow:hidden}.ks-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}.ks-panel-head h3{font-size:13px;margin:0;font-weight:800;color:#13252e}.ks-panel-head p{margin:4px 0 0;color:#89959c;font-size:9px}.ks-panel-head button{border:0;background:transparent;color:#087b60;font-size:10px;font-weight:700;cursor:pointer}.ks-panel-filter{border:1px solid #e1e6e9;border-radius:6px;padding:7px 9px;font-size:9px;color:#56666f;white-space:nowrap}.ks-panel-filter i{font-size:8px;margin-left:7px}.ks-line-chart{height:240px;position:relative}.ks-line-chart svg{width:100%;height:100%;display:block}.ks-chart-empty{height:100%;display:grid;place-items:center;color:#9aa5aa;font-size:11px}.ks-donut-wrap{display:flex;align-items:center;gap:22px;min-height:240px}.ks-donut{width:168px;height:168px;border-radius:50%;display:grid;place-items:center;position:relative;flex:none;background:conic-gradient(#08a66d 0deg,#08a66d 360deg)}.ks-donut:after{content:"";position:absolute;inset:31px;background:#fff;border-radius:50%}.ks-donut>div{position:relative;z-index:2;text-align:center}.ks-donut strong{display:block;font-size:20px}.ks-donut span{display:block;color:#87939a;font-size:9px;margin-top:3px}.ks-donut-legend{display:flex;flex-direction:column;gap:12px;min-width:0}.ks-legend-item{display:grid;grid-template-columns:8px 1fr auto;gap:7px;align-items:center;font-size:10px}.ks-legend-dot{width:8px;height:8px;border-radius:50%}.ks-legend-label{color:#40515a}.ks-legend-value{color:#8a969d}.ks-top-products .ks-panel-head{margin-bottom:6px}.ks-top-product{display:grid;grid-template-columns:42px 1fr auto;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #edf0f2}.ks-top-product:last-child{border-bottom:0}.ks-top-thumb{width:42px;height:42px;border-radius:7px;background:#f3f4f4;display:grid;place-items:center;overflow:hidden;color:#89959c}.ks-top-thumb img{width:100%;height:100%;object-fit:cover}.ks-top-product strong{font-size:10px;display:block;color:#1a2b34;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ks-top-product span{font-size:9px;color:#69777f;display:block;margin-top:3px}.ks-top-product em{font-size:9px;color:#7d8a91;font-style:normal;white-space:nowrap}.ks-recent-orders{min-height:270px}.ks-recent-orders .seller-orders-table{font-size:10px}.ks-recent-orders .seller-orders-table th{font-size:9px;background:#f7f9fa;color:#52636b;padding:10px 8px}.ks-recent-orders .seller-orders-table td{padding:10px 8px;border-bottom:1px solid #edf0f2;color:#263840}.ks-recent-orders .seller-orders-table th:first-child,.ks-recent-orders .seller-orders-table td:first-child{padding-left:10px}.ks-order-status-pill{display:inline-block;padding:5px 8px;border-radius:6px;font-size:9px;font-weight:700;text-transform:capitalize}.ks-order-status-pill.paid{background:#dff8e9;color:#078554}.ks-order-status-pill.pending{background:#e5f0ff;color:#2b82df}.ks-order-status-pill.failed{background:#ffe5e5;color:#e22f2f}.ks-performance-list>div{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:9px;padding:14px 0;border-bottom:1px solid #edf0f2;font-size:10px}.ks-performance-list>div:last-child{border-bottom:0}.ks-performance-list i{font-size:16px;color:#3e5058}.ks-performance-list span{color:#596970}.ks-performance-list strong{font-size:10px;color:#24363f}.ks-seller-app .seller-dashboard-header{margin-bottom:15px}.ks-seller-app .seller-dash-sidebar{display:none}.ks-seller-app .seller-dash-main{min-width:0}.ks-seller-app .seller-dash-row{display:none}
+@media(max-width:1180px){.ks-metric-grid{grid-template-columns:repeat(3,1fr)}.ks-dashboard-grid-top{grid-template-columns:1.3fr 1fr}.ks-top-products{grid-column:1/-1}.ks-seller-app{grid-template-columns:220px minmax(0,1fr)}}
+@media(max-width:900px){.ks-seller-app{grid-template-columns:1fr;border-radius:0;margin:0}.ks-seller-sidebar{position:fixed;z-index:100;left:0;top:0;bottom:0;width:244px;transform:translateX(-102%);transition:transform .2s ease;box-shadow:12px 0 30px rgba(0,0,0,.18)}.ks-seller-app.sidebar-open .ks-seller-sidebar{transform:translateX(0)}.ks-seller-content{width:100%}.ks-seller-topbar{padding:0 15px}.ks-seller-search{width:34vw}.ks-topbar-actions{gap:9px}.ks-user-menu>span:not(.ks-user-avatar),.ks-user-menu>i{display:none}.ks-seller-page-head{padding:18px 15px 14px}.ks-seller-app .seller-dash-tab{padding:0 15px 20px}.ks-dashboard-grid-top,.ks-dashboard-grid-bottom{grid-template-columns:1fr}.ks-top-products{grid-column:auto}.ks-donut-wrap{justify-content:center}.ks-performance{min-height:auto}}
+@media(max-width:620px){.ks-seller-search{display:none}.ks-add-product-top{font-size:0;padding:9px 10px}.ks-add-product-top i:first-child{font-size:12px}.ks-add-product-top i:last-child{display:none}.ks-seller-page-head{align-items:flex-start;flex-direction:column}.ks-date-control{align-self:stretch;justify-content:center}.ks-metric-grid{grid-template-columns:1fr 1fr;gap:9px}.ks-metric-card{min-height:95px;padding:12px 10px}.ks-metric-card strong{font-size:14px}.ks-metric-icon{width:35px;height:35px}.ks-panel{padding:14px}.ks-line-chart{height:205px}.ks-donut-wrap{flex-direction:column}.ks-donut{width:145px;height:145px}.ks-donut:after{inset:27px}.ks-recent-orders{overflow:auto}.ks-recent-orders .seller-orders-table{min-width:560px}}
+
+/* Remove the old seller application shell when the approved seller dashboard is active. */
+#sellerPage.seller-dashboard-active{max-width:1600px;padding:14px 12px 50px}
+#sellerPage.seller-dashboard-active .full-page-back-row,
+#sellerPage.seller-dashboard-active .full-page-panel>.profile-panel-header{display:none}
+#sellerPage.seller-dashboard-active .full-page-panel{padding:0;border:0;background:transparent;border-radius:0}
+#sellerPage.seller-dashboard-active #sellerPanelBody{padding:0}
