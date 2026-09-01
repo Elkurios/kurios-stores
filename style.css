@@ -5046,6 +5046,69 @@ img {
 }
 
 
+/* DASHBOARD CHOICE MODAL */
+
+.dashboard-choice-modal {
+    text-align: center;
+}
+
+.dashboard-choice-modal p {
+    color: #6b7280;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+.dashboard-choice-card {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.dashboard-choice-card:hover {
+    border-color: var(--purple);
+    background: var(--purple-soft);
+}
+
+.dashboard-choice-card > i {
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.dashboard-choice-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 10px;
+    background: var(--purple-soft);
+    color: var(--purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.dashboard-choice-card div strong {
+    display: block;
+    font-size: 13px;
+    color: #111827;
+    margin-bottom: 2px;
+}
+
+.dashboard-choice-card div span {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+
 /* =========================================================
    SELLER DASHBOARD (tabbed, sidebar layout)
    ========================================================= */
