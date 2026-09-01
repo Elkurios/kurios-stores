@@ -8424,6 +8424,13 @@ function hideAllSellerStates() {
 
     });
 
+    const sellerPageEl =
+        document.getElementById("sellerPage");
+
+    if (sellerPageEl) {
+        sellerPageEl.classList.remove("seller-dashboard-active");
+    }
+
 }
 
 
@@ -8708,6 +8715,17 @@ async function openSellerPanel() {
 
             if (typeof loadSellerSales === "function") {
                 loadSellerSales(student.id);
+            }
+
+            if (typeof loadSellerDashboardStats === "function") {
+                loadSellerDashboardStats(student.id);
+            }
+
+            const sellerPageEl =
+                document.getElementById("sellerPage");
+
+            if (sellerPageEl) {
+                sellerPageEl.classList.add("seller-dashboard-active");
             }
 
             return;
@@ -11056,6 +11074,293 @@ async function loadDashboardWalletBalance(studentId) {
             "Load dashboard wallet balance error:",
             error
         );
+
+    }
+
+}
+
+
+// =========================================================
+// SELLER DASHBOARD — TAB SWITCHING
+// =========================================================
+
+document.querySelectorAll(".seller-dash-nav-item[data-seller-tab]").forEach(function (button) {
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            const targetTab =
+                button.dataset.sellerTab;
+
+            document.querySelectorAll(".seller-dash-nav-item[data-seller-tab]").forEach(function (btn) {
+                btn.classList.remove("active");
+            });
+
+            button.classList.add("active");
+
+            document.querySelectorAll(".seller-dash-tab").forEach(function (tab) {
+                tab.style.display = "none";
+            });
+
+            const targetEl =
+                document.getElementById(
+                    "sellerTab" +
+                    targetTab.charAt(0).toUpperCase() +
+                    targetTab.slice(1)
+                );
+
+            if (targetEl) {
+                targetEl.style.display = "block";
+            }
+
+        }
+    );
+
+});
+
+
+// =========================================================
+// SELLER DASHBOARD STATS (Overview tab)
+// =========================================================
+
+async function loadSellerDashboardStats(studentId) {
+
+    const loadingEl =
+        document.getElementById("sellerStatsLoading");
+
+    const contentEl =
+        document.getElementById("sellerStatsContent");
+
+    if (!loadingEl || !contentEl) {
+        return;
+    }
+
+    loadingEl.style.display = "block";
+    contentEl.style.display = "none";
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/dashboard-stats?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        loadingEl.style.display = "none";
+
+        if (!data.success) {
+            return;
+        }
+
+        contentEl.style.display = "block";
+
+
+        // ------------------------------------
+        // STAT CARDS
+        // ------------------------------------
+
+        const setText = function (id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+
+        setText("statTotalSales", "₦" + Number(data.totalSales).toLocaleString());
+        setText("statOrderCount", data.orderCount);
+        setText("statProductCount", data.productCount);
+        setText("statCustomerCount", data.uniqueCustomers);
+        setText("statWalletBalance", "₦" + Number(data.walletBalance).toLocaleString());
+
+
+        // ------------------------------------
+        // SALES CHART (custom SVG-free bar chart)
+        // ------------------------------------
+
+        const chartEl =
+            document.getElementById("sellerSalesChart");
+
+        if (chartEl) {
+
+            chartEl.innerHTML = "";
+
+            const maxValue =
+                Math.max(1, ...data.salesByDay.map(function (d) { return d.total; }));
+
+            data.salesByDay.forEach(function (day) {
+
+                const heightPercent =
+                    Math.max(3, Math.round((day.total / maxValue) * 100));
+
+                const wrap =
+                    document.createElement("div");
+
+                wrap.className = "seller-chart-bar-wrap";
+
+                wrap.innerHTML = `
+                    <div class="seller-chart-bar" style="height:${heightPercent}%;" title="₦${Number(day.total).toLocaleString()}"></div>
+                    <span class="seller-chart-bar-label">${day.label}</span>
+                `;
+
+                chartEl.appendChild(wrap);
+
+            });
+
+        }
+
+
+        // ------------------------------------
+        // ORDER STATUS BREAKDOWN
+        // ------------------------------------
+
+        const statusEl =
+            document.getElementById("sellerStatusBreakdown");
+
+        if (statusEl) {
+
+            const statusColors = {
+                paid: "#15803d",
+                pending: "#b45309",
+                failed: "#dc2626"
+            };
+
+            statusEl.innerHTML = "";
+
+            Object.keys(data.statusBreakdown).forEach(function (status) {
+
+                const row =
+                    document.createElement("div");
+
+                row.className = "seller-status-row";
+
+                row.innerHTML = `
+                    <span class="seller-status-dot" style="background:${statusColors[status]};"></span>
+                    <span class="seller-status-row-label">${status}</span>
+                    <span class="seller-status-row-count">${data.statusBreakdown[status]}</span>
+                `;
+
+                statusEl.appendChild(row);
+
+            });
+
+        }
+
+
+        // ------------------------------------
+        // TOP SELLING PRODUCTS
+        // ------------------------------------
+
+        const topProductsEl =
+            document.getElementById("sellerTopProducts");
+
+        const topProductsEmptyEl =
+            document.getElementById("sellerTopProductsEmpty");
+
+        if (topProductsEl) {
+
+            topProductsEl.innerHTML = "";
+
+            if (data.topProducts.length === 0) {
+
+                if (topProductsEmptyEl) topProductsEmptyEl.style.display = "block";
+
+            } else {
+
+                if (topProductsEmptyEl) topProductsEmptyEl.style.display = "none";
+
+                data.topProducts.forEach(function (product) {
+
+                    const row =
+                        document.createElement("div");
+
+                    row.className = "seller-top-product-row";
+
+                    row.innerHTML = `
+                        <strong>${product.name}</strong>
+                        <span class="seller-top-product-qty">${product.quantitySold} sold</span>
+                    `;
+
+                    topProductsEl.appendChild(row);
+
+                });
+
+            }
+
+        }
+
+
+        // ------------------------------------
+        // RECENT ORDERS TABLE
+        // ------------------------------------
+
+        const recentOrdersEl =
+            document.getElementById("sellerRecentOrdersTable");
+
+        const recentOrdersEmptyEl =
+            document.getElementById("sellerRecentOrdersEmpty");
+
+        if (recentOrdersEl) {
+
+            if (data.recentOrders.length === 0) {
+
+                recentOrdersEl.innerHTML = "";
+
+                if (recentOrdersEmptyEl) recentOrdersEmptyEl.style.display = "block";
+
+            } else {
+
+                if (recentOrdersEmptyEl) recentOrdersEmptyEl.style.display = "none";
+
+                const rows =
+                    data.recentOrders.map(function (order) {
+
+                        const orderDate =
+                            new Date(order.createdAt).toLocaleDateString(
+                                undefined,
+                                { month: "short", day: "numeric" }
+                            );
+
+                        return `
+                            <tr>
+                                <td>#${order.orderId}</td>
+                                <td>${order.buyerName}</td>
+                                <td>₦${Number(order.subtotal).toLocaleString()}</td>
+                                <td><span class="seller-order-status-pill ${order.status}">${order.status}</span></td>
+                                <td>${orderDate}</td>
+                            </tr>
+                        `;
+
+                    }).join("");
+
+                recentOrdersEl.innerHTML = `
+                    <table class="seller-orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                `;
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Load seller dashboard stats error:",
+            error
+        );
+
+        loadingEl.style.display = "none";
 
     }
 
