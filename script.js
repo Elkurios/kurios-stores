@@ -3225,6 +3225,13 @@ if (signInForm) {
                     "Login successful. Welcome back to Kurios Stores."
                 );
 
+                const postLoginSplash =
+                    document.getElementById("postLoginSplash");
+
+                if (postLoginSplash) {
+                    postLoginSplash.style.display = "flex";
+                }
+
 updateLoginState();
 
                 if (typeof showDashboardChoiceModal === "function") {
@@ -3241,7 +3248,14 @@ updateLoginState();
                                 sellerData.seller.status === "approved"
                             ) {
 
+                                // Keep the splash up — the choice
+                                // modal renders on top of it.
+
                                 showDashboardChoiceModal(data.student);
+
+                            } else if (postLoginSplash) {
+
+                                postLoginSplash.style.display = "none";
 
                             }
 
@@ -3253,7 +3267,15 @@ updateLoginState();
                                 error
                             );
 
+                            if (postLoginSplash) {
+                                postLoginSplash.style.display = "none";
+                            }
+
                         });
+
+                } else if (postLoginSplash) {
+
+                    postLoginSplash.style.display = "none";
 
                 }
 
