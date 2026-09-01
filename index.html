@@ -4592,6 +4592,43 @@
 
 
     <!-- =====================================================
+         DASHBOARD CHOOSER — APPROVED SELLERS
+    ====================================================== -->
+
+    <div class="ks-role-chooser" id="ksRoleChooser" aria-hidden="true">
+        <div class="ks-role-chooser-backdrop"></div>
+        <div class="ks-role-chooser-dialog" role="dialog" aria-modal="true" aria-labelledby="ksRoleChooserTitle">
+            <div class="ks-role-chooser-brand"><i class="fa-solid fa-cart-shopping"></i></div>
+            <p class="ks-role-chooser-eyebrow">WELCOME BACK</p>
+            <h2 id="ksRoleChooserTitle">Where would you like to go?</h2>
+            <p class="ks-role-chooser-subtitle">You have both a student account and an approved seller account. Choose the dashboard you want to access.</p>
+
+            <div class="ks-role-chooser-options">
+                <button type="button" class="ks-role-card student" id="ksChooseStudent">
+                    <span class="ks-role-card-icon"><i class="fa-solid fa-user-graduate"></i></span>
+                    <span class="ks-role-card-copy">
+                        <strong>Student Dashboard</strong>
+                        <small>Shop, manage orders, wallet, messages and your student account.</small>
+                    </span>
+                    <i class="fa-solid fa-arrow-right ks-role-card-arrow"></i>
+                </button>
+
+                <button type="button" class="ks-role-card seller" id="ksChooseSeller">
+                    <span class="ks-role-card-icon"><i class="fa-solid fa-store"></i></span>
+                    <span class="ks-role-card-copy">
+                        <strong>Seller Dashboard</strong>
+                        <small>Manage your store, products, orders, sales, inventory and wallet.</small>
+                    </span>
+                    <i class="fa-solid fa-arrow-right ks-role-card-arrow"></i>
+                </button>
+            </div>
+
+            <p class="ks-role-chooser-note"><i class="fa-solid fa-circle-check"></i> One login. Two dashboards. Your accounts stay linked.</p>
+        </div>
+    </div>
+
+
+    <!-- =====================================================
          JAVASCRIPT
     ====================================================== -->
 
