@@ -5133,6 +5133,133 @@ img {
     background: var(--purple-soft);
 }
 
+/* WALLET PAGE */
+
+.wallet-balance-card {
+    background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin-bottom: 24px;
+    color: white;
+    text-align: center;
+}
+
+.wallet-balance-card span {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.85;
+    margin-bottom: 8px;
+}
+
+.wallet-balance-card strong {
+    font-size: 34px;
+    font-weight: 800;
+}
+
+.wallet-transaction-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.wallet-transaction-row:last-child {
+    border-bottom: none;
+}
+
+.wallet-transaction-info strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 3px;
+}
+
+.wallet-transaction-info span {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.wallet-transaction-amount {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.wallet-transaction-amount.credit {
+    color: #15803d;
+}
+
+.wallet-transaction-amount.debit {
+    color: #dc2626;
+}
+
+
+/* SELLER SALES */
+
+.seller-sales-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--purple-soft);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+}
+
+.seller-sales-summary span {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--purple-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.seller-sales-summary strong {
+    font-size: 20px;
+    color: var(--purple-dark);
+}
+
+.seller-sale-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+
+.seller-sale-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.seller-sale-card-top strong {
+    font-size: 13px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.seller-sale-card-top span {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.seller-sale-amount {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--purple-dark);
+    white-space: nowrap;
+}
+
+.seller-sale-items {
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+
 .seller-product-card {
     display: flex;
     align-items: center;
