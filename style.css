@@ -3328,6 +3328,66 @@ img {
 }
 
 
+/* PASSCODE REVEAL TOGGLE */
+
+.passcode-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 7px;
+}
+
+.passcode-label-row label {
+    margin-bottom: 0;
+}
+
+.passcode-reveal-btn {
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 2px 4px;
+}
+
+.passcode-reveal-btn:hover {
+    color: var(--purple);
+}
+
+
+/* PASSWORD SHOW/HIDE TOGGLE */
+
+.password-field-wrap {
+    position: relative;
+}
+
+.password-field-wrap input {
+    padding-right: 40px !important;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.password-toggle-btn:hover {
+    color: var(--purple);
+}
+
+
 .form-group input,
 .form-group textarea {
 
