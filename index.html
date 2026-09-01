@@ -2953,21 +2953,34 @@
 
                     <div class="form-group">
 
-                        <label for="signinPasscodeBoxes">
-                            Passcode
-                        </label>
+                        <div class="passcode-label-row">
+
+                            <label for="signinPasscodeBoxes">
+                                Passcode
+                            </label>
+
+                            <button
+                                type="button"
+                                class="passcode-reveal-btn"
+                                data-target="signinPasscodeBoxes"
+                                aria-label="Show passcode"
+                            >
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+
+                        </div>
 
                         <div
                             class="otp-input-container passcode-input-container"
                             id="signinPasscodeBoxes"
                         >
 
-                            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
-                            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+                            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
 
                         </div>
 
@@ -3040,11 +3053,24 @@
                             Password
                         </label>
 
-                        <input
-                            type="password"
-                            id="signinAdminPassword"
-                            placeholder="Admin password"
-                        >
+                        <div class="password-field-wrap">
+
+                            <input
+                                type="password"
+                                id="signinAdminPassword"
+                                placeholder="Admin password"
+                            >
+
+                            <button
+                                type="button"
+                                class="password-toggle-btn"
+                                data-target="signinAdminPassword"
+                                aria-label="Show password"
+                            >
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+
+                        </div>
 
                     </div>
 
@@ -3183,20 +3209,33 @@
 
                 <div class="form-group">
 
-                    <label for="newPasscodeBoxes">
-                        New 6-digit passcode
-                    </label>
+                    <div class="passcode-label-row">
+
+                        <label for="newPasscodeBoxes">
+                            New 6-digit passcode
+                        </label>
+
+                        <button
+                            type="button"
+                            class="passcode-reveal-btn"
+                            data-target="newPasscodeBoxes"
+                            aria-label="Show passcode"
+                        >
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+
+                    </div>
 
                     <div
                         class="otp-input-container passcode-input-container"
                         id="newPasscodeBoxes"
                     >
-                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
                     </div>
 
                     <input type="hidden" id="newPasscodeInput">
@@ -3205,20 +3244,33 @@
 
                 <div class="form-group">
 
-                    <label for="confirmNewPasscodeBoxes">
-                        Confirm new passcode
-                    </label>
+                    <div class="passcode-label-row">
+
+                        <label for="confirmNewPasscodeBoxes">
+                            Confirm new passcode
+                        </label>
+
+                        <button
+                            type="button"
+                            class="passcode-reveal-btn"
+                            data-target="confirmNewPasscodeBoxes"
+                            aria-label="Show passcode"
+                        >
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+
+                    </div>
 
                     <div
                         class="otp-input-container passcode-input-container"
                         id="confirmNewPasscodeBoxes"
                     >
-                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-                        <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+                        <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
                     </div>
 
                     <input type="hidden" id="confirmNewPasscodeInput">
@@ -3500,21 +3552,34 @@
     <!-- PASSCODE -->
     <div class="form-group">
 
-        <label for="signupPasscodeBoxes">
-            Create a 6-digit passcode *
-        </label>
+        <div class="passcode-label-row">
+
+            <label for="signupPasscodeBoxes">
+                Create a 6-digit passcode *
+            </label>
+
+            <button
+                type="button"
+                class="passcode-reveal-btn"
+                data-target="signupPasscodeBoxes"
+                aria-label="Show passcode"
+            >
+                <i class="fa-regular fa-eye"></i>
+            </button>
+
+        </div>
 
         <div
             class="otp-input-container passcode-input-container"
             id="signupPasscodeBoxes"
         >
 
-            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
 
         </div>
 
@@ -3525,21 +3590,34 @@
 
     <div class="form-group">
 
-        <label for="signupConfirmPasscodeBoxes">
-            Confirm your passcode *
-        </label>
+        <div class="passcode-label-row">
+
+            <label for="signupConfirmPasscodeBoxes">
+                Confirm your passcode *
+            </label>
+
+            <button
+                type="button"
+                class="passcode-reveal-btn"
+                data-target="signupConfirmPasscodeBoxes"
+                aria-label="Show passcode"
+            >
+                <i class="fa-regular fa-eye"></i>
+            </button>
+
+        </div>
 
         <div
             class="otp-input-container passcode-input-container"
             id="signupConfirmPasscodeBoxes"
         >
 
-            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
-            <input type="text" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
+            <input type="password" class="otp-digit passcode-digit" maxlength="1" inputmode="numeric">
 
         </div>
 
