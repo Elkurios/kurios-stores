@@ -5748,6 +5748,10 @@ showOtpVerificationScreen(
             closeNotificationPanel();
         }
 
+        if (hash !== "#sell" && typeof setAccountMenuContext === "function") {
+            setAccountMenuContext(false);
+        }
+
         if (hash === "#sell") {
 
             hideAllFullPages();
@@ -8560,6 +8564,10 @@ function openSignInModalStandalone() {
 
 async function openSellerPanel() {
 
+    if (typeof setAccountMenuContext === "function") {
+        setAccountMenuContext(false);
+    }
+
     const student =
         getStoredStudent();
 
@@ -8749,6 +8757,10 @@ async function openSellerPanel() {
 
             window.__kuriosCurrentSeller = seller;
 
+            if (typeof setAccountMenuContext === "function") {
+                setAccountMenuContext(true);
+            }
+
             const studentDisplayName =
                 [student.first_name, student.last_name].filter(Boolean).join(" ").trim() ||
                 seller.store_name ||
@@ -8870,7 +8882,18 @@ if (accountBecomeSeller) {
         "click",
         function () {
 
-            window.location.hash = "sell";
+            if (
+                __kuriosInSellerDashboard &&
+                typeof goHome === "function"
+            ) {
+
+                goHome();
+
+            } else {
+
+                window.location.hash = "sell";
+
+            }
 
         }
     );
@@ -11839,6 +11862,31 @@ async function loadReviewablePrompts(studentId) {
 // =========================================================
 
 let __kuriosApprovedSellerCache = null;
+let __kuriosInSellerDashboard = false;
+
+function setAccountMenuContext(inSellerDashboard) {
+
+    __kuriosInSellerDashboard = inSellerDashboard;
+
+    const labelEl =
+        document.getElementById("accountBecomeSellerLabel");
+
+    if (!labelEl) {
+        return;
+    }
+
+    if (inSellerDashboard) {
+
+        labelEl.textContent = "Switch to Student";
+
+    } else {
+
+        labelEl.textContent =
+            __kuriosApprovedSellerCache ? "Switch to Seller" : "Sell on Kurios";
+
+    }
+
+}
 
 async function updateSellerMenuLabel(studentId) {
 
@@ -11865,8 +11913,7 @@ async function updateSellerMenuLabel(studentId) {
 
         __kuriosApprovedSellerCache = isApprovedSeller;
 
-        labelEl.textContent =
-            isApprovedSeller ? "Switch to Seller" : "Sell on Kurios";
+        setAccountMenuContext(__kuriosInSellerDashboard);
 
         return isApprovedSeller;
 
