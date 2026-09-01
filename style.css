@@ -6960,3 +6960,77 @@ img {
 @media(max-width:620px){
     .ks-seller-account-menu{right:-4px;width:225px}
 }
+
+/* =====================================================
+   APPROVED SELLER — DASHBOARD CHOOSER
+===================================================== */
+.ks-role-chooser{
+    position:fixed;
+    inset:0;
+    z-index:10000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+}
+.ks-role-chooser.open{display:flex}
+.ks-role-chooser-backdrop{
+    position:absolute;
+    inset:0;
+    background:rgba(15,23,42,.58);
+    backdrop-filter:blur(7px);
+}
+.ks-role-chooser-dialog{
+    position:relative;
+    width:min(680px,100%);
+    padding:34px;
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:24px;
+    box-shadow:0 30px 90px rgba(15,23,42,.25);
+    text-align:center;
+    animation:ksRoleChooserIn .2s ease-out;
+}
+@keyframes ksRoleChooserIn{
+    from{opacity:0;transform:translateY(12px) scale(.985)}
+    to{opacity:1;transform:translateY(0) scale(1)}
+}
+.ks-role-chooser-brand{
+    width:52px;height:52px;margin:0 auto 13px;border-radius:15px;
+    display:grid;place-items:center;background:#087b60;color:#fff;font-size:21px;
+    box-shadow:0 10px 24px rgba(8,123,96,.22);
+}
+.ks-role-chooser-eyebrow{
+    margin:0 0 6px;color:#087b60;font-size:11px;font-weight:800;letter-spacing:.14em;
+}
+.ks-role-chooser-dialog h2{
+    margin:0;color:#15242b;font-size:28px;line-height:1.15;
+}
+.ks-role-chooser-subtitle{
+    max-width:530px;margin:10px auto 25px;color:#718087;font-size:13px;line-height:1.65;
+}
+.ks-role-chooser-options{display:grid;grid-template-columns:1fr 1fr;gap:13px;text-align:left}
+.ks-role-card{
+    min-height:145px;padding:20px;border:1px solid #e2e8e8;border-radius:17px;background:#fff;
+    display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:13px;cursor:pointer;
+    transition:.18s ease;box-shadow:0 5px 18px rgba(15,23,42,.04);
+}
+.ks-role-card:hover{transform:translateY(-2px);border-color:#b7d9cf;box-shadow:0 14px 30px rgba(15,23,42,.09)}
+.ks-role-card.student:hover{background:#fbfaff}
+.ks-role-card.seller:hover{background:#f7fcfa}
+.ks-role-card-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:18px}
+.ks-role-card.student .ks-role-card-icon{background:#f0ebff;color:#5b21b6}
+.ks-role-card.seller .ks-role-card-icon{background:#e8f6f1;color:#087b60}
+.ks-role-card-copy strong{display:block;margin-top:2px;color:#17252c;font-size:14px}
+.ks-role-card-copy small{display:block;margin-top:7px;color:#7a878d;font-size:11px;line-height:1.55;font-weight:500}
+.ks-role-card-arrow{align-self:center;color:#9aa6aa;font-size:13px;transition:.18s ease}
+.ks-role-card:hover .ks-role-card-arrow{transform:translateX(3px);color:#087b60}
+.ks-role-chooser-note{margin:20px 0 0;color:#7b888e;font-size:11px}
+.ks-role-chooser-note i{color:#087b60;margin-right:5px}
+@media(max-width:620px){
+    .ks-role-chooser{padding:14px}
+    .ks-role-chooser-dialog{padding:26px 18px;border-radius:20px}
+    .ks-role-chooser-dialog h2{font-size:23px}
+    .ks-role-chooser-options{grid-template-columns:1fr}
+    .ks-role-card{min-height:118px}
+}
