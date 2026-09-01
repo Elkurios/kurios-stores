@@ -1341,6 +1341,10 @@ function updateLoginState() {
         loadDashboardRecentOrders(student.id);
     }
 
+    if (typeof loadDashboardWalletBalance === "function") {
+        loadDashboardWalletBalance(student.id);
+    }
+
 
     // ========================================
     // GET DISPLAY NAME
@@ -5747,6 +5751,11 @@ showOtpVerificationScreen(
         if (hash === "#wallet") {
 
             showSimplePage("walletPage");
+
+            if (typeof loadWalletPage === "function") {
+                loadWalletPage();
+            }
+
             return;
 
         }
@@ -8697,6 +8706,10 @@ async function openSellerPanel() {
                 loadSellerProducts(student.id);
             }
 
+            if (typeof loadSellerSales === "function") {
+                loadSellerSales(student.id);
+            }
+
             return;
 
         }
@@ -10760,5 +10773,290 @@ if (dashboardViewAllOrders) {
             window.location.hash = "orders";
         }
     );
+
+}
+
+
+// =========================================================
+// SELLER SALES
+// =========================================================
+
+async function loadSellerSales(studentId) {
+
+    const loadingEl =
+        document.getElementById("sellerSalesLoading");
+
+    const emptyEl =
+        document.getElementById("sellerSalesEmpty");
+
+    const listEl =
+        document.getElementById("sellerSalesList");
+
+    const summaryEl =
+        document.getElementById("sellerSalesSummary");
+
+    if (!listEl) {
+        return;
+    }
+
+    if (loadingEl) loadingEl.style.display = "block";
+    if (emptyEl) emptyEl.style.display = "none";
+    if (summaryEl) summaryEl.style.display = "none";
+    listEl.innerHTML = "";
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/orders?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+        if (!data.success) {
+            return;
+        }
+
+        if (data.orders.length === 0) {
+
+            if (emptyEl) emptyEl.style.display = "block";
+
+            return;
+
+        }
+
+        if (summaryEl) {
+
+            summaryEl.style.display = "flex";
+
+            const revenueEl =
+                document.getElementById("sellerTotalRevenue");
+
+            if (revenueEl) {
+
+                revenueEl.textContent =
+                    "₦" + Number(data.totalRevenue).toLocaleString();
+
+            }
+
+        }
+
+        data.orders.forEach(function (order) {
+
+            const itemsSummary =
+                order.items.map(function (item) {
+                    return item.quantity + "× " + item.name;
+                }).join(", ");
+
+            const orderDate =
+                new Date(order.createdAt).toLocaleDateString(
+                    undefined,
+                    { month: "short", day: "numeric", year: "numeric" }
+                );
+
+            const card =
+                document.createElement("div");
+
+            card.className = "seller-sale-card";
+
+            card.innerHTML = `
+                <div class="seller-sale-card-top">
+                    <div>
+                        <strong>${order.buyerName}</strong>
+                        <span>${orderDate} · ${order.buyerEmail || order.buyerPhone || ""}</span>
+                    </div>
+                    <div class="seller-sale-amount">
+                        ₦${Number(order.subtotal).toLocaleString()}
+                    </div>
+                </div>
+                <div class="seller-sale-items">
+                    ${itemsSummary}
+                </div>
+            `;
+
+            listEl.appendChild(card);
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Load seller sales error:",
+            error
+        );
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+    }
+
+}
+
+
+// =========================================================
+// WALLET PAGE
+// =========================================================
+
+async function loadWalletPage() {
+
+    const student =
+        getStoredStudent();
+
+    const loadingEl =
+        document.getElementById("walletLoading");
+
+    const notSellerEl =
+        document.getElementById("walletNotSellerState");
+
+    const sellerStateEl =
+        document.getElementById("walletSellerState");
+
+    if (loadingEl) loadingEl.style.display = "block";
+    if (notSellerEl) notSellerEl.style.display = "none";
+    if (sellerStateEl) sellerStateEl.style.display = "none";
+
+    if (!student) {
+        if (loadingEl) loadingEl.style.display = "none";
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/wallet?studentId=" + student.id
+            );
+
+        const data = await response.json();
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+        if (!data.success) {
+
+            if (notSellerEl) notSellerEl.style.display = "block";
+
+            return;
+
+        }
+
+        if (sellerStateEl) sellerStateEl.style.display = "block";
+
+        const balanceEl =
+            document.getElementById("walletBalance");
+
+        if (balanceEl) {
+
+            balanceEl.textContent =
+                "₦" + Number(data.balance).toLocaleString();
+
+        }
+
+        const listEl =
+            document.getElementById("walletTransactionList");
+
+        const emptyEl =
+            document.getElementById("walletTransactionsEmpty");
+
+        if (listEl) {
+
+            listEl.innerHTML = "";
+
+            if (data.transactions.length === 0) {
+
+                if (emptyEl) emptyEl.style.display = "block";
+
+            } else {
+
+                if (emptyEl) emptyEl.style.display = "none";
+
+                data.transactions.forEach(function (tx) {
+
+                    const txDate =
+                        new Date(tx.created_at).toLocaleDateString(
+                            undefined,
+                            { month: "short", day: "numeric", year: "numeric" }
+                        );
+
+                    const row =
+                        document.createElement("div");
+
+                    row.className = "wallet-transaction-row";
+
+                    row.innerHTML = `
+                        <div class="wallet-transaction-info">
+                            <strong>${tx.description || (tx.type === "credit" ? "Wallet credit" : "Wallet debit")}</strong>
+                            <span>${txDate}</span>
+                        </div>
+                        <div class="wallet-transaction-amount ${tx.type}">
+                            ${tx.type === "credit" ? "+" : "-"}₦${Number(tx.amount).toLocaleString()}
+                        </div>
+                    `;
+
+                    listEl.appendChild(row);
+
+                });
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Load wallet error:",
+            error
+        );
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+    }
+
+}
+
+
+// ========================================
+// DASHBOARD WALLET STAT CARD
+// ========================================
+
+async function loadDashboardWalletBalance(studentId) {
+
+    const balanceEl =
+        document.getElementById("dashboardWalletBalance");
+
+    if (!balanceEl) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/wallet?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            balanceEl.textContent =
+                Number(data.balance).toLocaleString(
+                    undefined,
+                    { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                );
+
+        }
+
+        // If not a seller (403), the card just
+        // keeps showing 0.00 — that's accurate.
+
+    } catch (error) {
+
+        console.error(
+            "Load dashboard wallet balance error:",
+            error
+        );
+
+    }
 
 }
