@@ -3931,15 +3931,18 @@ showOtpVerificationScreen(
 
 
     /* =====================================================
-       15. CHAT SYSTEM — FRONTEND DEMO
+       15. CHAT SYSTEM — REAL, BACKEND-POWERED
        ===================================================== */
 
 
-    const chatContacts =
-        document.querySelectorAll(
-            ".chat-contact"
-        );
+    const chatContactList =
+        document.getElementById("chatContactList");
 
+    const chatContactsLoading =
+        document.getElementById("chatContactsLoading");
+
+    const chatContactsEmpty =
+        document.getElementById("chatContactsEmpty");
 
     const activeChatName =
         document.getElementById(
@@ -3983,207 +3986,267 @@ showOtpVerificationScreen(
         );
 
 
-
-    /*
-        Current selected contact.
-    */
-
-    let activeContact =
-        "Elkurios";
+    let activeChatPartnerId = null;
+    let chatPollInterval = null;
+    let conversationsPollInterval = null;
+    let cachedConversations = [];
 
 
+    function chatInitial(firstName, lastName) {
 
-    /*
-        Temporary chat messages.
+        const name =
+            (firstName || "?").trim();
 
-        REAL chat will later use:
-        Node.js
-        Express
-        PostgreSQL
-    */
+        return name.charAt(0).toUpperCase();
 
-    const chatMessages = {
+    }
 
-        "Elkurios": [
 
-            {
-                type: "received",
-                text:
-                    "Hi! Welcome to Kurios Stores. How can we help you?",
-                sender:
-                    "Elkurios"
-            },
+    function renderChatContactList() {
 
-            {
-                type: "sent",
-                text:
-                    "Hello! I want to know if you have phone chargers available.",
-                sender:
-                    "You"
-            },
+        if (!chatContactList) {
+            return;
+        }
 
-            {
-                type: "received",
-                text:
-                    "Yes, we do. You can check our Electronics section.",
-                sender:
-                    "Elkurios"
+        chatContactList.innerHTML = "";
+
+        if (cachedConversations.length === 0) {
+
+            if (chatContactsEmpty) {
+                chatContactsEmpty.style.display = "block";
             }
 
-        ],
+            return;
+
+        }
+
+        if (chatContactsEmpty) {
+            chatContactsEmpty.style.display = "none";
+        }
+
+        cachedConversations.forEach(function (conversation) {
+
+            const fullName =
+                ((conversation.first_name || "") + " " + (conversation.last_name || "")).trim();
+
+            const button =
+                document.createElement("button");
+
+            button.className = "chat-contact";
+
+            if (conversation.id === activeChatPartnerId) {
+                button.classList.add("active");
+            }
+
+            const avatarMarkup =
+                conversation.profile_picture ?
+                    `<img src="${API_URL + conversation.profile_picture}" alt="${fullName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` :
+                    chatInitial(conversation.first_name, conversation.last_name);
+
+            const unreadBadge =
+                conversation.unread_count > 0 ?
+                    `<span class="chat-contact-unread-badge">${conversation.unread_count}</span>` :
+                    "";
+
+            button.innerHTML = `
+                <div class="chat-avatar">${avatarMarkup}</div>
+                <div class="chat-contact-info">
+                    <strong>${fullName || "Kurios Student"}</strong>
+                    <span>${conversation.last_message ? conversation.last_message.slice(0, 32) : ""}</span>
+                </div>
+                ${unreadBadge}
+            `;
+
+            button.addEventListener(
+                "click",
+                function () {
+                    openChatWith(conversation.id, fullName);
+                }
+            );
+
+            chatContactList.appendChild(button);
+
+        });
+
+    }
 
 
-        "Chisom": [],
+    async function loadConversations() {
 
-        "Daniel": []
+        const student =
+            getLoggedInStudent();
 
-    };
+        if (!student) {
+            return;
+        }
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/chat/conversations?studentId=" + student.id
+                );
+
+            const data = await response.json();
+
+            if (chatContactsLoading) {
+                chatContactsLoading.style.display = "none";
+            }
+
+            if (data.success) {
+
+                cachedConversations = data.conversations;
+                renderChatContactList();
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Load conversations error:",
+                error
+            );
+
+            if (chatContactsLoading) {
+                chatContactsLoading.style.display = "none";
+            }
+
+        }
+
+    }
 
 
-
-    function displayChat(contact) {
-
+    function renderMessages(messageRows, myId) {
 
         if (!messages) {
             return;
         }
 
-
         messages.innerHTML = "";
 
+        if (messageRows.length === 0) {
 
+            messages.innerHTML = `
+                <p class="chat-contacts-status" style="padding: 20px;">
+                    No messages yet. Say hello!
+                </p>
+            `;
 
-        const conversation =
-            chatMessages[contact] || [];
+            return;
 
+        }
 
+        messageRows.forEach(function (message) {
 
-        conversation.forEach(
-            function (message) {
+            const isSent =
+                message.sender_id === myId;
 
+            const messageElement =
+                document.createElement("div");
 
-                const messageElement =
-                    document.createElement(
-                        "div"
-                    );
+            messageElement.className =
+                "message " + (isSent ? "sent" : "received");
 
-
-                messageElement.className =
-                    "message " +
-                    message.type;
-
-
-                messageElement.innerHTML = `
-
-                    <div class="message-bubble">
-
-                        ${message.text}
-
-                    </div>
-
-                    <span>
-
-                        ${message.sender}
-
-                    </span>
-
-                `;
-
-
-                messages.appendChild(
-                    messageElement
+            const time =
+                new Date(message.created_at).toLocaleTimeString(
+                    [],
+                    { hour: "2-digit", minute: "2-digit" }
                 );
 
-            }
-        );
+            messageElement.innerHTML = `
+                <div class="message-bubble">${escapeChatText(message.body)}</div>
+                <span>${isSent ? "You" : "Them"} • ${time}</span>
+            `;
 
+            messages.appendChild(messageElement);
 
+        });
 
-        /*
-            Automatically scroll
-            to the latest message.
-        */
-
-        messages.scrollTop =
-            messages.scrollHeight;
+        messages.scrollTop = messages.scrollHeight;
 
     }
 
 
+    function escapeChatText(text) {
 
-    /*
-        Selecting a student or
-        Elkurios changes the conversation.
-    */
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
 
-    chatContacts.forEach(
-        function (contact) {
-
-
-            contact.addEventListener(
-                "click",
-                function () {
+    }
 
 
-                    chatContacts.forEach(
-                        function (item) {
+    async function loadThread(partnerId, myId) {
 
-                            item.classList.remove(
-                                "active"
-                            );
+        try {
 
-                        }
-                    );
+            const response =
+                await fetch(
+                    API_URL + "/api/chat/messages?studentId=" + myId + "&withId=" + partnerId
+                );
 
+            const data = await response.json();
 
-                    contact.classList.add(
-                        "active"
-                    );
+            if (data.success && activeChatPartnerId === partnerId) {
 
+                renderMessages(data.messages, myId);
 
-                    activeContact =
-                        contact.dataset.contact;
+            }
 
+            // A message may have just been marked read —
+            // refresh the sidebar's unread badges too.
 
-                    if (activeChatName) {
+            loadConversations();
 
-                        activeChatName.textContent =
-                            activeContact;
+        } catch (error) {
 
-                    }
-
-
-                    if (activeChatStatus) {
-
-                        activeChatStatus.textContent =
-                            activeContact ===
-                            "Elkurios"
-                                ? "Store Owner"
-                                : "Student";
-
-                    }
-
-
-                    if (activeChatAvatar) {
-
-                        activeChatAvatar.textContent =
-                            activeContact
-                                .charAt(0)
-                                .toUpperCase();
-
-                    }
-
-
-                    displayChat(
-                        activeContact
-                    );
-
-                }
+            console.error(
+                "Load thread error:",
+                error
             );
 
         }
-    );
 
+    }
+
+
+    function openChatWith(partnerId, partnerName) {
+
+        const student =
+            getLoggedInStudent();
+
+        if (!student) {
+            return;
+        }
+
+        activeChatPartnerId = partnerId;
+
+        if (activeChatName) {
+            activeChatName.textContent = partnerName || "Kurios Student";
+        }
+
+        if (activeChatStatus) {
+            activeChatStatus.textContent = "Kurios Stores student";
+        }
+
+        if (activeChatAvatar) {
+            activeChatAvatar.innerHTML = `<i class="fa-solid fa-user"></i>`;
+        }
+
+        renderChatContactList();
+
+        loadThread(partnerId, student.id);
+
+        clearInterval(chatPollInterval);
+
+        chatPollInterval = setInterval(
+            function () {
+                loadThread(partnerId, student.id);
+            },
+            4000
+        );
+
+    }
 
 
     /*
@@ -4194,60 +4257,82 @@ showOtpVerificationScreen(
 
         messageForm.addEventListener(
             "submit",
-            function (event) {
+            async function (event) {
 
                 event.preventDefault();
 
+                const student =
+                    getLoggedInStudent();
+
+                if (!student) {
+
+                    showMessage("Please sign in to chat.");
+                    return;
+
+                }
+
+                if (!activeChatPartnerId) {
+
+                    showMessage("Select or start a conversation first.");
+                    return;
+
+                }
 
                 if (!messageInput) {
                     return;
                 }
 
-
                 const text =
                     messageInput.value.trim();
-
 
                 if (text === "") {
                     return;
                 }
 
-
-
-                if (
-                    !chatMessages[
-                        activeContact
-                    ]
-                ) {
-
-                    chatMessages[
-                        activeContact
-                    ] = [];
-
-                }
-
-
-
-                chatMessages[
-                    activeContact
-                ].push({
-
-                    type: "sent",
-
-                    text: text,
-
-                    sender: "You"
-
-                });
-
-
-
                 messageInput.value = "";
 
+                try {
 
-                displayChat(
-                    activeContact
-                );
+                    const response =
+                        await fetch(
+                            API_URL + "/api/chat/messages",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    senderId: student.id,
+                                    recipientId: activeChatPartnerId,
+                                    body: text
+                                })
+                            }
+                        );
+
+                    const data = await response.json();
+
+                    if (!data.success) {
+
+                        showMessage(
+                            data.message || "Could not send your message."
+                        );
+
+                        return;
+
+                    }
+
+                    loadThread(activeChatPartnerId, student.id);
+
+                } catch (error) {
+
+                    console.error(
+                        "Send message error:",
+                        error
+                    );
+
+                    showMessage("Unable to connect to Kurios Stores server.");
+
+                }
 
             }
         );
@@ -4267,38 +4352,27 @@ showOtpVerificationScreen(
             "input",
             function () {
 
-
                 const search =
                     chatSearch.value
                         .toLowerCase()
                         .trim();
 
+                const contactButtons =
+                    chatContactList ?
+                        chatContactList.querySelectorAll(".chat-contact") :
+                        [];
 
-
-                chatContacts.forEach(
+                contactButtons.forEach(
                     function (contact) {
 
-
                         const name =
-                            contact.dataset.contact
+                            contact
+                                .querySelector("strong")
+                                .textContent
                                 .toLowerCase();
 
-
-                        if (
-                            name.includes(search)
-                        ) {
-
-                            contact.style.display =
-                                "";
-
-                        }
-
-                        else {
-
-                            contact.style.display =
-                                "none";
-
-                        }
+                        contact.style.display =
+                            name.includes(search) ? "" : "none";
 
                     }
                 );
@@ -4311,7 +4385,7 @@ showOtpVerificationScreen(
 
 
     /* =====================================================
-       17. NEW CHAT BUTTON
+       17. NEW CHAT BUTTON — ADD BY PHONE NUMBER
        ===================================================== */
 
 
@@ -4320,6 +4394,18 @@ showOtpVerificationScreen(
             "newChatButton"
         );
 
+    const newChatForm =
+        document.getElementById("newChatForm");
+
+    const newChatPhoneInput =
+        document.getElementById("newChatPhoneInput");
+
+    const newChatFindButton =
+        document.getElementById("newChatFindButton");
+
+    const newChatStatus =
+        document.getElementById("newChatStatus");
+
 
     if (newChatButton) {
 
@@ -4327,14 +4413,148 @@ showOtpVerificationScreen(
             "click",
             function () {
 
-                showMessage(
-                    "New chat system will connect to registered students."
-                );
+                const student =
+                    getLoggedInStudent();
+
+                if (!student) {
+
+                    showMessage("Please sign in to start a chat.");
+                    openSignInModal();
+                    return;
+
+                }
+
+                if (newChatForm) {
+
+                    const isVisible =
+                        newChatForm.style.display === "block";
+
+                    newChatForm.style.display =
+                        isVisible ? "none" : "block";
+
+                    if (!isVisible && newChatPhoneInput) {
+                        newChatPhoneInput.focus();
+                    }
+
+                }
 
             }
         );
 
     }
+
+
+    if (newChatFindButton) {
+
+        newChatFindButton.addEventListener(
+            "click",
+            async function () {
+
+                const student =
+                    getLoggedInStudent();
+
+                if (!student) {
+                    return;
+                }
+
+                const phoneNumber =
+                    newChatPhoneInput ? newChatPhoneInput.value.trim() : "";
+
+                if (!phoneNumber) {
+
+                    if (newChatStatus) {
+                        newChatStatus.textContent = "Please enter a phone number.";
+                    }
+
+                    return;
+
+                }
+
+                newChatFindButton.disabled = true;
+
+                if (newChatStatus) {
+                    newChatStatus.textContent = "Searching...";
+                }
+
+                try {
+
+                    const response =
+                        await fetch(
+                            API_URL + "/api/chat/find",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    studentId: student.id,
+                                    phoneNumber: phoneNumber
+                                })
+                            }
+                        );
+
+                    const data = await response.json();
+
+                    if (!data.success) {
+
+                        if (newChatStatus) {
+                            newChatStatus.textContent = data.message;
+                        }
+
+                        return;
+
+                    }
+
+                    const fullName =
+                        ((data.student.first_name || "") + " " + (data.student.last_name || "")).trim();
+
+                    if (newChatStatus) {
+                        newChatStatus.textContent = "";
+                    }
+
+                    if (newChatPhoneInput) {
+                        newChatPhoneInput.value = "";
+                    }
+
+                    if (newChatForm) {
+                        newChatForm.style.display = "none";
+                    }
+
+                    openChatWith(data.student.id, fullName);
+
+                } catch (error) {
+
+                    console.error(
+                        "Find student by phone error:",
+                        error
+                    );
+
+                    if (newChatStatus) {
+                        newChatStatus.textContent = "Unable to connect to Kurios Stores server.";
+                    }
+
+                } finally {
+
+                    newChatFindButton.disabled = false;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // Load the conversation list once, and keep it
+    // fresh while the student is on the site.
+
+    loadConversations();
+
+    conversationsPollInterval = setInterval(
+        loadConversations,
+        15000
+    );
+
 
 
 
