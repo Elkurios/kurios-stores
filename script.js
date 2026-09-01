@@ -5789,6 +5789,30 @@ if (openSignUp) {
                 signUpModal.classList.add("open");
             }
 
+            // Reset header visibility in case a previous
+            // OTP flow hid it.
+
+            const authIconEl =
+                document.querySelector("#signUpModal .auth-icon");
+
+            if (authIconEl) {
+                authIconEl.style.display = "";
+            }
+
+            const titleEl =
+                document.getElementById("accountModalTitle");
+
+            if (titleEl) {
+                titleEl.style.display = "";
+            }
+
+            const subtitleEl =
+                document.getElementById("accountModalSubtitle");
+
+            if (subtitleEl) {
+                subtitleEl.style.display = "";
+            }
+
         }
     );
 
@@ -6115,6 +6139,36 @@ function showOtpVerificationScreen(studentId, email) {
 
         otpScreen.style.display = "block";
 
+    }
+
+
+    // ========================================
+    // HIDE THE PERSISTENT SIGNUP HEADER
+    // (icon + subtitle) — the OTP screen has
+    // its own header, so showing both stacked
+    // on top of each other wastes space,
+    // especially on mobile.
+    // ========================================
+
+    const authIcon =
+        document.querySelector("#signUpModal .auth-icon");
+
+    if (authIcon) {
+        authIcon.style.display = "none";
+    }
+
+    const accountModalSubtitleEl =
+        document.getElementById("accountModalSubtitle");
+
+    if (accountModalSubtitleEl) {
+        accountModalSubtitleEl.style.display = "none";
+    }
+
+    const accountModalTitleEl =
+        document.getElementById("accountModalTitle");
+
+    if (accountModalTitleEl) {
+        accountModalTitleEl.style.display = "none";
     }
 
 
