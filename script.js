@@ -1357,6 +1357,10 @@ function updateLoginState() {
         loadDashboardWalletBalance(student.id);
     }
 
+    if (typeof updateSellerMenuLabel === "function") {
+        updateSellerMenuLabel(student.id);
+    }
+
 
     // ========================================
     // GET DISPLAY NAME
@@ -3222,6 +3226,36 @@ if (signInForm) {
                 );
 
 updateLoginState();
+
+                if (typeof showDashboardChoiceModal === "function") {
+
+                    fetch(
+                        API_URL + "/api/sellers/me?studentId=" + data.student.id
+                    )
+                        .then(function (response) { return response.json(); })
+                        .then(function (sellerData) {
+
+                            if (
+                                sellerData.success &&
+                                sellerData.seller &&
+                                sellerData.seller.status === "approved"
+                            ) {
+
+                                showDashboardChoiceModal(data.student);
+
+                            }
+
+                        })
+                        .catch(function (error) {
+
+                            console.error(
+                                "Post-login seller check error:",
+                                error
+                            );
+
+                        });
+
+                }
 
 
 
@@ -11210,6 +11244,18 @@ document.addEventListener("click", function (event) {
             window.location.hash = "store-" + seller.id;
         }
 
+    } else if (action === "switch-to-student") {
+
+        if (typeof goHome === "function") {
+
+            goHome();
+
+        } else if (typeof closeSellerPanel === "function") {
+
+            closeSellerPanel();
+
+        }
+
     } else if (action === "marketing" || action === "discounts") {
 
         showMessage(
@@ -11784,5 +11830,138 @@ async function loadReviewablePrompts(studentId) {
         );
 
     }
+
+}
+
+
+// =========================================================
+// STUDENT / SELLER DUAL DASHBOARD
+// =========================================================
+
+let __kuriosApprovedSellerCache = null;
+
+async function updateSellerMenuLabel(studentId) {
+
+    const labelEl =
+        document.getElementById("accountBecomeSellerLabel");
+
+    if (!labelEl) {
+        return null;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/me?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        const isApprovedSeller =
+            data.success &&
+            data.seller &&
+            data.seller.status === "approved";
+
+        __kuriosApprovedSellerCache = isApprovedSeller;
+
+        labelEl.textContent =
+            isApprovedSeller ? "Switch to Seller" : "Sell on Kurios";
+
+        return isApprovedSeller;
+
+    } catch (error) {
+
+        console.error(
+            "Check seller status for menu error:",
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
+
+// ========================================
+// DASHBOARD CHOICE MODAL
+// (shown once, right after a fresh login,
+// only if the student is an approved seller —
+// not shown again on ordinary page reloads)
+// ========================================
+
+function showDashboardChoiceModal(student) {
+
+    const modal =
+        document.getElementById("dashboardChoiceModal");
+
+    if (!modal) {
+        return;
+    }
+
+    const greetingEl =
+        document.getElementById("dashboardChoiceGreeting");
+
+    if (greetingEl) {
+
+        const firstName =
+            (student.first_name || "").trim();
+
+        greetingEl.textContent =
+            "Welcome back" + (firstName ? ", " + firstName : "") + "!";
+
+    }
+
+    modal.classList.add("open");
+
+}
+
+function closeDashboardChoiceModal() {
+
+    const modal =
+        document.getElementById("dashboardChoiceModal");
+
+    if (modal) {
+        modal.classList.remove("open");
+    }
+
+}
+
+const dashboardChoiceStudent =
+    document.getElementById("dashboardChoiceStudent");
+
+if (dashboardChoiceStudent) {
+
+    dashboardChoiceStudent.addEventListener(
+        "click",
+        function () {
+
+            closeDashboardChoiceModal();
+
+            if (typeof goHome === "function") {
+                goHome();
+            }
+
+        }
+    );
+
+}
+
+const dashboardChoiceSeller =
+    document.getElementById("dashboardChoiceSeller");
+
+if (dashboardChoiceSeller) {
+
+    dashboardChoiceSeller.addEventListener(
+        "click",
+        function () {
+
+            closeDashboardChoiceModal();
+
+            window.location.hash = "sell";
+
+        }
+    );
 
 }
