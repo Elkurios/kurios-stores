@@ -109,6 +109,33 @@
         margin-top: 0;
     }
 
+    .password-field-wrap {
+        position: relative;
+    }
+
+    .password-field-wrap input {
+        padding-right: 38px !important;
+        margin-bottom: 0 !important;
+    }
+
+    .password-toggle-btn {
+        position: absolute;
+        right: 4px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+        opacity: 0.5;
+    }
+
+    .password-toggle-btn:hover {
+        opacity: 1;
+    }
+
     #keyGate button {
         width: 100%;
         border: none;
@@ -478,7 +505,12 @@
     <input type="text" id="adminUsernameInput" placeholder="Username">
 
     <label for="adminPasswordInput">Password</label>
-    <input type="password" id="adminPasswordInput" placeholder="Password">
+    <div class="password-field-wrap">
+        <input type="password" id="adminPasswordInput" placeholder="Password">
+        <button type="button" class="password-toggle-btn" id="adminPasswordToggle" aria-label="Show password">
+            👁
+        </button>
+    </div>
 
     <button id="adminLoginSubmit" style="margin-top: 16px;">Sign In</button>
     <div id="keyGateError"></div>
@@ -1465,6 +1497,36 @@
             } finally {
 
                 kuriosStoreLinkButton.disabled = false;
+
+            }
+
+        });
+
+    }
+
+    // PASSWORD SHOW/HIDE TOGGLE
+
+    const adminPasswordToggle = document.getElementById("adminPasswordToggle");
+
+    if (adminPasswordToggle) {
+
+        adminPasswordToggle.addEventListener("click", function () {
+
+            const input = document.getElementById("adminPasswordInput");
+
+            if (!input) return;
+
+            if (input.type === "password") {
+
+                input.type = "text";
+                adminPasswordToggle.textContent = "🙈";
+                adminPasswordToggle.setAttribute("aria-label", "Hide password");
+
+            } else {
+
+                input.type = "password";
+                adminPasswordToggle.textContent = "👁";
+                adminPasswordToggle.setAttribute("aria-label", "Show password");
 
             }
 
