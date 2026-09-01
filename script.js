@@ -667,6 +667,21 @@ document.addEventListener("DOMContentLoaded", function () {
             displayProducts(products);
 
 
+            /*
+                Show a handful of them as
+                "Recommended for You" on the
+                logged-in student dashboard.
+            */
+
+            if (typeof renderDashboardRecommendations === "function") {
+
+                renderDashboardRecommendations(
+                    products.slice(0, 4)
+                );
+
+            }
+
+
         }
 
 
@@ -1319,6 +1334,10 @@ function updateLoginState() {
     // ========================================
 
     refreshOrderCountBadge(student.id);
+
+    if (typeof loadDashboardRecentOrders === "function") {
+        loadDashboardRecentOrders(student.id);
+    }
 
 
     // ========================================
@@ -10457,3 +10476,231 @@ document.querySelectorAll(".password-toggle-btn").forEach(function (button) {
     );
 
 });
+
+
+// =========================================================
+// STUDENT DASHBOARD — RECENT ORDERS + RECOMMENDATIONS
+// =========================================================
+
+async function loadDashboardRecentOrders(studentId) {
+
+    const listEl =
+        document.getElementById("dashboardRecentOrders");
+
+    const emptyEl =
+        document.getElementById("dashboardOrdersEmpty");
+
+    if (!listEl) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/orders?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+            return;
+        }
+
+        const recentOrders =
+            data.orders.slice(0, 3);
+
+        listEl.innerHTML = "";
+
+        if (recentOrders.length === 0) {
+
+            if (emptyEl) emptyEl.style.display = "block";
+
+            return;
+
+        }
+
+        if (emptyEl) emptyEl.style.display = "none";
+
+        recentOrders.forEach(function (order) {
+
+            let items = [];
+
+            try {
+                items =
+                    typeof order.items === "string" ?
+                        JSON.parse(order.items) :
+                        order.items;
+            } catch (error) {
+                items = [];
+            }
+
+            const itemSummary =
+                items.length > 0 ?
+                    items.length + " item" + (items.length === 1 ? "" : "s") +
+                        (items[0].name ? " · " + items[0].name + (items.length > 1 ? " + more" : "") : "") :
+                    "Order";
+
+            const orderDate =
+                new Date(order.created_at).toLocaleDateString(
+                    undefined,
+                    { month: "short", day: "numeric" }
+                );
+
+            const row =
+                document.createElement("div");
+
+            row.className = "dashboard-order-row";
+
+            row.innerHTML = `
+                <div class="dashboard-order-row-info">
+                    <strong>${itemSummary}</strong>
+                    <span>${orderDate}</span>
+                </div>
+                <div class="dashboard-order-row-right">
+                    <strong>₦${Number(order.amount).toLocaleString()}</strong>
+                    <span class="dashboard-order-status ${order.status}">${order.status}</span>
+                </div>
+            `;
+
+            row.style.cursor = "pointer";
+
+            row.addEventListener(
+                "click",
+                function () {
+                    window.location.hash = "orders";
+                }
+            );
+
+            listEl.appendChild(row);
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Load dashboard orders error:",
+            error
+        );
+
+    }
+
+}
+
+
+function renderDashboardRecommendations(products) {
+
+    const grid =
+        document.getElementById("dashboardRecommendations");
+
+    if (!grid) {
+        return;
+    }
+
+    grid.innerHTML = "";
+
+    products.forEach(function (product) {
+
+        const category =
+            product.category || "General";
+
+        const icon =
+            STOREFRONT_CATEGORY_ICONS[category] || "fa-box";
+
+        const imageMarkup =
+            product.image_url ?
+                `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
+                `<i class="fa-solid ${icon}"></i>`;
+
+        const card =
+            document.createElement("article");
+
+        card.className = "product-card";
+        card.style.cursor = "pointer";
+
+        card.innerHTML = `
+            <div class="product-image">
+                ${imageMarkup}
+            </div>
+            <div class="product-info">
+                <span class="product-category">${category}</span>
+                <h3>${product.name}</h3>
+                <div class="product-bottom">
+                    <strong>₦${Number(product.price).toLocaleString()}</strong>
+                </div>
+            </div>
+        `;
+
+        card.addEventListener(
+            "click",
+            function () {
+                window.location.hash = "shop";
+            }
+        );
+
+        grid.appendChild(card);
+
+    });
+
+}
+
+
+// ========================================
+// DASHBOARD STAT CARD SHORTCUTS
+// ========================================
+
+const dashboardWalletCard =
+    document.getElementById("dashboardWalletCard");
+
+if (dashboardWalletCard) {
+
+    dashboardWalletCard.addEventListener(
+        "click",
+        function () {
+            window.location.hash = "wallet";
+        }
+    );
+
+}
+
+const dashboardWishlistCard =
+    document.getElementById("dashboardWishlistCard");
+
+if (dashboardWishlistCard) {
+
+    dashboardWishlistCard.addEventListener(
+        "click",
+        function () {
+            window.location.hash = "wishlist";
+        }
+    );
+
+}
+
+const dashboardRewardsCard =
+    document.getElementById("dashboardRewardsCard");
+
+if (dashboardRewardsCard) {
+
+    dashboardRewardsCard.addEventListener(
+        "click",
+        function () {
+            window.location.hash = "rewards";
+        }
+    );
+
+}
+
+const dashboardViewAllOrders =
+    document.getElementById("dashboardViewAllOrders");
+
+if (dashboardViewAllOrders) {
+
+    dashboardViewAllOrders.addEventListener(
+        "click",
+        function () {
+            window.location.hash = "orders";
+        }
+    );
+
+}
