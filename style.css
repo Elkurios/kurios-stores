@@ -5048,6 +5048,92 @@ img {
 
 /* DASHBOARD CHOICE MODAL */
 
+/* POST-LOGIN SPLASH */
+
+.post-login-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 1900;
+    background: linear-gradient(135deg, var(--purple-dark), var(--purple) 55%, var(--purple-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.post-login-splash-pattern {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.post-login-splash-pattern i {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.1);
+    font-size: 48px;
+}
+
+.post-login-splash-pattern i:nth-child(1) { top: 6%; left: 8%; font-size: 32px; transform: rotate(-15deg); }
+.post-login-splash-pattern i:nth-child(2) { top: 14%; left: 82%; font-size: 60px; transform: rotate(20deg); }
+.post-login-splash-pattern i:nth-child(3) { top: 30%; left: 30%; font-size: 26px; transform: rotate(40deg); }
+.post-login-splash-pattern i:nth-child(4) { top: 22%; left: 55%; font-size: 40px; transform: rotate(-30deg); }
+.post-login-splash-pattern i:nth-child(5) { top: 48%; left: 5%; font-size: 50px; transform: rotate(10deg); }
+.post-login-splash-pattern i:nth-child(6) { top: 60%; left: 90%; font-size: 34px; transform: rotate(-40deg); }
+.post-login-splash-pattern i:nth-child(7) { top: 68%; left: 18%; font-size: 44px; transform: rotate(25deg); }
+.post-login-splash-pattern i:nth-child(8) { top: 78%; left: 60%; font-size: 30px; transform: rotate(-10deg); }
+.post-login-splash-pattern i:nth-child(9) { top: 85%; left: 38%; font-size: 55px; transform: rotate(15deg); }
+.post-login-splash-pattern i:nth-child(10) { top: 5%; left: 45%; font-size: 22px; transform: rotate(-25deg); }
+.post-login-splash-pattern i:nth-child(11) { top: 40%; left: 72%; font-size: 36px; transform: rotate(35deg); }
+.post-login-splash-pattern i:nth-child(12) { top: 90%; left: 8%; font-size: 28px; transform: rotate(-20deg); }
+.post-login-splash-pattern i:nth-child(13) { top: 12%; left: 65%; font-size: 24px; transform: rotate(5deg); }
+.post-login-splash-pattern i:nth-child(14) { top: 55%; left: 45%; font-size: 20px; transform: rotate(-35deg); }
+.post-login-splash-pattern i:nth-child(15) { top: 35%; left: 12%; font-size: 38px; transform: rotate(45deg); }
+.post-login-splash-pattern i:nth-child(16) { top: 72%; left: 80%; font-size: 46px; transform: rotate(-5deg); }
+.post-login-splash-pattern i:nth-child(17) { top: 95%; left: 70%; font-size: 32px; transform: rotate(30deg); }
+.post-login-splash-pattern i:nth-child(18) { top: 2%; left: 25%; font-size: 42px; transform: rotate(-45deg); }
+
+.post-login-splash-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: white;
+}
+
+.post-login-splash-logo {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 18px;
+    animation: postLoginSplashPulse 1.6s ease-in-out infinite;
+}
+
+.post-login-splash-content p {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.02em;
+}
+
+@keyframes postLoginSplashPulse {
+
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.08);
+        opacity: 0.85;
+    }
+
+}
+
+
 .dashboard-choice-modal {
     text-align: center;
 }
