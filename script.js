@@ -5332,16 +5332,6 @@ showOtpVerificationScreen(
 
 
     /*
-        Show Elkurios conversation.
-    */
-
-    displayChat(
-        "Elkurios"
-    );
-
-
-
-    /*
         IMPORTANT:
 
         This is where the frontend
