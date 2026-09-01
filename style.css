@@ -5285,7 +5285,8 @@ img {
     gap: 20px;
 }
 
-.seller-donut {
+.seller-donut,
+.ks-donut {
     width: 130px;
     height: 130px;
     min-width: 130px;
@@ -5297,7 +5298,8 @@ img {
     background: conic-gradient(#e5e7eb 0deg 360deg);
 }
 
-.seller-donut::after {
+.seller-donut::after,
+.ks-donut::after {
     content: "";
     position: absolute;
     inset: 22px;
@@ -5305,26 +5307,30 @@ img {
     border-radius: 50%;
 }
 
-.seller-donut > div {
+.seller-donut > div,
+.ks-donut > div {
     position: relative;
     z-index: 2;
     text-align: center;
 }
 
-.seller-donut strong {
+.seller-donut strong,
+.ks-donut strong {
     display: block;
     font-size: 22px;
     color: #111827;
 }
 
-.seller-donut span {
+.seller-donut span,
+.ks-donut span {
     display: block;
     font-size: 10px;
     color: #9ca3af;
     margin-top: 2px;
 }
 
-.seller-status-breakdown {
+.seller-status-breakdown,
+.ks-donut-legend {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -6983,3 +6989,31 @@ img {
     }
 
 }
+
+/* =========================================================
+   KURIOS SELLER CENTER — DASHBOARD SHELL
+   (structural layout from the reference mockup,
+   recolored to our purple brand throughout)
+   ========================================================= */
+.ks-seller-app{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:calc(100vh - 20px);background:#f8fafb;border:1px solid #e5e7eb;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(15,23,42,.08);margin:0 auto;max-width:1500px;color:#10212a}
+.ks-seller-sidebar{background:linear-gradient(180deg,#4c1d95 0%,#5b21b6 55%,#6d28d9 100%);color:#fff;padding:18px 12px 14px;display:flex;flex-direction:column;min-width:0}
+.ks-seller-brand{display:flex;align-items:center;gap:10px;padding:4px 12px 17px;border-bottom:1px solid rgba(255,255,255,.15);margin-bottom:18px}
+.ks-seller-brand-mark{font-size:25px;color:#c4b5fd}.ks-seller-brand strong{display:block;font-size:21px;line-height:1;font-weight:900;letter-spacing:.3px}.ks-seller-brand span{display:block;color:#c4b5fd;font-size:16px;font-weight:900;letter-spacing:.5px}.ks-seller-profile{display:flex;gap:10px;align-items:center;padding:0 9px 16px}.ks-seller-avatar,.ks-user-avatar{border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#f3e8ff;color:var(--purple)}.ks-seller-avatar{width:43px;height:43px;flex:none}.ks-seller-avatar img,.ks-user-avatar img{width:100%;height:100%;object-fit:cover}.ks-seller-profile-copy strong{display:block;font-size:13px;color:#fff}.ks-seller-profile-copy span{font-size:11px;color:#d8c7f5}.ks-seller-profile-copy i{color:#c4b5fd;margin-left:2px}.ks-seller-nav{display:flex;flex-direction:column;gap:3px}.ks-seller-nav-item{width:100%;display:flex;align-items:center;gap:12px;border:0;background:transparent;color:#f2ecfb;padding:10px 12px;border-radius:8px;font:600 12px/1.2 inherit;text-align:left;cursor:pointer}.ks-seller-nav-item i:first-child{width:16px;text-align:center;font-size:14px}.ks-seller-nav-item:hover{background:rgba(255,255,255,.1)}.ks-seller-nav-item.active{background:rgba(255,255,255,.18);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}.ks-seller-nav-item span{flex:1}.ks-seller-nav-item b{min-width:21px;height:21px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--purple-dark);font-size:10px}.ks-nav-chevron{font-size:9px!important;width:auto!important}.ks-grow-card{position:relative;margin:18px 0 14px;padding:15px 14px;border-radius:9px;background:linear-gradient(135deg,#7c3aed,#5b21b6);overflow:hidden}.ks-grow-card strong{font-size:13px}.ks-grow-card p{font-size:11px;line-height:1.55;color:#ede9fe;margin:7px 0 11px;max-width:150px}.ks-grow-card button{border:0;background:#fff;color:var(--purple-dark);border-radius:5px;padding:7px 10px;font-size:10px;font-weight:800;cursor:pointer}.ks-grow-icon{position:absolute;right:7px;bottom:18px;font-size:34px;transform:rotate(-18deg);opacity:.25}.ks-help-card{margin-top:auto;border-top:1px solid rgba(255,255,255,.14);padding:17px 9px 4px;display:flex;gap:12px;align-items:center}.ks-help-card>i{font-size:20px}.ks-help-card strong,.ks-help-card span{display:block}.ks-help-card strong{font-size:12px}.ks-help-card span{font-size:10px;color:#d8c7f5;margin-top:3px}
+.ks-seller-content{min-width:0;background:#fbfcfd}.ks-seller-topbar{height:66px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:18px;padding:0 24px}.ks-sidebar-toggle{border:0;background:transparent;font-size:18px;color:#182b34;cursor:pointer;display:none}.ks-seller-search{width:min(340px,42vw);height:36px;border:1px solid #dce2e5;border-radius:7px;display:flex;align-items:center;gap:9px;padding:0 11px;color:#5d6b73;margin-left:auto}.ks-seller-search input{border:0;outline:0;width:100%;font:500 12px inherit;color:#152831;background:transparent}.ks-topbar-actions{display:flex;align-items:center;gap:13px}.ks-icon-btn{position:relative;border:0;background:transparent;color:#172b34;font-size:17px;cursor:pointer}.ks-notification-dot{position:absolute;right:-1px;top:0;width:5px;height:5px;border-radius:50%;background:#ef4444}.ks-add-product-top{border:0;background:var(--purple);color:#fff;border-radius:6px;padding:9px 12px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:7px;cursor:pointer}.ks-add-product-top:hover{background:var(--purple-dark)}.ks-user-menu{border:0;background:transparent;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#1b2c34;cursor:pointer}.ks-user-avatar{width:30px;height:30px}.ks-seller-page-head{padding:22px 28px 17px;display:flex;justify-content:space-between;align-items:flex-end;gap:18px}.ks-seller-page-head h2{font-size:24px;line-height:1.2;margin:0 0 5px;font-weight:800;letter-spacing:-.6px}.ks-seller-page-head p{margin:0;color:#6d7a83;font-size:13px}.ks-wave{font-size:21px}.ks-seller-app .seller-dash-tab{padding:0 28px 26px}.ks-metric-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:15px;margin-bottom:18px}.ks-metric-card{background:#fff;border:1px solid #e1e6e9;border-radius:10px;padding:16px 14px;display:flex;align-items:center;gap:11px;min-height:90px}.ks-metric-icon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:15px}.ks-metric-icon.sales{background:#dcfce7;color:#15803d}.ks-metric-icon.orders{background:#e1efff;color:#2585e8}.ks-metric-icon.customers{background:#f3e8ff;color:var(--purple)}.ks-metric-icon.products{background:#ffeadb;color:#e27d2b}.ks-metric-icon.rating{background:#fff2bd;color:#dfaa00}.ks-metric-card span{display:block;color:#1f3039;font-size:11px;margin-bottom:4px}.ks-metric-card strong{display:block;color:#0e1e27;font-size:17px;line-height:1.2}
+.ks-dashboard-grid{display:grid;gap:16px;margin-bottom:16px}.ks-dashboard-grid-top{grid-template-columns:minmax(0,1.55fr) minmax(260px,1fr) minmax(250px,1.08fr)}.ks-dashboard-grid-bottom{grid-template-columns:minmax(0,1.7fr) minmax(270px,.72fr)}.ks-panel{background:#fff;border:1px solid #e1e6e9;border-radius:10px;padding:17px 18px;min-width:0;overflow:hidden}.ks-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}.ks-panel-head h3{font-size:13px;margin:0;font-weight:800;color:#13252e}.ks-panel-head p{margin:4px 0 0;color:#89959c;font-size:9px}.ks-panel-head button{border:0;background:transparent;color:var(--purple-dark);font-size:10px;font-weight:700;cursor:pointer}
+.ks-line-chart{height:200px;position:relative}.ks-line-chart svg{width:100%;height:100%;display:block}
+.ks-donut-wrap{display:flex;align-items:center;gap:22px;min-height:200px}
+.ks-top-product{display:grid;grid-template-columns:42px 1fr auto;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #edf0f2}.ks-top-product:last-child{border-bottom:0}
+.ks-recent-orders{min-height:230px}.ks-recent-orders .seller-orders-table{font-size:10px}.ks-recent-orders .seller-orders-table th{font-size:9px;background:#f7f9fa;color:#52636b;padding:10px 8px}.ks-recent-orders .seller-orders-table td{padding:10px 8px;border-bottom:1px solid #edf0f2;color:#263840}
+.ks-performance-list>div{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:9px;padding:14px 0;border-bottom:1px solid #edf0f2;font-size:10px}.ks-performance-list>div:last-child{border-bottom:0}.ks-performance-list i{font-size:16px;color:var(--purple)}.ks-performance-list span{color:#596970}.ks-performance-list strong{font-size:11px;color:#24363f}
+.ks-seller-app .seller-dashboard-header{margin-bottom:15px}
+
+@media(max-width:1180px){.ks-metric-grid{grid-template-columns:repeat(3,1fr)}.ks-dashboard-grid-top{grid-template-columns:1.3fr 1fr}.ks-top-products{grid-column:1/-1}.ks-seller-app{grid-template-columns:220px minmax(0,1fr)}}
+@media(max-width:900px){.ks-sidebar-toggle{display:block}.ks-seller-app{grid-template-columns:1fr;border-radius:0;margin:0}.ks-seller-sidebar{position:fixed;z-index:100;left:0;top:0;bottom:0;width:244px;transform:translateX(-102%);transition:transform .2s ease;box-shadow:12px 0 30px rgba(0,0,0,.18)}.ks-seller-app.sidebar-open .ks-seller-sidebar{transform:translateX(0)}.ks-seller-content{width:100%}.ks-seller-topbar{padding:0 15px}.ks-seller-search{width:34vw}.ks-topbar-actions{gap:9px}.ks-user-menu>span:not(.ks-user-avatar){display:none}.ks-seller-page-head{padding:18px 15px 14px}.ks-seller-app .seller-dash-tab{padding:0 15px 20px}.ks-dashboard-grid-top,.ks-dashboard-grid-bottom{grid-template-columns:1fr}.ks-top-products{grid-column:auto}.ks-donut-wrap{justify-content:center}}
+@media(max-width:620px){.ks-seller-search{display:none}.ks-add-product-top{font-size:0;padding:9px 10px}.ks-add-product-top i{font-size:12px}.ks-seller-page-head{align-items:flex-start;flex-direction:column}.ks-metric-grid{grid-template-columns:1fr 1fr;gap:9px}.ks-metric-card{min-height:85px;padding:12px 10px}.ks-metric-card strong{font-size:14px}.ks-metric-icon{width:35px;height:35px}.ks-panel{padding:14px}.ks-line-chart{height:180px}.ks-donut-wrap{flex-direction:column}.ks-recent-orders{overflow:auto}.ks-recent-orders .seller-orders-table{min-width:560px}}
+
+/* Widen the seller page for this dashboard, and strip the old application-form chrome */
+#sellerPage.seller-dashboard-active{max-width:1600px;padding:14px 12px 50px}
+#sellerPage.seller-dashboard-active .full-page-back-row,
+#sellerPage.seller-dashboard-active .full-page-panel>.profile-panel-header{display:none}
+#sellerPage.seller-dashboard-active .full-page-panel{padding:0;border:0;background:transparent;border-radius:0}
