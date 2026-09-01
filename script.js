@@ -1604,6 +1604,24 @@ const studentAccountMenu =
         "studentAccountMenu"
     );
 
+const accountBecomeSeller =
+    document.getElementById("accountBecomeSeller");
+
+const accountSwitchToSeller =
+    document.getElementById("accountSwitchToSeller");
+
+const sellerDashboardUserMenu =
+    document.getElementById("sellerDashboardUserMenu");
+
+const ksSellerAccountMenu =
+    document.getElementById("ksSellerAccountMenu");
+
+const sellerSwitchToStudent =
+    document.getElementById("sellerSwitchToStudent");
+
+const sellerAccountProfile =
+    document.getElementById("sellerAccountProfile");
+
 
 if (openSignIn) {
 
@@ -1661,6 +1679,10 @@ if (openSignIn) {
                     "open"
                 );
 
+                if (willOpen) {
+                    refreshStudentSellerSwitch();
+                }
+
                 if (
                     willOpen &&
                     typeof closeNotificationPanel === "function"
@@ -1703,6 +1725,72 @@ document.addEventListener(
 
     }
 );
+
+
+// =========================================================
+// STUDENT <-> SELLER SWITCH
+// =========================================================
+if (accountSwitchToSeller) {
+    accountSwitchToSeller.addEventListener("click", async function () {
+        const student = getStoredStudent();
+        if (!student) {
+            openSignInModalStandalone();
+            return;
+        }
+
+        setActiveKuriosRole("seller");
+        if (studentAccountMenu) studentAccountMenu.classList.remove("open");
+        await openSellerPanel();
+    });
+}
+
+if (sellerDashboardUserMenu) {
+    sellerDashboardUserMenu.addEventListener("click", function (event) {
+        event.stopPropagation();
+        const open = !ksSellerAccountMenu.classList.contains("open");
+        if (open) {
+            const student = getStoredStudent();
+            const seller = window.__kuriosCurrentSeller;
+            const nameEl = document.getElementById("ksSellerAccountName");
+            const storeEl = document.getElementById("ksSellerAccountStore");
+            const avatarEl = document.getElementById("ksSellerAccountAvatar");
+            const fullName = student ? [student.first_name, student.last_name].filter(Boolean).join(" ").trim() : "Seller";
+            if (nameEl) nameEl.textContent = fullName || "Seller";
+            if (storeEl) storeEl.textContent = seller && seller.store_name ? seller.store_name : "Seller account";
+            if (avatarEl && seller && seller.store_image) avatarEl.innerHTML = `<img src="${API_URL + seller.store_image}" alt="Store logo">`;
+        }
+        ksSellerAccountMenu.classList.toggle("open", open);
+        sellerDashboardUserMenu.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+}
+
+if (sellerSwitchToStudent) {
+    sellerSwitchToStudent.addEventListener("click", function () {
+        openStudentMode();
+    });
+}
+
+if (sellerAccountProfile) {
+    sellerAccountProfile.addEventListener("click", function () {
+        closeSellerAccountMenu();
+        const sellerSettingsNav = document.querySelector('.ks-seller-app [data-seller-tab="settings"]');
+        if (sellerSettingsNav) sellerSettingsNav.click();
+    });
+}
+
+if (sellerAccountSignOut) {
+    sellerAccountSignOut.addEventListener("click", function () {
+        closeSellerAccountMenu();
+        const signOut = document.getElementById("signOutButton");
+        if (signOut) signOut.click();
+    });
+}
+
+document.addEventListener("click", function (event) {
+    if (ksSellerAccountMenu && sellerDashboardUserMenu && !ksSellerAccountMenu.contains(event.target) && !sellerDashboardUserMenu.contains(event.target)) {
+        closeSellerAccountMenu();
+    }
+});
 
 // ========================================
 // GET CURRENTLY LOGGED-IN STUDENT
@@ -8399,8 +8487,8 @@ const sellerBackLink =
 const closeSeller =
     document.getElementById("closeSeller");
 
-const accountBecomeSeller =
-    document.getElementById("accountBecomeSeller");
+const sellerAccountSignOut =
+    document.getElementById("sellerAccountSignOut");
 
 const sellerLoadingState =
     document.getElementById("sellerLoadingState");
@@ -8423,6 +8511,70 @@ const sellerApplyStatus =
 const sellerApplySubmit =
     document.getElementById("sellerApplySubmit");
 
+
+async function refreshStudentSellerSwitch() {
+
+    if (!accountSwitchToSeller) {
+        return;
+    }
+
+    const student = getStoredStudent();
+
+    accountSwitchToSeller.style.display = "none";
+    if (accountBecomeSeller) accountBecomeSeller.style.display = "flex";
+
+    if (!student || !student.id) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            API_URL + "/api/sellers/me?studentId=" + encodeURIComponent(student.id)
+        );
+
+        const data = await response.json();
+        const seller = data && data.success ? data.seller : null;
+
+        if (seller && seller.status === "approved") {
+            accountSwitchToSeller.style.display = "flex";
+            accountSwitchToSeller.dataset.sellerId = seller.id || "";
+            if (accountBecomeSeller) accountBecomeSeller.style.display = "none";
+        }
+    } catch (error) {
+        console.warn("Could not check seller role:", error.message);
+    }
+}
+
+function setActiveKuriosRole(role) {
+    try {
+        localStorage.setItem("kuriosActiveRole", role);
+    } catch (error) {}
+}
+
+function getActiveKuriosRole() {
+    try {
+        return localStorage.getItem("kuriosActiveRole") || "student";
+    } catch (error) {
+        return "student";
+    }
+}
+
+function closeSellerAccountMenu() {
+    if (ksSellerAccountMenu) {
+        ksSellerAccountMenu.classList.remove("open");
+    }
+    if (sellerDashboardUserMenu) {
+        sellerDashboardUserMenu.setAttribute("aria-expanded", "false");
+    }
+}
+
+function openStudentMode() {
+    setActiveKuriosRole("student");
+    closeSellerAccountMenu();
+    closeSellerPanel();
+    window.location.hash = "home";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
 function hideAllSellerStates() {
 
@@ -8525,6 +8677,8 @@ function openSignInModalStandalone() {
 
 
 async function openSellerPanel() {
+
+    setActiveKuriosRole("seller");
 
     const student =
         getStoredStudent();
@@ -8719,6 +8873,19 @@ async function openSellerPanel() {
         }
 
         if (seller.status === "approved") {
+
+            const accountNameEl = document.getElementById("ksSellerAccountName");
+            const accountStoreEl = document.getElementById("ksSellerAccountStore");
+            const accountAvatarEl = document.getElementById("ksSellerAccountAvatar");
+            const fullStudentName = [student.first_name, student.last_name].filter(Boolean).join(" ").trim();
+
+            if (accountNameEl) accountNameEl.textContent = fullStudentName || seller.store_name || "Seller";
+            if (accountStoreEl) accountStoreEl.textContent = seller.store_name || "Seller account";
+            if (accountAvatarEl) {
+                accountAvatarEl.innerHTML = seller.store_image
+                    ? `<img src="${API_URL + seller.store_image}" alt="Store logo">`
+                    : `<i class="fa-solid fa-store"></i>`;
+            }
 
             const nameEl =
                 document.getElementById("sellerApprovedStoreName");
@@ -11530,3 +11697,10 @@ async function loadReviewablePrompts(studentId) {
     }
 
 }
+
+
+// Keep role state in sync with the existing sign-out flow.
+document.addEventListener("click", function (event) {
+    const signOut = event.target.closest("#signOutButton");
+    if (signOut) setActiveKuriosRole("student");
+});
