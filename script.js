@@ -8683,6 +8683,24 @@ async function openSellerPanel() {
 
         }
 
+        window.__kuriosCurrentSeller = seller;
+
+        const dashboardStoreNameEl = document.getElementById("sellerDashboardStoreName");
+        const dashboardWelcomeEl = document.getElementById("sellerDashboardWelcomeName");
+        const dashboardTopNameEl = document.getElementById("sellerDashboardTopName");
+        const dashboardAvatarEls = [
+            document.getElementById("sellerDashboardAvatar"),
+            document.getElementById("sellerDashboardTopAvatar")
+        ];
+        const studentDisplayName = [student.first_name, student.last_name].filter(Boolean).join(" ").trim() || seller.store_name || "Seller";
+        if (dashboardStoreNameEl) dashboardStoreNameEl.textContent = seller.store_name || "Your Store";
+        if (dashboardWelcomeEl) dashboardWelcomeEl.textContent = studentDisplayName.split(" ")[0] || "Seller";
+        if (dashboardTopNameEl) dashboardTopNameEl.textContent = studentDisplayName.split(" ")[0] || "Seller";
+        dashboardAvatarEls.forEach(function (el) {
+            if (!el) return;
+            el.innerHTML = seller.store_image ? `<img src="${API_URL + seller.store_image}" alt="Store logo">` : `<i class="fa-solid fa-store"></i>`;
+        });
+
         if (seller.status === "pending") {
 
             const nameEl =
@@ -11152,361 +11170,217 @@ document.querySelectorAll(".seller-dash-nav-item[data-seller-tab]").forEach(func
 
 async function loadSellerDashboardStats(studentId) {
 
-    const loadingEl =
-        document.getElementById("sellerStatsLoading");
+    const loadingEl = document.getElementById("sellerStatsLoading");
+    const contentEl = document.getElementById("sellerStatsContent");
 
-    const contentEl =
-        document.getElementById("sellerStatsContent");
-
-    if (!loadingEl || !contentEl) {
-        return;
-    }
+    if (!loadingEl || !contentEl) return;
 
     loadingEl.style.display = "block";
     contentEl.style.display = "none";
 
     try {
-
-        const response =
-            await fetch(
-                API_URL + "/api/sellers/dashboard-stats?studentId=" + studentId
-            );
-
+        const response = await fetch(
+            API_URL + "/api/sellers/dashboard-stats?studentId=" + encodeURIComponent(studentId)
+        );
         const data = await response.json();
 
         loadingEl.style.display = "none";
-
-        if (!data.success) {
-            return;
-        }
+        if (!data.success) return;
 
         contentEl.style.display = "block";
 
-
-        // ------------------------------------
-        // STAT CARDS
-        // ------------------------------------
-
-        const setText = function (id, text) {
+        const money = value => "₦" + Number(value || 0).toLocaleString();
+        const setText = (id, value) => {
             const el = document.getElementById(id);
-            if (el) el.textContent = text;
+            if (el) el.textContent = value;
         };
 
-        setText("statTotalSales", "₦" + Number(data.totalSales).toLocaleString());
-        setText("statOrderCount", data.orderCount);
-        setText("statProductCount", data.productCount);
-        setText("statCustomerCount", data.uniqueCustomers);
-        setText("statWalletBalance", "₦" + Number(data.walletBalance).toLocaleString());
+        setText("statTotalSales", money(data.totalSales));
+        setText("statOrderCount", data.orderCount || 0);
+        setText("statProductCount", data.productCount || 0);
+        setText("statCustomerCount", data.uniqueCustomers || 0);
+        setText("statWalletBalance", money(data.walletBalance));
+        setText("statStoreRating", data.storeReviewCount > 0
+            ? Number(data.storeRating).toFixed(1) + " / 5"
+            : "No ratings yet");
+        setText("ksPerformanceProducts", data.productCount || 0);
+        setText("ksPerformanceOrders", data.orderCount || 0);
+        setText("ksPerformanceReviews", data.storeReviewCount || 0);
+        setText("sellerDonutTotal", data.orderCount || 0);
 
-        setText(
-            "statStoreRating",
-            data.storeReviewCount > 0 ?
-                data.storeRating.toFixed(1) + " ★ (" + data.storeReviewCount + ")" :
-                "No ratings yet"
-        );
+        const badge = document.getElementById("sellerOrdersBadge");
+        if (badge) {
+            if (Number(data.orderCount) > 0) {
+                badge.textContent = data.orderCount > 99 ? "99+" : data.orderCount;
+                badge.style.display = "grid";
+            } else badge.style.display = "none";
+        }
 
-
-        // ------------------------------------
-        // SALES CHART — real SVG line chart
-        // ------------------------------------
-
-        const chartEl =
-            document.getElementById("sellerSalesChart");
-
+        // ---------------------------------------------------------
+        // REAL 7-DAY SALES LINE CHART
+        // ---------------------------------------------------------
+        const chartEl = document.getElementById("sellerSalesChart");
         if (chartEl) {
-
-            const days =
-                Array.isArray(data.salesByDay) ? data.salesByDay : [];
-
-            if (days.length === 0) {
-
-                chartEl.innerHTML =
-                    '<div class="seller-chart-empty">No sales data yet.</div>';
-
+            const days = Array.isArray(data.salesByDay) ? data.salesByDay : [];
+            if (!days.length) {
+                chartEl.innerHTML = '<div class="ks-chart-empty">No sales data yet.</div>';
             } else {
-
-                const width = 620;
-                const height = 160;
-                const pad = { left: 42, right: 12, top: 12, bottom: 26 };
+                const width = 620, height = 220;
+                const pad = { left: 42, right: 12, top: 15, bottom: 34 };
                 const innerW = width - pad.left - pad.right;
                 const innerH = height - pad.top - pad.bottom;
-
-                const maxValue =
-                    Math.max(1, ...days.map(function (d) { return Number(d.total) || 0; }));
-
-                const points =
-                    days.map(function (d, i) {
-
-                        const x =
-                            pad.left + (days.length === 1 ? innerW / 2 : (i * innerW) / (days.length - 1));
-
-                        const y =
-                            pad.top + innerH - ((Number(d.total) || 0) / maxValue) * innerH;
-
-                        return { x: x, y: y, label: d.label, value: Number(d.total) || 0 };
-
-                    });
-
-                const polyline =
-                    points.map(function (p) { return p.x + "," + p.y; }).join(" ");
-
-                const area =
-                    pad.left + "," + (pad.top + innerH) + " " +
-                    polyline + " " +
-                    points[points.length - 1].x + "," + (pad.top + innerH);
-
-                const gridLines =
-                    [0, 0.25, 0.5, 0.75, 1].map(function (r) {
-
-                        const y = pad.top + innerH - r * innerH;
-                        const value = Math.round(maxValue * r);
-                        const label = value >= 1000 ? Math.round(value / 1000) + "K" : value;
-
-                        return `<line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke="#f0f0f2" stroke-width="1"/>` +
-                            `<text x="${pad.left - 8}" y="${y + 3}" text-anchor="end" fill="#9ca3af" font-size="10">₦${label}</text>`;
-
-                    }).join("");
-
-                const dayLabels =
-                    points.map(function (p) {
-                        return `<text x="${p.x}" y="${height - 6}" text-anchor="middle" fill="#9ca3af" font-size="10">${p.label}</text>`;
-                    }).join("");
-
-                const dots =
-                    points.map(function (p) {
-                        return `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#6d28d9" stroke="#fff" stroke-width="2"><title>₦${p.value.toLocaleString()}</title></circle>`;
-                    }).join("");
-
-                chartEl.innerHTML =
-                    `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img">` +
-                    gridLines +
-                    `<polygon points="${area}" fill="rgba(109,40,217,0.08)"/>` +
-                    `<polyline points="${polyline}" fill="none" stroke="#6d28d9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
-                    dots +
-                    dayLabels +
-                    `</svg>`;
-
-            }
-
-        }
-
-
-        // ------------------------------------
-        // ORDER STATUS — real donut chart
-        // ------------------------------------
-
-        const statusColors = {
-            paid: "#15803d",
-            pending: "#b45309",
-            failed: "#dc2626"
-        };
-
-        const statusEntries =
-            Object.entries(data.statusBreakdown || {});
-
-        const totalStatuses =
-            Math.max(1, statusEntries.reduce(function (sum, entry) { return sum + Number(entry[1] || 0); }, 0));
-
-        const donutEl =
-            document.getElementById("sellerOrderDonut");
-
-        const statusEl =
-            document.getElementById("sellerStatusBreakdown");
-
-        let cursor = 0;
-
-        const stops =
-            statusEntries.map(function (entry) {
-
-                const status = entry[0];
-                const value = Number(entry[1] || 0);
-
-                const startDeg = (cursor * 360) / totalStatuses;
-                cursor += value;
-                const endDeg = (cursor * 360) / totalStatuses;
-
-                return (statusColors[status] || "#9ca3af") + " " + startDeg + "deg " + endDeg + "deg";
-
-            });
-
-        if (donutEl) {
-
-            donutEl.style.background =
-                stops.length > 0 ?
-                    "conic-gradient(" + stops.join(",") + ")" :
-                    "conic-gradient(#e5e7eb 0deg 360deg)";
-
-        }
-
-        const donutTotalEl =
-            document.getElementById("sellerDonutTotal");
-
-        if (donutTotalEl) {
-
-            donutTotalEl.textContent =
-                statusEntries.reduce(function (sum, entry) { return sum + Number(entry[1] || 0); }, 0);
-
-        }
-
-        if (statusEl) {
-
-            statusEl.innerHTML =
-                statusEntries.map(function (entry) {
-
-                    const status = entry[0];
-                    const count = Number(entry[1] || 0);
-                    const pct = ((count / totalStatuses) * 100).toFixed(0);
-
-                    return `
-                        <div class="seller-status-row">
-                            <span class="seller-status-dot" style="background:${statusColors[status] || "#9ca3af"};"></span>
-                            <span class="seller-status-row-label">${status}</span>
-                            <span class="seller-status-row-count">${count} (${pct}%)</span>
-                        </div>
-                    `;
-
+                const max = Math.max(1, ...days.map(d => Number(d.total) || 0));
+                const points = days.map((d, i) => {
+                    const x = pad.left + (days.length === 1 ? innerW / 2 : i * innerW / (days.length - 1));
+                    const y = pad.top + innerH - ((Number(d.total) || 0) / max) * innerH;
+                    return { x, y, label: d.label, value: Number(d.total) || 0 };
+                });
+                const polyline = points.map(p => `${p.x},${p.y}`).join(" ");
+                const area = `${pad.left},${pad.top + innerH} ${polyline} ${points[points.length - 1].x},${pad.top + innerH}`;
+                const grid = [0, .25, .5, .75, 1].map(r => {
+                    const y = pad.top + innerH - r * innerH;
+                    const value = Math.round(max * r);
+                    return `<line x1="${pad.left}" y1="${y}" x2="${width-pad.right}" y2="${y}" stroke="#edf1f3" stroke-width="1"/>` +
+                        `<text x="${pad.left-8}" y="${y+3}" text-anchor="end" fill="#87939a" font-size="10">₦${value >= 1000 ? Math.round(value/1000) + "K" : value}</text>`;
                 }).join("");
-
+                const labels = points.map(p => `<text x="${p.x}" y="${height-8}" text-anchor="middle" fill="#7c8991" font-size="10">${escapeHtml(p.label)}</text>`).join("");
+                const circles = points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#0aa66f" stroke="#fff" stroke-width="2"><title>₦${p.value.toLocaleString()}</title></circle>`).join("");
+                chartEl.innerHTML = `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img">${grid}<polygon points="${area}" fill="rgba(10,166,111,.08)"/><polyline points="${polyline}" fill="none" stroke="#0aa66f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${circles}${labels}</svg>`;
+            }
         }
 
+        // ---------------------------------------------------------
+        // REAL ORDER STATUS DONUT
+        // ---------------------------------------------------------
+        const breakdown = data.statusBreakdown || {};
+        const statusEntries = Object.entries(breakdown);
+        const totalStatuses = Math.max(1, statusEntries.reduce((sum, [, value]) => sum + Number(value || 0), 0));
+        const donut = document.getElementById("sellerOrderDonut");
+        const legend = document.getElementById("sellerStatusBreakdown");
+        const statusColors = { paid: "#0aa66f", pending: "#3182e6", failed: "#ef4444" };
+        let cursor = 0;
+        const stops = statusEntries.map(([status, value]) => {
+            const startDeg = cursor * 360 / totalStatuses;
+            cursor += Number(value || 0);
+            const endDeg = cursor * 360 / totalStatuses;
+            return `${statusColors[status] || "#f59e0b"} ${startDeg}deg ${endDeg}deg`;
+        });
+        if (donut) donut.style.background = `conic-gradient(${stops.length ? stops.join(",") : "#e8edef 0deg 360deg"})`;
+        if (legend) {
+            legend.innerHTML = statusEntries.map(([status, value]) => {
+                const count = Number(value || 0);
+                const pct = totalStatuses ? ((count / totalStatuses) * 100).toFixed(1) : "0.0";
+                return `<div class="ks-legend-item"><span class="ks-legend-dot" style="background:${statusColors[status] || "#f59e0b"}"></span><span class="ks-legend-label">${escapeHtml(status)}</span><span class="ks-legend-value">${count} (${pct}%)</span></div>`;
+            }).join("") || '<div class="ks-chart-empty">No orders yet.</div>';
+        }
 
-        // ------------------------------------
-        // TOP SELLING PRODUCTS — with thumbnail + price
-        // ------------------------------------
-
-        const topProductsEl =
-            document.getElementById("sellerTopProducts");
-
-        const topProductsEmptyEl =
-            document.getElementById("sellerTopProductsEmpty");
-
+        // ---------------------------------------------------------
+        // TOP PRODUCTS
+        // ---------------------------------------------------------
+        const topProductsEl = document.getElementById("sellerTopProducts");
+        const topProductsEmptyEl = document.getElementById("sellerTopProductsEmpty");
         if (topProductsEl) {
-
-            const topProducts =
-                Array.isArray(data.topProducts) ? data.topProducts : [];
-
-            if (topProducts.length === 0) {
-
-                topProductsEl.innerHTML = "";
-
-                if (topProductsEmptyEl) topProductsEmptyEl.style.display = "block";
-
-            } else {
-
-                if (topProductsEmptyEl) topProductsEmptyEl.style.display = "none";
-
-                topProductsEl.innerHTML =
-                    topProducts.map(function (product) {
-
-                        const thumbMarkup =
-                            product.image_url ?
-                                `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
-                                `<i class="fa-solid fa-box"></i>`;
-
-                        return `
-                            <div class="seller-top-product-row seller-top-product-row-with-thumb">
-                                <div class="seller-top-product-thumb">${thumbMarkup}</div>
-                                <div class="seller-top-product-details">
-                                    <strong>${product.name}</strong>
-                                    <span>₦${Number(product.price || 0).toLocaleString()}</span>
-                                </div>
-                                <span class="seller-top-product-qty">${product.quantitySold} sold</span>
-                            </div>
-                        `;
-
-                    }).join("");
-
-            }
-
+            const products = Array.isArray(data.topProducts) ? data.topProducts : [];
+            topProductsEl.innerHTML = products.map(product => {
+                const thumb = product.image_url
+                    ? `<img src="${API_URL + product.image_url}" alt="${escapeHtml(product.name)}">`
+                    : `<i class="fa-solid fa-box"></i>`;
+                return `<div class="ks-top-product"><div class="ks-top-thumb">${thumb}</div><div><strong>${escapeHtml(product.name || "Product")}</strong><span>${money(product.price || 0)}</span></div><em>${Number(product.quantitySold || 0).toLocaleString()} sold</em></div>`;
+            }).join("");
+            if (topProductsEmptyEl) topProductsEmptyEl.style.display = products.length ? "none" : "block";
         }
 
-
-        // ------------------------------------
-        // RECENT ORDERS TABLE — now with product
-        // ------------------------------------
-
-        const recentOrdersEl =
-            document.getElementById("sellerRecentOrdersTable");
-
-        const recentOrdersEmptyEl =
-            document.getElementById("sellerRecentOrdersEmpty");
-
+        // ---------------------------------------------------------
+        // RECENT ORDERS
+        // ---------------------------------------------------------
+        const recentOrdersEl = document.getElementById("sellerRecentOrdersTable");
+        const recentOrdersEmptyEl = document.getElementById("sellerRecentOrdersEmpty");
         if (recentOrdersEl) {
-
-            const recentOrders =
-                Array.isArray(data.recentOrders) ? data.recentOrders : [];
-
-            if (recentOrders.length === 0) {
-
+            const orders = Array.isArray(data.recentOrders) ? data.recentOrders : [];
+            if (!orders.length) {
                 recentOrdersEl.innerHTML = "";
-
                 if (recentOrdersEmptyEl) recentOrdersEmptyEl.style.display = "block";
-
             } else {
-
                 if (recentOrdersEmptyEl) recentOrdersEmptyEl.style.display = "none";
-
-                const rows =
-                    recentOrders.map(function (order) {
-
-                        const firstItem =
-                            Array.isArray(order.items) && order.items[0] ?
-                                order.items[0].name :
-                                "Product";
-
-                        const orderDate =
-                            new Date(order.createdAt).toLocaleDateString(
-                                undefined,
-                                { month: "short", day: "numeric" }
-                            );
-
-                        return `
-                            <tr>
-                                <td>#${order.orderId}</td>
-                                <td>${order.buyerName}</td>
-                                <td>${firstItem}</td>
-                                <td>₦${Number(order.subtotal).toLocaleString()}</td>
-                                <td><span class="seller-order-status-pill ${order.status}">${order.status}</span></td>
-                                <td>${orderDate}</td>
-                            </tr>
-                        `;
-
-                    }).join("");
-
-                recentOrdersEl.innerHTML = `
-                    <table class="seller-orders-table">
-                        <thead>
-                            <tr>
-                                <th>Order</th>
-                                <th>Customer</th>
-                                <th>Product</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rows}
-                        </tbody>
-                    </table>
-                `;
-
+                const rows = orders.map(order => {
+                    const firstItem = Array.isArray(order.items) && order.items[0] ? order.items[0].name : "Seller product";
+                    const date = new Date(order.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+                    return `<tr><td>#${escapeHtml(order.orderId)}</td><td>${escapeHtml(order.buyerName || "Kurios Student")}</td><td>${escapeHtml(firstItem)}</td><td>${money(order.subtotal)}</td><td><span class="ks-order-status-pill ${escapeHtml(order.status)}">${escapeHtml(order.status)}</span></td><td>${escapeHtml(date)}</td></tr>`;
+                }).join("");
+                recentOrdersEl.innerHTML = `<div style="overflow:auto"><table class="seller-orders-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table></div>`;
             }
-
         }
-
     } catch (error) {
-
-        console.error(
-            "Load seller dashboard stats error:",
-            error
-        );
-
+        console.error("Load seller dashboard stats error:", error);
         loadingEl.style.display = "none";
+    }
+}
 
+
+// =========================================================
+// MODERN SELLER CENTER NAVIGATION
+// =========================================================
+(function initModernSellerCenter() {
+    function switchSellerTab(tabName) {
+        document.querySelectorAll(".ks-seller-app .seller-dash-tab").forEach(function (tab) {
+            tab.style.display = "none";
+        });
+        document.querySelectorAll(".ks-seller-app [data-seller-tab]").forEach(function (item) {
+            item.classList.remove("active");
+        });
+        const target = document.getElementById("sellerTab" + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+        if (target) target.style.display = "block";
+        document.querySelectorAll('.ks-seller-app [data-seller-tab="' + tabName + '"]').forEach(function (item) {
+            if (item.classList.contains("ks-seller-nav-item")) item.classList.add("active");
+        });
     }
 
-}
+    document.addEventListener("click", function (event) {
+        const tabTrigger = event.target.closest(".ks-seller-app [data-seller-tab]");
+        if (tabTrigger) {
+            event.preventDefault();
+            switchSellerTab(tabTrigger.dataset.sellerTab);
+            return;
+        }
+
+        const actionTrigger = event.target.closest(".ks-seller-app [data-seller-action]");
+        if (!actionTrigger) return;
+        const action = actionTrigger.dataset.sellerAction;
+        if (action === "wallet") {
+            const wallet = document.getElementById("walletPage");
+            if (wallet) {
+                closeSellerPanel();
+                if (typeof openWalletPage === "function") openWalletPage();
+                else window.location.hash = "wallet";
+            }
+        } else if (action === "store") {
+            const seller = window.__kuriosCurrentSeller;
+            if (seller && seller.id && typeof openStorefront === "function") openStorefront(seller.id);
+        } else if (action === "messages") {
+            const chat = document.getElementById("chatPage");
+            if (chat) { closeSellerPanel(); window.location.hash = "chat"; }
+        } else if (["marketing", "discounts", "reviews", "notifications", "profile"].includes(action)) {
+            if (typeof showToast === "function") showToast("This seller tool is available in the next Kurios Stores update.");
+            else alert("This seller tool is available in the next Kurios Stores update.");
+        }
+    });
+
+    document.addEventListener("click", function (event) {
+        const add = event.target.closest("#sellerDashboardAddProduct");
+        if (!add) return;
+        switchSellerTab("products");
+        setTimeout(function () {
+            const existing = document.getElementById("addProductButton");
+            if (existing) existing.click();
+        }, 0);
+    });
+
+    const toggle = document.getElementById("ksSellerSidebarToggle");
+    if (toggle) toggle.addEventListener("click", function () {
+        const app = document.querySelector(".ks-seller-app");
+        if (app) app.classList.toggle("sidebar-open");
+    });
+})();
 
 
 // =========================================================
