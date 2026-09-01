@@ -448,6 +448,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         }
 
+        document.body.classList.add("cart-open");
+
         const choiceEl =
             document.getElementById("orderPaymentChoice");
 
@@ -470,6 +472,8 @@ document.addEventListener("DOMContentLoaded", function () {
             cartOverlay.classList.remove("open");
 
         }
+
+        document.body.classList.remove("cart-open");
 
     }
 
