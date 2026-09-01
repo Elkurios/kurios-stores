@@ -653,7 +653,7 @@
 
         <!-- WALLET -->
 
-        <div class="stat-card stat-card--wallet">
+        <button type="button" class="stat-card stat-card--wallet stat-card-link" id="dashboardWalletCard">
 
             <div class="stat-icon">
                 <i class="fa-solid fa-credit-card"></i>
@@ -669,12 +669,12 @@
                 </span>
             </div>
 
-        </div>
+        </button>
 
 
         <!-- WISHLIST -->
 
-        <div class="stat-card stat-card--wishlist">
+        <button type="button" class="stat-card stat-card--wishlist stat-card-link" id="dashboardWishlistCard">
 
             <div class="stat-icon">
                 <i class="fa-regular fa-heart"></i>
@@ -690,12 +690,12 @@
                 </span>
             </div>
 
-        </div>
+        </button>
 
 
         <!-- REWARDS -->
 
-        <div class="stat-card stat-card--rewards">
+        <button type="button" class="stat-card stat-card--rewards stat-card-link" id="dashboardRewardsCard">
 
             <div class="stat-icon">
                 <i class="fa-solid fa-sparkles"></i>
@@ -713,7 +713,47 @@
                 </span>
             </div>
 
+        </button>
+
+    </div>
+
+
+    <!-- =================================================
+         RECENT ORDERS
+    ================================================== -->
+
+    <div class="dashboard-section">
+
+        <div class="dashboard-section-header">
+            <h2>Recent Orders</h2>
+            <button type="button" id="dashboardViewAllOrders" class="dashboard-section-link">
+                View all <i class="fa-solid fa-arrow-right"></i>
+            </button>
         </div>
+
+        <p id="dashboardOrdersEmpty" class="dashboard-empty-note">
+            No orders yet — your recent purchases will show up here.
+        </p>
+
+        <div id="dashboardRecentOrders" class="dashboard-order-list"></div>
+
+    </div>
+
+
+    <!-- =================================================
+         RECOMMENDED FOR YOU
+    ================================================== -->
+
+    <div class="dashboard-section">
+
+        <div class="dashboard-section-header">
+            <h2>Recommended for You</h2>
+            <a href="#shop" class="dashboard-section-link">
+                See all <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div id="dashboardRecommendations" class="product-grid dashboard-recommend-grid"></div>
 
     </div>
 
