@@ -1449,6 +1449,99 @@ function updateLoginState() {
 updateLoginState();
 
 
+// =========================================================
+// LINKED STUDENT + SELLER DASHBOARDS
+// =========================================================
+
+function getRoleChooser() {
+    return document.getElementById("ksRoleChooser");
+}
+
+function closeDashboardChooser() {
+    const chooser = getRoleChooser();
+    if (chooser) {
+        chooser.classList.remove("open");
+        chooser.setAttribute("aria-hidden", "true");
+    }
+}
+
+function openDashboardChooser() {
+    const chooser = getRoleChooser();
+    if (!chooser) return;
+    chooser.classList.add("open");
+    chooser.setAttribute("aria-hidden", "false");
+}
+
+async function showDashboardChooserForStudent(student) {
+    if (!student || !student.id) {
+        setActiveKuriosRole("student");
+        return false;
+    }
+
+    try {
+        const response = await fetch(
+            API_URL + "/api/sellers/me?studentId=" + encodeURIComponent(student.id)
+        );
+        const data = await response.json();
+        const seller = data && data.success ? data.seller : null;
+
+        if (seller && seller.status === "approved") {
+            window.__kuriosCurrentSeller = seller;
+            openDashboardChooser();
+            return true;
+        }
+    } catch (error) {
+        console.warn("Could not check seller dashboard access:", error.message);
+    }
+
+    setActiveKuriosRole("student");
+    return false;
+}
+
+// Approved sellers choose a workspace immediately after login.
+const ksChooseStudent = document.getElementById("ksChooseStudent");
+const ksChooseSeller = document.getElementById("ksChooseSeller");
+
+if (ksChooseStudent) {
+    ksChooseStudent.addEventListener("click", function () {
+        setActiveKuriosRole("student");
+        closeDashboardChooser();
+        openStudentMode();
+    });
+}
+
+if (ksChooseSeller) {
+    ksChooseSeller.addEventListener("click", async function () {
+        const student = getStoredStudent();
+        if (!student) return;
+        setActiveKuriosRole("seller");
+        closeDashboardChooser();
+        await openSellerPanel();
+    });
+}
+
+
+// Restore the last workspace when the page is refreshed.
+// A fresh login still triggers the dashboard chooser above.
+setTimeout(async function () {
+    const student = getStoredStudent();
+    if (!student || getActiveKuriosRole() !== "seller") return;
+    try {
+        const response = await fetch(
+            API_URL + "/api/sellers/me?studentId=" + encodeURIComponent(student.id)
+        );
+        const data = await response.json();
+        if (data.success && data.seller && data.seller.status === "approved") {
+            window.__kuriosCurrentSeller = data.seller;
+            await openSellerPanel();
+        } else {
+            setActiveKuriosRole("student");
+        }
+    } catch (error) {
+        console.warn("Could not restore seller workspace:", error.message);
+    }
+}, 250);
+
 // ========================================
 // SIGN OUT
 // ========================================
@@ -1738,9 +1831,25 @@ if (accountSwitchToSeller) {
             return;
         }
 
-        setActiveKuriosRole("seller");
         if (studentAccountMenu) studentAccountMenu.classList.remove("open");
-        await openSellerPanel();
+
+        try {
+            const response = await fetch(
+                API_URL + "/api/sellers/me?studentId=" + encodeURIComponent(student.id)
+            );
+            const data = await response.json();
+            if (!data.success || !data.seller || data.seller.status !== "approved") {
+                setActiveKuriosRole("student");
+                refreshStudentSellerSwitch();
+                showMessage("Your seller account is not currently approved.");
+                return;
+            }
+            window.__kuriosCurrentSeller = data.seller;
+            setActiveKuriosRole("seller");
+            await openSellerPanel();
+        } catch (error) {
+            showMessage("Unable to verify your seller account right now.");
+        }
     });
 }
 
