@@ -448,6 +448,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         }
 
+        const choiceEl =
+            document.getElementById("orderPaymentChoice");
+
+        if (choiceEl) {
+            choiceEl.style.display = "none";
+        }
+
+        if (checkoutButton) {
+            checkoutButton.style.display = "";
+        }
+
     }
 
 
@@ -4692,6 +4703,8 @@ showOtpVerificationScreen(
        ===================================================== */
 
 
+    let currentOrderPaymentReference = null;
+
     if (checkoutButton) {
 
         checkoutButton.addEventListener(
@@ -4780,99 +4793,17 @@ showOtpVerificationScreen(
 
                     }
 
+                    currentOrderPaymentReference =
+                        initiateData.paymentReference;
 
-                    // ========================================
-                    // HAND OFF TO THE MONNIFY PAYMENT WIDGET
-                    // ========================================
+                    checkoutButton.style.display = "none";
 
-                    closeCartPanel();
+                    const choiceEl =
+                        document.getElementById("orderPaymentChoice");
 
-                    if (typeof MonnifySDK === "undefined") {
-
-                        showMessage(
-                            "Payment could not load. Please refresh and try again."
-                        );
-
-                        return;
-
+                    if (choiceEl) {
+                        choiceEl.style.display = "block";
                     }
-
-                    if (
-                        !initiateData.amount ||
-                        isNaN(initiateData.amount) ||
-                        initiateData.amount <= 0
-                    ) {
-
-                        console.error(
-                            "Checkout error: invalid amount from server",
-                            initiateData
-                        );
-
-                        showMessage(
-                            "There was a problem with your order total. Please try again or contact support."
-                        );
-
-                        return;
-
-                    }
-
-                    if (
-                        !initiateData.apiKey ||
-                        !initiateData.contractCode
-                    ) {
-
-                        console.error(
-                            "Checkout error: missing Monnify credentials from server",
-                            initiateData
-                        );
-
-                        showMessage(
-                            "Payment is not fully configured yet. Please contact support."
-                        );
-
-                        return;
-
-                    }
-
-                    MonnifySDK.initialize({
-
-                        amount: initiateData.amount,
-
-                        currency: "NGN",
-
-                        reference: initiateData.paymentReference,
-
-                        customerFullName:
-                            initiateData.customerName,
-
-                        customerEmail:
-                            initiateData.customerEmail,
-
-                        apiKey: initiateData.apiKey,
-
-                        contractCode: initiateData.contractCode,
-
-                        paymentDescription:
-                            "Kurios Stores order",
-
-                        onComplete: async function () {
-
-                            await verifyOrderPayment(
-                                initiateData.paymentReference
-                            );
-
-                        },
-
-                        onClose: function () {
-
-                            // Student closed the widget without
-                            // finishing — we'll still catch a
-                            // completed payment via the webhook,
-                            // so nothing else to do here.
-
-                        }
-
-                    });
 
                 } catch (error) {
 
@@ -4891,6 +4822,259 @@ showOtpVerificationScreen(
 
                     checkoutButton.textContent =
                         "Proceed to Checkout";
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // ========================================
+    // PAY ORDER WITH MONNIFY
+    // ========================================
+
+    const payOrderWithMonnifyButton =
+        document.getElementById("payOrderWithMonnifyButton");
+
+    if (payOrderWithMonnifyButton) {
+
+        payOrderWithMonnifyButton.addEventListener(
+            "click",
+            async function () {
+
+                const statusEl =
+                    document.getElementById("orderPaymentStatus");
+
+                if (!currentOrderPaymentReference) {
+                    return;
+                }
+
+                const student =
+                    getLoggedInStudent();
+
+                if (!student) {
+                    return;
+                }
+
+                payOrderWithMonnifyButton.disabled = true;
+
+                if (statusEl) statusEl.textContent = "";
+
+                try {
+
+                    const response =
+                        await fetch(
+                            API_URL + "/api/orders/pay/monnify",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    paymentReference: currentOrderPaymentReference
+                                })
+                            }
+                        );
+
+                    const data = await response.json();
+
+                    if (!data.success) {
+
+                        if (statusEl) {
+                            statusEl.textContent =
+                                data.message || "Could not start Monnify checkout.";
+                        }
+
+                        return;
+
+                    }
+
+                    if (typeof MonnifySDK === "undefined") {
+
+                        if (statusEl) {
+                            statusEl.textContent =
+                                "Payment could not load. Please refresh and try again.";
+                        }
+
+                        return;
+
+                    }
+
+                    if (
+                        !data.apiKey ||
+                        !data.contractCode
+                    ) {
+
+                        console.error(
+                            "Checkout error: missing Monnify credentials from server",
+                            data
+                        );
+
+                        if (statusEl) {
+                            statusEl.textContent =
+                                "Monnify is not fully configured yet. Try OPay instead, or contact support.";
+                        }
+
+                        return;
+
+                    }
+
+                    closeCartPanel();
+
+                    MonnifySDK.initialize({
+
+                        amount: data.amount,
+
+                        currency: "NGN",
+
+                        reference: data.paymentReference,
+
+                        customerFullName:
+                            `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+
+                        customerEmail: student.email,
+
+                        apiKey: data.apiKey,
+
+                        contractCode: data.contractCode,
+
+                        paymentDescription:
+                            "Kurios Stores order",
+
+                        onComplete: async function () {
+
+                            await verifyOrderPayment(
+                                data.paymentReference
+                            );
+
+                        },
+
+                        onClose: function () {
+
+                            // Student closed the widget without
+                            // finishing — we'll still catch a
+                            // completed payment via the webhook,
+                            // so nothing else to do here.
+
+                        }
+
+                    });
+
+                } catch (error) {
+
+                    console.error(
+                        "Order Monnify checkout error:",
+                        error
+                    );
+
+                    if (statusEl) {
+                        statusEl.textContent =
+                            "Unable to connect to Kurios Stores server.";
+                    }
+
+                } finally {
+
+                    payOrderWithMonnifyButton.disabled = false;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // ========================================
+    // PAY ORDER WITH OPAY
+    // ========================================
+
+    const payOrderWithOpayButton =
+        document.getElementById("payOrderWithOpayButton");
+
+    if (payOrderWithOpayButton) {
+
+        payOrderWithOpayButton.addEventListener(
+            "click",
+            async function () {
+
+                const statusEl =
+                    document.getElementById("orderPaymentStatus");
+
+                if (!currentOrderPaymentReference) {
+                    return;
+                }
+
+                const student =
+                    getLoggedInStudent();
+
+                if (!student) {
+                    return;
+                }
+
+                payOrderWithOpayButton.disabled = true;
+
+                if (statusEl) statusEl.textContent = "Redirecting to OPay...";
+
+                try {
+
+                    const returnUrl =
+                        window.location.origin + "/#orders";
+
+                    const response =
+                        await fetch(
+                            API_URL + "/api/orders/pay/opay",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    paymentReference: currentOrderPaymentReference,
+                                    returnUrl: returnUrl,
+                                    customerName:
+                                        `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                                    customerEmail: student.email
+                                })
+                            }
+                        );
+
+                    const data = await response.json();
+
+                    if (!data.success || !data.cashierUrl) {
+
+                        if (statusEl) {
+                            statusEl.textContent =
+                                data.message || "Could not start OPay checkout.";
+                        }
+
+                        payOrderWithOpayButton.disabled = false;
+
+                        return;
+
+                    }
+
+                    localStorage.setItem(
+                        "kuriosPendingOpayOrderRef",
+                        currentOrderPaymentReference
+                    );
+
+                    window.location.href = data.cashierUrl;
+
+                } catch (error) {
+
+                    console.error(
+                        "Order OPay checkout error:",
+                        error
+                    );
+
+                    if (statusEl) {
+                        statusEl.textContent =
+                            "Unable to connect to Kurios Stores server.";
+                    }
+
+                    payOrderWithOpayButton.disabled = false;
 
                 }
 
@@ -4957,7 +5141,39 @@ showOtpVerificationScreen(
                 "We couldn't confirm your payment. Check My Orders shortly, or contact support if this continues."
             );
 
+        } finally {
+
+            currentOrderPaymentReference = null;
+
+            if (checkoutButton) {
+                checkoutButton.style.display = "";
+            }
+
+            const choiceEl =
+                document.getElementById("orderPaymentChoice");
+
+            if (choiceEl) {
+                choiceEl.style.display = "none";
+            }
+
         }
+
+    }
+
+
+    // ========================================
+    // RESUME AN OPAY ORDER PAYMENT IF WE'RE
+    // RETURNING FROM THE OPAY CHECKOUT PAGE
+    // ========================================
+
+    const pendingOpayOrderRef =
+        localStorage.getItem("kuriosPendingOpayOrderRef");
+
+    if (pendingOpayOrderRef) {
+
+        localStorage.removeItem("kuriosPendingOpayOrderRef");
+
+        verifyOrderPayment(pendingOpayOrderRef);
 
     }
 
