@@ -498,28 +498,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /*
-        Clicking outside the cart
-        closes it.
+        The cart overlay is click-through now
+        (so the shop stays interactive behind it),
+        so there's no "click outside" region to
+        listen for anymore — closing happens via
+        the visible X button instead.
     */
-
-    if (cartOverlay) {
-
-        cartOverlay.addEventListener(
-            "click",
-            function (event) {
-
-                if (
-                    event.target === cartOverlay
-                ) {
-
-                    closeCartPanel();
-
-                }
-
-            }
-        );
-
-    }
 
 
 
