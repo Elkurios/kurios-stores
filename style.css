@@ -2076,9 +2076,7 @@ img {
    ========================================================= */
 
 .cart-overlay,
-.modal-overlay,
-.profile-overlay,
-.orders-overlay {
+.modal-overlay {
 
     position: fixed;
 
@@ -2097,13 +2095,30 @@ img {
 
 
 .cart-overlay.open,
-.modal-overlay.open,
-.profile-overlay.open,
-.orders-overlay.open {
+.modal-overlay.open {
 
     opacity: 1;
 
     visibility: visible;
+}
+
+
+/* Profile & Orders are full pages, not drawers */
+
+.profile-overlay,
+.orders-overlay {
+
+    display: none;
+}
+
+.profile-overlay.open,
+.orders-overlay.open {
+
+    display: block;
+
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
 }
 
 
@@ -2462,33 +2477,14 @@ img {
 
 .profile-panel {
 
-    position: absolute;
-
-    top: 0;
-
-    right: 0;
-
-    height: 100%;
-
-    width: 460px;
-
-    max-width: 100%;
-
     background: var(--white);
+
+    border: 1px solid var(--border);
+    border-radius: 16px;
 
     display: flex;
 
     flex-direction: column;
-
-    transform: translateX(100%);
-
-    transition: 0.3s ease;
-}
-
-
-.profile-overlay.open .profile-panel {
-
-    transform: translateX(0);
 }
 
 
@@ -3043,33 +3039,14 @@ img {
 
 .orders-panel {
 
-    position: absolute;
-
-    top: 0;
-
-    right: 0;
-
-    height: 100%;
-
-    width: 460px;
-
-    max-width: 100%;
-
     background: var(--white);
+
+    border: 1px solid var(--border);
+    border-radius: 16px;
 
     display: flex;
 
     flex-direction: column;
-
-    transform: translateX(100%);
-
-    transition: 0.3s ease;
-}
-
-
-.orders-overlay.open .orders-panel {
-
-    transform: translateX(0);
 }
 
 
@@ -4770,6 +4747,30 @@ img {
     text-align: center;
 
     color: var(--purple-dark);
+}
+
+
+.coming-soon-panel {
+    text-align: center;
+    padding: 60px 30px;
+}
+
+.coming-soon-panel i {
+    font-size: 40px;
+    color: var(--purple-light);
+    margin-bottom: 16px;
+    display: block;
+}
+
+.coming-soon-panel h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+}
+
+.coming-soon-panel p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 13px;
 }
 
 
