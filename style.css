@@ -1415,6 +1415,35 @@ img {
 }
 
 
+.chat-mobile-avatar {
+    display: none;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 50%;
+    background: var(--purple-soft);
+    color: var(--purple);
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    overflow: hidden;
+}
+
+.chat-mobile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+@media (max-width: 780px) {
+
+    .chat-mobile-avatar {
+        display: flex;
+    }
+
+}
+
+
 .chat-sidebar-header {
 
     padding: 20px;
@@ -8301,6 +8330,18 @@ img {
 .chat-reaction-popover button:hover {
     background: var(--purple-soft);
     transform: scale(1.15);
+}
+
+.chat-reaction-more {
+    color: #9ca3af;
+    font-size: 13px !important;
+    border-left: 1px solid var(--border);
+    padding-left: 8px !important;
+    margin-left: 2px;
+}
+
+.chat-reaction-more:hover {
+    color: var(--purple) !important;
 }
 
 .message-reactions {
