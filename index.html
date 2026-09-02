@@ -1719,6 +1719,24 @@
 
 
 
+                    <!-- EMOJI PICKER -->
+
+                    <div class="chat-emoji-picker" id="chatEmojiPicker" style="display: none;"></div>
+
+
+                    <!-- VOICE RECORDING INDICATOR -->
+
+                    <div class="chat-recording-bar" id="chatRecordingBar" style="display: none;">
+                        <span class="chat-recording-dot"></span>
+                        <span id="chatRecordingTimer">0:00</span>
+                        <span>Recording voice note...</span>
+                        <button type="button" id="chatCancelRecording" class="chat-recording-cancel">Cancel</button>
+                        <button type="button" id="chatSendRecording" class="chat-recording-send">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+
+
                     <!-- MESSAGE INPUT -->
 
                     <form
@@ -1726,7 +1744,14 @@
                         id="messageForm"
                     >
 
-                        <button type="button" class="chat-input-icon-btn soon" title="Attachments — coming soon" data-chat-action="soon">
+                        <input
+                            type="file"
+                            id="chatFileInput"
+                            accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.doc,.docx"
+                            style="display: none;"
+                        >
+
+                        <button type="button" class="chat-input-icon-btn" id="chatAttachButton" title="Attach a file">
                             <i class="fa-solid fa-paperclip"></i>
                         </button>
 
@@ -1737,8 +1762,12 @@
                             autocomplete="off"
                         >
 
-                        <button type="button" class="chat-input-icon-btn soon" title="Emoji — coming soon" data-chat-action="soon">
+                        <button type="button" class="chat-input-icon-btn" id="chatEmojiButton" title="Emoji">
                             <i class="fa-regular fa-face-smile"></i>
+                        </button>
+
+                        <button type="button" class="chat-input-icon-btn" id="chatVoiceButton" title="Record a voice note">
+                            <i class="fa-solid fa-microphone"></i>
                         </button>
 
                         <button
