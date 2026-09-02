@@ -3679,6 +3679,35 @@ updateLoginState();
 
 
             // ========================================
+            // PHONE / WHATSAPP FORMAT CHECK
+            // ========================================
+
+            const digitsOnlyPhone =
+                phone.replace(/\D/g, "");
+
+            if (!/^0\d{10}$/.test(digitsOnlyPhone)) {
+
+                showMessage(
+                    "Please enter a complete, valid phone number (11 digits, starting with 0)."
+                );
+
+                return;
+            }
+
+            const digitsOnlyWhatsapp =
+                whatsappNumber.replace(/\D/g, "");
+
+            if (!/^0\d{10}$/.test(digitsOnlyWhatsapp)) {
+
+                showMessage(
+                    "Please enter a complete, valid WhatsApp number (11 digits, starting with 0)."
+                );
+
+                return;
+            }
+
+
+            // ========================================
             // STUDENT CONFIRMATION
             // ========================================
 
@@ -3746,10 +3775,10 @@ updateLoginState();
 
                             email: email,
 
-                            phone: phone,
+                            phone: digitsOnlyPhone,
 
                             whatsappNumber:
-                                whatsappNumber,
+                                digitsOnlyWhatsapp,
 
                             university: university,
 
@@ -4441,6 +4470,11 @@ showOtpVerificationScreen(
             getLoggedInStudent();
 
         if (!student) {
+
+            if (chatContactsLoading) {
+                chatContactsLoading.style.display = "none";
+            }
+
             return;
         }
 
