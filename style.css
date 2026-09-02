@@ -4488,7 +4488,7 @@ img {
     }
 
 
-    .signin-nav-button span {
+    .signin-nav-button span:not(.header-avatar-circle):not(.header-avatar-initial) {
 
         display: none;
     }
@@ -8073,7 +8073,7 @@ img {
 
 @media (max-width: 480px) {
 
-    .signin-nav-button span {
+    .signin-nav-button span:not(.header-avatar-circle):not(.header-avatar-initial) {
         display: none;
     }
 
