@@ -13134,3 +13134,28 @@ if (chatIconButton) {
     );
 
 }
+
+
+// =========================================================
+// ACCOUNT MENU NAV LINKS (Dashboard/Shop/Categories/Rewards)
+// — close the dropdown once clicked, matching every other
+// item in this menu
+// =========================================================
+
+document.querySelectorAll(".account-menu-nav-link").forEach(function (link) {
+
+    link.addEventListener(
+        "click",
+        function () {
+
+            const menu =
+                document.getElementById("studentAccountMenu");
+
+            if (menu) {
+                menu.classList.remove("open");
+            }
+
+        }
+    );
+
+});
