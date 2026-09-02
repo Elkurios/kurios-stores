@@ -4425,7 +4425,9 @@ showOtpVerificationScreen(
             const sellerTag =
                 conversation.partner_store_name ?
                     `<span class="chat-contact-seller-tag">Seller</span>` :
-                    "";
+                    (conversation.type === "SUPPORT" ?
+                        `<span class="chat-contact-seller-tag support">Support</span>` :
+                        "");
 
             const previewLine =
                 isProduct ?
@@ -4484,9 +4486,6 @@ showOtpVerificationScreen(
         const sidebarName =
             document.getElementById("chatAppSidebarName");
 
-        const mobileAvatar =
-            document.getElementById("chatMobileAvatar");
-
         const avatarMarkup =
             student.profile_picture ?
                 `<img src="${API_URL + student.profile_picture}" alt="You">` :
@@ -4494,10 +4493,6 @@ showOtpVerificationScreen(
 
         if (sidebarAvatar) {
             sidebarAvatar.innerHTML = avatarMarkup;
-        }
-
-        if (mobileAvatar) {
-            mobileAvatar.innerHTML = avatarMarkup;
         }
 
         if (sidebarName) {
@@ -4690,6 +4685,52 @@ showOtpVerificationScreen(
             messages.appendChild(messageElement);
 
         });
+
+        // "Seen" indicator — shown once, under the most
+        // recent message YOU sent that the other person
+        // has actually read (not on every message).
+
+        let lastSeenMessage = null;
+
+        for (let i = messageRows.length - 1; i >= 0; i--) {
+
+            const m = messageRows[i];
+
+            if (m.sender_id === myId) {
+
+                if (m.read_at) {
+                    lastSeenMessage = m;
+                }
+
+                break;
+
+            }
+
+        }
+
+        if (lastSeenMessage) {
+
+            const seenEl =
+                messages.querySelector('[data-message-id="' + lastSeenMessage.id + '"]');
+
+            if (seenEl) {
+
+                const seenLabel =
+                    document.createElement("div");
+
+                seenLabel.className = "message-seen-label";
+
+                seenLabel.textContent =
+                    "Seen " + new Date(lastSeenMessage.read_at).toLocaleTimeString(
+                        [],
+                        { hour: "2-digit", minute: "2-digit" }
+                    );
+
+                seenEl.appendChild(seenLabel);
+
+            }
+
+        }
 
         messages.scrollTop = messages.scrollHeight;
 
@@ -4891,7 +4932,17 @@ showOtpVerificationScreen(
             const bannerText =
                 contextBanner.querySelector("span");
 
-            if (productContext) {
+            if (productContext === "__SUPPORT__") {
+
+                if (bannerIcon) {
+                    bannerIcon.className = "fa-solid fa-headset";
+                }
+
+                if (bannerText) {
+                    bannerText.textContent = "You're chatting with Kurios Stores Support.";
+                }
+
+            } else if (productContext) {
 
                 if (bannerIcon) {
                     bannerIcon.className = "fa-solid fa-box";
@@ -5313,6 +5364,17 @@ showOtpVerificationScreen(
 
             if (!currentStudent) {
                 return;
+            }
+
+            // Don't play a sound for our own message
+            // echoing back — only for messages we receive.
+
+            if (String(incomingMessage.sender_id) !== String(currentStudent.id)) {
+
+                if (typeof playChatNotificationSound === "function") {
+                    playChatNotificationSound();
+                }
+
             }
 
             // Refresh the sidebar either way, so
@@ -13047,6 +13109,80 @@ if (dashboardChoiceSeller) {
 // CONTACT SELLER ABOUT A PRODUCT
 // =========================================================
 
+async function contactSupport() {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) {
+
+        if (typeof openSignInModalStandalone === "function") {
+            openSignInModalStandalone();
+        }
+
+        return;
+
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/chat/contact-support",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        studentId: student.id
+                    })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            alert(data.message || "Could not start a chat with support.");
+            return;
+
+        }
+
+        window.__kuriosPendingChatOpen = {
+            conversationId: data.conversationId,
+            sellerStudentId: data.supportStudentId,
+            storeName: data.supportName,
+            productName: "__SUPPORT__"
+        };
+
+        window.location.hash = "chat";
+
+    } catch (error) {
+
+        console.error(
+            "Contact support error:",
+            error
+        );
+
+        alert("Unable to connect to Kurios Stores server.");
+
+    }
+
+}
+
+const chatContactSupportBtn =
+    document.getElementById("chatContactSupportBtn");
+
+if (chatContactSupportBtn) {
+
+    chatContactSupportBtn.addEventListener(
+        "click",
+        contactSupport
+    );
+
+}
+
 async function contactSellerAboutProduct(productId) {
 
     const student =
@@ -13500,8 +13636,22 @@ async function sendChatAttachment(file, messageType) {
             getLoggedInStudent() :
             null;
 
-    if (!student || !window.activeChatPartnerId) {
+    if (!student) {
         return;
+    }
+
+    if (!window.activeChatPartnerId) {
+
+        console.error(
+            "sendChatAttachment: no active conversation (window.activeChatPartnerId is not set)."
+        );
+
+        if (typeof showMessage === "function") {
+            showMessage("Open a conversation before sending that.", "error");
+        }
+
+        return;
+
     }
 
     const formData =
@@ -13813,7 +13963,27 @@ if (chatVoiceButton) {
 
     chatVoiceButton.addEventListener(
         "click",
-        startVoiceRecording
+        function () {
+
+            if (
+                __kuriosMediaRecorder &&
+                __kuriosMediaRecorder.state === "recording"
+            ) {
+
+                // Already recording — tapping the mic again
+                // stops and sends, the same way tapping it
+                // once starts. No need to hunt for the
+                // separate send button in the bar below.
+
+                sendVoiceRecording();
+
+            } else {
+
+                startVoiceRecording();
+
+            }
+
+        }
     );
 
 }
@@ -14168,3 +14338,89 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 });
+
+
+// =========================================================
+// CHAT — NOTIFICATION SOUND
+// (a short synthesized two-tone chime — no external
+// audio file needed, works the instant the page loads)
+// =========================================================
+
+let __kuriosAudioContext = null;
+
+function playChatNotificationSound() {
+
+    try {
+
+        if (!__kuriosAudioContext) {
+
+            const AudioContextClass =
+                window.AudioContext || window.webkitAudioContext;
+
+            if (!AudioContextClass) {
+                return;
+            }
+
+            __kuriosAudioContext = new AudioContextClass();
+
+        }
+
+        const ctx = __kuriosAudioContext;
+
+        if (ctx.state === "suspended") {
+            ctx.resume();
+        }
+
+        const now =
+            ctx.currentTime;
+
+        [880, 1175].forEach(function (frequency, index) {
+
+            const oscillator =
+                ctx.createOscillator();
+
+            const gain =
+                ctx.createGain();
+
+            oscillator.type = "sine";
+            oscillator.frequency.value = frequency;
+
+            const startTime =
+                now + index * 0.11;
+
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.18, startTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.22);
+
+            oscillator.connect(gain);
+            gain.connect(ctx.destination);
+
+            oscillator.start(startTime);
+            oscillator.stop(startTime + 0.25);
+
+        });
+
+    } catch (error) {
+
+        console.error("Play notification sound error:", error);
+
+    }
+
+}
+
+// Browsers block audio until the user has interacted
+// with the page at least once — this unlocks it on the
+// first click/tap so the very first notification sound
+// isn't silently swallowed.
+
+document.addEventListener(
+    "click",
+    function unlockAudioOnce() {
+
+        if (__kuriosAudioContext && __kuriosAudioContext.state === "suspended") {
+            __kuriosAudioContext.resume();
+        }
+
+    },
+    { once: false }
+);
