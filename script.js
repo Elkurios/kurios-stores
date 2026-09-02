@@ -4250,6 +4250,61 @@ showOtpVerificationScreen(
     let chatPollInterval = null;
     let conversationsPollInterval = null;
     let cachedConversations = [];
+    let onlineStudentIds = new Set();
+
+    async function refreshOnlinePresence() {
+
+        try {
+
+            const response =
+                await fetch(API_URL + "/api/chat/online-students");
+
+            const data = await response.json();
+
+            if (data.success) {
+
+                onlineStudentIds =
+                    new Set(data.onlineIds.map(String));
+
+                if (activeChatPartnerId) {
+
+                    updateHeaderPresence(activeChatPartnerId);
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Refresh online presence error:",
+                error
+            );
+
+        }
+
+    }
+
+    function updateHeaderPresence(partnerId) {
+
+        const isOnline =
+            onlineStudentIds.has(String(partnerId));
+
+        const dot =
+            document.getElementById("activeChatStatusDot");
+
+        if (dot) {
+            dot.classList.toggle("online", isOnline);
+        }
+
+        if (activeChatStatus) {
+
+            activeChatStatus.textContent =
+                isOnline ? "Online" : "Kurios Stores student";
+
+        }
+
+    }
 
 
     function chatInitial(firstName, lastName) {
@@ -4321,6 +4376,11 @@ showOtpVerificationScreen(
             const isProduct =
                 conversation.type === "PRODUCT" && conversation.product_name;
 
+            const sellerTag =
+                conversation.partner_store_name ?
+                    `<span class="chat-contact-seller-tag">Seller</span>` :
+                    "";
+
             const previewLine =
                 isProduct ?
                     `<i class="fa-solid fa-box"></i> ${conversation.product_name}` :
@@ -4329,7 +4389,7 @@ showOtpVerificationScreen(
             button.innerHTML = `
                 <div class="chat-avatar">${avatarMarkup}</div>
                 <div class="chat-contact-info">
-                    <strong>${fullName || "Kurios Student"}</strong>
+                    <strong>${fullName || "Kurios Student"}${sellerTag}</strong>
                     <span>${previewLine}</span>
                 </div>
                 ${unreadBadge}
@@ -4555,13 +4615,14 @@ showOtpVerificationScreen(
         activeChatPartnerId = partnerId;
         activeConversationId = conversationId || null;
 
-        if (activeChatName) {
-            activeChatName.textContent = partnerName || "Kurios Student";
+        const nameTextEl =
+            document.getElementById("activeChatNameText");
+
+        if (nameTextEl) {
+            nameTextEl.textContent = partnerName || "Kurios Student";
         }
 
-        if (activeChatStatus) {
-            activeChatStatus.textContent = "Kurios Stores student";
-        }
+        updateHeaderPresence(partnerId);
 
         if (activeChatAvatar) {
             activeChatAvatar.innerHTML = `<i class="fa-solid fa-user"></i>`;
@@ -4647,6 +4708,17 @@ showOtpVerificationScreen(
                         <div class="chat-profile-info-row">
                             <i class="fa-solid fa-phone"></i>
                             <span>${partner.phone}</span>
+                        </div>
+                    `;
+
+                }
+
+                if (partner.whatsapp_number) {
+
+                    infoRows += `
+                        <div class="chat-profile-info-row">
+                            <i class="fa-brands fa-whatsapp"></i>
+                            <span>${partner.whatsapp_number}</span>
                         </div>
                     `;
 
@@ -5058,6 +5130,10 @@ showOtpVerificationScreen(
         loadConversations,
         30000
     );
+
+    refreshOnlinePresence();
+
+    setInterval(refreshOnlinePresence, 15000);
 
 
     // ========================================
@@ -12930,3 +13006,40 @@ document.addEventListener("click", function (event) {
     }
 
 });
+
+
+// =========================================================
+// VIEW PROFILE BUTTON — reveals the real profile panel
+// =========================================================
+
+const chatViewProfileBtn =
+    document.getElementById("chatViewProfileBtn");
+
+if (chatViewProfileBtn) {
+
+    chatViewProfileBtn.addEventListener(
+        "click",
+        function () {
+
+            const panel =
+                document.getElementById("chatProfilePanel");
+
+            if (!panel || panel.style.display === "none") {
+                return;
+            }
+
+            panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+            panel.style.outline = "2px solid #6d28d9";
+
+            setTimeout(
+                function () {
+                    panel.style.outline = "none";
+                },
+                900
+            );
+
+        }
+    );
+
+}
