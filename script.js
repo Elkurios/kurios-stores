@@ -5290,7 +5290,7 @@ showOtpVerificationScreen(
                         newChatForm.style.display = "none";
                     }
 
-                    openChatWith(data.student.id, fullName, null, null, data.student);
+                    openChatWith(data.student.id, fullName, data.conversationId || null, null, data.student);
 
                 } catch (error) {
 
@@ -13669,6 +13669,12 @@ async function sendChatAttachment(file, messageType) {
         formData.append("messageType", messageType);
     }
 
+    console.log(
+        "sendChatAttachment: uploading",
+        file.name, file.size + " bytes", file.type,
+        "to conversation with", window.activeChatPartnerId
+    );
+
     try {
 
         const response =
@@ -13680,9 +13686,13 @@ async function sendChatAttachment(file, messageType) {
                 }
             );
 
+        console.log("sendChatAttachment: server responded with status", response.status);
+
         const data = await response.json();
 
         if (!data.success) {
+
+            console.error("sendChatAttachment: server rejected the upload —", data.message);
 
             if (typeof showMessage === "function") {
                 showMessage(data.message || "Could not send that attachment.", "error");
@@ -13691,6 +13701,8 @@ async function sendChatAttachment(file, messageType) {
             return;
 
         }
+
+        console.log("sendChatAttachment: upload succeeded, message id", data.message && data.message.id);
 
         if (typeof window.loadThread === "function") {
 
@@ -13922,11 +13934,24 @@ function cancelVoiceRecording() {
 
 function sendVoiceRecording() {
 
+    console.log("sendVoiceRecording called. Recorder state:", __kuriosMediaRecorder ? __kuriosMediaRecorder.state : "no recorder");
+
     if (!__kuriosMediaRecorder || __kuriosMediaRecorder.state === "inactive") {
+
+        console.error("sendVoiceRecording: no active recorder to stop.");
+
+        if (typeof showMessage === "function") {
+            showMessage("No active recording to send.", "error");
+        }
+
+        hideRecordingBar();
         return;
+
     }
 
     __kuriosMediaRecorder.onstop = function () {
+
+        console.log("Recorder stopped. Chunks collected:", __kuriosRecordedChunks.length);
 
         const mimeType =
             __kuriosMediaRecorder.mimeType || "audio/webm";
@@ -13934,11 +13959,7 @@ function sendVoiceRecording() {
         const blob =
             new Blob(__kuriosRecordedChunks, { type: mimeType });
 
-        const extension =
-            mimeType.indexOf("ogg") !== -1 ? "ogg" : "webm";
-
-        const file =
-            new File([blob], "voice-note." + extension, { type: mimeType });
+        console.log("Voice note blob size (bytes):", blob.size, "mimeType:", mimeType);
 
         stopVoiceRecordingTracks();
         hideRecordingBar();
@@ -13946,8 +13967,34 @@ function sendVoiceRecording() {
         __kuriosMediaRecorder = null;
         __kuriosRecordedChunks = [];
 
+        if (blob.size === 0) {
+
+            console.error("Voice note blob is empty — nothing was recorded (tap and hold longer before sending).");
+
+            if (typeof showMessage === "function") {
+                showMessage("That recording was too short — try holding it a bit longer.", "error");
+            }
+
+            return;
+
+        }
+
+        const extension =
+            mimeType.indexOf("ogg") !== -1 ? "ogg" : "webm";
+
+        const file =
+            new File([blob], "voice-note." + extension, { type: mimeType });
+
         if (typeof sendChatAttachment === "function") {
-            sendChatAttachment(file, "VOICE");
+
+            sendChatAttachment(file, "VOICE").then(function () {
+                console.log("Voice note upload finished.");
+            });
+
+        } else {
+
+            console.error("sendChatAttachment is not defined — cannot send voice note.");
+
         }
 
     };
