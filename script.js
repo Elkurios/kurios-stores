@@ -1275,6 +1275,12 @@ function updateLoginState() {
 
     }
 
+    const mainNavEl =
+        document.getElementById("mainNav");
+
+    if (mainNavEl) {
+        mainNavEl.style.display = "flex";
+    }
 
     return;
 
@@ -1329,6 +1335,13 @@ function updateLoginState() {
         loggedInHero.style.display =
             "block";
 
+    }
+
+    const mainNavEl =
+        document.getElementById("mainNav");
+
+    if (mainNavEl) {
+        mainNavEl.style.display = "none";
     }
 
 
@@ -2171,7 +2184,9 @@ function closeProfilePanel() {
 
     exitProfileEditMode();
 
-    if (typeof goHome === "function") {
+    if (typeof goBack === "function") {
+        goBack();
+    } else if (typeof goHome === "function") {
         goHome();
     }
 
@@ -2885,7 +2900,9 @@ function closeOrdersPanel() {
 
     }
 
-    if (typeof goHome === "function") {
+    if (typeof goBack === "function") {
+        goBack();
+    } else if (typeof goHome === "function") {
         goHome();
     }
 
@@ -6232,6 +6249,37 @@ showOtpVerificationScreen(
 
     }
 
+    function goBack() {
+
+        const previousHash =
+            window.__kuriosPreviousHash;
+
+        const currentHash =
+            window.location.hash;
+
+        // Only honor it if it's a real, different, non-empty
+        // page — never bounce back to the page we're already
+        // on, and never chase an empty/home-equivalent hash.
+
+        if (
+            previousHash &&
+            previousHash.length > 1 &&
+            previousHash !== currentHash
+        ) {
+
+            window.location.hash =
+                previousHash.slice(1);
+
+        } else {
+
+            goHome();
+
+        }
+
+    }
+
+    window.goBack = goBack;
+
     function showSimplePage(pageId) {
 
         hideAllFullPages();
@@ -6255,10 +6303,18 @@ showOtpVerificationScreen(
     }
 
     let __kuriosRouteToken = 0;
+    let __kuriosLastKnownHash = "";
 
     function syncPageFromHash() {
 
         const hash = window.location.hash;
+
+        // Remember what page we were just on, so "back"
+        // buttons can return there instead of always
+        // dropping the user on the dashboard home.
+
+        window.__kuriosPreviousHash = __kuriosLastKnownHash;
+        __kuriosLastKnownHash = hash;
 
         const thisRouteToken =
             ++__kuriosRouteToken;
@@ -6435,8 +6491,10 @@ showOtpVerificationScreen(
 
     }
 
-    // Generic "Back to Kurios Stores" links on the
-    // simple coming-soon pages (Wishlist, Wallet).
+    // Generic "Back" links used across full pages
+    // (Wishlist, Wallet, Chat, Seller Dashboard) —
+    // return to wherever the student actually came
+    // from, not always the dashboard home.
 
     document.querySelectorAll(".page-back-link").forEach(function (link) {
 
@@ -6445,7 +6503,7 @@ showOtpVerificationScreen(
             function (event) {
 
                 event.preventDefault();
-                goHome();
+                goBack();
 
             }
         );
@@ -9062,6 +9120,13 @@ function hideAllSellerStates() {
 
 function closeSellerPanel() {
 
+    if (typeof window.goBack === "function") {
+
+        window.goBack();
+        return;
+
+    }
+
     if (window.location.hash === "#sell") {
 
         history.pushState(
@@ -10031,6 +10096,13 @@ const STOREFRONT_CATEGORY_ICONS = {
 };
 
 function closeStorefrontPage() {
+
+    if (typeof window.goBack === "function") {
+
+        window.goBack();
+        return;
+
+    }
 
     if (
         window.location.hash &&
@@ -13039,6 +13111,25 @@ if (chatViewProfileBtn) {
                 900
             );
 
+        }
+    );
+
+}
+
+
+// =========================================================
+// HEADER CHAT ICON
+// =========================================================
+
+const chatIconButton =
+    document.getElementById("chatIconButton");
+
+if (chatIconButton) {
+
+    chatIconButton.addEventListener(
+        "click",
+        function () {
+            window.location.hash = "chat";
         }
     );
 
