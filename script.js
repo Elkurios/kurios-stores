@@ -890,19 +890,33 @@ document.addEventListener("DOMContentLoaded", function () {
                         </strong>
 
 
-                        <button
+                        <div style="display:flex; gap:6px;">
 
-                            class="add-to-cart"
+                            ${product.seller_id ? `
+                                <button
+                                    class="contact-seller-btn"
+                                    data-product-id="${product.id}"
+                                    title="Message the seller about this product"
+                                >
+                                    <i class="fa-regular fa-comment"></i>
+                                </button>
+                            ` : ""}
 
-                            data-product-id="${product.id}"
+                            <button
 
-                        >
+                                class="add-to-cart"
 
-                            <i class="fa-solid fa-plus"></i>
+                                data-product-id="${product.id}"
 
-                            Add
+                            >
 
-                        </button>
+                                <i class="fa-solid fa-plus"></i>
+
+                                Add
+
+                            </button>
+
+                        </div>
 
 
                     </div>
@@ -944,6 +958,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 }
             );
+
+
+            /*
+                Contact Seller button.
+            */
+
+            const contactSellerBtn =
+                productCard.querySelector(
+                    ".contact-seller-btn"
+                );
+
+            if (contactSellerBtn) {
+
+                contactSellerBtn.addEventListener(
+                    "click",
+                    function () {
+
+                        if (typeof contactSellerAboutProduct === "function") {
+                            contactSellerAboutProduct(product.id);
+                        }
+
+                    }
+                );
+
+            }
 
 
             /*
@@ -4177,6 +4216,7 @@ showOtpVerificationScreen(
 
 
     let activeChatPartnerId = null;
+    let activeConversationId = null;
     let chatPollInterval = null;
     let conversationsPollInterval = null;
     let cachedConversations = [];
@@ -4224,7 +4264,7 @@ showOtpVerificationScreen(
 
             button.className = "chat-contact";
 
-            if (conversation.id === activeChatPartnerId) {
+            if (conversation.conversation_id === activeConversationId) {
                 button.classList.add("active");
             }
 
@@ -4238,11 +4278,19 @@ showOtpVerificationScreen(
                     `<span class="chat-contact-unread-badge">${conversation.unread_count}</span>` :
                     "";
 
+            const isProduct =
+                conversation.type === "PRODUCT" && conversation.product_name;
+
+            const previewLine =
+                isProduct ?
+                    `<i class="fa-solid fa-box"></i> ${conversation.product_name}` :
+                    (conversation.last_message ? conversation.last_message.slice(0, 32) : "");
+
             button.innerHTML = `
                 <div class="chat-avatar">${avatarMarkup}</div>
                 <div class="chat-contact-info">
                     <strong>${fullName || "Kurios Student"}</strong>
-                    <span>${conversation.last_message ? conversation.last_message.slice(0, 32) : ""}</span>
+                    <span>${previewLine}</span>
                 </div>
                 ${unreadBadge}
             `;
@@ -4250,7 +4298,14 @@ showOtpVerificationScreen(
             button.addEventListener(
                 "click",
                 function () {
-                    openChatWith(conversation.id, fullName);
+
+                    openChatWith(
+                        conversation.id,
+                        fullName,
+                        conversation.conversation_id,
+                        isProduct ? conversation.product_name : null
+                    );
+
                 }
             );
 
@@ -4287,6 +4342,20 @@ showOtpVerificationScreen(
 
                 cachedConversations = data.conversations;
                 renderChatContactList();
+
+            }
+
+            if (window.__kuriosPendingChatOpen) {
+
+                const pending = window.__kuriosPendingChatOpen;
+                window.__kuriosPendingChatOpen = null;
+
+                openChatWith(
+                    pending.sellerStudentId,
+                    pending.storeName || "Seller",
+                    pending.conversationId,
+                    pending.productName
+                );
 
             }
 
@@ -4371,14 +4440,19 @@ showOtpVerificationScreen(
     }
 
 
-    async function loadThread(partnerId, myId) {
+    async function loadThread(partnerId, myId, conversationId) {
 
         try {
 
+            let url =
+                API_URL + "/api/chat/messages?studentId=" + myId + "&withId=" + partnerId;
+
+            if (conversationId) {
+                url += "&conversationId=" + conversationId;
+            }
+
             const response =
-                await fetch(
-                    API_URL + "/api/chat/messages?studentId=" + myId + "&withId=" + partnerId
-                );
+                await fetch(url);
 
             const data = await response.json();
 
@@ -4405,7 +4479,7 @@ showOtpVerificationScreen(
     }
 
 
-    function openChatWith(partnerId, partnerName) {
+    function openChatWith(partnerId, partnerName, conversationId, productContext) {
 
         const student =
             getLoggedInStudent();
@@ -4415,6 +4489,7 @@ showOtpVerificationScreen(
         }
 
         activeChatPartnerId = partnerId;
+        activeConversationId = conversationId || null;
 
         if (activeChatName) {
             activeChatName.textContent = partnerName || "Kurios Student";
@@ -4432,7 +4507,37 @@ showOtpVerificationScreen(
             document.getElementById("chatContextBanner");
 
         if (contextBanner) {
+
             contextBanner.style.display = "flex";
+
+            const bannerIcon =
+                contextBanner.querySelector("i");
+
+            const bannerText =
+                contextBanner.querySelector("span");
+
+            if (productContext) {
+
+                if (bannerIcon) {
+                    bannerIcon.className = "fa-solid fa-box";
+                }
+
+                if (bannerText) {
+                    bannerText.textContent = "You're chatting about: " + productContext;
+                }
+
+            } else {
+
+                if (bannerIcon) {
+                    bannerIcon.className = "fa-solid fa-user-group";
+                }
+
+                if (bannerText) {
+                    bannerText.textContent = "This is a normal conversation — you're chatting with a fellow student.";
+                }
+
+            }
+
         }
 
         const chatApp =
@@ -4451,13 +4556,13 @@ showOtpVerificationScreen(
 
         renderChatContactList();
 
-        loadThread(partnerId, student.id);
+        loadThread(partnerId, student.id, activeConversationId);
 
         clearInterval(chatPollInterval);
 
         chatPollInterval = setInterval(
             function () {
-                loadThread(partnerId, student.id);
+                loadThread(partnerId, student.id, activeConversationId);
             },
             20000
         );
@@ -4520,7 +4625,8 @@ showOtpVerificationScreen(
                                 body: JSON.stringify({
                                     senderId: student.id,
                                     recipientId: activeChatPartnerId,
-                                    body: text
+                                    body: text,
+                                    conversationId: activeConversationId
                                 })
                             }
                         );
@@ -4537,7 +4643,7 @@ showOtpVerificationScreen(
 
                     }
 
-                    loadThread(activeChatPartnerId, student.id);
+                    loadThread(activeChatPartnerId, student.id, activeConversationId);
 
                 } catch (error) {
 
@@ -4843,7 +4949,7 @@ showOtpVerificationScreen(
                 String(incomingMessage.sender_id) === String(activeChatPartnerId)
             ) {
 
-                loadThread(activeChatPartnerId, currentStudent.id);
+                loadThread(activeChatPartnerId, currentStudent.id, activeConversationId);
 
             }
 
@@ -5750,79 +5856,32 @@ showOtpVerificationScreen(
        ===================================================== */
 
 
-    document.querySelectorAll(
-        'a[href^="#"]'
-    ).forEach(
-        function (link) {
+    /*
+        Smooth-scrolling for plain "#section" links
+        used to be handled here directly — but that
+        approach called preventDefault() on every
+        "#" link click and did its own manual scroll,
+        which silently broke navigation the moment the
+        target section was hidden (i.e. from any page
+        other than the homepage itself). The unified
+        hash router below now owns all of this — it
+        already scrolls to the right section as part
+        of normal navigation, and works correctly from
+        any page, not just the homepage.
+    */
+
+    document.querySelectorAll('a[href="#signin"]').forEach(function (link) {
+
+        link.addEventListener("click", function (event) {
+
+            event.preventDefault();
+            openSignInModal();
+
+        });
+
+    });
 
 
-            link.addEventListener(
-                "click",
-                function (event) {
-
-
-                    const targetId =
-                        link.getAttribute(
-                            "href"
-                        );
-
-
-                    if (
-                        !targetId ||
-                        targetId === "#"
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    /*
-                        Don't interfere with
-                        modal links.
-                    */
-
-                    if (
-                        targetId ===
-                        "#signin"
-                    ) {
-
-                        event.preventDefault();
-
-                        openSignInModal();
-
-                        return;
-
-                    }
-
-
-
-                    const target =
-                        document.querySelector(
-                            targetId
-                        );
-
-
-                    if (target) {
-
-                        event.preventDefault();
-
-
-                        target.scrollIntoView({
-
-                            behavior: "smooth",
-
-                            block: "start"
-
-                        });
-
-                    }
-
-                }
-            );
-
-        }
-    );
 
 
 
@@ -12441,5 +12500,73 @@ if (dashboardChoiceSeller) {
 
         }
     );
+
+}
+
+
+// =========================================================
+// CONTACT SELLER ABOUT A PRODUCT
+// =========================================================
+
+async function contactSellerAboutProduct(productId) {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) {
+
+        if (typeof openSignInModalStandalone === "function") {
+            openSignInModalStandalone();
+        }
+
+        return;
+
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/chat/contact-seller",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        studentId: student.id,
+                        productId: productId
+                    })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            alert(data.message || "Could not start a chat with this seller.");
+            return;
+
+        }
+
+        window.__kuriosPendingChatOpen = {
+            conversationId: data.conversationId,
+            sellerStudentId: data.sellerStudentId,
+            storeName: data.storeName,
+            productName: data.productName
+        };
+
+        window.location.hash = "chat";
+
+    } catch (error) {
+
+        console.error(
+            "Contact seller error:",
+            error
+        );
+
+        alert("Unable to connect to Kurios Stores server.");
+
+    }
 
 }
