@@ -1279,25 +1279,7 @@
             </a>
         </div>
 
-            <div class="section-heading">
-
-                <span>
-                    COMMUNITY
-                </span>
-
-                <h2>
-                    Campus Chat
-                </h2>
-
-                <p>
-                    Connect with students and chat directly
-                    with Elkurios.
-                </p>
-
-            </div>
-
-
-            <div class="chat-preview">
+            <div class="chat-preview" id="chatPreviewApp">
 
 
                 <!-- CHAT CONTACTS -->
@@ -1307,15 +1289,16 @@
                     <div class="chat-sidebar-header">
 
                         <h3>
-                            Messages
+                            Chats
                         </h3>
 
                         <button
                             id="newChatButton"
-                            aria-label="New Chat"
+                            class="new-chat-header-button"
                         >
 
-                            <i class="fa-solid fa-pen"></i>
+                            <i class="fa-solid fa-plus"></i>
+                            New Chat
 
                         </button>
 
@@ -1375,7 +1358,7 @@
                         style="display: none;"
                     >
                         No conversations yet. Tap
-                        <i class="fa-solid fa-pen"></i>
+                        <i class="fa-solid fa-plus"></i>
                         above to message someone by phone number.
                     </p>
 
@@ -1391,6 +1374,15 @@
 
 
                     <div class="chat-window-header">
+
+                        <button
+                            type="button"
+                            class="chat-back-button"
+                            id="chatBackButton"
+                            aria-label="Back to chats"
+                        >
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
 
                         <div class="chat-user">
 
@@ -1416,16 +1408,14 @@
 
                         </div>
 
+                    </div>
 
-                        <button
-                            class="chat-more-button"
-                            id="chatMoreButton"
-                        >
 
-                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                    <!-- CONVERSATION TYPE BANNER -->
 
-                        </button>
-
+                    <div class="chat-context-banner" id="chatContextBanner" style="display: none;">
+                        <i class="fa-solid fa-user-group"></i>
+                        <span>This is a normal conversation — you're chatting with a fellow student.</span>
                     </div>
 
 
@@ -1445,6 +1435,14 @@
                     </div>
 
 
+                    <!-- TYPING INDICATOR -->
+
+                    <div class="chat-typing-indicator" id="chatTypingIndicator" style="display: none;">
+                        <span class="chat-typing-dots"><i></i><i></i><i></i></span>
+                        <span id="chatTypingText">typing...</span>
+                    </div>
+
+
 
                     <!-- MESSAGE INPUT -->
 
@@ -1452,17 +1450,6 @@
                         class="message-form"
                         id="messageForm"
                     >
-
-                        <button
-                            type="button"
-                            id="attachButton"
-                            aria-label="Attach File"
-                        >
-
-                            <i class="fa-solid fa-paperclip"></i>
-
-                        </button>
-
 
                         <input
                             type="text"
