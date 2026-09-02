@@ -4592,8 +4592,54 @@ showOtpVerificationScreen(
                     `<i class="fa-solid fa-check-double message-read-receipt ${message.read_at ? "read" : ""}"></i>` :
                     "";
 
+            let bubbleContent;
+
+            const attachmentUrl =
+                message.attachment_url ?
+                    (message.attachment_url.indexOf("http") === 0 ? message.attachment_url : API_URL + message.attachment_url) :
+                    null;
+
+            if (message.message_type === "IMAGE" && attachmentUrl) {
+
+                bubbleContent = `<a href="${attachmentUrl}" target="_blank" rel="noopener"><img src="${attachmentUrl}" class="message-image" alt="Shared photo"></a>`;
+
+            } else if (message.message_type === "VOICE" && attachmentUrl) {
+
+                bubbleContent = `
+                    <div class="message-voice-note">
+                        <i class="fa-solid fa-microphone" style="color: var(--purple);"></i>
+                        <audio controls src="${attachmentUrl}"></audio>
+                    </div>
+                `;
+
+            } else if (message.message_type === "FILE" && attachmentUrl) {
+
+                const sizeLabel =
+                    message.attachment_size ?
+                        (message.attachment_size > 1024 * 1024 ?
+                            (message.attachment_size / (1024 * 1024)).toFixed(1) + " MB" :
+                            Math.round(message.attachment_size / 1024) + " KB") :
+                        "";
+
+                bubbleContent = `
+                    <a href="${attachmentUrl}" target="_blank" rel="noopener" class="message-file-card">
+                        <span class="message-file-icon"><i class="fa-solid fa-file"></i></span>
+                        <span>
+                            <strong>${escapeChatText(message.attachment_name || "File")}</strong>
+                            <span>${sizeLabel}</span>
+                        </span>
+                    </a>
+                `;
+
+            } else {
+
+                bubbleContent =
+                    `<div class="message-bubble">${escapeChatText(message.body)}</div>`;
+
+            }
+
             messageElement.innerHTML = `
-                <div class="message-bubble">${escapeChatText(message.body)}</div>
+                ${bubbleContent}
                 <span>${time}${receiptMarkup}</span>
             `;
 
@@ -4653,6 +4699,8 @@ showOtpVerificationScreen(
 
     }
 
+    window.loadThread = loadThread;
+
 
     function openChatWith(partnerId, partnerName, conversationId, productContext, partnerData) {
 
@@ -4665,6 +4713,9 @@ showOtpVerificationScreen(
 
         activeChatPartnerId = partnerId;
         activeConversationId = conversationId || null;
+
+        window.activeChatPartnerId = activeChatPartnerId;
+        window.activeConversationId = activeConversationId;
 
         const nameTextEl =
             document.getElementById("activeChatNameText");
@@ -6063,7 +6114,7 @@ showOtpVerificationScreen(
        ===================================================== */
 
 
-    function showMessage(message) {
+    function showMessage(message, type) {
 
 
         /*
@@ -6106,8 +6157,17 @@ showOtpVerificationScreen(
 
 
 
-        toast.textContent =
-            message;
+        const isError =
+            type === "error";
+
+        toast.classList.toggle("toast-error", isError);
+
+        toast.innerHTML = `
+            <span class="kurios-toast-icon">
+                <i class="fa-solid ${isError ? "fa-exclamation" : "fa-check"}"></i>
+            </span>
+            <span>${message}</span>
+        `;
 
 
         toast.classList.add(
@@ -6477,6 +6537,27 @@ showOtpVerificationScreen(
         }
 
         if (hash === "#chat") {
+
+            const student =
+                typeof getLoggedInStudent === "function" ?
+                    getLoggedInStudent() :
+                    null;
+
+            if (!student) {
+
+                // Not logged in — don't show the chat page,
+                // just prompt sign-in and clear the #chat
+                // hash so the URL doesn't claim to be there.
+
+                history.replaceState(null, "", window.location.pathname + window.location.search);
+
+                if (typeof openSignInModalStandalone === "function") {
+                    openSignInModalStandalone();
+                }
+
+                return;
+
+            }
 
             showSimplePage("chatPage");
 
@@ -13193,3 +13274,487 @@ document.querySelectorAll(".account-menu-nav-link").forEach(function (link) {
     );
 
 });
+
+
+// =========================================================
+// CHAT — KEEP THE MESSAGE INPUT VISIBLE WHEN THE
+// MOBILE KEYBOARD OPENS
+// (CSS dvh handles most modern browsers, but not every
+// device supports it — this uses the VisualViewport API
+// as a more broadly-compatible safety net, directly
+// setting the real visible height whenever it changes)
+// =========================================================
+
+if (window.visualViewport) {
+
+    function syncChatHeightToVisualViewport() {
+
+        const chatPreview =
+            document.getElementById("chatPreviewApp");
+
+        if (!chatPreview) {
+            return;
+        }
+
+        const chatPageVisible =
+            document.getElementById("chatPage") &&
+            getComputedStyle(document.getElementById("chatPage")).display !== "none";
+
+        if (!chatPageVisible) {
+            return;
+        }
+
+        chatPreview.style.height =
+            window.visualViewport.height + "px";
+
+    }
+
+    window.visualViewport.addEventListener(
+        "resize",
+        syncChatHeightToVisualViewport
+    );
+
+    window.visualViewport.addEventListener(
+        "scroll",
+        syncChatHeightToVisualViewport
+    );
+
+}
+
+
+// =========================================================
+// CHAT — EMOJI PICKER
+// =========================================================
+
+const KURIOS_EMOJI_LIST = [
+    "😀", "😂", "😊", "😍", "🥰", "😘", "😎", "🤔",
+    "😅", "😭", "😢", "😡", "🥺", "😴", "🤗", "🙄",
+    "👍", "👎", "👏", "🙏", "💪", "🤝", "✌️", "🤞",
+    "❤️", "🔥", "💯", "🎉", "✅", "❌", "⭐", "😴"
+];
+
+const chatEmojiButton =
+    document.getElementById("chatEmojiButton");
+
+const chatEmojiPicker =
+    document.getElementById("chatEmojiPicker");
+
+if (chatEmojiPicker) {
+
+    chatEmojiPicker.innerHTML =
+        KURIOS_EMOJI_LIST.map(function (emoji) {
+            return `<button type="button">${emoji}</button>`;
+        }).join("");
+
+    chatEmojiPicker.addEventListener(
+        "click",
+        function (event) {
+
+            const btn =
+                event.target.closest("button");
+
+            if (!btn) {
+                return;
+            }
+
+            const input =
+                document.getElementById("messageInput");
+
+            if (input) {
+
+                input.value += btn.textContent;
+                input.focus();
+
+            }
+
+        }
+    );
+
+}
+
+if (chatEmojiButton && chatEmojiPicker) {
+
+    chatEmojiButton.addEventListener(
+        "click",
+        function (event) {
+
+            event.stopPropagation();
+
+            chatEmojiPicker.style.display =
+                chatEmojiPicker.style.display === "none" ? "grid" : "none";
+
+        }
+    );
+
+    document.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                chatEmojiPicker.style.display !== "none" &&
+                !chatEmojiPicker.contains(event.target) &&
+                event.target !== chatEmojiButton
+            ) {
+
+                chatEmojiPicker.style.display = "none";
+
+            }
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// CHAT — FILE ATTACHMENTS
+// =========================================================
+
+async function sendChatAttachment(file, messageType) {
+
+    const student =
+        typeof getLoggedInStudent === "function" ?
+            getLoggedInStudent() :
+            null;
+
+    if (!student || !window.activeChatPartnerId) {
+        return;
+    }
+
+    const formData =
+        new FormData();
+
+    formData.append("file", file);
+    formData.append("senderId", student.id);
+    formData.append("recipientId", window.activeChatPartnerId);
+
+    if (window.activeConversationId) {
+        formData.append("conversationId", window.activeConversationId);
+    }
+
+    if (messageType) {
+        formData.append("messageType", messageType);
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/chat/messages/attachment",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            if (typeof showMessage === "function") {
+                showMessage(data.message || "Could not send that attachment.", "error");
+            }
+
+            return;
+
+        }
+
+        if (typeof window.loadThread === "function") {
+
+            window.loadThread(
+                window.activeChatPartnerId,
+                student.id,
+                window.activeConversationId
+            );
+
+        }
+
+        if (typeof loadConversations === "function") {
+            loadConversations();
+        }
+
+    } catch (error) {
+
+        console.error("Send attachment error:", error);
+
+        if (typeof showMessage === "function") {
+            showMessage("Unable to connect to Kurios Stores server.", "error");
+        }
+
+    }
+
+}
+
+const chatAttachButton =
+    document.getElementById("chatAttachButton");
+
+const chatFileInput =
+    document.getElementById("chatFileInput");
+
+if (chatAttachButton && chatFileInput) {
+
+    chatAttachButton.addEventListener(
+        "click",
+        function () {
+            chatFileInput.click();
+        }
+    );
+
+    chatFileInput.addEventListener(
+        "change",
+        function () {
+
+            const file =
+                chatFileInput.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+
+                if (typeof showMessage === "function") {
+                    showMessage("That file is too large — 10MB max.", "error");
+                }
+
+                chatFileInput.value = "";
+                return;
+
+            }
+
+            sendChatAttachment(file);
+
+            chatFileInput.value = "";
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// CHAT — VOICE NOTES
+// =========================================================
+
+let __kuriosMediaRecorder = null;
+let __kuriosRecordedChunks = [];
+let __kuriosRecordingStartedAt = 0;
+let __kuriosRecordingTimerInterval = null;
+let __kuriosRecordingStream = null;
+
+function formatRecordingTime(ms) {
+
+    const totalSeconds =
+        Math.floor(ms / 1000);
+
+    const minutes =
+        Math.floor(totalSeconds / 60);
+
+    const seconds =
+        totalSeconds % 60;
+
+    return minutes + ":" + String(seconds).padStart(2, "0");
+
+}
+
+function stopVoiceRecordingTracks() {
+
+    if (__kuriosRecordingStream) {
+
+        __kuriosRecordingStream.getTracks().forEach(function (track) {
+            track.stop();
+        });
+
+        __kuriosRecordingStream = null;
+
+    }
+
+    if (__kuriosRecordingTimerInterval) {
+        clearInterval(__kuriosRecordingTimerInterval);
+        __kuriosRecordingTimerInterval = null;
+    }
+
+}
+
+function hideRecordingBar() {
+
+    const bar =
+        document.getElementById("chatRecordingBar");
+
+    if (bar) {
+        bar.style.display = "none";
+    }
+
+    const form =
+        document.getElementById("messageForm");
+
+    if (form) {
+        form.style.display = "flex";
+    }
+
+}
+
+async function startVoiceRecording() {
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+
+        if (typeof showMessage === "function") {
+            showMessage("Voice recording isn't supported on this browser.", "error");
+        }
+
+        return;
+
+    }
+
+    try {
+
+        const stream =
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        __kuriosRecordingStream = stream;
+
+        __kuriosRecordedChunks = [];
+
+        const recorder =
+            new MediaRecorder(stream);
+
+        __kuriosMediaRecorder = recorder;
+
+        recorder.ondataavailable = function (event) {
+
+            if (event.data && event.data.size > 0) {
+                __kuriosRecordedChunks.push(event.data);
+            }
+
+        };
+
+        recorder.start();
+
+        __kuriosRecordingStartedAt = Date.now();
+
+        const bar =
+            document.getElementById("chatRecordingBar");
+
+        const form =
+            document.getElementById("messageForm");
+
+        const timerEl =
+            document.getElementById("chatRecordingTimer");
+
+        if (bar) bar.style.display = "flex";
+        if (form) form.style.display = "none";
+
+        __kuriosRecordingTimerInterval = setInterval(
+            function () {
+
+                if (timerEl) {
+
+                    timerEl.textContent =
+                        formatRecordingTime(Date.now() - __kuriosRecordingStartedAt);
+
+                }
+
+            },
+            250
+        );
+
+    } catch (error) {
+
+        console.error("Start recording error:", error);
+
+        if (typeof showMessage === "function") {
+            showMessage("Couldn't access your microphone. Check your browser permissions.", "error");
+        }
+
+    }
+
+}
+
+function cancelVoiceRecording() {
+
+    if (__kuriosMediaRecorder && __kuriosMediaRecorder.state !== "inactive") {
+
+        __kuriosMediaRecorder.onstop = null;
+        __kuriosMediaRecorder.stop();
+
+    }
+
+    stopVoiceRecordingTracks();
+    hideRecordingBar();
+
+    __kuriosMediaRecorder = null;
+    __kuriosRecordedChunks = [];
+
+}
+
+function sendVoiceRecording() {
+
+    if (!__kuriosMediaRecorder || __kuriosMediaRecorder.state === "inactive") {
+        return;
+    }
+
+    __kuriosMediaRecorder.onstop = function () {
+
+        const mimeType =
+            __kuriosMediaRecorder.mimeType || "audio/webm";
+
+        const blob =
+            new Blob(__kuriosRecordedChunks, { type: mimeType });
+
+        const extension =
+            mimeType.indexOf("ogg") !== -1 ? "ogg" : "webm";
+
+        const file =
+            new File([blob], "voice-note." + extension, { type: mimeType });
+
+        stopVoiceRecordingTracks();
+        hideRecordingBar();
+
+        __kuriosMediaRecorder = null;
+        __kuriosRecordedChunks = [];
+
+        if (typeof sendChatAttachment === "function") {
+            sendChatAttachment(file, "VOICE");
+        }
+
+    };
+
+    __kuriosMediaRecorder.stop();
+
+}
+
+const chatVoiceButton =
+    document.getElementById("chatVoiceButton");
+
+if (chatVoiceButton) {
+
+    chatVoiceButton.addEventListener(
+        "click",
+        startVoiceRecording
+    );
+
+}
+
+const chatCancelRecording =
+    document.getElementById("chatCancelRecording");
+
+if (chatCancelRecording) {
+
+    chatCancelRecording.addEventListener(
+        "click",
+        cancelVoiceRecording
+    );
+
+}
+
+const chatSendRecording =
+    document.getElementById("chatSendRecording");
+
+if (chatSendRecording) {
+
+    chatSendRecording.addEventListener(
+        "click",
+        sendVoiceRecording
+    );
+
+}
