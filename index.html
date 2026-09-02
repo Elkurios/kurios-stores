@@ -1393,6 +1393,91 @@
             <div class="chat-preview" id="chatPreviewApp">
 
 
+                <!-- APP SIDEBAR -->
+
+                <div class="chat-app-sidebar">
+
+                    <div class="chat-app-brand">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                        <div>
+                            <strong>KURIOS</strong>
+                            <span>STORES</span>
+                        </div>
+                    </div>
+
+                    <button type="button" class="chat-app-newchat-btn" id="appSidebarNewChat">
+                        <i class="fa-solid fa-plus"></i>
+                        New Chat
+                    </button>
+
+                    <nav class="chat-app-nav">
+
+                        <button type="button" class="chat-app-nav-item active">
+                            <i class="fa-regular fa-comments"></i>
+                            Chats
+                        </button>
+
+                        <button type="button" class="chat-app-nav-item" data-chat-sidebar-action="notifications">
+                            <i class="fa-regular fa-bell"></i>
+                            Notifications
+                        </button>
+
+                        <button type="button" class="chat-app-nav-item" data-chat-sidebar-action="orders">
+                            <i class="fa-solid fa-box"></i>
+                            Orders
+                        </button>
+
+                        <button type="button" class="chat-app-nav-item soon" data-chat-sidebar-action="soon">
+                            <i class="fa-solid fa-motorcycle"></i>
+                            Errands
+                            <span class="soon-pill">Soon</span>
+                        </button>
+
+                        <button type="button" class="chat-app-nav-item soon" data-chat-sidebar-action="soon">
+                            <i class="fa-regular fa-heart"></i>
+                            Favorites
+                            <span class="soon-pill">Soon</span>
+                        </button>
+
+                        <button type="button" class="chat-app-nav-item" data-chat-sidebar-action="rewards">
+                            <i class="fa-solid fa-gift"></i>
+                            Rewards
+                        </button>
+
+                        <button type="button" class="chat-app-nav-item" data-chat-sidebar-action="wallet">
+                            <i class="fa-solid fa-wallet"></i>
+                            Wallet
+                        </button>
+
+                        <button type="button" class="chat-app-nav-item" data-chat-sidebar-action="profile">
+                            <i class="fa-regular fa-user"></i>
+                            Profile
+                        </button>
+
+                        <button type="button" class="chat-app-nav-item" data-chat-sidebar-action="settings">
+                            <i class="fa-solid fa-gear"></i>
+                            Settings
+                        </button>
+
+                        <button type="button" class="chat-app-nav-item soon" data-chat-sidebar-action="soon">
+                            <i class="fa-regular fa-circle-question"></i>
+                            Support
+                            <span class="soon-pill">Soon</span>
+                        </button>
+
+                    </nav>
+
+                    <div class="chat-app-sidebar-footer" id="chatAppSidebarFooter" data-chat-sidebar-action="profile">
+                        <div class="chat-app-sidebar-avatar" id="chatAppSidebarAvatar"><i class="fa-regular fa-user"></i></div>
+                        <div>
+                            <strong id="chatAppSidebarName">You</strong>
+                            <span>View profile</span>
+                        </div>
+                    </div>
+
+                </div>
+
+
                 <!-- CHAT CONTACTS -->
 
                 <div class="chat-sidebar">
@@ -1426,6 +1511,18 @@
                             placeholder="Search conversations..."
                         >
 
+                    </div>
+
+
+                    <!-- FILTER PILLS -->
+
+                    <div class="chat-filter-pills" id="chatFilterPills">
+                        <button type="button" class="chat-filter-pill active" data-chat-filter="all">All</button>
+                        <button type="button" class="chat-filter-pill" data-chat-filter="NORMAL">Students</button>
+                        <button type="button" class="chat-filter-pill" data-chat-filter="PRODUCT">Sellers</button>
+                        <button type="button" class="chat-filter-pill soon" data-chat-filter="soon">Orders <span class="soon-pill">Soon</span></button>
+                        <button type="button" class="chat-filter-pill soon" data-chat-filter="soon">Errands <span class="soon-pill">Soon</span></button>
+                        <button type="button" class="chat-filter-pill soon" data-chat-filter="soon">Support <span class="soon-pill">Soon</span></button>
                     </div>
 
 
@@ -1519,6 +1616,23 @@
 
                         </div>
 
+
+                        <div class="chat-header-actions">
+
+                            <button type="button" class="chat-header-icon-btn soon" title="Voice calling — coming soon" data-chat-action="soon">
+                                <i class="fa-solid fa-phone"></i>
+                            </button>
+
+                            <button type="button" class="chat-header-icon-btn soon" title="Video calling — coming soon" data-chat-action="soon">
+                                <i class="fa-solid fa-video"></i>
+                            </button>
+
+                            <button type="button" class="chat-header-icon-btn soon" title="More options — coming soon" data-chat-action="soon">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+
+                        </div>
+
                     </div>
 
 
@@ -1562,6 +1676,10 @@
                         id="messageForm"
                     >
 
+                        <button type="button" class="chat-input-icon-btn soon" title="Attachments — coming soon" data-chat-action="soon">
+                            <i class="fa-solid fa-paperclip"></i>
+                        </button>
+
                         <input
                             type="text"
                             id="messageInput"
@@ -1569,6 +1687,9 @@
                             autocomplete="off"
                         >
 
+                        <button type="button" class="chat-input-icon-btn soon" title="Emoji — coming soon" data-chat-action="soon">
+                            <i class="fa-regular fa-face-smile"></i>
+                        </button>
 
                         <button
                             type="submit"
@@ -1581,6 +1702,64 @@
                         </button>
 
                     </form>
+
+                </div>
+
+
+                <!-- PROFILE PANEL -->
+
+                <div class="chat-profile-panel" id="chatProfilePanel" style="display: none;">
+
+                    <div class="chat-profile-avatar" id="chatProfileAvatar"><i class="fa-regular fa-user"></i></div>
+
+                    <strong id="chatProfileName">Kurios Student</strong>
+
+                    <span class="chat-profile-badge"><i class="fa-solid fa-graduation-cap"></i> Student</span>
+
+                    <p id="chatProfileUniversity" class="chat-profile-university"></p>
+
+                    <div class="chat-profile-actions">
+                        <div class="chat-profile-action">
+                            <i class="fa-regular fa-comment"></i>
+                            <span>Message</span>
+                        </div>
+                        <div class="chat-profile-action soon" data-chat-action="soon">
+                            <i class="fa-solid fa-phone"></i>
+                            <span>Call</span>
+                        </div>
+                        <div class="chat-profile-action soon" data-chat-action="soon">
+                            <i class="fa-solid fa-video"></i>
+                            <span>Video</span>
+                        </div>
+                        <div class="chat-profile-action soon" data-chat-action="soon">
+                            <i class="fa-solid fa-ellipsis"></i>
+                            <span>More</span>
+                        </div>
+                    </div>
+
+                    <div class="chat-profile-section">
+                        <h4>Information</h4>
+                        <div id="chatProfileInfoList"></div>
+                    </div>
+
+                    <div class="chat-profile-section">
+                        <button type="button" class="chat-profile-list-item soon" data-chat-action="soon">
+                            <i class="fa-solid fa-magnifying-glass"></i> Search in conversation
+                            <span class="soon-pill">Soon</span>
+                        </button>
+                        <button type="button" class="chat-profile-list-item soon" data-chat-action="soon">
+                            <i class="fa-regular fa-bell-slash"></i> Mute notifications
+                            <span class="soon-pill">Soon</span>
+                        </button>
+                        <button type="button" class="chat-profile-list-item soon danger" data-chat-action="soon">
+                            <i class="fa-solid fa-ban"></i> Block student
+                            <span class="soon-pill">Soon</span>
+                        </button>
+                        <button type="button" class="chat-profile-list-item soon danger" data-chat-action="soon">
+                            <i class="fa-solid fa-flag"></i> Report student
+                            <span class="soon-pill">Soon</span>
+                        </button>
+                    </div>
 
                 </div>
 
