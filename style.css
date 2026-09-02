@@ -5426,6 +5426,7 @@ img {
 
 #sellerPage.seller-dashboard-active .ks-seller-app {
     min-height: 100vh;
+    min-height: 100dvh;
     border-radius: 0;
     border: none;
     box-shadow: none;
@@ -7892,6 +7893,7 @@ img {
 
 .chat-full-page .chat-preview {
     height: 100vh;
+    height: 100dvh;
     border-radius: 0;
     border: none;
     box-shadow: none;
