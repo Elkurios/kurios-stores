@@ -8269,6 +8269,26 @@ img {
     pointer-events: auto;
 }
 
+/* :hover is unreliable on touch devices, so always show
+   these on small/touch screens instead of hiding them
+   behind a gesture that may never register. */
+
+@media (hover: none), (max-width: 780px) {
+
+    .message-hover-actions {
+        opacity: 1;
+        pointer-events: auto;
+        position: static;
+        margin-top: 4px;
+        justify-content: flex-end;
+    }
+
+    .message.received .message-hover-actions {
+        justify-content: flex-start;
+    }
+
+}
+
 .message.sent .message-hover-actions {
     right: 0;
 }
