@@ -3283,6 +3283,21 @@ if (signInForm) {
                     postLoginSplash.style.display = "flex";
                 }
 
+                const splashShownAt = Date.now();
+                const SPLASH_MIN_DISPLAY_MS = 5000;
+
+                function proceedAfterSplashDelay(callback) {
+
+                    const elapsed =
+                        Date.now() - splashShownAt;
+
+                    const remaining =
+                        Math.max(0, SPLASH_MIN_DISPLAY_MS - elapsed);
+
+                    setTimeout(callback, remaining);
+
+                }
+
 updateLoginState();
 
                 if (typeof showDashboardChoiceModal === "function") {
@@ -3293,22 +3308,27 @@ updateLoginState();
                         .then(function (response) { return response.json(); })
                         .then(function (sellerData) {
 
-                            if (
+                            const isApprovedSeller =
                                 sellerData.success &&
                                 sellerData.seller &&
-                                sellerData.seller.status === "approved"
-                            ) {
+                                sellerData.seller.status === "approved";
 
-                                // Keep the splash up — the choice
-                                // modal renders on top of it.
+                            proceedAfterSplashDelay(function () {
 
-                                showDashboardChoiceModal(data.student);
+                                if (isApprovedSeller) {
 
-                            } else if (postLoginSplash) {
+                                    // Keep the splash up — the choice
+                                    // modal renders on top of it.
 
-                                postLoginSplash.style.display = "none";
+                                    showDashboardChoiceModal(data.student);
 
-                            }
+                                } else if (postLoginSplash) {
+
+                                    postLoginSplash.style.display = "none";
+
+                                }
+
+                            });
 
                         })
                         .catch(function (error) {
@@ -3318,15 +3338,25 @@ updateLoginState();
                                 error
                             );
 
-                            if (postLoginSplash) {
-                                postLoginSplash.style.display = "none";
-                            }
+                            proceedAfterSplashDelay(function () {
+
+                                if (postLoginSplash) {
+                                    postLoginSplash.style.display = "none";
+                                }
+
+                            });
 
                         });
 
-                } else if (postLoginSplash) {
+                } else {
 
-                    postLoginSplash.style.display = "none";
+                    proceedAfterSplashDelay(function () {
+
+                        if (postLoginSplash) {
+                            postLoginSplash.style.display = "none";
+                        }
+
+                    });
 
                 }
 
@@ -12460,17 +12490,27 @@ if (dashboardChoiceStudent) {
         "click",
         function () {
 
+            // Hide the choice cards but leave the splash
+            // showing underneath for a beat before we go.
+
             closeDashboardChoiceModal();
 
-            if (typeof switchDashboardWithReload === "function") {
+            setTimeout(
+                function () {
 
-                switchDashboardWithReload(null);
+                    if (typeof switchDashboardWithReload === "function") {
 
-            } else if (typeof goHome === "function") {
+                        switchDashboardWithReload(null);
 
-                goHome();
+                    } else if (typeof goHome === "function") {
 
-            }
+                        goHome();
+
+                    }
+
+                },
+                5000
+            );
 
         }
     );
@@ -12488,15 +12528,22 @@ if (dashboardChoiceSeller) {
 
             closeDashboardChoiceModal();
 
-            if (typeof switchDashboardWithReload === "function") {
+            setTimeout(
+                function () {
 
-                switchDashboardWithReload("sell");
+                    if (typeof switchDashboardWithReload === "function") {
 
-            } else {
+                        switchDashboardWithReload("sell");
 
-                window.location.hash = "sell";
+                    } else {
 
-            }
+                        window.location.hash = "sell";
+
+                    }
+
+                },
+                5000
+            );
 
         }
     );
