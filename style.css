@@ -6964,7 +6964,8 @@ img {
    MENU BUTTONS
    ========================================================= */
 
-.student-account-menu > button {
+.student-account-menu > button,
+.account-menu-nav-link {
     width: 100%;
 
     border: none;
@@ -6993,6 +6994,8 @@ img {
 
     text-align: left;
 
+    text-decoration: none;
+
     transition:
         background 0.18s ease,
         color 0.18s ease;
@@ -7001,7 +7004,8 @@ img {
 
 /* ICONS */
 
-.student-account-menu > button i {
+.student-account-menu > button i,
+.account-menu-nav-link i {
     width: 20px;
 
     text-align: center;
@@ -7014,14 +7018,16 @@ img {
 
 /* HOVER */
 
-.student-account-menu > button:hover {
+.student-account-menu > button:hover,
+.account-menu-nav-link:hover {
     background: #f5f0ff;
 
     color: #5b21b6;
 }
 
 
-.student-account-menu > button:hover i {
+.student-account-menu > button:hover i,
+.account-menu-nav-link:hover i {
     color: #6d28d9;
 }
 
