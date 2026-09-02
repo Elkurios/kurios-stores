@@ -101,7 +101,7 @@
 
             <!-- DESKTOP NAVIGATION -->
 
-            <nav class="main-nav">
+            <nav class="main-nav" id="mainNav">
 
                 <a
                     href="#home"
@@ -131,19 +131,25 @@
                     Rewards
                 </a>
 
-                <a
-                    href="#chat"
-                    class="nav-link"
-                >
-                    Chat
-                </a>
-
             </nav>
 
 
             <!-- NAVIGATION ACTIONS -->
 
             <div class="nav-actions">
+
+
+                <!-- CHAT -->
+
+                <button
+                    class="nav-icon-button"
+                    id="chatIconButton"
+                    aria-label="Chat"
+                >
+
+                    <i class="fa-regular fa-comments"></i>
+
+                </button>
 
 
                 <!-- NOTIFICATIONS -->
@@ -234,6 +240,64 @@
         </div>
 
     </div>
+
+
+    <div class="account-menu-divider"></div>
+
+
+    <!-- DASHBOARD -->
+
+    <a
+        href="#home"
+        class="account-menu-nav-link"
+    >
+
+        <i class="fa-solid fa-grid-2"></i>
+
+        <span>
+            Dashboard
+        </span>
+
+    </a>
+
+    <a
+        href="#shop"
+        class="account-menu-nav-link"
+    >
+
+        <i class="fa-solid fa-store"></i>
+
+        <span>
+            Shop
+        </span>
+
+    </a>
+
+    <a
+        href="#categories"
+        class="account-menu-nav-link"
+    >
+
+        <i class="fa-solid fa-grip"></i>
+
+        <span>
+            Categories
+        </span>
+
+    </a>
+
+    <a
+        href="#rewards"
+        class="account-menu-nav-link"
+    >
+
+        <i class="fa-solid fa-gift"></i>
+
+        <span>
+            Rewards
+        </span>
+
+    </a>
 
 
     <div class="account-menu-divider"></div>
