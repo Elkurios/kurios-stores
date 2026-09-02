@@ -1,8035 +1,13195 @@
 /* =========================================================
    KURIOS STORES
-   MAIN STYLESHEET
+   MAIN JAVASCRIPT
    ========================================================= */
 
 
 /* =========================================================
-   1. GLOBAL SETTINGS
+   1. BASIC SETTINGS
    ========================================================= */
 
-:root {
+/*
+    This is the address of our Node.js backend.
 
-    /* Kurios brand colours */
-    --purple: #6d28d9;
-    --purple-dark: #4c1d95;
-    --purple-light: #8b5cf6;
-    --purple-soft: #f3e8ff;
+    Our frontend is here:
 
-    /* General colours */
-    --white: #ffffff;
-    --black: #171717;
-    --text: #27272a;
-    --muted: #71717a;
-    --border: #e4e4e7;
-    --background: #fafafa;
-    --light-background: #f7f5fb;
+    C:\Users\HomePC\Desktop\CODE WITH ELKURIOS\kurios-stores
 
-    /* Status colours */
-    --green: #16a34a;
-    --red: #dc2626;
-    --orange: #ea580c;
+    Our backend is here:
 
-    /* Effects */
-    --shadow-small: 0 4px 15px rgba(0, 0, 0, 0.06);
-    --shadow-medium: 0 10px 30px rgba(0, 0, 0, 0.09);
-    --shadow-large: 0 20px 50px rgba(0, 0, 0, 0.14);
+    C:\Users\HomePC\Desktop\kurios-stores-backend
+*/
 
-    --radius-small: 8px;
-    --radius-medium: 14px;
-    --radius-large: 22px;
+const API_URL = "https://kurios-stores-backend.onrender.com";
 
-    --transition: 0.25s ease;
-}
 
+/*
+    Wait until the HTML has completely loaded
+    before JavaScript starts working.
+*/
 
-/* Remove default browser spacing */
+document.addEventListener("DOMContentLoaded", function () {
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
+    console.log("Kurios Stores website loaded successfully.");
 
-/* Smooth scrolling */
 
-html {
-    scroll-behavior: smooth;
-    max-width: 100vw;
-    overflow-x: hidden;
-}
 
+    /* =====================================================
+       2. GET IMPORTANT HTML ELEMENTS
+       ===================================================== */
 
-/* Main body */
 
-body {
+    const productGrid =
+        document.getElementById("productGrid");
 
-    font-family: "Inter", Arial, sans-serif;
 
-    background: var(--white);
+    const cartButton =
+        document.getElementById("cartButton");
 
-    color: var(--text);
 
-    line-height: 1.6;
+    const cartOverlay =
+        document.getElementById("cartOverlay");
 
-    max-width: 100vw;
 
-    overflow-x: hidden;
-}
+    const closeCart =
+        document.getElementById("closeCart");
 
 
-/* Links */
+    const cartItems =
+        document.getElementById("cartItems");
 
-a {
-    text-decoration: none;
-    color: inherit;
-}
 
+    const cartCount =
+        document.getElementById("cartBadge");
 
-/* Buttons */
 
-button,
-input,
-textarea {
-    font-family: inherit;
-}
+    const cartTotal =
+        document.getElementById("cartTotal");
 
 
-/* Buttons should look clickable */
+    const checkoutButton =
+        document.getElementById("checkoutButton");
 
-button {
-    cursor: pointer;
-}
 
 
-/* Images */
+    /* =====================================================
+       3. SHOPPING CART
+       ===================================================== */
 
-img {
-    max-width: 100%;
-    display: block;
-}
 
+    /*
+        The cart is stored in this array.
 
-/* Logged-in dashboard is hidden by default — JS reveals it (and
-   hides #loggedOutHero) once it confirms a student is signed in.
-   Without this, both heroes render on first paint until the
-   script at the bottom of the page runs. */
+        Example:
 
-#loggedInHero {
-    display: none;
-}
+        [
+            {
+                id: 1,
+                name: "Instant Noodles",
+                price: 1200,
+                quantity: 2
+            }
+        ]
+    */
 
+    let cart = JSON.parse(
+        localStorage.getItem("kuriosCart")
+    ) || [];
 
-/* =========================================================
-   2. REUSABLE CONTAINER
-   ========================================================= */
 
-.footer-container,
-.rewards-container {
 
-    width: min(1180px, 92%);
+    /*
+        Save the cart in the browser.
 
-    margin: 0 auto;
-}
+        This means refreshing the page
+        won't immediately empty the cart.
+    */
 
+    function saveCart() {
 
-/* Nav bar gets more breathing room on wide screens so the
-   links/icons/account cluster sits closer to the true edge
-   instead of stopping at the same 1180px column as the page
-   content sections. */
-
-.nav-container {
-
-    width: min(1440px, 96%);
-
-    margin: 0 auto;
-}
-
-
-/* =========================================================
-   3. NAVIGATION
-   ========================================================= */
-
-.navbar {
-
-    position: sticky;
-
-    top: 0;
-
-    z-index: 1000;
-
-    background: rgba(255, 255, 255, 0.96);
-
-    backdrop-filter: blur(12px);
-
-    border-bottom: 1px solid var(--border);
-}
-
-
-.nav-container {
-
-    min-height: 76px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 30px;
-}
-
-
-/* Logo */
-
-.logo-link {
-
-    display: flex;
-
-    align-items: center;
-
-    flex-shrink: 0;
-}
-
-
-.nav-logo {
-
-    width: 125px;
-
-    height: auto;
-
-    object-fit: contain;
-}
-
-
-/* Desktop navigation */
-
-.main-nav {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 30px;
-
-    margin-left: auto;
-}
-
-
-.nav-link {
-
-    position: relative;
-
-    color: var(--muted);
-
-    font-size: 14px;
-
-    font-weight: 600;
-
-    padding: 27px 0;
-
-    transition: var(--transition);
-}
-
-
-.nav-link:hover,
-.nav-link.active {
-
-    color: var(--purple);
-}
-
-
-.nav-link.active::after {
-
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-
-    right: 0;
-
-    bottom: 18px;
-
-    height: 2px;
-
-    border-radius: 5px;
-
-    background: var(--purple);
-}
-
-
-/* Navigation actions */
-
-.nav-actions {
-
-    position: relative;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-}
-
-
-/* Icon buttons */
-
-.nav-icon-button {
-
-    position: relative;
-
-    width: 42px;
-
-    height: 42px;
-
-    border: 1px solid var(--border);
-
-    background: var(--white);
-
-    color: var(--text);
-
-    border-radius: 50%;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    transition: var(--transition);
-}
-
-
-.nav-icon-button:hover {
-
-    color: var(--purple);
-
-    border-color: var(--purple-light);
-
-    background: var(--purple-soft);
-
-    transform: translateY(-2px);
-}
-
-
-/* Notification/cart numbers */
-
-.notification-badge,
-.cart-badge {
-
-    position: absolute;
-
-    top: -3px;
-
-    right: -3px;
-
-    min-width: 18px;
-
-    height: 18px;
-
-    padding: 0 4px;
-
-    border-radius: 50px;
-
-    background: var(--purple);
-
-    color: var(--white);
-
-    font-size: 10px;
-
-    font-weight: 700;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-}
-
-
-/* Sign in button */
-
-.signin-nav-button {
-
-    border: none;
-
-    background: var(--purple);
-
-    color: var(--white);
-
-    padding: 11px 18px;
-
-    border-radius: 9px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    font-size: 13px;
-
-    font-weight: 700;
-
-    transition: var(--transition);
-}
-
-
-.signin-nav-button.has-avatar {
-
-    background: transparent;
-
-    padding: 0;
-
-    border-radius: 50%;
-}
-
-.signin-nav-button.has-avatar:hover {
-
-    background: transparent;
-
-    transform: none;
-
-    box-shadow: none;
-}
-
-.header-avatar-circle {
-
-    width: 40px;
-    height: 40px;
-
-    border-radius: 50%;
-
-    overflow: hidden;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: linear-gradient(
-        135deg,
-        var(--purple),
-        var(--purple-light)
-    );
-
-    border: 2px solid var(--purple-soft);
-}
-
-.header-avatar-circle img {
-
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.header-avatar-initial {
-
-    color: var(--white);
-    font-size: 15px;
-    font-weight: 700;
-}
-
-
-.signin-nav-button:hover {
-
-    background: var(--purple-dark);
-
-    transform: translateY(-2px);
-
-    box-shadow: var(--shadow-small);
-}
-
-
-/* Mobile menu button */
-
-.mobile-menu-button {
-
-    display: none;
-
-    width: 42px;
-
-    height: 42px;
-
-    border: 1px solid var(--border);
-
-    background: var(--white);
-
-    border-radius: 9px;
-
-    color: var(--text);
-
-    font-size: 18px;
-}
-
-
-/* Mobile navigation */
-
-.mobile-menu {
-
-    display: none;
-
-    flex-direction: column;
-
-    padding: 10px 5% 20px;
-
-    border-top: 1px solid var(--border);
-
-    background: var(--white);
-}
-
-
-.mobile-menu a {
-
-    padding: 13px 0;
-
-    border-bottom: 1px solid #f0f0f0;
-
-    font-size: 14px;
-
-    font-weight: 600;
-}
-
-
-.mobile-menu a:hover {
-
-    color: var(--purple);
-}
-
-
-/* =========================================================
-   4. HERO
-   ========================================================= */
-
-.hero {
-
-    position: relative;
-
-    min-height: 600px;
-
-    display: flex;
-
-    align-items: center;
-
-    overflow: hidden;
-
-    background:
-        radial-gradient(
-            circle at 85% 20%,
-            rgba(139, 92, 246, 0.18),
-            transparent 30%
-        ),
-        linear-gradient(
-            135deg,
-            #ffffff 0%,
-            #faf7ff 55%,
-            #f3e8ff 100%
+        localStorage.setItem(
+            "kuriosCart",
+            JSON.stringify(cart)
         );
-}
 
+    }
 
-.hero-content {
 
-    position: relative;
 
-    z-index: 2;
+    /*
+        Format Nigerian currency.
+    */
 
-    width: min(1180px, 92%);
+    function formatMoney(amount) {
 
-    margin: 0 auto;
+        return "₦" + Number(amount).toLocaleString();
 
-    padding: 80px 0;
-}
+    }
 
 
-.hero-label {
 
-    display: inline-block;
+    /* =====================================================
+       4. DISPLAY CART
+       ===================================================== */
 
-    margin-bottom: 18px;
 
-    color: var(--purple);
+    function updateCart() {
 
-    font-size: 12px;
 
-    font-weight: 800;
+        /*
+            Make sure the cart container exists.
+        */
 
-    letter-spacing: 2px;
-}
+        if (!cartItems) {
+            return;
+        }
 
 
-.hero h1 {
+        /*
+            Empty the current cart display.
+        */
 
-    max-width: 750px;
+        cartItems.innerHTML = "";
 
-    color: var(--black);
 
-    font-size: clamp(45px, 7vw, 78px);
 
-    line-height: 1.04;
+        /*
+            If there are no products...
+        */
 
-    letter-spacing: -3px;
+        if (cart.length === 0) {
 
-    margin-bottom: 25px;
+            cartItems.innerHTML = `
 
-    font-weight: 800;
-}
+                <div class="empty-cart">
 
+                    <i class="fa-solid fa-cart-shopping"></i>
 
-.hero h1 span {
+                    <h3>
+                        Your cart is empty
+                    </h3>
 
-    color: var(--purple);
-}
+                    <p>
+                        Add some products to get started.
+                    </p>
 
+                </div>
 
-.hero p {
+            `;
 
-    max-width: 600px;
+        }
 
-    color: var(--muted);
 
-    font-size: 20px;
 
-    margin-bottom: 8px;
-}
+        /*
+            Otherwise display the products.
+        */
 
+        else {
 
-.hero .hero-subtext {
+            cart.forEach(function (item, index) {
 
-    font-size: 15px;
 
-    margin-bottom: 30px;
-}
+                const itemTotal =
+                    item.price * item.quantity;
 
 
-/* Hero buttons */
+                cartItems.innerHTML += `
 
-.hero-buttons {
+                    <div class="cart-item">
 
-    display: flex;
 
-    align-items: center;
+                        <div class="cart-item-image">
 
-    gap: 12px;
+                            <i class="fa-solid fa-bag-shopping"></i>
 
-    flex-wrap: wrap;
-}
+                        </div>
 
 
-/* Main purple button */
 
-.primary-button {
+                        <div class="cart-item-info">
 
-    display: inline-flex;
+                            <h3>
+                                ${item.name}
+                            </h3>
 
-    align-items: center;
 
-    justify-content: center;
+                            <div class="cart-item-price">
 
-    gap: 10px;
+                                ${formatMoney(item.price)}
 
-    border: none;
+                            </div>
 
-    background: var(--purple);
 
-    color: var(--white);
 
-    padding: 14px 22px;
+                            <div class="quantity-controls">
 
-    border-radius: 10px;
 
-    font-size: 14px;
+                                <button
+                                    class="quantity-button"
+                                    data-action="decrease"
+                                    data-index="${index}"
+                                >
+                                    −
+                                </button>
 
-    font-weight: 700;
 
-    transition: var(--transition);
-}
+                                <strong>
+                                    ${item.quantity}
+                                </strong>
 
 
-.primary-button:hover {
+                                <button
+                                    class="quantity-button"
+                                    data-action="increase"
+                                    data-index="${index}"
+                                >
+                                    +
+                                </button>
 
-    background: var(--purple-dark);
 
-    transform: translateY(-2px);
+                                <button
+                                    class="remove-item"
+                                    data-action="remove"
+                                    data-index="${index}"
+                                >
+                                    Remove
+                                </button>
 
-    box-shadow: var(--shadow-medium);
-}
 
+                            </div>
 
-/* Secondary button */
 
-.secondary-button {
+                        </div>
 
-    display: inline-flex;
 
-    align-items: center;
 
-    justify-content: center;
+                        <strong>
 
-    border: 1px solid var(--border);
+                            ${formatMoney(itemTotal)}
 
-    background: var(--white);
+                        </strong>
 
-    color: var(--text);
 
-    padding: 13px 21px;
+                    </div>
 
-    border-radius: 10px;
+                `;
 
-    font-size: 14px;
+            });
 
-    font-weight: 700;
+        }
 
-    transition: var(--transition);
-}
 
 
-.secondary-button:hover {
+        /*
+            Calculate total number of items.
+        */
 
-    border-color: var(--purple);
+        let totalQuantity = 0;
 
-    color: var(--purple);
 
-    transform: translateY(-2px);
-}
+        cart.forEach(function (item) {
 
+            totalQuantity += item.quantity;
 
-/* Decorative circles */
+        });
 
-.hero-decoration {
 
-    position: absolute;
 
-    inset: 0;
+        /*
+            Update cart badge.
+        */
 
-    pointer-events: none;
-}
+        if (cartCount) {
 
+            cartCount.textContent =
+                totalQuantity;
 
-.hero-circle {
+        }
 
-    position: absolute;
 
-    border-radius: 50%;
 
-    border: 1px solid rgba(109, 40, 217, 0.12);
-}
+        /*
+            Calculate total price.
+        */
 
+        let totalPrice = 0;
 
-.circle-one {
 
-    width: 420px;
+        cart.forEach(function (item) {
 
-    height: 420px;
+            totalPrice +=
+                item.price * item.quantity;
 
-    right: -120px;
+        });
 
-    top: 50%;
 
-    transform: translateY(-50%);
-}
 
+        /*
+            Display total price.
+        */
 
-.circle-two {
+        if (cartTotal) {
 
-    width: 260px;
+            cartTotal.textContent =
+                formatMoney(totalPrice);
 
-    height: 260px;
+        }
 
-    right: 40px;
+    }
 
-    top: 50%;
 
-    transform: translateY(-50%);
-}
 
+    /* =====================================================
+       5. ADD PRODUCT TO CART
+       ===================================================== */
 
-/* =========================================================
-   5. GENERAL SECTIONS
-   ========================================================= */
 
-.section {
+    function addToCart(product) {
 
-    width: min(1180px, 92%);
 
-    margin: 0 auto;
+        /*
+            Check whether the product
+            already exists in the cart.
+        */
 
-    padding: 90px 0;
-}
+        const existingProduct =
+            cart.find(function (item) {
 
+                return item.id === product.id;
 
-.section-heading {
+            });
 
-    text-align: center;
 
-    max-width: 650px;
 
-    margin: 0 auto 45px;
-}
+        /*
+            If it already exists,
+            increase quantity.
+        */
 
+        if (existingProduct) {
 
-.section-heading > span,
-.section-label {
+            existingProduct.quantity += 1;
 
-    display: block;
+        }
 
-    color: var(--purple);
 
-    font-size: 11px;
 
-    font-weight: 800;
+        /*
+            Otherwise add a new product.
+        */
 
-    letter-spacing: 2px;
+        else {
 
-    margin-bottom: 9px;
-}
+            cart.push({
 
+                id: product.id,
 
-.section-heading h2 {
+                name: product.name,
 
-    font-size: clamp(30px, 4vw, 42px);
+                price: Number(product.price),
 
-    line-height: 1.15;
+                quantity: 1
 
-    color: var(--black);
+            });
 
-    margin-bottom: 12px;
+        }
 
-    letter-spacing: -1px;
-}
 
 
-.section-heading p {
+        /*
+            Save cart.
+        */
 
-    color: var(--muted);
+        saveCart();
 
-    font-size: 15px;
-}
 
+        /*
+            Update display.
+        */
 
-/* =========================================================
-   6. CATEGORIES
-   ========================================================= */
+        updateCart();
 
-.category-grid {
 
-    display: grid;
+        /*
+            Open cart.
+        */
 
-    grid-template-columns: repeat(4, 1fr);
+        openCart();
 
-    gap: 18px;
-}
 
+        /*
+            Show confirmation.
+        */
 
-.category-card {
+        showMessage(
+            product.name + " added to your cart."
+        );
 
-    text-align: left;
+    }
 
-    border: 1px solid var(--border);
 
-    background: var(--white);
 
-    border-radius: var(--radius-medium);
+    /* =====================================================
+       6. CART BUTTON
+       ===================================================== */
 
-    padding: 25px;
 
-    transition: var(--transition);
-}
+    function openCart() {
 
+        if (typeof closeNotificationPanel === "function") {
+            closeNotificationPanel();
+        }
 
-.category-card:hover {
+        if (cartOverlay) {
 
-    border-color: rgba(109, 40, 217, 0.3);
+            cartOverlay.classList.add("open");
 
-    transform: translateY(-6px);
+        }
 
-    box-shadow: var(--shadow-medium);
-}
+        document.body.classList.add("cart-open");
 
+        const choiceEl =
+            document.getElementById("orderPaymentChoice");
 
-.category-icon {
+        if (choiceEl) {
+            choiceEl.style.display = "none";
+        }
 
-    width: 52px;
+        if (checkoutButton) {
+            checkoutButton.style.display = "";
+        }
 
-    height: 52px;
+    }
 
-    display: flex;
 
-    align-items: center;
 
-    justify-content: center;
+    function closeCartPanel() {
 
-    border-radius: 12px;
+        if (cartOverlay) {
 
-    background: var(--purple-soft);
+            cartOverlay.classList.remove("open");
 
-    color: var(--purple);
+        }
 
-    font-size: 20px;
+        document.body.classList.remove("cart-open");
 
-    margin-bottom: 20px;
-}
+    }
 
 
-.category-card h3 {
 
-    font-size: 16px;
+    if (cartButton) {
 
-    margin-bottom: 8px;
+        cartButton.addEventListener(
+            "click",
+            openCart
+        );
 
-    color: var(--black);
-}
+    }
 
 
-.category-card p {
 
-    font-size: 13px;
+    if (closeCart) {
 
-    color: var(--muted);
+        closeCart.addEventListener(
+            "click",
+            closeCartPanel
+        );
 
-    line-height: 1.6;
-}
+    }
 
 
-/* =========================================================
-   7. SHOP
-   ========================================================= */
 
-.shop-section {
+    /*
+        The cart overlay is click-through now
+        (so the shop stays interactive behind it),
+        so there's no "click outside" region to
+        listen for anymore — closing happens via
+        the visible X button instead.
+    */
 
-    max-width: none;
 
-    width: 100%;
 
-    padding-left: 4%;
+    /* =====================================================
+       7. CART QUANTITY BUTTONS
+       ===================================================== */
 
-    padding-right: 4%;
 
-    background: var(--light-background);
-}
+    if (cartItems) {
 
+        cartItems.addEventListener(
+            "click",
+            function (event) {
 
-.shop-section .section-heading {
 
-    margin-bottom: 30px;
-}
+                const button =
+                    event.target.closest("button");
 
 
-/* Product filters */
+                if (!button) {
+                    return;
+                }
 
-.product-filters {
 
-    display: flex;
+                const action =
+                    button.dataset.action;
 
-    align-items: center;
 
-    justify-content: center;
+                const index =
+                    Number(button.dataset.index);
 
-    gap: 8px;
 
-    flex-wrap: wrap;
 
-    margin-bottom: 35px;
-}
+                /*
+                    Increase quantity.
+                */
 
+                if (action === "increase") {
 
-.filter-button {
+                    cart[index].quantity += 1;
 
-    border: 1px solid var(--border);
+                }
 
-    background: var(--white);
 
-    color: var(--muted);
 
-    padding: 9px 16px;
+                /*
+                    Decrease quantity.
+                */
 
-    border-radius: 50px;
+                if (action === "decrease") {
 
-    font-size: 12px;
+                    cart[index].quantity -= 1;
 
-    font-weight: 700;
 
-    transition: var(--transition);
-}
+                    /*
+                        Remove product when
+                        quantity reaches zero.
+                    */
 
+                    if (
+                        cart[index].quantity <= 0
+                    ) {
 
-.filter-button:hover,
-.filter-button.active {
+                        cart.splice(index, 1);
 
-    background: var(--purple);
+                    }
 
-    color: var(--white);
+                }
 
-    border-color: var(--purple);
-}
 
 
-/* Product grid */
+                /*
+                    Remove product.
+                */
 
-.product-grid {
+                if (action === "remove") {
 
-    width: min(1180px, 100%);
+                    cart.splice(index, 1);
 
-    margin: 0 auto;
+                }
 
-    display: grid;
 
-    grid-template-columns: repeat(4, 1fr);
 
-    gap: 20px;
-}
+                saveCart();
 
+                updateCart();
 
-/* Product card */
+            }
+        );
 
-.product-card {
+    }
 
-    background: var(--white);
 
-    border: 1px solid var(--border);
 
-    border-radius: var(--radius-medium);
+    /* =====================================================
+       8. LOAD PRODUCTS FROM NODE BACKEND
+       ===================================================== */
 
-    overflow: hidden;
 
-    transition: var(--transition);
-}
+    async function loadProducts() {
 
 
-.product-card:hover {
+        /*
+            Tell the browser:
 
-    transform: translateY(-6px);
+            "Go to my backend and
+             ask for the products."
+        */
 
-    box-shadow: var(--shadow-medium);
-}
+        try {
 
 
-/* Product image area */
+            const response =
+                await fetch(
+                    API_URL + "/api/products"
+                );
 
-.product-image {
 
-    position: relative;
 
-    height: 210px;
+            /*
+                Check whether the backend
+                responded successfully.
+            */
 
-    display: flex;
+            if (!response.ok) {
 
-    align-items: center;
+                throw new Error(
+                    "Backend returned an error."
+                );
 
-    justify-content: center;
+            }
 
-    background: linear-gradient(
-        145deg,
-        #fafafa,
-        #f2eafa
+
+
+            /*
+                Convert the response
+                into JavaScript data.
+            */
+
+            const products =
+                await response.json();
+
+
+
+            console.log(
+                "Products from Kurios Backend:",
+                products
+            );
+
+
+
+            /*
+                Display products
+                on the website.
+            */
+
+            displayProducts(products);
+
+
+            /*
+                Show a handful of them as
+                "Recommended for You" on the
+                logged-in student dashboard.
+            */
+
+            if (typeof renderDashboardRecommendations === "function") {
+
+                renderDashboardRecommendations(
+                    products.slice(0, 4)
+                );
+
+            }
+
+
+        }
+
+
+        catch (error) {
+
+
+            console.error(
+                "Error connecting to backend:",
+                error
+            );
+
+
+
+            /*
+                Tell the user that
+                the backend isn't available.
+            */
+
+            if (productGrid) {
+
+                productGrid.innerHTML = `
+
+                    <div class="empty-state">
+
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+
+                        <h3>
+                            Products could not be loaded
+                        </h3>
+
+                        <p>
+                            Please make sure the Kurios Stores
+                            backend is running.
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+
+    }
+
+
+
+    /* =====================================================
+       9. DISPLAY PRODUCTS
+       ===================================================== */
+
+
+    function displayProducts(products) {
+
+
+        if (!productGrid) {
+            return;
+        }
+
+
+        /*
+            Remove the old hard-coded products.
+        */
+
+        productGrid.innerHTML = "";
+
+
+
+        /*
+            If there are no products.
+        */
+
+        if (
+            !products ||
+            products.length === 0
+        ) {
+
+            productGrid.innerHTML = `
+
+                <div class="empty-state">
+
+                    <i class="fa-solid fa-box-open"></i>
+
+                    <h3>
+                        No products available
+                    </h3>
+
+                    <p>
+                        Please check back later.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+
+        /*
+            Go through each product.
+        */
+
+        const categoryIcons = {
+            "Fashion": "fa-shirt",
+            "Electronics": "fa-plug",
+            "Beauty": "fa-spray-can-sparkles",
+            "Food": "fa-utensils",
+            "Books": "fa-book",
+            "School Materials": "fa-pen",
+            "Phones": "fa-mobile-screen",
+            "Accessories": "fa-gem",
+            "Health": "fa-heart-pulse",
+            "Home": "fa-house",
+            "Services": "fa-screwdriver-wrench",
+            "Others": "fa-box"
+        };
+
+        products.forEach(function (product) {
+
+            const category =
+                product.category || "General";
+
+            const icon =
+                categoryIcons[category] || "fa-box";
+
+
+            /*
+                Create the product card.
+            */
+
+            const productCard =
+                document.createElement("article");
+
+
+            productCard.className =
+                "product-card";
+
+
+            productCard.dataset.category =
+                category;
+
+
+            const imageMarkup =
+                product.image_url ?
+                    `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
+                    `<i class="fa-solid ${icon}"></i>`;
+
+            const soldByMarkup =
+                product.seller_id ?
+                    `<span class="product-sold-by" data-seller-id="${product.seller_id}">
+                        Sold by ${product.seller_store_name || "a Kurios seller"}
+                    </span>` :
+                    `<p>Available at Kurios Stores.</p>`;
+
+            const ratingMarkup =
+                product.review_count > 0 ?
+                    `<span class="product-rating">
+                        <i class="fa-solid fa-star"></i>
+                        ${Number(product.avg_rating).toFixed(1)}
+                        <span class="product-rating-count">(${product.review_count})</span>
+                    </span>` :
+                    "";
+
+            productCard.innerHTML = `
+
+                <div class="product-image">
+
+                    ${imageMarkup}
+
+                </div>
+
+
+                <div class="product-info">
+
+
+                    <span class="product-category">
+
+                        ${category}
+
+                    </span>
+
+
+                    <h3>
+
+                        ${product.name}
+
+                    </h3>
+
+
+                    ${ratingMarkup}
+
+
+                    ${soldByMarkup}
+
+
+                    <div class="product-bottom">
+
+
+                        <strong>
+
+                            ${formatMoney(product.price)}
+
+                        </strong>
+
+
+                        <div style="display:flex; gap:6px;">
+
+                            ${product.seller_id ? `
+                                <button
+                                    class="contact-seller-btn"
+                                    data-product-id="${product.id}"
+                                    title="Message the seller about this product"
+                                >
+                                    <i class="fa-regular fa-comment"></i>
+                                </button>
+                            ` : ""}
+
+                            <button
+
+                                class="add-to-cart"
+
+                                data-product-id="${product.id}"
+
+                            >
+
+                                <i class="fa-solid fa-plus"></i>
+
+                                Add
+
+                            </button>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+            `;
+
+
+
+            /*
+                Put the card inside
+                the product grid.
+            */
+
+            productGrid.appendChild(
+                productCard
+            );
+
+
+
+            /*
+                Add click event to
+                the Add button.
+            */
+
+            const addButton =
+                productCard.querySelector(
+                    ".add-to-cart"
+                );
+
+
+            addButton.addEventListener(
+                "click",
+                function () {
+
+                    addToCart(product);
+
+                }
+            );
+
+
+            /*
+                Contact Seller button.
+            */
+
+            const contactSellerBtn =
+                productCard.querySelector(
+                    ".contact-seller-btn"
+                );
+
+            if (contactSellerBtn) {
+
+                contactSellerBtn.addEventListener(
+                    "click",
+                    function () {
+
+                        if (typeof contactSellerAboutProduct === "function") {
+                            contactSellerAboutProduct(product.id);
+                        }
+
+                    }
+                );
+
+            }
+
+
+            /*
+                Add click event to
+                the "Sold by" label.
+            */
+
+            const soldByLabel =
+                productCard.querySelector(
+                    ".product-sold-by"
+                );
+
+            if (soldByLabel) {
+
+                soldByLabel.addEventListener(
+                    "click",
+                    function () {
+
+                        window.location.hash =
+                            "store-" + product.seller_id;
+
+                    }
+                );
+
+            }
+
+        });
+
+    }
+
+
+
+    /* =====================================================
+       10. PRODUCT FILTERS
+       ===================================================== */
+
+
+    const filterButtons =
+        document.querySelectorAll(
+            ".filter-button"
+        );
+
+
+
+    filterButtons.forEach(
+        function (button) {
+
+
+            button.addEventListener(
+                "click",
+                function () {
+
+
+                    /*
+                        Remove active state
+                        from all buttons.
+                    */
+
+                    filterButtons.forEach(
+                        function (item) {
+
+                            item.classList.remove(
+                                "active"
+                            );
+
+                        }
+                    );
+
+
+
+                    /*
+                        Activate clicked button.
+                    */
+
+                    button.classList.add(
+                        "active"
+                    );
+
+
+
+                    const selectedCategory =
+                        button.dataset.filter;
+
+
+
+                    const productCards =
+                        document.querySelectorAll(
+                            ".product-card"
+                        );
+
+
+
+                    productCards.forEach(
+                        function (card) {
+
+
+                            if (
+                                selectedCategory ===
+                                "all"
+                            ) {
+
+                                card.style.display =
+                                    "";
+
+                                return;
+
+                            }
+
+
+
+                            if (
+                                card.dataset.category ===
+                                selectedCategory
+                            ) {
+
+                                card.style.display =
+                                    "";
+
+                            }
+
+                            else {
+
+                                card.style.display =
+                                    "none";
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+        }
     );
 
-    color: var(--purple);
 
-    font-size: 55px;
-}
 
+    /* =====================================================
+       11. CATEGORY CARDS
+       ===================================================== */
 
-/* Product tag */
 
-.product-tag {
+    const categoryCards =
+        document.querySelectorAll(
+            ".category-card"
+        );
 
-    position: absolute;
 
-    top: 12px;
+    categoryCards.forEach(
+        function (card) {
 
-    left: 12px;
+            card.addEventListener(
+                "click",
+                function () {
 
-    padding: 6px 9px;
 
-    border-radius: 6px;
+                    const category =
+                        card.dataset.category;
 
-    background: var(--purple);
 
-    color: var(--white);
+                    /*
+                        Find matching shop filter.
+                    */
 
-    font-size: 9px;
+                    const filter =
+                        document.querySelector(
+                            `.filter-button[data-filter="${category}"]`
+                        );
 
-    font-weight: 700;
-}
 
+                    if (filter) {
 
-/* Product information */
+                        filter.click();
 
-.product-info {
+                    }
 
-    padding: 20px;
-}
 
+                    /*
+                        Scroll to shop.
+                    */
 
-.product-category {
+                    const shop =
+                        document.getElementById(
+                            "shop"
+                        );
 
-    color: var(--purple);
 
-    font-size: 10px;
+                    if (shop) {
 
-    font-weight: 800;
+                        shop.scrollIntoView({
+                            behavior: "smooth"
+                        });
 
-    text-transform: uppercase;
+                    }
 
-    letter-spacing: 0.8px;
-}
+                }
+            );
 
-
-.product-info h3 {
-
-    color: var(--black);
-
-    font-size: 16px;
-
-    margin: 7px 0;
-}
-
-
-.product-info p {
-
-    min-height: 42px;
-
-    color: var(--muted);
-
-    font-size: 12px;
-
-    line-height: 1.6;
-
-    margin-bottom: 17px;
-}
-
-
-/* Product bottom */
-
-.product-bottom {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 10px;
-}
-
-
-.product-bottom strong {
-
-    color: var(--black);
-
-    font-size: 16px;
-}
-
-
-/* Add button */
-
-.contact-seller-btn {
-
-    border: 1px solid var(--border);
-
-    background: white;
-
-    color: #6b7280;
-
-    width: 32px;
-
-    height: 32px;
-
-    border-radius: 8px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    font-size: 12px;
-
-    cursor: pointer;
-
-    transition: var(--transition);
-}
-
-.contact-seller-btn:hover {
-
-    border-color: var(--purple);
-
-    color: var(--purple);
-}
-
-
-.add-to-cart {
-
-    border: none;
-
-    background: var(--purple-soft);
-
-    color: var(--purple);
-
-    padding: 9px 12px;
-
-    border-radius: 8px;
-
-    font-size: 11px;
-
-    font-weight: 800;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 5px;
-
-    transition: var(--transition);
-}
-
-
-.add-to-cart:hover {
-
-    background: var(--purple);
-
-    color: var(--white);
-}
-
-
-/* =========================================================
-   8. REWARDS
-   ========================================================= */
-
-.rewards-section {
-
-    padding: 80px 0;
-
-    background: var(--purple);
-
-    color: var(--white);
-}
-
-
-.rewards-container {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 60px;
-}
-
-
-.rewards-content {
-
-    max-width: 650px;
-}
-
-
-.rewards-content .section-label {
-
-    color: #ddd6fe;
-}
-
-
-.rewards-content h2 {
-
-    font-size: clamp(32px, 5vw, 48px);
-
-    line-height: 1.15;
-
-    letter-spacing: -1.5px;
-
-    margin-bottom: 18px;
-}
-
-
-.rewards-content h2 span {
-
-    color: #ddd6fe;
-}
-
-
-.rewards-content p {
-
-    color: #ede9fe;
-
-    max-width: 550px;
-
-    font-size: 15px;
-
-    margin-bottom: 28px;
-}
-
-
-.rewards-content .primary-button {
-
-    background: var(--white);
-
-    color: var(--purple);
-}
-
-
-.rewards-content .primary-button:hover {
-
-    background: #f5f3ff;
-}
-
-
-/* Rewards card */
-
-.rewards-card {
-
-    min-width: 230px;
-
-    padding: 30px;
-
-    border-radius: 20px;
-
-    background: rgba(255, 255, 255, 0.12);
-
-    border: 1px solid rgba(255, 255, 255, 0.22);
-
-    backdrop-filter: blur(10px);
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-
-    text-align: center;
-}
-
-
-.reward-icon {
-
-    width: 58px;
-
-    height: 58px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border-radius: 50%;
-
-    background: rgba(255, 255, 255, 0.16);
-
-    margin-bottom: 18px;
-
-    font-size: 23px;
-}
-
-
-.rewards-card strong {
-
-    font-size: 25px;
-
-    margin-bottom: 4px;
-}
-
-
-.rewards-card span {
-
-    font-size: 12px;
-
-    color: #ddd6fe;
-}
-
-
-/* =========================================================
-   9. CHAT SECTION
-   ========================================================= */
-
-.chat-section {
-
-    max-width: 1100px;
-}
-
-
-.chat-full-page {
-
-    max-width: 1100px;
-}
-
-
-/* Chat main box */
-
-.chat-preview {
-
-    display: grid;
-
-    grid-template-columns: 210px 300px minmax(0, 1fr) 280px;
-
-    height: min(760px, calc(100vh - 180px));
-
-    min-height: 480px;
-
-    border: 1px solid var(--border);
-
-    border-radius: var(--radius-large);
-
-    overflow: hidden;
-
-    background: var(--white);
-
-    box-shadow: var(--shadow-small);
-}
-
-.chat-preview:not(.has-profile-panel) {
-    grid-template-columns: 210px 300px minmax(0, 1fr);
-}
-
-
-.chat-full-page .full-page-back-row {
-    margin-bottom: 16px;
-}
-
-
-/* Chat sidebar */
-
-.chat-sidebar {
-
-    border-right: 1px solid var(--border);
-
-    background: #fcfcfc;
-
-    display: flex;
-
-    flex-direction: column;
-
-    min-height: 0;
-}
-
-
-#chatContactList {
-
-    flex: 1;
-
-    overflow-y: auto;
-
-    min-height: 0;
-}
-
-
-.chat-sidebar-header {
-
-    padding: 20px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    border-bottom: 1px solid var(--border);
-}
-
-
-.chat-sidebar-header h3 {
-
-    font-size: 16px;
-}
-
-
-.chat-sidebar-header button {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 6px;
-
-    padding: 8px 14px;
-
-    border: none;
-
-    background: var(--purple);
-
-    color: var(--white);
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-    border-radius: 8px;
-
-    cursor: pointer;
-}
-
-.chat-sidebar-header button:hover {
-
-    background: var(--purple-dark);
-}
-
-
-/* Chat search */
-
-.chat-search {
-
-    position: relative;
-
-    margin: 15px;
-}
-
-
-.chat-search i {
-
-    position: absolute;
-
-    left: 12px;
-
-    top: 50%;
-
-    transform: translateY(-50%);
-
-    color: var(--muted);
-
-    font-size: 12px;
-}
-
-
-.chat-search input {
-
-    width: 100%;
-
-    border: 1px solid var(--border);
-
-    background: var(--white);
-
-    border-radius: 8px;
-
-    padding: 10px 10px 10px 34px;
-
-    outline: none;
-
-    font-size: 12px;
-}
-
-
-.chat-search input:focus {
-
-    border-color: var(--purple);
-}
-
-
-/* NEW CHAT — ADD BY PHONE NUMBER */
-
-#newChatForm {
-    margin: 0 15px 15px;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--purple-soft);
-}
-
-.new-chat-phone-input {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 9px 10px;
-    outline: none;
-    font-size: 12px;
-    margin-bottom: 8px;
-}
-
-.new-chat-phone-input:focus {
-    border-color: var(--purple);
-}
-
-.new-chat-find-button {
-    width: 100%;
-    border: none;
-    background: var(--purple);
-    color: white;
-    border-radius: 8px;
-    padding: 9px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.new-chat-find-button:hover {
-    background: var(--purple-dark);
-}
-
-.new-chat-status {
-    margin: 8px 0 0;
-    font-size: 11px;
-    color: #6b7280;
-}
-
-.chat-contacts-status {
-    padding: 0 15px;
-    font-size: 12px;
-    color: #9ca3af;
-    text-align: center;
-}
-
-.chat-contact-unread-badge {
-    background: var(--purple);
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    border-radius: 999px;
-    min-width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 5px;
-}
-
-
-/* Chat contact */
-
-.chat-contact {
-
-    width: 100%;
-
-    border: none;
-
-    border-left: 3px solid transparent;
-
-    background: transparent;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 11px;
-
-    text-align: left;
-
-    padding: 13px 16px;
-
-    transition: var(--transition);
-}
-
-
-.chat-contact:hover {
-
-    background: #f5f3ff;
-}
-
-
-.chat-contact.active {
-
-    background: var(--purple-soft);
-
-    border-left-color: var(--purple);
-}
-
-
-/* Avatar */
-
-.chat-avatar {
-
-    width: 40px;
-
-    height: 40px;
-
-    flex-shrink: 0;
-
-    border-radius: 50%;
-
-    background: #e4e4e7;
-
-    color: var(--text);
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    font-size: 13px;
-
-    font-weight: 800;
-}
-
-
-.owner-avatar {
-
-    background: var(--purple);
-
-    color: var(--white);
-}
-
-
-.chat-contact-info {
-
-    display: flex;
-
-    flex-direction: column;
-
-    overflow: hidden;
-}
-
-
-.chat-contact-info strong {
-
-    font-size: 12px;
-}
-
-
-.chat-contact-info span {
-
-    font-size: 10px;
-
-    color: var(--muted);
-}
-
-
-.online-dot {
-
-    width: 8px;
-
-    height: 8px;
-
-    border-radius: 50%;
-
-    background: var(--green);
-
-    margin-left: auto;
-}
-
-
-/* Chat window */
-
-.chat-window {
-
-    display: flex;
-
-    flex-direction: column;
-
-    min-width: 0;
-
-    min-height: 0;
-}
-
-
-/* Chat header */
-
-.chat-window-header {
-
-    min-height: 70px;
-
-    padding: 15px 20px;
-
-    border-bottom: 1px solid var(--border);
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-}
-
-
-.chat-back-button {
-
-    display: none;
-
-    border: none;
-
-    background: transparent;
-
-    color: var(--text);
-
-    font-size: 16px;
-
-    width: 32px;
-
-    height: 32px;
-
-    border-radius: 8px;
-
-    cursor: pointer;
-
-    flex-shrink: 0;
-}
-
-.chat-back-button:hover {
-
-    background: var(--purple-soft);
-
-    color: var(--purple);
-}
-
-
-/* Context banner */
-
-.chat-context-banner {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    padding: 10px 20px;
-
-    background: var(--purple-soft);
-
-    color: var(--purple-dark);
-
-    font-size: 11px;
-
-    font-weight: 600;
-
-    border-bottom: 1px solid var(--border);
-}
-
-.chat-context-banner i {
-
-    font-size: 12px;
-}
-
-
-/* Typing indicator */
-
-.chat-typing-indicator {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    padding: 8px 20px;
-
-    font-size: 11px;
-
-    color: var(--muted);
-
-    background: #fafafa;
-}
-
-.chat-typing-dots {
-
-    display: inline-flex;
-
-    gap: 3px;
-}
-
-.chat-typing-dots i {
-
-    width: 5px;
-
-    height: 5px;
-
-    border-radius: 50%;
-
-    background: var(--purple-light);
-
-    display: inline-block;
-
-    animation: chatTypingBounce 1.2s infinite ease-in-out;
-}
-
-.chat-typing-dots i:nth-child(2) {
-    animation-delay: 0.15s;
-}
-
-.chat-typing-dots i:nth-child(3) {
-    animation-delay: 0.3s;
-}
-
-@keyframes chatTypingBounce {
-
-    0%, 60%, 100% {
-        transform: translateY(0);
-        opacity: 0.5;
-    }
-
-    30% {
-        transform: translateY(-3px);
-        opacity: 1;
-    }
-
-}
-
-
-.chat-user {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 11px;
-}
-
-
-.chat-user > div:last-child {
-
-    display: flex;
-
-    flex-direction: column;
-}
-
-
-.chat-user strong {
-
-    font-size: 13px;
-}
-
-
-.chat-user span {
-
-    color: var(--green);
-
-    font-size: 10px;
-}
-
-
-.chat-more-button {
-
-    width: 36px;
-
-    height: 36px;
-
-    border: none;
-
-    background: transparent;
-
-    color: var(--muted);
-
-    border-radius: 8px;
-}
-
-
-.chat-more-button:hover {
-
-    background: var(--purple-soft);
-
-    color: var(--purple);
-}
-
-
-/* Messages */
-
-.messages {
-
-    flex: 1;
-
-    padding: 25px;
-
-    overflow-y: auto;
-
-    background: #fafafa;
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 18px;
-}
-
-
-.message {
-
-    display: flex;
-
-    flex-direction: column;
-
-    max-width: 70%;
-}
-
-
-.message.sent {
-
-    align-self: flex-end;
-
-    align-items: flex-end;
-}
-
-
-.message.received {
-
-    align-self: flex-start;
-
-    align-items: flex-start;
-}
-
-
-.message-bubble {
-
-    padding: 11px 14px;
-
-    border-radius: 13px;
-
-    font-size: 12px;
-
-    line-height: 1.55;
-}
-
-
-.message.received .message-bubble {
-
-    background: var(--white);
-
-    border: 1px solid var(--border);
-
-    border-bottom-left-radius: 4px;
-}
-
-
-.message.sent .message-bubble {
-
-    background: var(--purple);
-
-    color: var(--white);
-
-    border-bottom-right-radius: 4px;
-}
-
-
-.message span {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 4px;
-
-    color: var(--muted);
-
-    font-size: 9px;
-
-    margin-top: 5px;
-}
-
-.message-read-receipt {
-
-    font-size: 10px;
-
-    color: #9ca3af;
-}
-
-.message-read-receipt.read {
-
-    color: var(--purple);
-}
-
-
-/* Message form */
-
-.message-form {
-
-    min-height: 70px;
-
-    padding: 12px 16px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    border-top: 1px solid var(--border);
-
-    background: var(--white);
-}
-
-
-.message-form button:first-child {
-
-    width: 38px;
-
-    height: 38px;
-
-    border: none;
-
-    background: transparent;
-
-    color: var(--muted);
-}
-
-
-.message-form input {
-
-    flex: 1;
-
-    min-width: 0;
-
-    border: 1px solid var(--border);
-
-    outline: none;
-
-    border-radius: 50px;
-
-    padding: 11px 15px;
-
-    font-size: 12px;
-}
-
-
-.message-form input:focus {
-
-    border-color: var(--purple);
-}
-
-
-.send-message-button {
-
-    width: 40px;
-
-    height: 40px;
-
-    flex-shrink: 0;
-
-    border: none;
-
-    background: var(--purple);
-
-    color: var(--white);
-
-    border-radius: 50%;
-
-    transition: var(--transition);
-}
-
-
-.send-message-button:hover {
-
-    background: var(--purple-dark);
-
-    transform: scale(1.05);
-}
-
-
-/* =========================================================
-   10. WHY KURIOS
-   ========================================================= */
-
-.why-section {
-
-    background: var(--light-background);
-
-    padding: 80px 4%;
-}
-
-
-.why-grid {
-
-    width: min(1180px, 100%);
-
-    margin: 0 auto;
-
-    display: grid;
-
-    grid-template-columns: repeat(4, 1fr);
-
-    gap: 18px;
-}
-
-
-.why-card {
-
-    padding: 25px;
-
-    background: var(--white);
-
-    border: 1px solid var(--border);
-
-    border-radius: var(--radius-medium);
-
-    transition: var(--transition);
-}
-
-
-.why-card:hover {
-
-    transform: translateY(-5px);
-
-    box-shadow: var(--shadow-small);
-}
-
-
-.why-icon {
-
-    width: 48px;
-
-    height: 48px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    background: var(--purple-soft);
-
-    color: var(--purple);
-
-    border-radius: 11px;
-
-    margin-bottom: 17px;
-}
-
-
-.why-card h3 {
-
-    font-size: 15px;
-
-    margin-bottom: 8px;
-}
-
-
-.why-card p {
-
-    font-size: 12px;
-
-    color: var(--muted);
-
-    line-height: 1.6;
-}
-
-
-/* =========================================================
-   11. NOTIFICATION PANEL
-   ========================================================= */
-
-.notification-panel {
-
-    position: fixed;
-
-    z-index: 3100;
-
-    top: 85px;
-
-    right: 25px;
-
-    width: 360px;
-
-    max-width: calc(100% - 30px);
-
-    max-height: 600px;
-
-    background: var(--white);
-
-    border: 1px solid var(--border);
-
-    border-radius: 16px;
-
-    box-shadow: var(--shadow-large);
-
-    overflow: hidden;
-
-    opacity: 0;
-
-    visibility: hidden;
-
-    transform: translateY(-10px);
-
-    transition: var(--transition);
-}
-
-
-.notification-panel.open {
-
-    opacity: 1;
-
-    visibility: visible;
-
-    transform: translateY(0);
-}
-
-
-.notification-header {
-
-    padding: 18px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    border-bottom: 1px solid var(--border);
-}
-
-
-.notification-header h3 {
-
-    font-size: 16px;
-
-    margin-bottom: 3px;
-}
-
-
-.notification-header p {
-
-    color: var(--muted);
-
-    font-size: 10px;
-}
-
-
-.panel-close,
-.modal-close {
-
-    width: 34px;
-
-    height: 34px;
-
-    border: none;
-
-    background: #f4f4f5;
-
-    color: var(--muted);
-
-    border-radius: 50%;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-}
-
-
-.notification-list {
-
-    max-height: 500px;
-
-    overflow-y: auto;
-}
-
-
-.notification-item {
-
-    display: flex;
-
-    gap: 12px;
-
-    padding: 16px;
-
-    border-bottom: 1px solid #f1f1f1;
-
-    transition: var(--transition);
-}
-
-
-.notification-item:hover {
-
-    background: #fafafa;
-}
-
-
-.notification-item.unread {
-
-    background: #faf7ff;
-}
-
-
-.notification-icon {
-
-    width: 38px;
-
-    height: 38px;
-
-    flex-shrink: 0;
-
-    border-radius: 10px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    background: var(--purple-soft);
-
-    color: var(--purple);
-}
-
-
-.notification-content strong {
-
-    display: block;
-
-    font-size: 12px;
-
-    margin-bottom: 3px;
-}
-
-
-.notification-content p {
-
-    color: var(--muted);
-
-    font-size: 11px;
-
-    line-height: 1.5;
-}
-
-
-.notification-content span {
-
-    display: block;
-
-    color: #a1a1aa;
-
-    font-size: 9px;
-
-    margin-top: 5px;
-}
-
-
-/* =========================================================
-   12. EMPTY STATES
-   ========================================================= */
-
-.empty-state,
-.empty-cart {
-
-    padding: 45px 20px;
-
-    text-align: center;
-
-    color: var(--muted);
-}
-
-
-.empty-state i,
-.empty-cart i {
-
-    color: #c4b5fd;
-
-    font-size: 32px;
-
-    margin-bottom: 12px;
-}
-
-
-.empty-state h4,
-.empty-cart h3 {
-
-    color: var(--text);
-
-    font-size: 14px;
-
-    margin-bottom: 4px;
-}
-
-
-.empty-state p,
-.empty-cart p {
-
-    font-size: 11px;
-}
-
-
-/* =========================================================
-   13. CART
-   ========================================================= */
-
-.modal-overlay {
-
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 2000;
-
-    background: rgba(0, 0, 0, 0.45);
-
-    opacity: 0;
-
-    visibility: hidden;
-
-    transition: var(--transition);
-}
-
-
-.modal-overlay.open {
-
-    opacity: 1;
-
-    visibility: visible;
-}
-
-
-/* Cart coexists with shopping — no dimmed backdrop
-   blocking the page, and clicks pass straight through
-   to whatever's behind it except on the panel itself. */
-
-.cart-overlay {
-
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 2000;
-
-    pointer-events: none;
-
-    visibility: hidden;
-
-    overflow: hidden;
-
-}
-
-
-.cart-overlay.open {
-
-    visibility: visible;
-}
-
-
-/* Profile & Orders are full pages, not drawers */
-
-.profile-overlay,
-.orders-overlay {
-
-    display: none;
-}
-
-.profile-overlay.open,
-.orders-overlay.open {
-
-    display: block;
-
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 32px 24px 80px;
-}
-
-
-@media (min-width: 900px) {
-
-    body.cart-open #mainContent {
-
-        padding-right: 430px;
-
-        transition: padding-right 0.3s ease;
-
-        box-sizing: border-box;
-
-    }
-
-}
-
-
-/* Cart panel */
-
-.cart-panel {
-
-    position: absolute;
-
-    top: 0;
-
-    right: 0;
-
-    height: 100%;
-
-    width: 430px;
-
-    max-width: 100%;
-
-    background: var(--white);
-
-    display: flex;
-
-    flex-direction: column;
-
-    transform: translateX(100%);
-
-    transition: 0.3s ease;
-
-    pointer-events: auto;
-
-    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.12);
-}
-
-
-.cart-overlay.open .cart-panel {
-
-    transform: translateX(0);
-}
-
-
-.cart-header {
-
-    padding: 22px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    border-bottom: 1px solid var(--border);
-}
-
-
-.cart-header h2 {
-
-    font-size: 20px;
-
-    margin-bottom: 2px;
-}
-
-
-.cart-header p {
-
-    color: var(--muted);
-
-    font-size: 11px;
-}
-
-
-.close-cart {
-
-    width: 38px;
-
-    height: 38px;
-
-    border: none;
-
-    background: #f4f4f5;
-
-    border-radius: 50%;
-
-    color: var(--muted);
-}
-
-
-.cart-items {
-
-    flex: 1;
-
-    overflow-y: auto;
-
-    padding: 20px;
-}
-
-
-.cart-item {
-
-    display: flex;
-
-    align-items: flex-start;
-
-    gap: 12px;
-
-    padding: 14px 0;
-
-    border-bottom: 1px solid var(--border);
-}
-
-
-.cart-item-image {
-
-    width: 60px;
-
-    height: 60px;
-
-    border-radius: 9px;
-
-    background: var(--purple-soft);
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    color: var(--purple);
-}
-
-
-.cart-item-info h3 {
-
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text);
-    margin: 0 0 6px;
-    text-decoration: none;
-}
-
-
-.cart-item-price {
-
-    font-size: 12px;
-    font-weight: 600;
-    color: #9ca3af;
-    margin-bottom: 10px;
-}
-
-
-.quantity-controls {
-
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-
-.quantity-button {
-
-    width: 26px;
-    height: 26px;
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    background: var(--white);
-    color: var(--text);
-    font-size: 15px;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.quantity-button:hover {
-    border-color: var(--purple);
-    color: var(--purple);
-}
-
-
-.quantity-controls strong {
-
-    min-width: 16px;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text);
-}
-
-
-.remove-item {
-
-    margin-left: auto;
-    border: none;
-    background: transparent;
-    color: #dc2626;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 4px 6px;
-    text-decoration: none;
-}
-
-.remove-item:hover {
-    text-decoration: underline;
-}
-
-
-.cart-item > strong {
-
-    align-self: flex-start;
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--text);
-    text-decoration: none;
-    white-space: nowrap;
-}
-
-
-.cart-item-image i {
-    font-size: 20px;
-}
-
-
-.cart-item-info {
-
-    flex: 1;
-}
-
-
-.cart-item-info h4 {
-
-    font-size: 13px;
-
-    margin-bottom: 4px;
-}
-
-
-.cart-item-info span {
-
-    color: var(--purple);
-
-    font-size: 12px;
-
-    font-weight: 700;
-}
-
-
-.cart-quantity {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    margin-top: 8px;
-}
-
-
-.cart-quantity button {
-
-    width: 25px;
-
-    height: 25px;
-
-    border: 1px solid var(--border);
-
-    background: var(--white);
-
-    border-radius: 5px;
-}
-
-
-.cart-quantity span {
-
-    color: var(--text);
-
-    font-size: 11px;
-}
-
-
-/* Cart footer */
-
-.cart-footer {
-
-    padding: 20px;
-
-    border-top: 1px solid var(--border);
-
-    background: var(--white);
-}
-
-
-.cart-total {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    margin-bottom: 15px;
-}
-
-
-.cart-total span {
-
-    color: var(--muted);
-
-    font-size: 13px;
-}
-
-
-.cart-total strong {
-
-    color: var(--black);
-
-    font-size: 22px;
-}
-
-
-.checkout-button {
-
-    width: 100%;
-
-    border: none;
-
-    background: var(--purple);
-
-    color: var(--white);
-
-    padding: 14px;
-
-    border-radius: 9px;
-
-    font-size: 13px;
-
-    font-weight: 700;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 8px;
-}
-
-
-.checkout-button:hover {
-
-    background: var(--purple-dark);
-}
-
-
-/* =========================================================
-   MY PROFILE PANEL
-   ========================================================= */
-
-.profile-panel {
-
-    background: var(--white);
-
-    border: 1px solid var(--border);
-    border-radius: 16px;
-
-    display: flex;
-
-    flex-direction: column;
-}
-
-
-.profile-panel-header {
-
-    padding: 22px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    border-bottom: 1px solid var(--border);
-}
-
-
-.profile-panel-header h2 {
-
-    font-size: 20px;
-
-    margin-bottom: 2px;
-}
-
-
-.profile-panel-header p {
-
-    color: var(--muted);
-
-    font-size: 11px;
-}
-
-
-.profile-panel-body {
-
-    flex: 1;
-
-    overflow-y: auto;
-
-    padding: 24px 22px;
-}
-
-
-/* Avatar block */
-
-.profile-avatar-block {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 16px;
-
-    margin-bottom: 26px;
-}
-
-
-.profile-avatar-circle {
-
-    position: relative;
-
-    width: 68px;
-    height: 68px;
-    flex-shrink: 0;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    overflow: hidden;
-
-    background: linear-gradient(
-        135deg,
-        var(--purple),
-        var(--purple-light)
+        }
     );
 
-    color: var(--white);
+// ========================================
+// UPDATE HEADER LOGIN STATE
+// ========================================
 
-    font-size: 26px;
+function updateLoginState() {
 
-    box-shadow: 0 0 0 4px var(--purple-soft);
-}
+        // ========================================
+    // HERO LOGIN STATE
+    // ========================================
 
+    const loggedOutHero =
+        document.getElementById("loggedOutHero");
 
-.profile-avatar-circle img {
+    const loggedInHero =
+        document.getElementById("loggedInHero");
 
-    width: 100%;
-    height: 100%;
+    const heroStudentName =
+        document.getElementById("heroStudentName");
 
-    object-fit: cover;
-}
+    const heroStudentCampus =
+        document.getElementById("heroStudentCampus");
 
+    const signInButton =
+        document.getElementById("openSignIn");
 
-/* Small camera badge shown in edit mode */
-
-.profile-avatar-edit-badge {
-
-    position: absolute;
-
-    bottom: 0;
-
-    right: 0;
-
-    width: 24px;
-    height: 24px;
-
-    display: none;
-
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    background: var(--purple-dark);
-
-    color: var(--white);
-
-    font-size: 10px;
-
-    border: 2px solid var(--white);
-
-    cursor: pointer;
-}
-
-
-.profile-panel.editing .profile-avatar-edit-badge {
-
-    display: flex;
-}
-
-
-.profile-avatar-info h3 {
-
-    font-size: 18px;
-
-    font-weight: 800;
-
-    color: var(--text);
-
-    margin-bottom: 6px;
-}
-
-
-.profile-status-badge {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 6px;
-
-    padding: 4px 10px;
-
-    border-radius: 50px;
-
-    background: #dcfce7;
-
-    color: #16a34a;
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-    letter-spacing: 0.3px;
-}
-
-
-.profile-status-badge::before {
-
-    content: "";
-
-    width: 6px;
-    height: 6px;
-
-    border-radius: 50%;
-
-    background: #16a34a;
-}
-
-
-/* Field list (view mode) */
-
-.profile-field-list {
-
-    display: flex;
-
-    flex-direction: column;
-}
-
-
-.profile-field {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 12px;
-
-    padding: 14px 0;
-
-    border-bottom: 1px solid #f1f1f1;
-}
-
-
-.profile-field:last-child {
-
-    border-bottom: none;
-}
-
-
-.profile-field-label {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    color: var(--muted);
-
-    font-size: 13px;
-
-    font-weight: 600;
-}
-
-
-.profile-field-label i {
-
-    width: 16px;
-
-    color: #a78bfa;
-
-    font-size: 13px;
-
-    text-align: center;
-}
-
-
-.profile-field-value {
-
-    color: var(--text);
-
-    font-size: 13px;
-
-    font-weight: 700;
-
-    text-align: right;
-
-    max-width: 60%;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    white-space: nowrap;
-}
-
-
-/* Editable fields (edit mode) — only phone and DOB */
-
-.profile-field-editable {
-
-    display: none;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 12px;
-
-    padding: 10px 0;
-
-    border-bottom: 1px solid #f1f1f1;
-}
-
-
-.profile-field-editable label {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    color: var(--muted);
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    white-space: nowrap;
-}
-
-
-.profile-field-editable label i {
-
-    width: 16px;
-
-    color: #a78bfa;
-
-    font-size: 13px;
-
-    text-align: center;
-}
-
-
-.profile-field-editable input {
-
-    width: 60%;
-
-    border: 1px solid var(--border);
-
-    border-radius: 8px;
-
-    padding: 8px 10px;
-
-    outline: none;
-
-    font-size: 13px;
-
-    font-family: inherit;
-
-    color: var(--text);
-
-    text-align: right;
-}
-
-
-.profile-field-editable input:focus {
-
-    border-color: var(--purple);
-
-    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.08);
-}
-
-
-/* Panel switches between view mode and edit mode.
-   Everything below is driven off one class,
-   .profile-panel.editing, added by JS. */
-
-.profile-panel.editing .profile-field.editable-field {
-
-    display: none;
-}
-
-
-.profile-panel.editing .profile-field-editable {
-
-    display: flex;
-}
-
-
-/* "Edit" button (view mode only) */
-
-.profile-edit-actions {
-
-    display: flex;
-
-    justify-content: flex-end;
-
-    margin-bottom: 18px;
-}
-
-
-.profile-panel.editing .profile-edit-actions {
-
-    display: none;
-}
-
-
-.profile-edit-button {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    border: 1px solid var(--border);
-
-    background: var(--white);
-
-    color: var(--text);
-
-    padding: 8px 14px;
-
-    border-radius: 8px;
-
-    font-family: inherit;
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-    cursor: pointer;
-
-    transition: var(--transition);
-}
-
-
-.profile-edit-button:hover {
-
-    border-color: var(--purple);
-
-    color: var(--purple);
-}
-
-
-/* Save / Cancel footer (edit mode only) */
-
-.profile-panel-footer {
-
-    padding: 18px 22px;
-
-    border-top: 1px solid var(--border);
-
-    display: none;
-
-    gap: 10px;
-}
-
-
-.profile-panel.editing .profile-panel-footer {
-
-    display: flex;
-}
-
-
-.profile-save-button {
-
-    flex: 1;
-
-    border: none;
-
-    background: var(--purple);
-
-    color: var(--white);
-
-    padding: 12px;
-
-    border-radius: 10px;
-
-    font-family: inherit;
-
-    font-size: 13px;
-
-    font-weight: 700;
-
-    cursor: pointer;
-
-    transition: var(--transition);
-}
-
-
-.profile-save-button:hover {
-
-    background: var(--purple-dark);
-}
-
-
-.profile-save-button:disabled {
-
-    opacity: 0.6;
-
-    cursor: not-allowed;
-}
-
-
-.profile-cancel-button {
-
-    flex: 1;
-
-    border: 1px solid var(--border);
-
-    background: var(--white);
-
-    color: var(--text);
-
-    padding: 12px;
-
-    border-radius: 10px;
-
-    font-family: inherit;
-
-    font-size: 13px;
-
-    font-weight: 700;
-
-    cursor: pointer;
-
-    transition: var(--transition);
-}
-
-
-.profile-cancel-button:hover {
-
-    border-color: #d4d4d8;
-
-    background: #fafafa;
-}
-
-
-/* Note */
-
-.profile-note {
-
-    display: flex;
-
-    align-items: flex-start;
-
-    gap: 10px;
-
-    margin-top: 24px;
-
-    padding: 14px;
-
-    border-radius: 12px;
-
-    background: #faf7ff;
-
-    color: #7c6a94;
-
-    font-size: 12px;
-
-    line-height: 1.6;
-}
-
-
-.profile-panel.editing .profile-note {
-
-    display: none;
-}
-
-
-.profile-note i {
-
-    margin-top: 1px;
-
-    color: #a78bfa;
-}
-
-
-/* =========================================================
-   MY ORDERS PANEL
-   ========================================================= */
-
-.orders-panel {
-
-    background: var(--white);
-
-    border: 1px solid var(--border);
-    border-radius: 16px;
-
-    display: flex;
-
-    flex-direction: column;
-}
-
-
-.orders-panel-header {
-
-    padding: 22px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    border-bottom: 1px solid var(--border);
-}
-
-
-.orders-panel-header h2 {
-
-    font-size: 20px;
-
-    margin-bottom: 2px;
-}
-
-
-.orders-panel-header p {
-
-    color: var(--muted);
-
-    font-size: 11px;
-}
-
-
-.orders-panel-body {
-
-    flex: 1;
-
-    overflow-y: auto;
-
-    padding: 20px 22px;
-}
-
-
-/* Order card */
-
-.order-card {
-
-    border: 1px solid var(--border);
-
-    border-radius: 14px;
-
-    padding: 16px;
-
-    margin-bottom: 14px;
-}
-
-
-.order-card-top {
-
-    display: flex;
-
-    align-items: flex-start;
-
-    justify-content: space-between;
-
-    gap: 12px;
-
-    margin-bottom: 12px;
-}
-
-
-.order-card-reference {
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-    color: var(--muted);
-
-    letter-spacing: 0.3px;
-}
-
-
-.order-card-date {
-
-    font-size: 11px;
-
-    color: #a1a1aa;
-
-    margin-top: 3px;
-}
-
-
-.order-status-badge {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 6px;
-
-    padding: 4px 10px;
-
-    border-radius: 50px;
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-    letter-spacing: 0.3px;
-
-    white-space: nowrap;
-}
-
-
-.order-status-badge::before {
-
-    content: "";
-
-    width: 6px;
-    height: 6px;
-
-    border-radius: 50%;
-}
-
-
-.order-status-badge.status-paid {
-
-    background: #dcfce7;
-
-    color: #16a34a;
-}
-
-
-.order-status-badge.status-paid::before {
-
-    background: #16a34a;
-}
-
-
-.order-status-badge.status-pending {
-
-    background: #fef9c3;
-
-    color: #b45309;
-}
-
-
-.order-status-badge.status-pending::before {
-
-    background: #b45309;
-}
-
-
-.order-status-badge.status-failed {
-
-    background: #fee2e2;
-
-    color: #dc2626;
-}
-
-
-.order-status-badge.status-failed::before {
-
-    background: #dc2626;
-}
-
-
-.order-card-items {
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 6px;
-
-    margin-bottom: 12px;
-
-    padding-bottom: 12px;
-
-    border-bottom: 1px solid #f1f1f1;
-}
-
-
-.order-card-item-row {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 10px;
-
-    font-size: 12px;
-
-    color: var(--text);
-}
-
-
-.order-card-item-row span:first-child {
-
-    color: var(--muted);
-}
-
-
-.order-card-total {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-}
-
-
-.order-card-total span {
-
-    font-size: 12px;
-
-    color: var(--muted);
-
-    font-weight: 600;
-}
-
-
-.order-card-total strong {
-
-    font-size: 15px;
-
-    font-weight: 800;
-
-    color: var(--text);
-}
-
-
-/* =========================================================
-   AUTH MODAL — COMPACT & RESPONSIVE
-   ========================================================= */
-
-.auth-modal {
-
-    position: absolute;
-
-    top: 50%;
-    left: 50%;
-
-    width: 410px;
-    max-width: calc(100% - 30px);
-
-    max-height: calc(100vh - 30px);
-
-    overflow-y: auto;
-
-    box-sizing: border-box;
-
-    padding: 25px;
-
-    background: var(--white);
-
-    border-radius: 16px;
-
-    box-shadow: var(--shadow-large);
-
-    transform: translate(-50%, -50%);
-
-    transition: var(--transition);
-}
-
-
-.modal-overlay.open .auth-modal {
-
-    transform: translate(-50%, -50%);
-
-}
-
-
-.auth-modal > .modal-close {
-
-    position: absolute;
-
-    top: 17px;
-
-    right: 17px;
-}
-
-
-.auth-header {
-
-    text-align: center;
-
-    margin-bottom: 25px;
-}
-
-
-.auth-icon {
-
-    width: 52px;
-
-    height: 52px;
-
-    margin: 0 auto 15px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    background: var(--purple-soft);
-
-    color: var(--purple);
-
-    border-radius: 50%;
-
-    font-size: 19px;
-}
-
-
-.auth-header h2 {
-
-    font-size: 23px;
-
-    margin-bottom: 5px;
-}
-
-
-.auth-header p {
-
-    color: var(--muted);
-
-    font-size: 12px;
-}
-
-
-/* Form */
-
-.form-group {
-
-    margin-bottom: 17px;
-}
-
-
-.form-group label {
-
-    display: block;
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-    margin-bottom: 7px;
-}
-
-
-/* PASSCODE REVEAL TOGGLE */
-
-.passcode-label-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 7px;
-}
-
-.passcode-label-row label {
-    margin-bottom: 0;
-}
-
-.passcode-reveal-btn {
-    border: none;
-    background: transparent;
-    color: #9ca3af;
-    font-size: 13px;
-    cursor: pointer;
-    padding: 2px 4px;
-}
-
-.passcode-reveal-btn:hover {
-    color: var(--purple);
-}
-
-
-/* PASSWORD SHOW/HIDE TOGGLE */
-
-.password-field-wrap {
-    position: relative;
-}
-
-.password-field-wrap input {
-    padding-right: 40px !important;
-}
-
-.password-toggle-btn {
-    position: absolute;
-    right: 4px;
-    top: 50%;
-    transform: translateY(-50%);
-    border: none;
-    background: transparent;
-    color: #9ca3af;
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-}
-
-.password-toggle-btn:hover {
-    color: var(--purple);
-}
-
-
-.form-group input,
-.form-group textarea {
-
-    width: 100%;
-
-    border: 1px solid var(--border);
-
-    border-radius: 8px;
-
-    padding: 11px 12px;
-
-    outline: none;
-
-    font-size: 12px;
-
-    color: var(--text);
-
-    background: var(--white);
-
-    resize: vertical;
-}
-
-
-.form-group input:focus,
-.form-group textarea:focus {
-
-    border-color: var(--purple);
-
-    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.08);
-}
-
-
-/* Form options */
-
-.form-options {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    margin: 4px 0 20px;
-
-    font-size: 10px;
-}
-
-
-.form-options label {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 5px;
-
-    color: var(--muted);
-}
-
-
-.form-options a,
-.signup-prompt a {
-
-    color: var(--purple);
-
-    font-weight: 700;
-}
-
-
-/* Auth button */
-
-.auth-button {
-
-    width: 100%;
-
-    border: none;
-
-    background: var(--purple);
-
-    color: var(--white);
-
-    padding: 13px;
-
-    border-radius: 8px;
-
-    font-size: 13px;
-
-    font-weight: 700;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 8px;
-}
-
-
-.auth-button:hover {
-
-    background: var(--purple-dark);
-}
-
-
-.signup-prompt {
-
-    text-align: center;
-
-    color: var(--muted);
-
-    font-size: 11px;
-
-    margin-top: 18px;
-}
-
-
-/* =========================================================
-   15. BROADCAST MODAL
-   ========================================================= */
-
-.broadcast-modal {
-
-    width: 500px;
-}
-
-
-/* =========================================================
-   16. TOAST
-   ========================================================= */
-
-.toast {
-
-    position: fixed;
-
-    z-index: 3000;
-
-    right: 25px;
-
-    bottom: 25px;
-
-    max-width: 350px;
-
-    padding: 13px 17px;
-
-    background: var(--black);
-
-    color: var(--white);
-
-    border-radius: 9px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
-
-    font-size: 12px;
-
-    box-shadow: var(--shadow-medium);
-
-    opacity: 0;
-
-    visibility: hidden;
-
-    transform: translateY(15px);
-
-    transition: var(--transition);
-}
-
-
-.toast.show {
-
-    opacity: 1;
-
-    visibility: visible;
-
-    transform: translateY(0);
-}
-
-
-.toast i {
-
-    color: #c4b5fd;
-}
-
-
-/* =========================================================
-   17. FOOTER
-   ========================================================= */
-
-.footer {
-
-    background: #18121f;
-
-    color: var(--white);
-
-    padding-top: 55px;
-}
-
-
-.footer-container {
-
-    display: grid;
-
-    grid-template-columns: 1.4fr 1fr 1.3fr 1.2fr;
-
-    gap: 45px;
-
-    padding-bottom: 45px;
-}
-
-
-/* Footer brand */
-
-.footer-brand {
-
-    max-width: 300px;
-}
-
-
-.footer-logo {
-
-    width: 145px;
-
-    margin-bottom: 18px;
-
-    /* Helps transparent logos blend naturally */
-    mix-blend-mode: screen;
-}
-
-
-.footer-brand h3 {
-
-    font-size: 13px;
-
-    letter-spacing: 1px;
-
-    margin-bottom: 9px;
-}
-
-
-.footer-brand p {
-
-    color: #c4c0c8;
-
-    font-size: 11px;
-
-    line-height: 1.7;
-
-    margin-bottom: 10px;
-}
-
-
-.footer-brand .footer-tagline {
-
-    color: #a9a2af;
-
-    font-size: 10px;
-}
-
-
-/* Footer columns */
-
-.footer-column h4 {
-
-    font-size: 13px;
-
-    margin-bottom: 8px;
-}
-
-
-.footer-title-line {
-
-    width: 25px;
-
-    height: 2px;
-
-    background: var(--purple-light);
-
-    margin-bottom: 17px;
-}
-
-
-.footer-column > a {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
-
-    color: #c4c0c8;
-
-    font-size: 11px;
-
-    margin-bottom: 11px;
-
-    transition: var(--transition);
-}
-
-
-.footer-column > a:hover {
-
-    color: var(--white);
-
-    transform: translateX(3px);
-}
-
-
-.footer-column > a i {
-
-    width: 15px;
-
-    color: #a78bfa;
-}
-
-
-/* Footer location */
-
-.footer-info {
-
-    display: flex;
-
-    gap: 10px;
-
-    margin-bottom: 25px;
-}
-
-
-.footer-info > i {
-
-    color: #a78bfa;
-
-    margin-top: 3px;
-}
-
-
-.footer-info div {
-
-    display: flex;
-
-    flex-direction: column;
-}
-
-
-.footer-info strong {
-
-    color: #d8d4dc;
-
-    font-size: 11px;
-
-    font-weight: 600;
-}
-
-
-.footer-info span {
-
-    color: #99929f;
-
-    font-size: 10px;
-}
-
-
-.footer-subheading {
-
-    margin-top: 18px;
-}
-
-
-.why-footer-item {
-
-    color: #bcb6c2;
-
-    font-size: 10px;
-
-    margin-bottom: 8px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-}
-
-
-.why-footer-item i {
-
-    color: #a78bfa;
-
-    font-size: 10px;
-}
-
-
-.footer-contact-item {
-
-    color: #bcb6c2;
-
-    font-size: 10px;
-
-    margin-bottom: 11px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
-}
-
-
-.footer-contact-item i {
-
-    color: #a78bfa;
-}
-
-
-/* Social links */
-
-.social-links {
-
-    display: flex;
-
-    gap: 8px;
-}
-
-
-.social-links a {
-
-    width: 31px;
-
-    height: 31px;
-
-    border: 1px solid #3b3243;
-
-    border-radius: 7px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    color: #c4c0c8;
-
-    transition: var(--transition);
-}
-
-
-.social-links a:hover {
-
-    background: var(--purple);
-
-    border-color: var(--purple);
-
-    color: var(--white);
-
-    transform: translateY(-2px);
-}
-
-
-/* Footer bottom */
-
-.footer-bottom {
-
-    width: min(1180px, 92%);
-
-    margin: 0 auto;
-
-    min-height: 65px;
-
-    padding: 17px 0;
-
-    border-top: 1px solid #302936;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 15px;
-
-    color: #8f8796;
-
-    font-size: 9px;
-}
-
-
-.footer-policies {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-}
-
-
-.footer-policies a:hover {
-
-    color: var(--white);
-}
-
-
-.footer-love {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 5px;
-}
-
-
-.footer-love i {
-
-    color: #a78bfa;
-}
-
-
-/* =========================================================
-   18. HIDDEN ELEMENTS
-   ========================================================= */
-
-.hidden {
-
-    display: none !important;
-}
-
-
-/* =========================================================
-   19. RESPONSIVE DESIGN
-   ========================================================= */
-
-
-/* Tablets */
-
-@media (max-width: 1000px) {
-
-
-    .main-nav {
-
-        gap: 18px;
+    if (!signInButton) {
+        return;
     }
 
 
-    .category-grid,
-    .product-grid,
-    .why-grid {
+    // ========================================
+    // GET LOGGED-IN STUDENT
+    // ========================================
 
-        grid-template-columns: repeat(2, 1fr);
+    let storedStudent =
+        localStorage.getItem("kuriosLoggedInStudent");
+
+    if (!storedStudent) {
+
+        storedStudent =
+            sessionStorage.getItem(
+                "kuriosLoggedInStudent"
+            );
+
     }
 
 
-    .footer-container {
+    // ========================================
+    // STUDENT IS NOT LOGGED IN
+    // ========================================
 
-        grid-template-columns: repeat(2, 1fr);
+    if (!storedStudent) {
 
-        gap: 35px;
+    signInButton.classList.remove("has-avatar");
+
+    signInButton.innerHTML = `
+        <i class="fa-regular fa-user"></i>
+
+        <span>
+            Sign In
+        </span>
+    `;
+
+
+    // ========================================
+    // SHOW LOGGED-OUT HERO
+    // ========================================
+
+    const loggedOutHero =
+        document.getElementById("loggedOutHero");
+
+    const loggedInHero =
+        document.getElementById("loggedInHero");
+
+
+    if (loggedOutHero) {
+
+        loggedOutHero.style.display =
+            "block";
+
     }
 
 
-    .chat-preview {
+    if (loggedInHero) {
 
-        grid-template-columns: 230px 1fr;
+        loggedInHero.style.display =
+            "none";
+
     }
+
+    const mainNavEl =
+        document.getElementById("mainNav");
+
+    if (mainNavEl) {
+        mainNavEl.style.display = "flex";
+    }
+
+    return;
 
 }
 
 
-/* =========================================================
-   TABLET / SMALL LAPTOP
-   ========================================================= */
+    // ========================================
+    // READ STUDENT DATA
+    // ========================================
 
-@media (max-width: 780px) {
+    let student;
 
+    try {
 
-    .main-nav {
+        student =
+            JSON.parse(storedStudent);
 
-        display: none;
+    } catch (error) {
+
+        console.error(
+            "Unable to read logged-in student:",
+            error
+        );
+
+        return;
+
     }
 
 
-    .mobile-menu-button {
+    // ========================================
+    // UPDATE HERO FOR LOGGED-IN STUDENT
+    // ========================================
 
-        display: flex;
 
-        align-items: center;
+    // ========================================
+    // HIDE LOGGED-OUT HERO
+    // ========================================
 
-        justify-content: center;
+    if (loggedOutHero) {
+
+        loggedOutHero.style.display =
+            "none";
+
+    }
+
+    // ========================================
+    // SHOW LOGGED-IN HERO
+    // ========================================
+
+    if (loggedInHero) {
+
+        loggedInHero.style.display =
+            "block";
+
+    }
+
+    const mainNavEl =
+        document.getElementById("mainNav");
+
+    if (mainNavEl) {
+        mainNavEl.style.display = "none";
     }
 
 
-    .mobile-menu.show {
+    // ========================================
+    // STUDENT NAME
+    // ========================================
 
-        display: flex;
+    if (heroStudentName) {
+
+        heroStudentName.textContent =
+            student.first_name ||
+            student.firstName ||
+            "Student";
+
     }
 
 
-    .signin-nav-button span {
+    // ========================================
+    // STUDENT INFORMATION
+    // ========================================
 
-        display: none;
+    if (heroStudentCampus) {
+
+        const university =
+            student.university ||
+            "";
+
+        const studentId =
+            student.student_id ||
+            student.studentId ||
+            "";
+
+
+        if (university) {
+
+            heroStudentCampus.textContent =
+                university;
+
+        } else if (studentId) {
+
+            heroStudentCampus.textContent =
+                studentId;
+
+        } else {
+
+            heroStudentCampus.textContent =
+                "Your campus";
+
+        }
+
     }
 
 
-    .signin-nav-button {
+    // ========================================
+    // ACTIVE ORDERS
+    // ========================================
 
-        width: 42px;
+    refreshOrderCountBadge(student.id);
 
-        height: 42px;
+    if (typeof loadDashboardRecentOrders === "function") {
+        loadDashboardRecentOrders(student.id);
+    }
 
-        padding: 0;
+    if (typeof loadDashboardWalletBalance === "function") {
+        loadDashboardWalletBalance(student.id);
+    }
 
-        justify-content: center;
-
-        border-radius: 50%;
+    if (typeof updateSellerMenuLabel === "function") {
+        updateSellerMenuLabel(student.id);
     }
 
 
-    .hero {
+    // ========================================
+    // GET DISPLAY NAME
+    // ========================================
 
-        min-height: 520px;
+    const firstName =
+        student.first_name || "";
+
+    const lastName =
+        student.last_name || "";
+
+    const displayName =
+        firstName ||
+        lastName ||
+        "Account";
+
+
+    // ========================================
+    // UPDATE HEADER
+    // ========================================
+
+    const avatarMarkup =
+        student.profile_picture ?
+            `<img src="${API_URL + student.profile_picture}" alt="${displayName}">` :
+            `<span class="header-avatar-initial">${displayName.charAt(0).toUpperCase()}</span>`;
+
+    signInButton.classList.add("has-avatar");
+
+    signInButton.innerHTML = `
+        <span class="header-avatar-circle">
+            ${avatarMarkup}
+        </span>
+    `;
+
+    signInButton.setAttribute("aria-label", displayName);
+
+
+    // ========================================
+    // ACCOUNT DROPDOWN MENU HEADER
+    // ========================================
+
+    const accountMenuName =
+        document.getElementById("accountMenuName");
+
+    const accountMenuStudentInfo =
+        document.getElementById("accountMenuStudentInfo");
+
+    if (accountMenuName) {
+
+        const fullName =
+            `${firstName} ${lastName}`.trim();
+
+        accountMenuName.textContent =
+            fullName || "Student";
+
     }
 
+    if (accountMenuStudentInfo) {
 
-    .hero h1 {
+        const university =
+            student.university || "";
 
-        letter-spacing: -2px;
-    }
+        const studentIdValue =
+            student.student_id ||
+            student.studentId ||
+            "";
 
+        if (university && studentIdValue) {
 
-    .rewards-container {
+            accountMenuStudentInfo.textContent =
+                university + " · " + studentIdValue;
 
-        flex-direction: column;
+        } else {
 
-        align-items: flex-start;
-    }
+            accountMenuStudentInfo.textContent =
+                university ||
+                studentIdValue ||
+                "Student account";
 
-
-    .rewards-card {
-
-        width: 100%;
-
-        max-width: 280px;
-    }
-
-
-    /* Chat mobile layout is handled in the dedicated
-       CHAT — MOBILE LAYOUT section further down, which
-       correctly accounts for the app sidebar and profile
-       panel added later. */
-
-}
-
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media (max-width: 600px) {
-
-
-    .nav-container {
-
-        min-height: 68px;
-
-        gap: 7px;
-    }
-
-
-    .nav-logo {
-
-        width: 105px;
-    }
-
-
-    .nav-actions {
-
-        gap: 5px;
-    }
-
-
-    .nav-icon-button,
-    .signin-nav-button,
-    .mobile-menu-button {
-
-        width: 37px;
-
-        height: 37px;
-    }
-
-
-    .hero-content {
-
-        padding: 70px 0;
-    }
-
-
-    .hero h1 {
-
-        font-size: 43px;
-
-        letter-spacing: -2px;
-    }
-
-
-    .hero p {
-
-        font-size: 17px;
-    }
-
-
-    .section {
-
-        padding: 65px 0;
-    }
-
-
-    .category-grid,
-    .product-grid,
-    .why-grid {
-
-        grid-template-columns: 1fr;
-    }
-
-
-    .category-card {
-
-        padding: 20px;
-    }
-
-
-    .product-image {
-
-        height: 230px;
-    }
-
-
-    .product-filters {
-
-        justify-content: flex-start;
-
-        overflow-x: auto;
-
-        flex-wrap: nowrap;
-
-        padding-bottom: 5px;
-    }
-
-
-    .filter-button {
-
-        flex-shrink: 0;
-    }
-
-
-    .rewards-section {
-
-        padding: 60px 0;
-    }
-
-
-    .rewards-content h2 {
-
-        font-size: 34px;
-    }
-
-
-    .chat-preview {
-
-        min-height: 600px;
-
-        border-radius: 14px;
-    }
-
-
-    .messages {
-
-        padding: 17px;
-    }
-
-
-    .message {
-
-        max-width: 85%;
-    }
-
-
-    .notification-panel {
-
-        top: 75px;
-
-        right: 10px;
-
-        width: calc(100% - 20px);
-    }
-
-
-    .cart-panel {
-
-        width: 100%;
-    }
-
-
-    .auth-modal {
-
-        padding: 28px 20px;
-    }
-
-
-    .footer {
-
-        padding-top: 45px;
-    }
-
-
-    .footer-container {
-
-        grid-template-columns: 1fr;
-
-        gap: 30px;
-    }
-
-
-    .footer-brand {
-
-        max-width: 100%;
-    }
-
-
-    .footer-bottom {
-
-        flex-direction: column;
-
-        align-items: flex-start;
-
-        padding: 20px 0;
+        }
 
     }
 
 }
 
+// ========================================
+// CHECK LOGIN STATE
+// ========================================
 
-/* =========================================================
-   VERY SMALL PHONES
-   ========================================================= */
-
-@media (max-width: 380px) {
-
-
-    .nav-logo {
-
-        width: 90px;
-    }
+updateLoginState();
 
 
-    .hero h1 {
+// ========================================
+// SIGN OUT
+// ========================================
 
-        font-size: 37px;
-    }
+const signOutButton =
+    document.getElementById("signOutButton");
 
+if (signOutButton) {
 
-    .hero-buttons {
+    signOutButton.addEventListener(
+        "click",
+        function (event) {
 
-        flex-direction: column;
+            event.preventDefault();
 
-        align-items: stretch;
-    }
+            localStorage.removeItem(
+                "kuriosLoggedInStudent"
+            );
 
+            sessionStorage.removeItem(
+                "kuriosLoggedInStudent"
+            );
 
-    .primary-button,
-    .secondary-button {
+            updateLoginState();
 
-        width: 100%;
-    }
+            const studentAccountMenu =
+                document.getElementById(
+                    "studentAccountMenu"
+                );
 
+            if (studentAccountMenu) {
 
-    .product-bottom {
+                studentAccountMenu.classList.remove(
+                    "open"
+                );
 
-        align-items: flex-end;
-    }
+            }
 
+            const notificationsPanel =
+                document.getElementById(
+                    "notificationPanel"
+                );
 
-    .product-bottom strong {
+            if (notificationsPanel) {
 
-        font-size: 14px;
-    }
+                notificationsPanel.classList.remove(
+                    "open"
+                );
 
+            }
 
-    .add-to-cart {
+            window.location.hash = "";
 
-        padding: 8px 9px;
-    }
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
 
-}
-
-/* =========================================
-   KURIOS TOAST MESSAGE
-========================================= */
-
-.kurios-toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(30px);
-
-    background: #ffffff;
-    color: #4b0082;
-
-    padding: 14px 22px;
-
-    border-radius: 10px;
-
-    box-shadow:
-        0 10px 30px rgba(0, 0, 0, 0.20);
-
-    font-weight: 600;
-
-    z-index: 99999;
-
-    opacity: 0;
-
-    pointer-events: none;
-
-    transition:
-        opacity 0.3s ease,
-        transform 0.3s ease;
-}
-
-
-.kurios-toast.show {
-
-    opacity: 1;
-
-    transform:
-        translateX(-50%)
-        translateY(0);
-
-}
-
-/* =========================================
-   CREATE STUDENT ACCOUNT BUTTON
-========================================= */
-
-.create-account-btn {
-    width: 100%;
-    max-width: 360px;
-    height: 46px;
-
-    margin: 8px auto 0;
-
-    border: none;
-    border-radius: 9px;
-
-    background: linear-gradient(
-        135deg,
-        #6d28d9,
-        #7c3aed
+        }
     );
 
-    color: #ffffff;
-
-    padding: 0 18px;
-
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-
-    cursor: pointer;
-
-    box-shadow:
-        0 6px 15px rgba(109, 40, 217, 0.22);
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease;
 }
 
-
-/* User icon */
-
-.create-account-btn i:first-child {
-    font-size: 15px;
-}
+    /* =====================================================
+       12. SIGN IN MODAL
+       ===================================================== */
 
 
-/* Arrow */
-
-.create-account-btn i:last-child {
-    font-size: 15px;
-    margin-left: 2px;
-
-    transition: transform 0.2s ease;
-}
+    const openSignIn =
+        document.getElementById(
+            "openSignIn"
+        );
 
 
-/* =========================================
-   HOVER EFFECT
-========================================= */
+    const signInModal =
+        document.getElementById(
+            "signInModal"
+        );
 
-.create-account-btn:hover {
-    background: linear-gradient(
-        135deg,
-        #5b21b6,
-        #6d28d9
+
+    const closeSignIn =
+        document.getElementById(
+            "closeSignIn"
+        );
+
+
+    const signInForm =
+        document.getElementById(
+            "signinForm"
+        );
+
+
+
+    function openSignInModal() {
+
+        if (typeof closeNotificationPanel === "function") {
+            closeNotificationPanel();
+        }
+
+        if (signInModal) {
+
+            signInModal.classList.add(
+                "open"
+            );
+
+        }
+
+        const emailStep =
+            document.getElementById("signinEmailStep");
+
+        const passcodeStep =
+            document.getElementById("signinPasscodeStep");
+
+        const adminPasswordStep =
+            document.getElementById("signinAdminPasswordStep");
+
+        if (emailStep) {
+            emailStep.style.display = "block";
+        }
+
+        if (passcodeStep) {
+            passcodeStep.style.display = "none";
+        }
+
+        if (adminPasswordStep) {
+            adminPasswordStep.style.display = "none";
+        }
+
+    }
+
+
+
+    function closeSignInModal() {
+
+        if (signInModal) {
+
+            signInModal.classList.remove(
+                "open"
+            );
+
+        }
+
+    }
+
+
+
+    // ========================================
+// STUDENT ACCOUNT / SIGN IN BUTTON
+// ========================================
+
+const studentAccountMenu =
+    document.getElementById(
+        "studentAccountMenu"
     );
 
-    transform: translateY(-2px);
 
-    box-shadow:
-        0 9px 20px rgba(109, 40, 217, 0.30);
+if (openSignIn) {
+
+    openSignIn.addEventListener(
+        "click",
+        function (event) {
+
+            event.stopPropagation();
+
+
+            // ========================================
+            // CHECK LOGIN STATE
+            // ========================================
+
+            const loggedInStudent =
+                localStorage.getItem(
+                    "kuriosLoggedInStudent"
+                ) ||
+                sessionStorage.getItem(
+                    "kuriosLoggedInStudent"
+                );
+
+
+            // ========================================
+            // NOT LOGGED IN
+            // ========================================
+
+            if (!loggedInStudent) {
+
+                if (studentAccountMenu) {
+
+                    studentAccountMenu.classList.remove(
+                        "open"
+                    );
+
+                }
+
+                openSignInModal();
+
+                return;
+
+            }
+
+
+            // ========================================
+            // LOGGED IN
+            // ========================================
+
+            if (studentAccountMenu) {
+
+                const willOpen =
+                    !studentAccountMenu.classList.contains("open");
+
+                studentAccountMenu.classList.toggle(
+                    "open"
+                );
+
+                if (
+                    willOpen &&
+                    typeof closeNotificationPanel === "function"
+                ) {
+                    closeNotificationPanel();
+                }
+
+            }
+
+        }
+    );
+
 }
 
 
-/* Arrow moves when hovering */
+// ========================================
+// CLOSE ACCOUNT MENU WHEN CLICKING OUTSIDE
+// ========================================
 
-.create-account-btn:hover i:last-child {
-    transform: translateX(5px);
+document.addEventListener(
+    "click",
+    function (event) {
+
+        if (!studentAccountMenu) {
+            return;
+        }
+
+
+        if (
+            !studentAccountMenu.contains(event.target) &&
+            event.target !== openSignIn &&
+            !openSignIn.contains(event.target)
+        ) {
+
+            studentAccountMenu.classList.remove(
+                "open"
+            );
+
+        }
+
+    }
+);
+
+// ========================================
+// GET CURRENTLY LOGGED-IN STUDENT
+// ========================================
+
+function getLoggedInStudent() {
+
+    const storedStudent =
+        localStorage.getItem(
+            "kuriosLoggedInStudent"
+        ) ||
+        sessionStorage.getItem(
+            "kuriosLoggedInStudent"
+        );
+
+    if (!storedStudent) {
+        return null;
+    }
+
+    try {
+
+        return JSON.parse(storedStudent);
+
+    } catch (error) {
+
+        console.error(
+            "Unable to read logged-in student:",
+            error
+        );
+
+        return null;
+
+    }
+
 }
 
+
+// ========================================
+// SAVE AN UPDATED STUDENT OBJECT BACK TO
+// WHICHEVER STORAGE IT CAME FROM
+// ========================================
+
+function saveLoggedInStudent(student) {
+
+    const studentJson =
+        JSON.stringify(student);
+
+    if (
+        localStorage.getItem("kuriosLoggedInStudent")
+    ) {
+
+        localStorage.setItem(
+            "kuriosLoggedInStudent",
+            studentJson
+        );
+
+    } else {
+
+        sessionStorage.setItem(
+            "kuriosLoggedInStudent",
+            studentJson
+        );
+
+    }
+
+}
+
+
+// ========================================
+// MY PROFILE PANEL
+// ========================================
+
+const accountProfile =
+    document.getElementById("accountProfile");
+
+const profileOverlay =
+    document.getElementById("profileOverlay");
+
+const profilePanel =
+    document.getElementById("profilePanel");
+
+const closeProfile =
+    document.getElementById("closeProfile");
+
+const editProfileButton =
+    document.getElementById("editProfileButton");
+
+const cancelProfileEdit =
+    document.getElementById("cancelProfileEdit");
+
+const saveProfileEdit =
+    document.getElementById("saveProfileEdit");
+
+const profilePhoneInput =
+    document.getElementById("profilePhoneInput");
+
+const profileWhatsappInput =
+    document.getElementById("profileWhatsappInput");
+
+const profileDobInput =
+    document.getElementById("profileDobInput");
+
+const profilePictureInput =
+    document.getElementById("profilePictureInput");
+
+const profileAvatarCircle =
+    document.getElementById("profileAvatarCircle");
+
+const profileAvatarEditBadge =
+    document.getElementById("profileAvatarEditBadge");
+
+
+// Holds the file the student just picked,
+// until they hit Save.
+
+let selectedProfilePictureFile = null;
+
+
+// ========================================
+// SHOW A STUDENT'S DATA IN THE PANEL
+// (view mode fields)
+// ========================================
+
+function renderProfilePanel(student) {
+
+    // FULL NAME
+
+    const fullNameEl =
+        document.getElementById("profileFullName");
+
+    if (fullNameEl) {
+
+        const firstName =
+            student.first_name ||
+            student.firstName ||
+            "";
+
+        const lastName =
+            student.last_name ||
+            student.lastName ||
+            "";
+
+        const fullName =
+            `${firstName} ${lastName}`.trim();
+
+        fullNameEl.textContent =
+            fullName ||
+            "Student";
+
+    }
+
+
+    // STUDENT ID
+
+    const studentIdEl =
+        document.getElementById("profileStudentId");
+
+    if (studentIdEl) {
+
+        studentIdEl.textContent =
+            student.student_id ||
+            student.studentId ||
+            "Not provided";
+
+    }
+
+
+    // UNIVERSITY
+
+    const universityEl =
+        document.getElementById("profileUniversity");
+
+    if (universityEl) {
+
+        universityEl.textContent =
+            student.university ||
+            "Not provided";
+
+    }
+
+
+    // EMAIL
+
+    const emailEl =
+        document.getElementById("profileEmail");
+
+    if (emailEl) {
+
+        emailEl.textContent =
+            student.email ||
+            "Not provided";
+
+    }
+
+
+    // WHATSAPP NUMBER
+
+    const whatsappEl =
+        document.getElementById("profileWhatsapp");
+
+    if (whatsappEl) {
+
+        whatsappEl.textContent =
+            student.whatsapp_number ||
+            student.whatsappNumber ||
+            "Not provided";
+
+    }
+
+    if (profileWhatsappInput) {
+
+        profileWhatsappInput.value =
+            student.whatsapp_number ||
+            student.whatsappNumber ||
+            "";
+
+    }
+
+
+    // PHONE NUMBER
+
+    const phoneEl =
+        document.getElementById("profilePhone");
+
+    if (phoneEl) {
+
+        phoneEl.textContent =
+            student.phone ||
+            "Not provided";
+
+    }
+
+    if (profilePhoneInput) {
+
+        profilePhoneInput.value =
+            student.phone ||
+            "";
+
+    }
+
+
+    // DATE OF BIRTH
+
+    const dobEl =
+        document.getElementById("profileDob");
+
+    const dobRaw =
+        student.date_of_birth ||
+        student.dob ||
+        null;
+
+    // The database sends this back as a full
+    // timestamp — we only want the date part,
+    // both for display and for the date input.
+
+    const dobShort =
+        dobRaw ?
+            dobRaw.slice(0, 10) :
+            null;
+
+    if (dobEl) {
+
+        dobEl.textContent =
+            dobShort ||
+            "Not provided";
+
+    }
+
+    if (profileDobInput) {
+
+        profileDobInput.value =
+            dobShort ||
+            "";
+
+    }
+
+
+    // ACCOUNT STATUS
+
+    const statusEl =
+        document.getElementById("profileAccountStatus");
+
+    if (statusEl) {
+
+        statusEl.textContent =
+            student.email_verified === false ?
+                "Unverified" :
+                "Active";
+
+    }
+
+
+    // PROFILE PICTURE
+
+    renderProfileAvatar(
+        student.profile_picture
+    );
+
+}
+
+
+// ========================================
+// SHOW THE AVATAR — PICTURE IF THERE IS ONE,
+// OTHERWISE THE PLAIN PERSON ICON
+// ========================================
+
+function renderProfileAvatar(profilePicturePath) {
+
+    if (!profileAvatarCircle) {
+        return;
+    }
+
+
+    const existingImg =
+        profileAvatarCircle.querySelector("img");
+
+    if (existingImg) {
+        existingImg.remove();
+    }
+
+
+    if (profilePicturePath) {
+
+        const img =
+            document.createElement("img");
+
+        img.src =
+            API_URL + profilePicturePath;
+
+        img.alt =
+            "Profile picture";
+
+        profileAvatarCircle.insertBefore(
+            img,
+            profileAvatarCircle.firstChild
+        );
+
+    }
+
+}
+
+
+// ========================================
+// OPEN THE PANEL
+// ========================================
+
+function openProfilePanel() {
+
+    const student =
+        getLoggedInStudent();
+
+
+    // NOT LOGGED IN — SEND TO SIGN IN INSTEAD
+
+    if (!student) {
+
+        if (studentAccountMenu) {
+
+            studentAccountMenu.classList.remove(
+                "open"
+            );
+
+        }
+
+        if (window.location.hash === "#profile") {
+
+            history.replaceState(
+                null,
+                "",
+                window.location.pathname + window.location.search
+            );
+
+        }
+
+        openSignInModal();
+
+        return;
+
+    }
+
+
+    renderProfilePanel(student);
+    exitProfileEditMode();
+
+
+    if (studentAccountMenu) {
+
+        studentAccountMenu.classList.remove(
+            "open"
+        );
+
+    }
+
+    if (profileOverlay) {
+
+        profileOverlay.classList.add(
+            "open"
+        );
+
+    }
+
+    const mainEl =
+        document.getElementById("mainContent");
+
+    if (mainEl) {
+        mainEl.style.display = "none";
+    }
+
+    window.scrollTo({ top: 0 });
+
+}
+
+
+function closeProfilePanel() {
+
+    if (profileOverlay) {
+
+        profileOverlay.classList.remove(
+            "open"
+        );
+
+    }
+
+    exitProfileEditMode();
+
+    if (typeof goBack === "function") {
+        goBack();
+    } else if (typeof goHome === "function") {
+        goHome();
+    }
+
+}
+
+
+// ========================================
+// ENTER / EXIT EDIT MODE
+// ========================================
+
+function enterProfileEditMode() {
+
+    if (profilePanel) {
+
+        profilePanel.classList.add(
+            "editing"
+        );
+
+    }
+
+}
+
+
+function exitProfileEditMode() {
+
+    if (profilePanel) {
+
+        profilePanel.classList.remove(
+            "editing"
+        );
+
+    }
+
+
+    // Undo any unsaved picture preview and
+    // clear the picked file.
+
+    selectedProfilePictureFile = null;
+
+    if (profilePictureInput) {
+
+        profilePictureInput.value = "";
+
+    }
+
+    const student =
+        getLoggedInStudent();
+
+    if (student) {
+
+        renderProfileAvatar(
+            student.profile_picture
+        );
+
+    }
+
+}
+
+
+// ========================================
+// PICK A NEW PROFILE PICTURE
+// ========================================
+
+if (profileAvatarEditBadge) {
+
+    profileAvatarEditBadge.addEventListener(
+        "click",
+        function () {
+
+            if (profilePictureInput) {
+
+                profilePictureInput.click();
+
+            }
+
+        }
+    );
+
+}
+
+
+if (profilePictureInput) {
+
+    profilePictureInput.addEventListener(
+        "change",
+        function () {
+
+            const file =
+                profilePictureInput.files[0];
+
+            if (!file) {
+                return;
+            }
+
+
+            selectedProfilePictureFile =
+                file;
+
+
+            // Instant local preview before saving.
+
+            const reader =
+                new FileReader();
+
+            reader.onload = function () {
+
+                if (!profileAvatarCircle) {
+                    return;
+                }
+
+                const existingImg =
+                    profileAvatarCircle.querySelector("img");
+
+                if (existingImg) {
+                    existingImg.remove();
+                }
+
+                const img =
+                    document.createElement("img");
+
+                img.src =
+                    reader.result;
+
+                img.alt =
+                    "Profile picture preview";
+
+                profileAvatarCircle.insertBefore(
+                    img,
+                    profileAvatarCircle.firstChild
+                );
+
+            };
+
+            reader.readAsDataURL(file);
+
+        }
+    );
+
+}
+
+
+// ========================================
+// SAVE PROFILE CHANGES
+// ========================================
+
+if (saveProfileEdit) {
+
+    saveProfileEdit.addEventListener(
+        "click",
+        async function () {
+
+            const student =
+                getLoggedInStudent();
+
+            if (!student) {
+                return;
+            }
+
+
+            if (
+                profileWhatsappInput &&
+                !profileWhatsappInput.value.trim()
+            ) {
+
+                showMessage(
+                    "WhatsApp number is required."
+                );
+
+                profileWhatsappInput.focus();
+
+                return;
+
+            }
+
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                "studentId",
+                student.id
+            );
+
+            if (profilePhoneInput) {
+
+                formData.append(
+                    "phone",
+                    profilePhoneInput.value.trim()
+                );
+
+            }
+
+            if (profileWhatsappInput) {
+
+                formData.append(
+                    "whatsappNumber",
+                    profileWhatsappInput.value.trim()
+                );
+
+            }
+
+            if (profileDobInput && profileDobInput.value) {
+
+                formData.append(
+                    "dateOfBirth",
+                    profileDobInput.value
+                );
+
+            }
+
+            if (selectedProfilePictureFile) {
+
+                formData.append(
+                    "profilePicture",
+                    selectedProfilePictureFile
+                );
+
+            }
+
+
+            saveProfileEdit.disabled = true;
+
+            saveProfileEdit.textContent =
+                "Saving...";
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/students/update-profile",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+
+                if (!data.success) {
+
+                    showMessage(
+                        data.message ||
+                        "Could not update your profile."
+                    );
+
+                    return;
+
+                }
+
+
+                // Merge the returned fields into the
+                // stored student so nothing already
+                // held (like the password-free login
+                // fields) gets lost.
+
+                const updatedStudent =
+                    Object.assign(
+                        {},
+                        student,
+                        data.student
+                    );
+
+                saveLoggedInStudent(
+                    updatedStudent
+                );
+
+                renderProfilePanel(
+                    updatedStudent
+                );
+
+                exitProfileEditMode();
+
+                showMessage(
+                    "Profile updated successfully."
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Profile update error:",
+                    error
+                );
+
+                showMessage(
+                    "Could not reach the server. Please try again."
+                );
+
+            } finally {
+
+                saveProfileEdit.disabled = false;
+
+                saveProfileEdit.textContent =
+                    "Save Changes";
+
+            }
+
+        }
+    );
+
+}
+
+
+if (editProfileButton) {
+
+    editProfileButton.addEventListener(
+        "click",
+        enterProfileEditMode
+    );
+
+}
+
+
+if (cancelProfileEdit) {
+
+    cancelProfileEdit.addEventListener(
+        "click",
+        function () {
+
+            const student =
+                getLoggedInStudent();
+
+            if (student) {
+
+                renderProfilePanel(
+                    student
+                );
+
+            }
+
+            exitProfileEditMode();
+
+        }
+    );
+
+}
+
+
+if (accountProfile) {
+
+    accountProfile.addEventListener(
+        "click",
+        function () {
+            window.location.hash = "profile";
+        }
+    );
+
+}
+
+
+if (closeProfile) {
+
+    closeProfile.addEventListener(
+        "click",
+        closeProfilePanel
+    );
+
+}
+
+
+// Clicking outside the profile panel closes it.
+
+if (profileOverlay) {
+
+    profileOverlay.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                event.target === profileOverlay
+            ) {
+
+                closeProfilePanel();
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// ACCOUNT SETTINGS — OPENS PROFILE IN EDIT MODE
+// ========================================
+
+const accountSettings =
+    document.getElementById("accountSettings");
+
+if (accountSettings) {
+
+    accountSettings.addEventListener(
+        "click",
+        function () {
+
+            if (typeof hideAllFullPages === "function") {
+                hideAllFullPages();
+            }
+
+            history.pushState(null, "", "#profile");
+
+            openProfilePanel();
+
+            if (typeof enterProfileEditMode === "function") {
+                enterProfileEditMode();
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// WISHLIST / WALLET
+// (real pages, feature itself isn't built yet)
+// ========================================
+
+const accountWishlist =
+    document.getElementById("accountWishlist");
+
+if (accountWishlist) {
+
+    accountWishlist.addEventListener(
+        "click",
+        function () {
+
+            if (studentAccountMenu) {
+                studentAccountMenu.classList.remove("open");
+            }
+
+            window.location.hash = "wishlist";
+
+        }
+    );
+
+}
+
+const accountWallet =
+    document.getElementById("accountWallet");
+
+if (accountWallet) {
+
+    accountWallet.addEventListener(
+        "click",
+        function () {
+
+            if (studentAccountMenu) {
+                studentAccountMenu.classList.remove("open");
+            }
+
+            window.location.hash = "wallet";
+
+        }
+    );
+
+}
+
+
+// ========================================
+// MY ORDERS PANEL
+// ========================================
+
+const accountOrders =
+    document.getElementById("accountOrders");
+
+const dashboardMyOrders =
+    document.getElementById("dashboardMyOrders");
+
+const ordersOverlay =
+    document.getElementById("ordersOverlay");
+
+const closeOrders =
+    document.getElementById("closeOrders");
+
+const ordersPanelBody =
+    document.getElementById("ordersPanelBody");
+
+
+const ORDERS_EMPTY_STATE_HTML = `
+    <div class="empty-cart">
+        <i class="fa-solid fa-box"></i>
+        <h3>No orders yet</h3>
+        <p>Your past orders will show up here once you check out.</p>
+    </div>
+`;
+
+
+function formatOrderDate(dateString) {
+
+    const date =
+        new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+        return "";
+    }
+
+    return date.toLocaleDateString(
+        "en-NG",
+        {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+function renderOrderCard(order) {
+
+    const statusClass =
+        "status-" + order.status;
+
+    const statusLabel =
+        order.status.charAt(0).toUpperCase() +
+        order.status.slice(1);
+
+    const itemRows =
+        order.items.map(function (item) {
+
+            return `
+                <div class="order-card-item-row">
+                    <span>${item.name} × ${item.quantity}</span>
+                    <span>${formatMoney(item.price * item.quantity)}</span>
+                </div>
+            `;
+
+        }).join("");
+
+    return `
+        <div class="order-card">
+
+            <div class="order-card-top">
+
+                <div>
+                    <div class="order-card-reference">
+                        ${order.payment_reference}
+                    </div>
+                    <div class="order-card-date">
+                        ${formatOrderDate(order.created_at)}
+                    </div>
+                </div>
+
+                <span class="order-status-badge ${statusClass}">
+                    ${statusLabel}
+                </span>
+
+            </div>
+
+            <div class="order-card-items">
+                ${itemRows}
+            </div>
+
+            <div class="order-card-total">
+                <span>Total</span>
+                <strong>${formatMoney(order.amount)}</strong>
+            </div>
+
+        </div>
+    `;
+
+}
+
+
+async function loadOrdersIntoPanel(studentId) {
+
+    if (!ordersPanelBody) {
+        return;
+    }
+
+    if (typeof loadReviewablePrompts === "function") {
+        loadReviewablePrompts(studentId);
+    }
+
+    ordersPanelBody.innerHTML = `
+        <div class="empty-cart">
+            <i class="fa-solid fa-spinner"></i>
+            <h3>Loading your orders...</h3>
+        </div>
+    `;
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/orders?studentId=" + studentId
+            );
+
+        const data =
+            await response.json();
+
+        if (!data.success) {
+
+            ordersPanelBody.innerHTML = `
+                <div class="empty-cart">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <h3>Could not load your orders</h3>
+                    <p>${data.message || "Please try again."}</p>
+                </div>
+            `;
+
+            return;
+
+        }
+
+        if (data.orders.length === 0) {
+
+            ordersPanelBody.innerHTML =
+                ORDERS_EMPTY_STATE_HTML;
+
+            return;
+
+        }
+
+        ordersPanelBody.innerHTML =
+            data.orders.map(renderOrderCard).join("");
+
+    } catch (error) {
+
+        console.error(
+            "Load orders error:",
+            error
+        );
+
+        ordersPanelBody.innerHTML = `
+            <div class="empty-cart">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <h3>Could not reach the server</h3>
+                <p>Please try again.</p>
+            </div>
+        `;
+
+    }
+
+}
+
+
+function openOrdersPanel() {
+
+    const student =
+        getLoggedInStudent();
+
+    if (!student) {
+
+        if (studentAccountMenu) {
+
+            studentAccountMenu.classList.remove(
+                "open"
+            );
+
+        }
+
+        if (window.location.hash === "#orders") {
+
+            history.replaceState(
+                null,
+                "",
+                window.location.pathname + window.location.search
+            );
+
+        }
+
+        openSignInModal();
+
+        return;
+
+    }
+
+    if (studentAccountMenu) {
+
+        studentAccountMenu.classList.remove(
+            "open"
+        );
+
+    }
+
+    if (ordersOverlay) {
+
+        ordersOverlay.classList.add(
+            "open"
+        );
+
+    }
+
+    const mainEl =
+        document.getElementById("mainContent");
+
+    if (mainEl) {
+        mainEl.style.display = "none";
+    }
+
+    window.scrollTo({ top: 0 });
+
+    loadOrdersIntoPanel(
+        student.id
+    );
+
+}
+
+
+function closeOrdersPanel() {
+
+    if (ordersOverlay) {
+
+        ordersOverlay.classList.remove(
+            "open"
+        );
+
+    }
+
+    if (typeof goBack === "function") {
+        goBack();
+    } else if (typeof goHome === "function") {
+        goHome();
+    }
+
+}
+
+
+// ========================================
+// KEEP THE HERO'S ORDER COUNT ACCURATE
+// ("active" = paid, not yet fulfilled)
+// ========================================
+
+async function refreshOrderCountBadge(studentId) {
+
+    const heroActiveOrdersEl =
+        document.getElementById("heroActiveOrders");
+
+    const heroOrdersBadgeEl =
+        document.getElementById("heroOrdersBadge");
+
+    if (!heroActiveOrdersEl || !heroOrdersBadgeEl) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/orders?studentId=" + studentId
+            );
+
+        const data =
+            await response.json();
+
+        if (!data.success) {
+            return;
+        }
+
+        const activeOrderCount =
+            data.orders.filter(function (order) {
+
+                return order.status === "paid";
+
+            }).length;
+
+        heroActiveOrdersEl.textContent =
+            `${activeOrderCount} active order${activeOrderCount === 1 ? "" : "s"}`;
+
+        heroOrdersBadgeEl.textContent =
+            activeOrderCount;
+
+    } catch (error) {
+
+        console.error(
+            "Order count refresh error:",
+            error
+        );
+
+    }
+
+}
+
+
+if (accountOrders) {
+
+    accountOrders.addEventListener(
+        "click",
+        function () {
+            window.location.hash = "orders";
+        }
+    );
+
+}
+
+
+if (dashboardMyOrders) {
+
+    dashboardMyOrders.addEventListener(
+        "click",
+        function () {
+            window.location.hash = "orders";
+        }
+    );
+
+}
+
+
+if (closeOrders) {
+
+    closeOrders.addEventListener(
+        "click",
+        closeOrdersPanel
+    );
+
+}
+
+
+if (ordersOverlay) {
+
+    ordersOverlay.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                event.target === ordersOverlay
+            ) {
+
+                closeOrdersPanel();
+
+            }
+
+        }
+    );
+
+}
+
+
+
+
+    if (closeSignIn) {
+
+        closeSignIn.addEventListener(
+            "click",
+            closeSignInModal
+        );
+
+    }
+
+
+
+    if (signInModal) {
+
+        signInModal.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target ===
+                    signInModal
+                ) {
+
+                    closeSignInModal();
+
+                }
+
+            }
+        );
+
+    }
+
+
+
+    /*
+        Current sign-in is still
+        a frontend demonstration.
+
+        REAL authentication will be
+        connected to PostgreSQL later.
+    */
+
+    // ========================================
+// STUDENT SIGN IN
+// ========================================
+
+if (signInForm) {
+
+    signInForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            // ========================================
+            // GET FORM VALUES
+            // ========================================
+
+            const identifier =
+                document.getElementById(
+                    "signinIdentifierValue"
+                ).value.trim();
+
+            const passcode =
+                document.getElementById(
+                    "signinPasscode"
+                ).value;
+
+
+            // ========================================
+            // VALIDATE INPUT
+            // ========================================
+
+            if (
+                identifier === "" ||
+                passcode.length !== 6
+            ) {
+
+                showMessage(
+                    "Please enter your email/phone and 6-digit passcode."
+                );
+
+                return;
+
+            }
+
+
+            // ========================================
+            // GET SIGN IN BUTTON
+            // ========================================
+
+            const signInButton =
+                signInForm.querySelector(
+                    'button[type="submit"]'
+                );
+
+
+            // ========================================
+            // DISABLE BUTTON
+            // ========================================
+
+            if (signInButton) {
+
+                signInButton.disabled = true;
+
+                signInButton.innerHTML = `
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Signing In...
+                `;
+
+            }
+
+
+            try {
+
+                // ========================================
+                // SEND LOGIN REQUEST
+                // ========================================
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/students/login",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                identifier:
+                                    identifier,
+
+                                passcode:
+                                    passcode
+
+                            })
+
+                        }
+                    );
+
+
+                // ========================================
+                // READ RESPONSE
+                // ========================================
+
+                const data =
+                    await response.json();
+
+
+                // ========================================
+                // LOGIN FAILED
+                // ========================================
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    // ====================================
+                    // UNVERIFIED EMAIL — SEND THEM TO
+                    // THE OTP VERIFICATION SCREEN
+                    // ====================================
+
+                    if (
+                        data.requiresVerification &&
+                        data.studentId &&
+                        data.email
+                    ) {
+
+                        closeSignInModal();
+
+                        if (signUpModal) {
+
+                            signUpModal.classList.add(
+                                "open"
+                            );
+
+                        }
+
+                        showOtpVerificationScreen(
+                            data.studentId,
+                            data.email
+                        );
+
+                        if (resendOtpButton) {
+
+                            resendOtpButton.click();
+
+                        }
+
+                        return;
+
+                    }
+
+                    showMessage(
+                        data.message ||
+                        "Invalid email or password."
+                    );
+
+                    return;
+
+                }
+
+
+                // ========================================
+                // LOGIN SUCCESSFUL
+                // ========================================
+
+                console.log(
+                    "Student logged in successfully:",
+                    data.student
+                );
+
+
+                // ========================================
+                // SAVE LOGGED-IN STUDENT
+                // ========================================
+
+                const rememberMe =
+                    document.getElementById(
+                        "rememberMe"
+                    );
+
+
+                if (
+                    rememberMe &&
+                    rememberMe.checked
+                ) {
+
+                    localStorage.setItem(
+                        "kuriosLoggedInStudent",
+                        JSON.stringify(
+                            data.student
+                        )
+                    );
+
+                } else {
+
+                    sessionStorage.setItem(
+                        "kuriosLoggedInStudent",
+                        JSON.stringify(
+                            data.student
+                        )
+                    );
+
+                }
+
+
+                // ========================================
+                // SUCCESS MESSAGE
+                // ========================================
+
+                showMessage(
+                    "Login successful. Welcome back to Kurios Stores."
+                );
+
+                if (
+                    window.__kuriosChatSocket &&
+                    window.__kuriosChatSocket.connected
+                ) {
+
+                    window.__kuriosChatSocket.emit(
+                        "join",
+                        data.student.id
+                    );
+
+                }
+
+                const postLoginSplash =
+                    document.getElementById("postLoginSplash");
+
+                if (postLoginSplash) {
+                    postLoginSplash.style.display = "flex";
+                }
+
+                const splashShownAt = Date.now();
+                const SPLASH_MIN_DISPLAY_MS = 5000;
+
+                function proceedAfterSplashDelay(callback) {
+
+                    const elapsed =
+                        Date.now() - splashShownAt;
+
+                    const remaining =
+                        Math.max(0, SPLASH_MIN_DISPLAY_MS - elapsed);
+
+                    setTimeout(callback, remaining);
+
+                }
+
+updateLoginState();
+
+                if (typeof showDashboardChoiceModal === "function") {
+
+                    fetch(
+                        API_URL + "/api/sellers/me?studentId=" + data.student.id
+                    )
+                        .then(function (response) { return response.json(); })
+                        .then(function (sellerData) {
+
+                            const isApprovedSeller =
+                                sellerData.success &&
+                                sellerData.seller &&
+                                sellerData.seller.status === "approved";
+
+                            proceedAfterSplashDelay(function () {
+
+                                if (isApprovedSeller) {
+
+                                    // Keep the splash up — the choice
+                                    // modal renders on top of it.
+
+                                    showDashboardChoiceModal(data.student);
+
+                                } else if (postLoginSplash) {
+
+                                    postLoginSplash.style.display = "none";
+
+                                }
+
+                            });
+
+                        })
+                        .catch(function (error) {
+
+                            console.error(
+                                "Post-login seller check error:",
+                                error
+                            );
+
+                            proceedAfterSplashDelay(function () {
+
+                                if (postLoginSplash) {
+                                    postLoginSplash.style.display = "none";
+                                }
+
+                            });
+
+                        });
+
+                } else {
+
+                    proceedAfterSplashDelay(function () {
+
+                        if (postLoginSplash) {
+                            postLoginSplash.style.display = "none";
+                        }
+
+                    });
+
+                }
+
+
+
+
+
+                // ========================================
+                // CLOSE SIGN-IN MODAL
+                // ========================================
+
+                const signInModal =
+                    document.getElementById(
+                        "signInModal"
+                    );
+
+                if (signInModal) {
+
+                    signInModal.classList.remove(
+                        "open"
+                    );
+
+                }
+
+
+                // ========================================
+                // CLEAR PASSCODE
+                // ========================================
+
+                signinPasscodeGroup.clear();
+
+
+                // ========================================
+                // UPDATE UI
+                // ========================================
+
+                console.log(
+                    "Logged-in student:",
+                    data.student
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Sign-in error:",
+                    error
+                );
+
+
+                showMessage(
+                    "Unable to connect to Kurios Stores server."
+                );
+
+
+            } finally {
+
+                // ========================================
+                // RESTORE BUTTON
+                // ========================================
+
+                if (signInButton) {
+
+                    signInButton.disabled = false;
+
+                    signInButton.innerHTML = `
+                        Sign In
+                    `;
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+
+    /* =====================================================
+       13. SIGN UP MODAL
+       ===================================================== */
+
+
+    const signUpModal =
+        document.getElementById(
+            "signUpModal"
+        );
+
+
+    const openSignUp =
+        document.getElementById(
+            "openSignUp"
+        );
+
+
+    const closeSignUp =
+        document.getElementById(
+            "closeSignUp"
+        );
+
+
+    const signupForm =
+        document.getElementById(
+            "signupForm"
+        );
+
+
+    const backToSignIn =
+        document.getElementById(
+            "backToSignIn"
+        );
+
+
+
+    function openSignUpModal() {
+
+        if (typeof closeNotificationPanel === "function") {
+            closeNotificationPanel();
+        }
+
+        if (signInModal) {
+
+            signInModal.classList.remove(
+                "active"
+            );
+
+        }
+
+
+        if (signUpModal) {
+
+            signUpModal.classList.add(
+                "active"
+            );
+
+        }
+
+    }
+
+
+
+    function closeSignUpModal() {
+
+        if (signUpModal) {
+
+            signUpModal.classList.remove(
+                "active"
+            );
+
+        }
+
+    }
+
+
+
+    if (openSignUp) {
+
+        openSignUp.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                openSignUpModal();
+
+            }
+        );
+
+    }
+
+
+
+    if (closeSignUp) {
+
+        closeSignUp.addEventListener(
+            "click",
+            closeSignUpModal
+        );
+
+    }
+
+
+
+    if (backToSignIn) {
+
+        backToSignIn.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                closeSignUpModal();
+
+                openSignInModal();
+
+            }
+        );
+
+    }
+
+
+
+    if (signupForm) {
+
+    signupForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            // ========================================
+            // GET FORM VALUES
+            // ========================================
+
+            const firstName =
+                document.getElementById("signupFirstName").value.trim();
+
+            const lastName =
+                document.getElementById("signupLastName").value.trim();
+
+            const email =
+                document.getElementById("signupEmail").value.trim();
+
+            const phone =
+                document.getElementById("signupPhone").value.trim();
+
+            const whatsappNumber =
+                document.getElementById("signupWhatsapp").value.trim();
+
+            const university =
+                document.getElementById("signupUniversity").value.trim();
+
+            const studentId =
+                document.getElementById("signupStudentId").value.trim();
+
+            const passcode =
+                document.getElementById("signupPasscode").value;
+
+            const confirmPasscode =
+                document.getElementById("signupConfirmPasscode").value;
+
+            const agreedStudent =
+                document.getElementById("agreedStudent").checked;
+
+            const agreedTerms =
+                document.getElementById("agreedTerms").checked;
+
+            const agreedPrivacy =
+                document.getElementById("agreedPrivacy").checked;
+
+            const receiveNotifications =
+                document.getElementById("receiveNotifications").checked;
+
+
+            // ========================================
+            // FRONTEND VALIDATION
+            // ========================================
+
+            if (
+                !firstName ||
+                !lastName ||
+                !email ||
+                !phone ||
+                !whatsappNumber ||
+                !university ||
+                !studentId ||
+                !passcode ||
+                !confirmPasscode
+            ) {
+
+                showMessage(
+                    "Please fill in all required fields."
+                );
+
+                return;
+            }
+
+
+            // ========================================
+            // PASSCODE CHECK
+            // ========================================
+
+            if (!/^\d{6}$/.test(passcode)) {
+
+                showMessage(
+                    "Your passcode must be exactly 6 digits."
+                );
+
+                return;
+            }
+
+
+            if (passcode !== confirmPasscode) {
+
+                showMessage(
+                    "Passcodes do not match."
+                );
+
+                return;
+            }
+
+
+            // ========================================
+            // PHONE / WHATSAPP FORMAT CHECK
+            // ========================================
+
+            const digitsOnlyPhone =
+                phone.replace(/\D/g, "");
+
+            if (!/^0\d{10}$/.test(digitsOnlyPhone)) {
+
+                showMessage(
+                    "Please enter a complete, valid phone number (11 digits, starting with 0)."
+                );
+
+                return;
+            }
+
+            const digitsOnlyWhatsapp =
+                whatsappNumber.replace(/\D/g, "");
+
+            if (!/^0\d{10}$/.test(digitsOnlyWhatsapp)) {
+
+                showMessage(
+                    "Please enter a complete, valid WhatsApp number (11 digits, starting with 0)."
+                );
+
+                return;
+            }
+
+
+            // ========================================
+            // STUDENT CONFIRMATION
+            // ========================================
+
+            if (!agreedStudent) {
+
+                showMessage(
+                    "Please confirm that you are a student."
+                );
+
+                return;
+            }
+
+
+            // ========================================
+            // TERMS & PRIVACY
+            // ========================================
+
+            if (!agreedTerms || !agreedPrivacy) {
+
+                showMessage(
+                    "Please agree to the Terms and Privacy Policy."
+                );
+
+                return;
+            }
+
+
+            // ========================================
+            // DISABLE BUTTON WHILE REGISTERING
+            // ========================================
+
+            const submitButton =
+                document.getElementById("signupSubmit");
+
+            if (submitButton) {
+
+                submitButton.disabled = true;
+
+                submitButton.textContent =
+                    "Creating Account...";
+            }
+
+
+            // ========================================
+            // SEND DATA TO BACKEND
+            // ========================================
+
+            try {
+
+                const response = await fetch(
+                    API_URL + "/api/students/register",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            firstName: firstName,
+
+                            lastName: lastName,
+
+                            email: email,
+
+                            phone: digitsOnlyPhone,
+
+                            whatsappNumber:
+                                digitsOnlyWhatsapp,
+
+                            university: university,
+
+                            studentId: studentId,
+
+                            passcode: passcode,
+
+                            confirmPasscode:
+                                confirmPasscode,
+
+                            agreedStudent:
+                                agreedStudent,
+
+                            agreedTerms:
+                                agreedTerms,
+
+                            agreedPrivacy:
+                                agreedPrivacy,
+
+                            receiveNotifications:
+                                receiveNotifications
+
+                        })
+
+                    }
+                );
+
+
+                // ========================================
+// READ BACKEND RESPONSE
+// ========================================
+
+const data =
+    await response.json();
+
+
+// ========================================
+// CONTINUE UNVERIFIED REGISTRATION
+// ========================================
+
+if (
+    response.ok &&
+    data.success &&
+    data.requiresVerification &&
+    data.continueRegistration
+) {
+
+    console.log(
+        "Continuing unverified registration:",
+        data.student
+    );
+
+
+    showOtpVerificationScreen(
+        data.studentId,
+        data.email
+    );
+
+
+    return;
+
+}
+
+
+// ========================================
+// INVALID OTP
+// ========================================
+
+if (!response.ok || !data.success) {
+
+    showMessage(
+        data.message ||
+        "Something went wrong while creating the account."
+    );
+
+    return;
+}
+
+
+// ========================================
+// SUCCESS - OTP VERIFICATION
+// ========================================
+
+console.log(
+    "Registration successful:",
+    data
+);
+
+
+// ========================================
+// CONFIRM VERIFICATION DATA
+// ========================================
+
+if (
+    !data.studentId ||
+    !data.email
+) {
+
+    console.error(
+        "Missing verification data:",
+        data
+    );
+
+    showMessage(
+        "Account was created, but verification information is missing."
+    );
+
+    return;
+}
+
+
+// ========================================
+// CLEAR REGISTRATION FORM
+// ========================================
+
+signupForm.reset();
+
+
+// ========================================
+// SHOW OTP VERIFICATION SCREEN
+// ========================================
+
+showOtpVerificationScreen(
+    data.studentId,
+    data.email
+);
+
+
+            } catch (error) {
+
+                console.error(
+                    "Registration error:",
+                    error
+                );
+
+                showMessage(
+                    "Unable to connect to Kurios Stores server."
+                );
+
+            } finally {
+
+                // ========================================
+                // ENABLE BUTTON AGAIN
+                // ========================================
+
+                if (submitButton) {
+
+                    submitButton.disabled = false;
+
+                    submitButton.textContent =
+                        "Create Student Account";
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+    /* =====================================================
+       14. NOTIFICATIONS
+       ===================================================== */
+
+
+    const notificationButton =
+        document.getElementById(
+            "notificationButton"
+        );
+
+
+    const notificationPanel =
+        document.getElementById(
+            "notificationPanel"
+        );
+
+
+    function closeNotificationPanel() {
+
+        if (notificationPanel) {
+
+            notificationPanel.classList.remove(
+                "open"
+            );
+
+        }
+
+    }
+
+    window.closeNotificationPanel = closeNotificationPanel;
+
+
+    const closeNotifications =
+        document.getElementById(
+            "closeNotifications"
+        );
+
+
+    const notificationList =
+        document.getElementById(
+            "notificationList"
+        );
+
+
+    const notificationBadge =
+        document.getElementById(
+            "notificationBadge"
+        );
+
+
+
+    /*
+        Notifications now come from the server —
+        every student sees the same admin announcements.
+    */
+
+    let notifications = [];
+
+
+
+    function saveNotifications() {
+
+        localStorage.setItem(
+            "kuriosNotifications",
+            JSON.stringify(
+                notifications
+            )
+        );
+
+    }
+
+
+
+    function renderNotifications() {
+
+
+        if (!notificationList) {
+            return;
+        }
+
+
+
+        notificationList.innerHTML = "";
+
+
+
+        if (
+            notifications.length === 0
+        ) {
+
+            notificationList.innerHTML = `
+
+                <div class="empty-state">
+
+                    <i class="fa-regular fa-bell-slash"></i>
+
+                    <h4>
+                        No notifications
+                    </h4>
+
+                    <p>
+                        You're all caught up.
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+
+
+        notifications.forEach(
+            function (notification) {
+
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "notification-item";
+
+
+                item.innerHTML = `
+
+                    <div class="notification-icon">
+
+                        <i class="fa-solid fa-bell"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong>
+
+                            ${notification.title}
+
+                        </strong>
+
+                        <p>
+
+                            ${notification.message}
+
+                        </p>
+
+                    </div>
+
+                `;
+
+
+                notificationList.appendChild(
+                    item
+                );
+
+            }
+        );
+
+
+
+        /*
+            Update notification badge — only show
+            a count for notifications the student
+            hasn't seen yet (tracked locally).
+        */
+
+        if (notificationBadge) {
+
+            const seenCount =
+                parseInt(
+                    localStorage.getItem("kuriosNotificationsSeenCount") || "0",
+                    10
+                );
+
+            const unseenCount =
+                Math.max(0, notifications.length - seenCount);
+
+            if (unseenCount > 0) {
+
+                notificationBadge.textContent = unseenCount;
+                notificationBadge.style.display = "";
+
+            } else {
+
+                notificationBadge.style.display = "none";
+
+            }
+
+        }
+
+    }
+
+
+
+    if (notificationButton) {
+
+        notificationButton.addEventListener(
+            "click",
+            function () {
+
+                let willOpen = true;
+
+                if (notificationPanel) {
+
+                    willOpen =
+                        !notificationPanel.classList.contains("open");
+
+                    notificationPanel.classList.toggle(
+                        "open"
+                    );
+
+                }
+
+                if (willOpen) {
+
+                    localStorage.setItem(
+                        "kuriosNotificationsSeenCount",
+                        notifications.length
+                    );
+
+                    if (notificationBadge) {
+                        notificationBadge.style.display = "none";
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+
+    if (closeNotifications) {
+
+        closeNotifications.addEventListener(
+            "click",
+            function () {
+
+                if (notificationPanel) {
+
+                    notificationPanel.classList.remove(
+                        "open"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+
+    /* =====================================================
+       15. CHAT SYSTEM — REAL, BACKEND-POWERED
+       ===================================================== */
+
+
+    const chatContactList =
+        document.getElementById("chatContactList");
+
+    const chatContactsLoading =
+        document.getElementById("chatContactsLoading");
+
+    const chatContactsEmpty =
+        document.getElementById("chatContactsEmpty");
+
+    const activeChatName =
+        document.getElementById(
+            "activeChatName"
+        );
+
+
+    const activeChatStatus =
+        document.getElementById(
+            "activeChatStatus"
+        );
+
+
+    const activeChatAvatar =
+        document.getElementById(
+            "activeChatAvatar"
+        );
+
+
+    const messages =
+        document.getElementById(
+            "messages"
+        );
+
+
+    const messageForm =
+        document.getElementById(
+            "messageForm"
+        );
+
+
+    const messageInput =
+        document.getElementById(
+            "messageInput"
+        );
+
+
+    let __kuriosLastTypingEmit = 0;
+
+    if (messageInput) {
+
+        messageInput.addEventListener(
+            "input",
+            function () {
+
+                if (
+                    !activeChatPartnerId ||
+                    !window.__kuriosChatSocket
+                ) {
+                    return;
+                }
+
+                const now = Date.now();
+
+                // Throttle — no need to emit on every
+                // keystroke, once every couple seconds
+                // is enough for a "typing..." indicator.
+
+                if (now - __kuriosLastTypingEmit < 2000) {
+                    return;
+                }
+
+                __kuriosLastTypingEmit = now;
+
+                window.__kuriosChatSocket.emit(
+                    "typing",
+                    { recipientId: activeChatPartnerId }
+                );
+
+            }
+        );
+
+    }
+
+
+    const chatSearch =
+        document.getElementById(
+            "chatSearch"
+        );
+
+
+    let activeChatPartnerId = null;
+    let activeConversationId = null;
+    let chatPollInterval = null;
+    let conversationsPollInterval = null;
+    let cachedConversations = [];
+    let onlineStudentIds = new Set();
+
+    async function refreshOnlinePresence() {
+
+        try {
+
+            const response =
+                await fetch(API_URL + "/api/chat/online-students");
+
+            const data = await response.json();
+
+            if (data.success) {
+
+                onlineStudentIds =
+                    new Set(data.onlineIds.map(String));
+
+                if (activeChatPartnerId) {
+
+                    updateHeaderPresence(activeChatPartnerId);
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Refresh online presence error:",
+                error
+            );
+
+        }
+
+    }
+
+    function updateHeaderPresence(partnerId) {
+
+        const isOnline =
+            onlineStudentIds.has(String(partnerId));
+
+        const dot =
+            document.getElementById("activeChatStatusDot");
+
+        if (dot) {
+            dot.classList.toggle("online", isOnline);
+        }
+
+        if (activeChatStatus) {
+
+            activeChatStatus.textContent =
+                isOnline ? "Online" : "Kurios Stores student";
+
+        }
+
+    }
+
+
+    function chatInitial(firstName, lastName) {
+
+        const name =
+            (firstName || "?").trim();
+
+        return name.charAt(0).toUpperCase();
+
+    }
+
+
+    function renderChatContactList() {
+
+        if (!chatContactList) {
+            return;
+        }
+
+        chatContactList.innerHTML = "";
+
+        const activeFilter =
+            (typeof __kuriosChatFilter !== "undefined" && __kuriosChatFilter) || "all";
+
+        const visibleConversations =
+            activeFilter === "all" ?
+                cachedConversations :
+                cachedConversations.filter(function (c) {
+                    return c.type === activeFilter;
+                });
+
+        if (visibleConversations.length === 0) {
+
+            if (chatContactsEmpty) {
+                chatContactsEmpty.style.display = "block";
+            }
+
+            return;
+
+        }
+
+        if (chatContactsEmpty) {
+            chatContactsEmpty.style.display = "none";
+        }
+
+        visibleConversations.forEach(function (conversation) {
+
+            const fullName =
+                ((conversation.first_name || "") + " " + (conversation.last_name || "")).trim();
+
+            const button =
+                document.createElement("button");
+
+            button.className = "chat-contact";
+
+            if (conversation.conversation_id === activeConversationId) {
+                button.classList.add("active");
+            }
+
+            const avatarMarkup =
+                conversation.profile_picture ?
+                    `<img src="${API_URL + conversation.profile_picture}" alt="${fullName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` :
+                    chatInitial(conversation.first_name, conversation.last_name);
+
+            const unreadBadge =
+                conversation.unread_count > 0 ?
+                    `<span class="chat-contact-unread-badge">${conversation.unread_count}</span>` :
+                    "";
+
+            const isProduct =
+                conversation.type === "PRODUCT" && conversation.product_name;
+
+            const sellerTag =
+                conversation.partner_store_name ?
+                    `<span class="chat-contact-seller-tag">Seller</span>` :
+                    "";
+
+            const previewLine =
+                isProduct ?
+                    `<i class="fa-solid fa-box"></i> ${conversation.product_name}` :
+                    (conversation.last_message ? conversation.last_message.slice(0, 32) : "");
+
+            button.innerHTML = `
+                <div class="chat-avatar">${avatarMarkup}</div>
+                <div class="chat-contact-info">
+                    <strong>${fullName || "Kurios Student"}${sellerTag}</strong>
+                    <span>${previewLine}</span>
+                </div>
+                ${unreadBadge}
+            `;
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    openChatWith(
+                        conversation.id,
+                        fullName,
+                        conversation.conversation_id,
+                        isProduct ? conversation.product_name : null
+                    );
+
+                }
+            );
+
+            chatContactList.appendChild(button);
+
+        });
+
+    }
+
+    window.renderChatContactList = renderChatContactList;
+
+
+    async function loadConversations() {
+
+        const student =
+            getLoggedInStudent();
+
+        if (!student) {
+
+            if (chatContactsLoading) {
+                chatContactsLoading.style.display = "none";
+            }
+
+            return;
+        }
+
+        const sidebarAvatar =
+            document.getElementById("chatAppSidebarAvatar");
+
+        const sidebarName =
+            document.getElementById("chatAppSidebarName");
+
+        if (sidebarAvatar) {
+
+            sidebarAvatar.innerHTML =
+                student.profile_picture ?
+                    `<img src="${API_URL + student.profile_picture}" alt="You">` :
+                    `<i class="fa-regular fa-user"></i>`;
+
+        }
+
+        if (sidebarName) {
+
+            sidebarName.textContent =
+                (student.first_name || "You");
+
+        }
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/chat/conversations?studentId=" + student.id
+                );
+
+            const data = await response.json();
+
+            if (chatContactsLoading) {
+                chatContactsLoading.style.display = "none";
+            }
+
+            if (data.success) {
+
+                cachedConversations = data.conversations;
+                renderChatContactList();
+
+            }
+
+            if (window.__kuriosPendingChatOpen) {
+
+                const pending = window.__kuriosPendingChatOpen;
+                window.__kuriosPendingChatOpen = null;
+
+                openChatWith(
+                    pending.sellerStudentId,
+                    pending.storeName || "Seller",
+                    pending.conversationId,
+                    pending.productName
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Load conversations error:",
+                error
+            );
+
+            if (chatContactsLoading) {
+                chatContactsLoading.style.display = "none";
+            }
+
+        }
+
+    }
+
+
+    function renderMessages(messageRows, myId) {
+
+        if (!messages) {
+            return;
+        }
+
+        messages.innerHTML = "";
+
+        if (messageRows.length === 0) {
+
+            messages.innerHTML = `
+                <p class="chat-contacts-status" style="padding: 20px;">
+                    No messages yet. Say hello!
+                </p>
+            `;
+
+            return;
+
+        }
+
+        messageRows.forEach(function (message) {
+
+            const isSent =
+                message.sender_id === myId;
+
+            const messageElement =
+                document.createElement("div");
+
+            messageElement.className =
+                "message " + (isSent ? "sent" : "received");
+
+            const time =
+                new Date(message.created_at).toLocaleTimeString(
+                    [],
+                    { hour: "2-digit", minute: "2-digit" }
+                );
+
+            const receiptMarkup =
+                isSent ?
+                    `<i class="fa-solid fa-check-double message-read-receipt ${message.read_at ? "read" : ""}"></i>` :
+                    "";
+
+            messageElement.innerHTML = `
+                <div class="message-bubble">${escapeChatText(message.body)}</div>
+                <span>${time}${receiptMarkup}</span>
+            `;
+
+            messages.appendChild(messageElement);
+
+        });
+
+        messages.scrollTop = messages.scrollHeight;
+
+    }
+
+
+    function escapeChatText(text) {
+
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+
+    }
+
+
+    async function loadThread(partnerId, myId, conversationId) {
+
+        try {
+
+            let url =
+                API_URL + "/api/chat/messages?studentId=" + myId + "&withId=" + partnerId;
+
+            if (conversationId) {
+                url += "&conversationId=" + conversationId;
+            }
+
+            const response =
+                await fetch(url);
+
+            const data = await response.json();
+
+            if (data.success && activeChatPartnerId === partnerId) {
+
+                renderMessages(data.messages, myId);
+
+            }
+
+            // A message may have just been marked read —
+            // refresh the sidebar's unread badges too.
+
+            loadConversations();
+
+        } catch (error) {
+
+            console.error(
+                "Load thread error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    function openChatWith(partnerId, partnerName, conversationId, productContext, partnerData) {
+
+        const student =
+            getLoggedInStudent();
+
+        if (!student) {
+            return;
+        }
+
+        activeChatPartnerId = partnerId;
+        activeConversationId = conversationId || null;
+
+        const nameTextEl =
+            document.getElementById("activeChatNameText");
+
+        if (nameTextEl) {
+            nameTextEl.textContent = partnerName || "Kurios Student";
+        }
+
+        updateHeaderPresence(partnerId);
+
+        if (activeChatAvatar) {
+            activeChatAvatar.innerHTML = `<i class="fa-solid fa-user"></i>`;
+        }
+
+
+        // ------------------------------------
+        // PROFILE PANEL — real data only
+        // ------------------------------------
+
+        const partner =
+            partnerData ||
+            cachedConversations.find(function (c) { return c.id === partnerId; }) ||
+            {};
+
+        const profilePanel =
+            document.getElementById("chatProfilePanel");
+
+        const chatPreviewApp =
+            document.getElementById("chatPreviewApp");
+
+        if (profilePanel) {
+
+            profilePanel.style.display = "block";
+
+            if (chatPreviewApp) {
+                chatPreviewApp.classList.add("has-profile-panel");
+            }
+
+            const profileAvatar =
+                document.getElementById("chatProfileAvatar");
+
+            if (profileAvatar) {
+
+                profileAvatar.innerHTML =
+                    partner.profile_picture ?
+                        `<img src="${API_URL + partner.profile_picture}" alt="${partnerName}">` :
+                        `<i class="fa-regular fa-user"></i>`;
+
+            }
+
+            const profileName =
+                document.getElementById("chatProfileName");
+
+            if (profileName) {
+                profileName.textContent = partnerName || "Kurios Student";
+            }
+
+            const profileUniversity =
+                document.getElementById("chatProfileUniversity");
+
+            if (profileUniversity) {
+
+                profileUniversity.textContent =
+                    partner.university || "";
+
+                profileUniversity.style.display =
+                    partner.university ? "block" : "none";
+
+            }
+
+            const infoList =
+                document.getElementById("chatProfileInfoList");
+
+            if (infoList) {
+
+                let infoRows = "";
+
+                if (partner.university) {
+
+                    infoRows += `
+                        <div class="chat-profile-info-row">
+                            <i class="fa-solid fa-building-columns"></i>
+                            <span>${partner.university}</span>
+                        </div>
+                    `;
+
+                }
+
+                if (partner.phone) {
+
+                    infoRows += `
+                        <div class="chat-profile-info-row">
+                            <i class="fa-solid fa-phone"></i>
+                            <span>${partner.phone}</span>
+                        </div>
+                    `;
+
+                }
+
+                if (partner.whatsapp_number) {
+
+                    infoRows += `
+                        <div class="chat-profile-info-row">
+                            <i class="fa-brands fa-whatsapp"></i>
+                            <span>${partner.whatsapp_number}</span>
+                        </div>
+                    `;
+
+                }
+
+                infoList.innerHTML =
+                    infoRows ||
+                    `<p style="font-size:11px; color:#9ca3af;">No further details available.</p>`;
+
+            }
+
+        }
+
+        const contextBanner =
+            document.getElementById("chatContextBanner");
+
+        if (contextBanner) {
+
+            contextBanner.style.display = "flex";
+
+            const bannerIcon =
+                contextBanner.querySelector("i");
+
+            const bannerText =
+                contextBanner.querySelector("span");
+
+            if (productContext) {
+
+                if (bannerIcon) {
+                    bannerIcon.className = "fa-solid fa-box";
+                }
+
+                if (bannerText) {
+                    bannerText.textContent = "You're chatting about: " + productContext;
+                }
+
+            } else {
+
+                if (bannerIcon) {
+                    bannerIcon.className = "fa-solid fa-user-group";
+                }
+
+                if (bannerText) {
+                    bannerText.textContent = "This is a normal conversation — you're chatting with a fellow student.";
+                }
+
+            }
+
+        }
+
+        const chatApp =
+            document.getElementById("chatPreviewApp");
+
+        if (chatApp) {
+            chatApp.classList.add("conversation-open");
+        }
+
+        const typingIndicator =
+            document.getElementById("chatTypingIndicator");
+
+        if (typingIndicator) {
+            typingIndicator.style.display = "none";
+        }
+
+        renderChatContactList();
+
+        loadThread(partnerId, student.id, activeConversationId);
+
+        clearInterval(chatPollInterval);
+
+        chatPollInterval = setInterval(
+            function () {
+                loadThread(partnerId, student.id, activeConversationId);
+            },
+            20000
+        );
+
+    }
+
+
+    /*
+        Send a message.
+    */
+
+    if (messageForm) {
+
+        messageForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+                const student =
+                    getLoggedInStudent();
+
+                if (!student) {
+
+                    showMessage("Please sign in to chat.");
+                    return;
+
+                }
+
+                if (!activeChatPartnerId) {
+
+                    showMessage("Select or start a conversation first.");
+                    return;
+
+                }
+
+                if (!messageInput) {
+                    return;
+                }
+
+                const text =
+                    messageInput.value.trim();
+
+                if (text === "") {
+                    return;
+                }
+
+                messageInput.value = "";
+
+                try {
+
+                    const response =
+                        await fetch(
+                            API_URL + "/api/chat/messages",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    senderId: student.id,
+                                    recipientId: activeChatPartnerId,
+                                    body: text,
+                                    conversationId: activeConversationId
+                                })
+                            }
+                        );
+
+                    const data = await response.json();
+
+                    if (!data.success) {
+
+                        showMessage(
+                            data.message || "Could not send your message."
+                        );
+
+                        return;
+
+                    }
+
+                    loadThread(activeChatPartnerId, student.id, activeConversationId);
+
+                } catch (error) {
+
+                    console.error(
+                        "Send message error:",
+                        error
+                    );
+
+                    showMessage("Unable to connect to Kurios Stores server.");
+
+                }
+
+            }
+        );
+
+    }
+
+
+
+    /* =====================================================
+       16. CHAT SEARCH
+       ===================================================== */
+
+
+    if (chatSearch) {
+
+        chatSearch.addEventListener(
+            "input",
+            function () {
+
+                const search =
+                    chatSearch.value
+                        .toLowerCase()
+                        .trim();
+
+                const contactButtons =
+                    chatContactList ?
+                        chatContactList.querySelectorAll(".chat-contact") :
+                        [];
+
+                contactButtons.forEach(
+                    function (contact) {
+
+                        const name =
+                            contact
+                                .querySelector("strong")
+                                .textContent
+                                .toLowerCase();
+
+                        contact.style.display =
+                            name.includes(search) ? "" : "none";
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+
+    /* =====================================================
+       17. NEW CHAT BUTTON — ADD BY PHONE NUMBER
+       ===================================================== */
+
+
+    const chatBackButton =
+        document.getElementById("chatBackButton");
+
+    if (chatBackButton) {
+
+        chatBackButton.addEventListener(
+            "click",
+            function () {
+
+                const chatApp =
+                    document.getElementById("chatPreviewApp");
+
+                if (chatApp) {
+                    chatApp.classList.remove("conversation-open");
+                }
+
+            }
+        );
+
+    }
+
+
+    const newChatButton =
+        document.getElementById(
+            "newChatButton"
+        );
+
+    const newChatForm =
+        document.getElementById("newChatForm");
+
+    const newChatPhoneInput =
+        document.getElementById("newChatPhoneInput");
+
+    const newChatFindButton =
+        document.getElementById("newChatFindButton");
+
+    const newChatStatus =
+        document.getElementById("newChatStatus");
+
+
+    if (newChatButton) {
+
+        newChatButton.addEventListener(
+            "click",
+            function () {
+
+                const student =
+                    getLoggedInStudent();
+
+                if (!student) {
+
+                    showMessage("Please sign in to start a chat.");
+                    openSignInModal();
+                    return;
+
+                }
+
+                if (newChatForm) {
+
+                    const isVisible =
+                        newChatForm.style.display === "block";
+
+                    newChatForm.style.display =
+                        isVisible ? "none" : "block";
+
+                    if (!isVisible && newChatPhoneInput) {
+                        newChatPhoneInput.focus();
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    if (newChatFindButton) {
+
+        newChatFindButton.addEventListener(
+            "click",
+            async function () {
+
+                const student =
+                    getLoggedInStudent();
+
+                if (!student) {
+                    return;
+                }
+
+                const phoneNumber =
+                    newChatPhoneInput ? newChatPhoneInput.value.trim() : "";
+
+                if (!phoneNumber) {
+
+                    if (newChatStatus) {
+                        newChatStatus.textContent = "Please enter a phone number.";
+                    }
+
+                    return;
+
+                }
+
+                newChatFindButton.disabled = true;
+
+                if (newChatStatus) {
+                    newChatStatus.textContent = "Searching...";
+                }
+
+                try {
+
+                    const response =
+                        await fetch(
+                            API_URL + "/api/chat/find",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    studentId: student.id,
+                                    phoneNumber: phoneNumber
+                                })
+                            }
+                        );
+
+                    const data = await response.json();
+
+                    if (!data.success) {
+
+                        if (newChatStatus) {
+                            newChatStatus.textContent = data.message;
+                        }
+
+                        return;
+
+                    }
+
+                    const fullName =
+                        ((data.student.first_name || "") + " " + (data.student.last_name || "")).trim();
+
+                    if (newChatStatus) {
+                        newChatStatus.textContent = "";
+                    }
+
+                    if (newChatPhoneInput) {
+                        newChatPhoneInput.value = "";
+                    }
+
+                    if (newChatForm) {
+                        newChatForm.style.display = "none";
+                    }
+
+                    openChatWith(data.student.id, fullName, null, null, data.student);
+
+                } catch (error) {
+
+                    console.error(
+                        "Find student by phone error:",
+                        error
+                    );
+
+                    if (newChatStatus) {
+                        newChatStatus.textContent = "Unable to connect to Kurios Stores server.";
+                    }
+
+                } finally {
+
+                    newChatFindButton.disabled = false;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // Load the conversation list once, and keep it
+    // fresh while the student is on the site. (Now
+    // that Socket.IO delivers messages instantly,
+    // this poll is just a resilience fallback in
+    // case the socket connection drops.)
+
+    loadConversations();
+
+    conversationsPollInterval = setInterval(
+        loadConversations,
+        30000
+    );
+
+    refreshOnlinePresence();
+
+    setInterval(refreshOnlinePresence, 15000);
+
+
+    // ========================================
+    // REAL-TIME CHAT (Socket.IO)
+    // ========================================
+
+    if (typeof io !== "undefined") {
+
+        const chatSocket =
+            io(API_URL);
+
+        window.__kuriosChatSocket = chatSocket;
+
+        chatSocket.on("connect", function () {
+
+            const currentStudent =
+                getLoggedInStudent();
+
+            if (currentStudent) {
+
+                chatSocket.emit("join", currentStudent.id);
+
+            }
+
+        });
+
+        chatSocket.on("new_message", function (incomingMessage) {
+
+            const currentStudent =
+                getLoggedInStudent();
+
+            if (!currentStudent) {
+                return;
+            }
+
+            // Refresh the sidebar either way, so
+            // unread badges/previews stay current.
+
+            loadConversations();
+
+            // If this message belongs to the thread
+            // that's currently open, refresh it too.
+
+            if (
+                activeChatPartnerId &&
+                String(incomingMessage.sender_id) === String(activeChatPartnerId)
+            ) {
+
+                loadThread(activeChatPartnerId, currentStudent.id, activeConversationId);
+
+            }
+
+        });
+
+        let __kuriosTypingHideTimeout = null;
+
+        chatSocket.on("typing", function (data) {
+
+            if (
+                !activeChatPartnerId ||
+                !data ||
+                String(data.fromStudentId) !== String(activeChatPartnerId)
+            ) {
+                return;
+            }
+
+            const typingIndicator =
+                document.getElementById("chatTypingIndicator");
+
+            const typingText =
+                document.getElementById("chatTypingText");
+
+            if (typingText && activeChatName) {
+
+                typingText.textContent =
+                    activeChatName.textContent + " is typing...";
+
+            }
+
+            if (typingIndicator) {
+
+                typingIndicator.style.display = "flex";
+
+                if (__kuriosTypingHideTimeout) {
+                    clearTimeout(__kuriosTypingHideTimeout);
+                }
+
+                __kuriosTypingHideTimeout = setTimeout(
+                    function () {
+                        typingIndicator.style.display = "none";
+                    },
+                    3000
+                );
+
+            }
+
+        });
+
+    }
+
+
+
+
+    /* =====================================================
+       18. ELKURIOS BROADCAST
+       ===================================================== */
+
+
+    const broadcastForm =
+        document.getElementById(
+            "broadcastForm"
+        );
+
+
+    const broadcastModal =
+        document.getElementById(
+            "broadcastModal"
+        );
+
+
+    const closeBroadcast =
+        document.getElementById(
+            "closeBroadcast"
+        );
+
+
+
+    if (closeBroadcast) {
+
+        closeBroadcast.addEventListener(
+            "click",
+            function () {
+
+                if (broadcastModal) {
+
+                    broadcastModal.classList.remove(
+                        "active"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+
+    /*
+        IMPORTANT:
+
+        This currently demonstrates
+        the frontend behaviour only.
+
+        The real broadcast system will be
+        connected to PostgreSQL and Node.js
+        after we create the notification API.
+    */
+
+    if (broadcastForm) {
+
+        broadcastForm.addEventListener(
+            "submit",
+            function (event) {
+
+                event.preventDefault();
+
+
+                const title =
+                    document.getElementById(
+                        "broadcastTitle"
+                    ).value.trim();
+
+
+                const message =
+                    document.getElementById(
+                        "broadcastMessage"
+                    ).value.trim();
+
+
+
+                if (
+                    title === "" ||
+                    message === ""
+                ) {
+
+                    showMessage(
+                        "Please enter a title and message."
+                    );
+
+                    return;
+
+                }
+
+
+
+                /*
+                    Add a temporary notification
+                    to this browser.
+                */
+
+                notifications.unshift({
+
+                    title: title,
+
+                    message: message
+
+                });
+
+
+
+                saveNotifications();
+
+                renderNotifications();
+
+
+
+                showMessage(
+                    "Announcement created. The real all-students broadcast API comes next."
+                );
+
+
+
+                broadcastForm.reset();
+
+            }
+        );
+
+    }
+
+
+
+    /* =====================================================
+       19. CHECKOUT
+       ===================================================== */
+
+
+    let currentOrderPaymentReference = null;
+
+    if (checkoutButton) {
+
+        checkoutButton.addEventListener(
+            "click",
+            async function () {
+
+
+                if (
+                    cart.length === 0
+                ) {
+
+                    showMessage(
+                        "Your cart is empty."
+                    );
+
+                    return;
+
+                }
+
+
+                // ========================================
+                // MUST BE SIGNED IN TO CHECK OUT
+                // ========================================
+
+                const student =
+                    getLoggedInStudent();
+
+                if (!student) {
+
+                    closeCartPanel();
+
+                    showMessage(
+                        "Please sign in to check out."
+                    );
+
+                    openSignInModal();
+
+                    return;
+
+                }
+
+
+                checkoutButton.disabled = true;
+
+                checkoutButton.textContent =
+                    "Starting checkout...";
+
+
+                try {
+
+                    // ========================================
+                    // START THE ORDER ON OUR SERVER
+                    // (server recalculates the real total —
+                    // never trust prices from the browser)
+                    // ========================================
+
+                    const initiateResponse =
+                        await fetch(
+                            API_URL + "/api/orders/initiate",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    studentId: student.id,
+                                    items: cart,
+                                    customerName:
+                                        `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                                    customerEmail: student.email
+                                })
+                            }
+                        );
+
+                    const initiateData =
+                        await initiateResponse.json();
+
+                    if (!initiateData.success) {
+
+                        showMessage(
+                            initiateData.message ||
+                            "Could not start checkout."
+                        );
+
+                        return;
+
+                    }
+
+                    currentOrderPaymentReference =
+                        initiateData.paymentReference;
+
+                    checkoutButton.style.display = "none";
+
+                    const choiceEl =
+                        document.getElementById("orderPaymentChoice");
+
+                    if (choiceEl) {
+                        choiceEl.style.display = "block";
+                    }
+
+                } catch (error) {
+
+                    console.error(
+                        "Checkout error:",
+                        error
+                    );
+
+                    showMessage(
+                        "Could not reach the server. Please try again."
+                    );
+
+                } finally {
+
+                    checkoutButton.disabled = false;
+
+                    checkoutButton.textContent =
+                        "Proceed to Checkout";
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // ========================================
+    // PAY ORDER WITH MONNIFY
+    // ========================================
+
+    const payOrderWithMonnifyButton =
+        document.getElementById("payOrderWithMonnifyButton");
+
+    if (payOrderWithMonnifyButton) {
+
+        payOrderWithMonnifyButton.addEventListener(
+            "click",
+            async function () {
+
+                const statusEl =
+                    document.getElementById("orderPaymentStatus");
+
+                if (!currentOrderPaymentReference) {
+                    return;
+                }
+
+                const student =
+                    getLoggedInStudent();
+
+                if (!student) {
+                    return;
+                }
+
+                payOrderWithMonnifyButton.disabled = true;
+
+                if (statusEl) statusEl.textContent = "";
+
+                try {
+
+                    const response =
+                        await fetch(
+                            API_URL + "/api/orders/pay/monnify",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    paymentReference: currentOrderPaymentReference
+                                })
+                            }
+                        );
+
+                    const data = await response.json();
+
+                    if (!data.success) {
+
+                        if (statusEl) {
+                            statusEl.textContent =
+                                data.message || "Could not start Monnify checkout.";
+                        }
+
+                        return;
+
+                    }
+
+                    if (typeof MonnifySDK === "undefined") {
+
+                        if (statusEl) {
+                            statusEl.textContent =
+                                "Payment could not load. Please refresh and try again.";
+                        }
+
+                        return;
+
+                    }
+
+                    if (
+                        !data.apiKey ||
+                        !data.contractCode
+                    ) {
+
+                        console.error(
+                            "Checkout error: missing Monnify credentials from server",
+                            data
+                        );
+
+                        if (statusEl) {
+                            statusEl.textContent =
+                                "Monnify is not fully configured yet. Try OPay instead, or contact support.";
+                        }
+
+                        return;
+
+                    }
+
+                    closeCartPanel();
+
+                    MonnifySDK.initialize({
+
+                        amount: data.amount,
+
+                        currency: "NGN",
+
+                        reference: data.paymentReference,
+
+                        customerFullName:
+                            `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+
+                        customerEmail: student.email,
+
+                        apiKey: data.apiKey,
+
+                        contractCode: data.contractCode,
+
+                        paymentDescription:
+                            "Kurios Stores order",
+
+                        onComplete: async function () {
+
+                            await verifyOrderPayment(
+                                data.paymentReference
+                            );
+
+                        },
+
+                        onClose: function () {
+
+                            // Student closed the widget without
+                            // finishing — we'll still catch a
+                            // completed payment via the webhook,
+                            // so nothing else to do here.
+
+                        }
+
+                    });
+
+                } catch (error) {
+
+                    console.error(
+                        "Order Monnify checkout error:",
+                        error
+                    );
+
+                    if (statusEl) {
+                        statusEl.textContent =
+                            "Unable to connect to Kurios Stores server.";
+                    }
+
+                } finally {
+
+                    payOrderWithMonnifyButton.disabled = false;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // ========================================
+    // PAY ORDER WITH OPAY
+    // ========================================
+
+    const payOrderWithOpayButton =
+        document.getElementById("payOrderWithOpayButton");
+
+    if (payOrderWithOpayButton) {
+
+        payOrderWithOpayButton.addEventListener(
+            "click",
+            async function () {
+
+                const statusEl =
+                    document.getElementById("orderPaymentStatus");
+
+                if (!currentOrderPaymentReference) {
+                    return;
+                }
+
+                const student =
+                    getLoggedInStudent();
+
+                if (!student) {
+                    return;
+                }
+
+                payOrderWithOpayButton.disabled = true;
+
+                if (statusEl) statusEl.textContent = "Redirecting to OPay...";
+
+                try {
+
+                    const returnUrl =
+                        window.location.origin + "/#orders";
+
+                    const response =
+                        await fetch(
+                            API_URL + "/api/orders/pay/opay",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    paymentReference: currentOrderPaymentReference,
+                                    returnUrl: returnUrl,
+                                    customerName:
+                                        `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                                    customerEmail: student.email
+                                })
+                            }
+                        );
+
+                    const data = await response.json();
+
+                    if (!data.success || !data.cashierUrl) {
+
+                        if (statusEl) {
+                            statusEl.textContent =
+                                data.message || "Could not start OPay checkout.";
+                        }
+
+                        payOrderWithOpayButton.disabled = false;
+
+                        return;
+
+                    }
+
+                    localStorage.setItem(
+                        "kuriosPendingOpayOrderRef",
+                        currentOrderPaymentReference
+                    );
+
+                    window.location.href = data.cashierUrl;
+
+                } catch (error) {
+
+                    console.error(
+                        "Order OPay checkout error:",
+                        error
+                    );
+
+                    if (statusEl) {
+                        statusEl.textContent =
+                            "Unable to connect to Kurios Stores server.";
+                    }
+
+                    payOrderWithOpayButton.disabled = false;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // ========================================
+    // CONFIRM A PAYMENT WITH OUR SERVER
+    // (never trust the widget's onComplete alone)
+    // ========================================
+
+    async function verifyOrderPayment(paymentReference) {
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/orders/verify",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            paymentReference: paymentReference
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (data.success) {
+
+                cart = [];
+
+                saveCart();
+
+                updateCart();
+
+                showMessage(
+                    "Payment confirmed! Your order has been placed."
+                );
+
+            } else {
+
+                showMessage(
+                    "We couldn't confirm your payment yet. Check My Orders shortly, or contact support if this continues."
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Payment verification error:",
+                error
+            );
+
+            showMessage(
+                "We couldn't confirm your payment. Check My Orders shortly, or contact support if this continues."
+            );
+
+        } finally {
+
+            currentOrderPaymentReference = null;
+
+            if (checkoutButton) {
+                checkoutButton.style.display = "";
+            }
+
+            const choiceEl =
+                document.getElementById("orderPaymentChoice");
+
+            if (choiceEl) {
+                choiceEl.style.display = "none";
+            }
+
+        }
+
+    }
+
+
+    // ========================================
+    // RESUME AN OPAY ORDER PAYMENT IF WE'RE
+    // RETURNING FROM THE OPAY CHECKOUT PAGE
+    // ========================================
+
+    const pendingOpayOrderRef =
+        localStorage.getItem("kuriosPendingOpayOrderRef");
+
+    if (pendingOpayOrderRef) {
+
+        localStorage.removeItem("kuriosPendingOpayOrderRef");
+
+        verifyOrderPayment(pendingOpayOrderRef);
+
+    }
+
+
+
+    /* =====================================================
+       20. FOOTER INTERACTIONS
+       ===================================================== */
+
+
+    const socialLinks =
+        document.querySelectorAll(
+            ".social-links a"
+        );
+
+
+    socialLinks.forEach(
+        function (link) {
+
+            link.addEventListener(
+                "click",
+                function (event) {
+
+                    event.preventDefault();
+
+
+                    const label =
+                        link.getAttribute(
+                            "aria-label"
+                        ) ||
+                        "Social media";
+
+
+                    showMessage(
+                        label +
+                        " link will be connected soon."
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+
+    /*
+        Footer policy links.
+    */
+
+    const privacyLink =
+        document.getElementById(
+            "privacyLink"
+        );
+
+
+    const termsLink =
+        document.getElementById(
+            "termsLink"
+        );
+
+
+    const refundLink =
+        document.getElementById(
+            "refundLink"
+        );
+
+
+
+    if (privacyLink) {
+
+        privacyLink.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                showMessage(
+                    "Privacy Policy page coming soon."
+                );
+
+            }
+        );
+
+    }
+
+
+
+    if (termsLink) {
+
+        termsLink.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                showMessage(
+                    "Terms of Service page coming soon."
+                );
+
+            }
+        );
+
+    }
+
+
+
+    if (refundLink) {
+
+        refundLink.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                showMessage(
+                    "Refund Policy page coming soon."
+                );
+
+            }
+        );
+
+    }
+
+
+
+    /* =====================================================
+       21. FOOTER HEART
+       ===================================================== */
+
+
+    const footerHeart =
+        document.querySelector(
+            ".footer-love i"
+        );
+
+
+    if (footerHeart) {
+
+        footerHeart.addEventListener(
+            "click",
+            function () {
+
+
+                footerHeart.classList.toggle(
+                    "fa-regular"
+                );
+
+
+                footerHeart.classList.toggle(
+                    "fa-solid"
+                );
+
+
+                showMessage(
+                    "Together for a greater campus ❤️"
+                );
+
+            }
+        );
+
+    }
+
+
+
+    /* =====================================================
+       22. GENERAL MESSAGE / TOAST
+       ===================================================== */
+
+
+    function showMessage(message) {
+
+
+        /*
+            Create a toast notification.
+        */
+
+        let toast =
+            document.getElementById(
+                "kuriosToast"
+            );
+
+
+
+        /*
+            If the toast doesn't exist,
+            create it.
+        */
+
+        if (!toast) {
+
+            toast =
+                document.createElement(
+                    "div"
+                );
+
+
+            toast.id =
+                "kuriosToast";
+
+
+            toast.className =
+                "kurios-toast";
+
+
+            document.body.appendChild(
+                toast
+            );
+
+        }
+
+
+
+        toast.textContent =
+            message;
+
+
+        toast.classList.add(
+            "show"
+        );
+
+
+
+        /*
+            Remove it after 3 seconds.
+        */
+
+        setTimeout(
+            function () {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            3000
+        );
+
+    }
+
+
+
+    /* =====================================================
+       23. SMOOTH SCROLLING
+       ===================================================== */
+
+
+    /*
+        Smooth-scrolling for plain "#section" links
+        used to be handled here directly — but that
+        approach called preventDefault() on every
+        "#" link click and did its own manual scroll,
+        which silently broke navigation the moment the
+        target section was hidden (i.e. from any page
+        other than the homepage itself). The unified
+        hash router below now owns all of this — it
+        already scrolls to the right section as part
+        of normal navigation, and works correctly from
+        any page, not just the homepage.
+    */
+
+    document.querySelectorAll('a[href="#signin"]').forEach(function (link) {
+
+        link.addEventListener("click", function (event) {
+
+            event.preventDefault();
+            openSignInModal();
+
+        });
+
+    });
+
+
+
+
+
+    /* =====================================================
+       24. INITIALIZE EVERYTHING
+       ===================================================== */
+
+
+    /*
+        Show saved cart.
+    */
+
+    updateCart();
+
+
+
+    /*
+        Load notifications from the server.
+    */
+
+    async function loadNotificationsFromServer() {
+
+        try {
+
+            const response =
+                await fetch(API_URL + "/api/notifications");
+
+            const data =
+                await response.json();
+
+            if (data.success) {
+
+                notifications = data.notifications;
+
+                renderNotifications();
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Load notifications error:",
+                error
+            );
+
+        }
+
+    }
+
+    loadNotificationsFromServer();
+
+
+
+    /*
+        IMPORTANT:
+
+        This is where the frontend
+        contacts our Node.js backend.
+    */
+
+    loadProducts();
+
+
+    // =====================================================
+    // UNIFIED FULL-PAGE ROUTER
+    // (single source of truth for every #hash-based full
+    // page: #sell, #store-<id>, #profile, #orders,
+    // #wishlist, #wallet — replaces the separate per-page
+    // listeners that used to duplicate this logic)
+    // =====================================================
+
+    function hideAllFullPages() {
+
+        ["sellerPage", "storefrontPage", "wishlistPage", "walletPage", "chatPage"]
+            .forEach(function (id) {
+
+                const el = document.getElementById(id);
+
+                if (el) {
+                    el.style.display = "none";
+                }
+
+            });
+
+        if (profileOverlay) {
+            profileOverlay.classList.remove("open");
+        }
+
+        if (ordersOverlay) {
+            ordersOverlay.classList.remove("open");
+        }
+
+    }
+
+    function goHome() {
+
+        if (window.location.hash) {
+
+            history.pushState(
+                null,
+                "",
+                window.location.pathname + window.location.search
+            );
+
+        }
+
+        hideAllFullPages();
+
+        const mainEl =
+            document.getElementById("mainContent");
+
+        if (mainEl) {
+            mainEl.style.display = "block";
+        }
+
+    }
+
+    function goBack() {
+
+        const previousHash =
+            window.__kuriosPreviousHash;
+
+        const currentHash =
+            window.location.hash;
+
+        // Only honor it if it's a real, different, non-empty
+        // page — never bounce back to the page we're already
+        // on, and never chase an empty/home-equivalent hash.
+
+        if (
+            previousHash &&
+            previousHash.length > 1 &&
+            previousHash !== currentHash
+        ) {
+
+            window.location.hash =
+                previousHash.slice(1);
+
+        } else {
+
+            goHome();
+
+        }
+
+    }
+
+    window.goBack = goBack;
+
+    function showSimplePage(pageId) {
+
+        hideAllFullPages();
+
+        const pageEl =
+            document.getElementById(pageId);
+
+        if (pageEl) {
+            pageEl.style.display = "block";
+        }
+
+        const mainEl =
+            document.getElementById("mainContent");
+
+        if (mainEl) {
+            mainEl.style.display = "none";
+        }
+
+        window.scrollTo({ top: 0 });
+
+    }
+
+    let __kuriosRouteToken = 0;
+    let __kuriosLastKnownHash = "";
+
+    function syncPageFromHash() {
+
+        const hash = window.location.hash;
+
+        // Remember what page we were just on, so "back"
+        // buttons can return there instead of always
+        // dropping the user on the dashboard home.
+
+        window.__kuriosPreviousHash = __kuriosLastKnownHash;
+        __kuriosLastKnownHash = hash;
+
+        const thisRouteToken =
+            ++__kuriosRouteToken;
+
+        const splashMessages = {
+            "#sell": "Loading your store...",
+            "#profile": "Loading your profile...",
+            "#orders": "Loading your orders...",
+            "#wishlist": "Loading your wishlist...",
+            "#wallet": "Loading your wallet...",
+            "#chat": "Loading chat..."
+        };
+
+        const splashMessage =
+            hash.indexOf("#store-") === 0 ?
+                "Loading store..." :
+                (splashMessages[hash] || "Loading...");
+
+        const splashEl =
+            document.getElementById("postLoginSplash");
+
+        const splashTextEl =
+            splashEl ? splashEl.querySelector("p") : null;
+
+        if (splashTextEl) {
+            splashTextEl.textContent = splashMessage;
+        }
+
+        if (splashEl) {
+            splashEl.style.display = "flex";
+        }
+
+        setTimeout(
+            function () {
+
+                // If another navigation started after this
+                // one, let that one win — don't route to a
+                // now-stale destination.
+
+                if (thisRouteToken !== __kuriosRouteToken) {
+                    return;
+                }
+
+                performPageRouting(hash);
+
+                if (splashEl) {
+                    splashEl.style.display = "none";
+                }
+
+            },
+            800
+        );
+
+    }
+
+    function performPageRouting(hash) {
+
+        if (typeof closeNotificationPanel === "function") {
+            closeNotificationPanel();
+        }
+
+        if (hash !== "#sell" && typeof setAccountMenuContext === "function") {
+            setAccountMenuContext(false);
+        }
+
+        if (hash === "#sell") {
+
+            hideAllFullPages();
+
+            if (typeof openSellerPanel === "function") {
+                openSellerPanel();
+            }
+
+            return;
+
+        }
+
+        if (hash.indexOf("#store-") === 0) {
+
+            const sellerId =
+                hash.replace("#store-", "");
+
+            if (sellerId && typeof openStorefront === "function") {
+
+                hideAllFullPages();
+                openStorefront(sellerId);
+                return;
+
+            }
+
+        }
+
+        if (hash === "#profile") {
+
+            hideAllFullPages();
+            openProfilePanel();
+            return;
+
+        }
+
+        if (hash === "#orders") {
+
+            hideAllFullPages();
+            openOrdersPanel();
+            return;
+
+        }
+
+        if (hash === "#wishlist") {
+
+            showSimplePage("wishlistPage");
+            return;
+
+        }
+
+        if (hash === "#wallet") {
+
+            showSimplePage("walletPage");
+
+            if (typeof loadWalletPage === "function") {
+                loadWalletPage();
+            }
+
+            return;
+
+        }
+
+        if (hash === "#chat") {
+
+            showSimplePage("chatPage");
+
+            if (typeof loadConversations === "function") {
+                loadConversations();
+            }
+
+            return;
+
+        }
+
+        // No matching hash — show the homepage.
+        // (This also covers plain section anchors like
+        // #shop, #categories, #rewards — the browser's
+        // native scroll-to-anchor can silently fail if
+        // that section was hidden at the moment the hash
+        // changed, e.g. coming back from another page, so
+        // we scroll to it manually here instead.)
+
+        hideAllFullPages();
+
+        const mainEl =
+            document.getElementById("mainContent");
+
+        if (mainEl) {
+            mainEl.style.display = "block";
+        }
+
+        if (hash && hash.length > 1) {
+
+            const targetEl =
+                document.getElementById(hash.slice(1));
+
+            if (targetEl) {
+
+                setTimeout(
+                    function () {
+                        targetEl.scrollIntoView({ behavior: "smooth" });
+                    },
+                    0
+                );
+
+            }
+
+        }
+
+    }
+
+    // Generic "Back" links used across full pages
+    // (Wishlist, Wallet, Chat, Seller Dashboard) —
+    // return to wherever the student actually came
+    // from, not always the dashboard home.
+
+    document.querySelectorAll(".page-back-link").forEach(function (link) {
+
+        link.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                goBack();
+
+            }
+        );
+
+    });
+
+    // Make these reachable from outer-scope code too
+    // (e.g. closeSellerPanel calling goHome()).
+
+    window.goHome = goHome;
+    window.syncPageFromHash = syncPageFromHash;
+
+    window.addEventListener("popstate", syncPageFromHash);
+    window.addEventListener("hashchange", syncPageFromHash);
+
+    syncPageFromHash();
+
+
+});
 
 /* =========================================
-   CLICK EFFECT
+   SIGN UP MODAL
 ========================================= */
 
-.create-account-btn:active {
-    transform: scale(0.97);
+const signUpModal =
+    document.getElementById("signUpModal");
 
-    box-shadow:
-        0 4px 10px rgba(109, 40, 217, 0.20);
+const openSignUp =
+    document.getElementById("openSignUp");
+
+const closeSignUp =
+    document.getElementById("closeSignUp");
+
+const backToSignIn =
+    document.getElementById("backToSignIn");
+
+
+/* OPEN SIGN UP */
+
+if (openSignUp) {
+
+    openSignUp.addEventListener(
+        "click",
+        function(event) {
+
+            event.preventDefault();
+
+            if (signInModal) {
+                signInModal.classList.remove("open");
+            }
+
+            if (signUpModal) {
+                signUpModal.classList.add("open");
+            }
+
+            // Reset header visibility in case a previous
+            // OTP flow hid it.
+
+            const authIconEl =
+                document.querySelector("#signUpModal .auth-icon");
+
+            if (authIconEl) {
+                authIconEl.style.display = "";
+            }
+
+            const titleEl =
+                document.getElementById("accountModalTitle");
+
+            if (titleEl) {
+                titleEl.style.display = "";
+            }
+
+            const subtitleEl =
+                document.getElementById("accountModalSubtitle");
+
+            if (subtitleEl) {
+                subtitleEl.style.display = "";
+            }
+
+        }
+    );
+
 }
 
+
+/* CLOSE SIGN UP */
+
+if (closeSignUp) {
+
+    closeSignUp.addEventListener(
+        "click",
+        function() {
+
+            if (signUpModal) {
+                signUpModal.classList.remove("open");
+            }
+
+            if (typeof stopOtpTimers === "function") {
+                stopOtpTimers();
+            }
+
+        }
+    );
+
+}
+
+
+/* BACK TO SIGN IN */
+
+if (backToSignIn) {
+
+    backToSignIn.addEventListener(
+        "click",
+        function(event) {
+
+            event.preventDefault();
+
+            if (signUpModal) {
+                signUpModal.classList.remove("open");
+            }
+
+            if (signInModal) {
+                signInModal.classList.add("open");
+            }
+
+            if (typeof stopOtpTimers === "function") {
+                stopOtpTimers();
+            }
+
+        }
+    );
+
+}
 
 /* =========================================
-   FOCUS EFFECT
+   SIGNUP MODAL SCROLLBAR
 ========================================= */
 
-.create-account-btn:focus-visible {
-    outline: 3px solid rgba(124, 58, 237, 0.25);
-    outline-offset: 3px;
+const signupModalContent =
+    document.querySelector("#signUpModal .auth-modal");
+
+let signupScrollbarTimer;
+
+if (signupModalContent) {
+
+    signupModalContent.addEventListener(
+        "scroll",
+        function () {
+
+            // Show scrollbar while scrolling
+            signupModalContent.classList.add(
+                "is-scrolling"
+            );
+
+            // Reset the timer
+            clearTimeout(
+                signupScrollbarTimer
+            );
+
+            // Hide scrollbar after scrolling stops
+            signupScrollbarTimer = setTimeout(
+                function () {
+
+                    signupModalContent.classList.remove(
+                        "is-scrolling"
+                    );
+
+                },
+                700
+            );
+
+        }
+    );
+
 }
 
+// ========================================
+// STUDENT EMAIL OTP VERIFICATION
+// ========================================
 
-/* =========================================
-   DISABLED STATE
-========================================= */
+let currentStudentId = null;
+let currentStudentEmail = null;
 
-.create-account-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-/* =========================================
-   PROFESSIONAL SIGNUP CHECKBOXES
-========================================= */
 
-#signupForm .form-checkbox {
-    width: 100%;
-    margin-bottom: 10px;
-}
+// ========================================
+// OTP ELEMENTS
+// ========================================
 
+const otpScreen =
+    document.getElementById("otpVerificationScreen");
 
-/* Checkbox + text */
+const otpDigits =
+    document.querySelectorAll(".otp-digit");
 
-#signupForm .form-checkbox label {
-    display: flex;
-    align-items: flex-start;
+const otpInput =
+    document.getElementById("otpInput");
 
-    gap: 8px;
+const verifyOtpButton =
+    document.getElementById("verifyOtpButton");
 
-    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+const resendOtpButton =
+    document.getElementById("resendOtpButton");
 
-    font-size: 13px;
-    font-weight: 400;
+const otpStatusMessage =
+    document.getElementById("otpStatusMessage");
 
-    line-height: 1.5;
+const otpExpiryTime =
+    document.getElementById("otpExpiryTime");
 
-    color: #4b5563;
+const otpExpiryCountdown =
+    document.getElementById("otpExpiryCountdown");
 
-    cursor: pointer;
+const otpResendCooldown =
+    document.getElementById("otpResendCooldown");
 
-    transition: color 0.2s ease;
-}
+const otpResendCooldownTime =
+    document.getElementById("otpResendCooldownTime");
 
 
-/* Checkbox itself */
+// ========================================
+// COUNTDOWN TIMER STATE
+// ========================================
 
-#signupForm .form-checkbox input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
+let otpExpiryInterval = null;
+let otpResendInterval = null;
 
-    min-width: 16px;
 
-    margin: 2px 0 0 0;
+// ========================================
+// START THE 10-MINUTE EXPIRY COUNTDOWN
+// ========================================
 
-    accent-color: #6d28d9;
+function startOtpExpiryCountdown() {
 
-    cursor: pointer;
-}
+    clearInterval(otpExpiryInterval);
 
+    let secondsLeft = 10 * 60;
 
-/* Hover */
+    function render() {
 
-#signupForm .form-checkbox label:hover {
-    color: #252525;
-}
+        const minutes =
+            Math.floor(secondsLeft / 60);
 
+        const seconds =
+            secondsLeft % 60;
 
-/* Keyboard focus */
+        if (otpExpiryTime) {
 
-#signupForm .form-checkbox input[type="checkbox"]:focus-visible {
-    outline: 2px solid rgba(109, 40, 217, 0.35);
-    outline-offset: 2px;
-}
+            otpExpiryTime.textContent =
+                String(minutes).padStart(2, "0") +
+                ":" +
+                String(seconds).padStart(2, "0");
 
+        }
 
-/* Checked text */
+        if (otpExpiryCountdown) {
 
-#signupForm .form-checkbox input[type="checkbox"]:checked + * {
-    color: #374151;
-}
+            otpExpiryCountdown.classList.toggle(
+                "otp-expiry-urgent",
+                secondsLeft <= 60
+            );
 
-/* =========================================
-   SIGNUP MODAL - HIDDEN SCROLLBAR
-========================================= */
+        }
 
-#signUpModal .auth-modal {
-    scrollbar-width: none;
-}
-
-#signUpModal .auth-modal::-webkit-scrollbar {
-    width: 0;
-    background: transparent;
-}
-
-#signUpModal .auth-modal.is-scrolling {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(100, 100, 100, 0.45) transparent;
-}
-
-#signUpModal .auth-modal.is-scrolling::-webkit-scrollbar {
-    width: 5px;
-}
-
-#signUpModal .auth-modal.is-scrolling::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-#signUpModal .auth-modal.is-scrolling::-webkit-scrollbar-thumb {
-    background: rgba(100, 100, 100, 0.45);
-    border-radius: 10px;
-}
-
-/* =====================================================
-   KURIOS STORES - OTP VERIFICATION DESIGN
-===================================================== */
-
-#otpVerificationScreen {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 5px 0;
-}
-
-
-/* OTP HEADER */
-
-.otp-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.otp-header h2 {
-    margin: 0 0 10px;
-    font-size: 26px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: #1f2937;
-}
-
-.otp-header p {
-    margin: 0 auto;
-    max-width: 420px;
-    font-size: 15px;
-    line-height: 1.6;
-    color: #6b7280;
-}
-
-.otp-email-chip {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 6px;
-    background: var(--purple-soft);
-    color: var(--purple-dark);
-    font-weight: 600;
-}
-
-
-/* OTP INPUT SECTION */
-
-.otp-input-section {
-    width: 100%;
-    max-width: 460px;
-    margin: 0 auto;
-}
-
-
-/* SIX OTP BOXES — underline style */
-
-.otp-input-container {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    width: 100%;
-    margin-bottom: 22px;
-}
-
-.otp-digit {
-    width: 44px;
-    height: 56px;
-
-    padding: 0;
-
-    border: none;
-    border-bottom: 3px solid #e5e0f5;
-    border-radius: 0;
-
-    background: transparent;
-
-    text-align: center;
-
-    font-size: 26px;
-    font-weight: 700;
-
-    color: #1f2937;
-
-    outline: none;
-
-    transition:
-        border-color 0.2s ease,
-        transform 0.2s ease;
-}
-
-
-/* ACTIVE OTP BOX */
-
-.otp-digit:focus {
-    border-color: var(--purple);
-    transform: translateY(-2px);
-}
-
-.otp-digit:not(:placeholder-shown) {
-    border-color: var(--purple-light);
-}
-
-
-.otp-status-message {
-    min-height: 18px;
-    margin: -8px 0 16px;
-
-    font-size: 13px;
-    font-weight: 600;
-    text-align: center;
-
-    color: var(--purple-dark);
-}
-
-
-.coming-soon-panel {
-    text-align: center;
-    padding: 60px 30px;
-}
-
-.coming-soon-panel i {
-    font-size: 40px;
-    color: var(--purple-light);
-    margin-bottom: 16px;
-    display: block;
-}
-
-.coming-soon-panel h2 {
-    margin: 0 0 8px;
-    font-size: 20px;
-}
-
-.coming-soon-panel p {
-    margin: 0;
-    color: #6b7280;
-    font-size: 13px;
-}
-
-
-/* SELLER — FULL PAGE (not a drawer) */
-
-.full-page-section {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 32px 24px 80px;
-}
-
-.full-page-back-row {
-    margin-bottom: 20px;
-}
-
-.full-page-back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--muted, #6b7280);
-}
-
-.full-page-back-link:hover {
-    color: var(--purple);
-}
-
-.full-page-panel {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px;
-}
-
-.full-page-panel .close-cart {
-    display: none;
-}
-
-@media (max-width: 600px) {
-
-    .full-page-section {
-        padding: 20px 16px 60px;
     }
 
-    .full-page-panel {
-        padding: 20px;
-        border-radius: 12px;
+    render();
+
+    otpExpiryInterval = setInterval(
+        function () {
+
+            secondsLeft = secondsLeft - 1;
+
+            if (secondsLeft <= 0) {
+
+                clearInterval(otpExpiryInterval);
+
+                secondsLeft = 0;
+
+                if (otpExpiryTime) {
+                    otpExpiryTime.textContent = "00:00";
+                }
+
+                if (otpStatusMessage) {
+
+                    otpStatusMessage.textContent =
+                        "This code has expired. Please resend a new one.";
+
+                }
+
+            }
+
+            render();
+
+        },
+        1000
+    );
+
+}
+
+
+// ========================================
+// START THE 30-SECOND RESEND COOLDOWN
+// ========================================
+
+function startOtpResendCooldown() {
+
+    clearInterval(otpResendInterval);
+
+    let secondsLeft = 30;
+
+    if (resendOtpButton) {
+        resendOtpButton.style.display = "none";
     }
 
-}
-
-
-/* STOREFRONT HEADER */
-
-.storefront-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-.storefront-icon {
-    width: 56px;
-    height: 56px;
-    min-width: 56px;
-    border-radius: 14px;
-    background: var(--purple-soft);
-    color: var(--purple);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    overflow: hidden;
-}
-
-.storefront-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.storefront-header h2 {
-    margin: 0 0 4px;
-    font-size: 18px;
-}
-
-.storefront-header p {
-    margin: 0;
-    font-size: 12px;
-    color: #6b7280;
-}
-
-
-/* OPAY BUTTON */
-
-.opay-button {
-    background: #1a9c5b;
-}
-
-.opay-button:hover {
-    background: #147d49;
-}
-
-
-/* DASHBOARD CHOICE MODAL */
-
-/* POST-LOGIN SPLASH */
-
-.post-login-splash {
-    position: fixed;
-    inset: 0;
-    z-index: 1900;
-    background: linear-gradient(135deg, var(--purple-dark), var(--purple) 55%, var(--purple-light));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.post-login-splash-pattern {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-}
-
-.post-login-splash-pattern i {
-    position: absolute;
-    color: rgba(255, 255, 255, 0.1);
-    font-size: 48px;
-}
-
-.post-login-splash-pattern i:nth-child(1) { top: 6%; left: 8%; font-size: 32px; transform: rotate(-15deg); }
-.post-login-splash-pattern i:nth-child(2) { top: 14%; left: 82%; font-size: 60px; transform: rotate(20deg); }
-.post-login-splash-pattern i:nth-child(3) { top: 30%; left: 30%; font-size: 26px; transform: rotate(40deg); }
-.post-login-splash-pattern i:nth-child(4) { top: 22%; left: 55%; font-size: 40px; transform: rotate(-30deg); }
-.post-login-splash-pattern i:nth-child(5) { top: 48%; left: 5%; font-size: 50px; transform: rotate(10deg); }
-.post-login-splash-pattern i:nth-child(6) { top: 60%; left: 90%; font-size: 34px; transform: rotate(-40deg); }
-.post-login-splash-pattern i:nth-child(7) { top: 68%; left: 18%; font-size: 44px; transform: rotate(25deg); }
-.post-login-splash-pattern i:nth-child(8) { top: 78%; left: 60%; font-size: 30px; transform: rotate(-10deg); }
-.post-login-splash-pattern i:nth-child(9) { top: 85%; left: 38%; font-size: 55px; transform: rotate(15deg); }
-.post-login-splash-pattern i:nth-child(10) { top: 5%; left: 45%; font-size: 22px; transform: rotate(-25deg); }
-.post-login-splash-pattern i:nth-child(11) { top: 40%; left: 72%; font-size: 36px; transform: rotate(35deg); }
-.post-login-splash-pattern i:nth-child(12) { top: 90%; left: 8%; font-size: 28px; transform: rotate(-20deg); }
-.post-login-splash-pattern i:nth-child(13) { top: 12%; left: 65%; font-size: 24px; transform: rotate(5deg); }
-.post-login-splash-pattern i:nth-child(14) { top: 55%; left: 45%; font-size: 20px; transform: rotate(-35deg); }
-.post-login-splash-pattern i:nth-child(15) { top: 35%; left: 12%; font-size: 38px; transform: rotate(45deg); }
-.post-login-splash-pattern i:nth-child(16) { top: 72%; left: 80%; font-size: 46px; transform: rotate(-5deg); }
-.post-login-splash-pattern i:nth-child(17) { top: 95%; left: 70%; font-size: 32px; transform: rotate(30deg); }
-.post-login-splash-pattern i:nth-child(18) { top: 2%; left: 25%; font-size: 42px; transform: rotate(-45deg); }
-
-.post-login-splash-content {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    color: white;
-}
-
-.post-login-splash-logo {
-    width: 84px;
-    height: 84px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    margin: 0 auto 18px;
-    animation: postLoginSplashPulse 1.6s ease-in-out infinite;
-}
-
-.post-login-splash-content p {
-    font-size: 13px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.85);
-    letter-spacing: 0.02em;
-}
-
-@keyframes postLoginSplashPulse {
-
-    0%, 100% {
-        transform: scale(1);
-        opacity: 1;
+    if (otpResendCooldown) {
+        otpResendCooldown.style.display = "inline";
     }
 
-    50% {
-        transform: scale(1.08);
-        opacity: 0.85;
+    function render() {
+
+        if (otpResendCooldownTime) {
+
+            otpResendCooldownTime.textContent =
+                secondsLeft;
+
+        }
+
     }
 
+    render();
+
+    otpResendInterval = setInterval(
+        function () {
+
+            secondsLeft = secondsLeft - 1;
+
+            if (secondsLeft <= 0) {
+
+                clearInterval(otpResendInterval);
+
+                if (resendOtpButton) {
+                    resendOtpButton.style.display = "inline";
+                }
+
+                if (otpResendCooldown) {
+                    otpResendCooldown.style.display = "none";
+                }
+
+                return;
+
+            }
+
+            render();
+
+        },
+        1000
+    );
+
 }
 
 
-.dashboard-choice-modal {
-    text-align: center;
-}
+// ========================================
+// STOP BOTH TIMERS
+// ========================================
 
-.dashboard-choice-modal p {
-    color: #6b7280;
-    font-size: 13px;
-    margin-bottom: 20px;
-}
+function stopOtpTimers() {
 
-.dashboard-choice-card {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    text-align: left;
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 12px;
-    cursor: pointer;
-    transition: var(--transition);
-}
+    clearInterval(otpExpiryInterval);
+    clearInterval(otpResendInterval);
 
-.dashboard-choice-card:hover {
-    border-color: var(--purple);
-    background: var(--purple-soft);
-}
-
-.dashboard-choice-card > i {
-    color: #9ca3af;
-    font-size: 12px;
-}
-
-.dashboard-choice-icon {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-    border-radius: 10px;
-    background: var(--purple-soft);
-    color: var(--purple);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-}
-
-.dashboard-choice-card div strong {
-    display: block;
-    font-size: 13px;
-    color: #111827;
-    margin-bottom: 2px;
-}
-
-.dashboard-choice-card div span {
-    font-size: 11px;
-    color: #9ca3af;
 }
 
 
-/* =========================================================
-   SELLER DASHBOARD (tabbed, sidebar layout)
-   ========================================================= */
+// ========================================
+// SHOW OTP VERIFICATION SCREEN
+// ========================================
 
-#sellerPage.seller-dashboard-active {
-    position: fixed;
-    inset: 0;
-    z-index: 3000;
-    background: #f8fafb;
-    padding: 0;
-    max-width: none;
-    margin: 0;
-    overflow-y: auto;
-}
+function showOtpVerificationScreen(studentId, email) {
 
-#sellerPage.seller-dashboard-active .ks-seller-app {
-    min-height: 100vh;
-    min-height: 100dvh;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
-    max-width: none;
-    margin: 0;
-}
+    currentStudentId = studentId;
+    currentStudentEmail = email;
 
-.seller-dash-layout {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 24px;
-}
 
-@media (max-width: 900px) {
+    // ========================================
+    // HIDE SIGNUP FORM
+    // ========================================
 
-    .seller-dash-layout {
-        grid-template-columns: 1fr;
+    const signupForm =
+        document.getElementById("signupForm");
+
+    if (signupForm) {
+
+        signupForm.style.display = "none";
+
     }
 
-}
 
+    // ========================================
+    // SHOW OTP SCREEN
+    // ========================================
 
-/* SIDEBAR */
+    if (otpScreen) {
 
-.seller-dash-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 10px;
-    align-self: flex-start;
-    position: sticky;
-    top: 90px;
-}
+        otpScreen.style.display = "block";
 
-@media (max-width: 900px) {
-
-    .seller-dash-sidebar {
-        position: static;
-        flex-direction: row;
-        overflow-x: auto;
     }
 
-}
 
-.seller-dash-nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border: none;
-    background: transparent;
-    text-decoration: none;
-    padding: 11px 14px;
-    border-radius: 9px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #6b7280;
-    cursor: pointer;
-    white-space: nowrap;
-    text-align: left;
-}
+    // ========================================
+    // HIDE THE PERSISTENT SIGNUP HEADER
+    // (icon + subtitle) — the OTP screen has
+    // its own header, so showing both stacked
+    // on top of each other wastes space,
+    // especially on mobile.
+    // ========================================
 
-.seller-dash-nav-item i {
-    width: 16px;
-    text-align: center;
-    color: #9ca3af;
-}
+    const authIcon =
+        document.querySelector("#signUpModal .auth-icon");
 
-.seller-dash-nav-item:hover {
-    background: var(--purple-soft);
-    color: var(--purple-dark);
-}
-
-.seller-dash-nav-item.active {
-    background: var(--purple);
-    color: white;
-}
-
-.seller-dash-nav-item.active i {
-    color: white;
-}
-
-
-/* MAIN CONTENT */
-
-.seller-dash-main {
-    min-width: 0;
-}
-
-
-/* STAT CARDS */
-
-.seller-stat-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 14px;
-    margin-bottom: 20px;
-}
-
-@media (max-width: 1100px) {
-
-    .seller-stat-grid {
-        grid-template-columns: repeat(3, 1fr);
+    if (authIcon) {
+        authIcon.style.display = "none";
     }
 
-}
+    const accountModalSubtitleEl =
+        document.getElementById("accountModalSubtitle");
 
-@media (max-width: 600px) {
-
-    .seller-stat-grid {
-        grid-template-columns: repeat(2, 1fr);
+    if (accountModalSubtitleEl) {
+        accountModalSubtitleEl.style.display = "none";
     }
 
-}
+    const accountModalTitleEl =
+        document.getElementById("accountModalTitle");
 
-.seller-stat-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.seller-stat-icon {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-}
-
-.seller-stat-value {
-    font-size: 17px;
-    font-weight: 800;
-    color: #111827;
-    line-height: 1.2;
-}
-
-.seller-stat-label {
-    font-size: 11px;
-    color: #9ca3af;
-    font-weight: 600;
-}
-
-
-/* PANELS ROW */
-
-.seller-dash-row {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-@media (max-width: 900px) {
-
-    .seller-dash-row {
-        grid-template-columns: 1fr;
+    if (accountModalTitleEl) {
+        accountModalTitleEl.style.display = "none";
     }
 
-}
 
-.seller-dash-panel {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 18px;
-}
+    // ========================================
+    // UPDATE EMAIL MESSAGE
+    // ========================================
 
-.seller-dash-panel-header {
-    margin-bottom: 14px;
-}
+    const otpMessage =
+        document.getElementById(
+            "otpVerificationMessage"
+        );
 
-.seller-dash-panel-header h3 {
-    font-size: 14px;
-    margin: 0;
-    color: #111827;
-}
+    if (otpMessage) {
 
+        otpMessage.innerHTML = `
+            We sent a 6-digit code to
+            <span class="otp-email-chip">${email}</span>.
+            Enter it below to activate your account.
+        `;
 
-/* SALES CHART (custom SVG bars) */
+    }
 
-.seller-sales-chart {
-    height: 160px;
-    padding-top: 10px;
-}
 
-.seller-sales-chart svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
+    // ========================================
+    // CLEAR OTP BOXES
+    // ========================================
 
-.seller-chart-bar-wrap {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    height: 100%;
-    justify-content: flex-end;
-}
+    otpDigits.forEach(function (input) {
 
-.seller-chart-bar {
-    width: 100%;
-    max-width: 32px;
-    background: linear-gradient(180deg, var(--purple-light), var(--purple));
-    border-radius: 6px 6px 0 0;
-    min-height: 3px;
-    transition: opacity 0.15s ease;
-}
+        input.value = "";
 
-.seller-chart-bar:hover {
-    opacity: 0.8;
-}
+    });
 
-.seller-chart-bar-label {
-    font-size: 10px;
-    color: #9ca3af;
-    white-space: nowrap;
-}
 
+    if (otpInput) {
 
-/* ORDER STATUS BREAKDOWN */
+        otpInput.value = "";
 
-.seller-donut-wrap {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
+    }
 
-.seller-donut,
-.ks-donut {
-    width: 130px;
-    height: 130px;
-    min-width: 130px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    background: conic-gradient(#e5e7eb 0deg 360deg);
-}
 
-.seller-donut::after,
-.ks-donut::after {
-    content: "";
-    position: absolute;
-    inset: 22px;
-    background: white;
-    border-radius: 50%;
-}
+    // ========================================
+    // CLEAR STATUS
+    // ========================================
 
-.seller-donut > div,
-.ks-donut > div {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-}
+    if (otpStatusMessage) {
 
-.seller-donut strong,
-.ks-donut strong {
-    display: block;
-    font-size: 22px;
-    color: #111827;
-}
+        otpStatusMessage.textContent = "";
 
-.seller-donut span,
-.ks-donut span {
-    display: block;
-    font-size: 10px;
-    color: #9ca3af;
-    margin-top: 2px;
-}
+    }
 
-.seller-status-breakdown,
-.ks-donut-legend {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
 
-.seller-status-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+    // ========================================
+    // FOCUS FIRST BOX
+    // ========================================
 
-.seller-status-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
+    if (otpDigits.length > 0) {
 
-.seller-status-row-label {
-    flex: 1;
-    font-size: 12px;
-    color: #6b7280;
-    text-transform: capitalize;
-}
+        otpDigits[0].focus();
 
-.seller-status-row-count {
-    font-size: 13px;
-    font-weight: 700;
-    color: #111827;
-}
+    }
 
 
-/* TOP PRODUCTS LIST */
+    // ========================================
+    // START COUNTDOWNS
+    // ========================================
 
-.seller-chart-empty {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #9ca3af;
-    font-size: 12px;
-}
+    startOtpExpiryCountdown();
 
-.seller-top-product-row-with-thumb {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+    startOtpResendCooldown();
 
-.seller-top-product-thumb {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    border-radius: 8px;
-    background: var(--purple-soft);
-    color: var(--purple);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    font-size: 13px;
 }
 
-.seller-top-product-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
 
-.seller-top-product-details {
-    flex: 1;
-    min-width: 0;
-}
+// ========================================
+// UPDATE COMBINED OTP
+// ========================================
 
-.seller-top-product-details span {
-    display: block;
-    font-size: 11px;
-    color: #9ca3af;
-    margin-top: 2px;
-}
+function updateCombinedOtp() {
 
+    let combinedOtp = "";
 
-.seller-top-product-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 12px;
-}
+    otpDigits.forEach(function (input) {
 
-.seller-top-product-row:last-child {
-    border-bottom: none;
-}
+        combinedOtp += input.value;
 
-.seller-top-product-row strong {
-    font-size: 12px;
-    color: #111827;
-}
+    });
 
-.seller-top-product-qty {
-    color: var(--purple-dark);
-    font-weight: 700;
-    white-space: nowrap;
-}
 
+    if (otpInput) {
 
-/* RECENT ORDERS TABLE */
+        otpInput.value = combinedOtp;
 
-.seller-orders-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-}
+    }
 
-.seller-orders-table th {
-    text-align: left;
-    color: #9ca3af;
-    font-weight: 600;
-    padding: 6px 8px;
-    border-bottom: 1px solid var(--border);
-}
 
-.seller-orders-table td {
-    padding: 10px 8px;
-    border-bottom: 1px solid var(--border);
-    color: #374151;
-}
+    return combinedOtp;
 
-.seller-orders-table tr:last-child td {
-    border-bottom: none;
 }
 
-.seller-order-status-pill {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-}
 
-.seller-order-status-pill.paid {
-    background: #dcfce7;
-    color: #15803d;
-}
+// ========================================
+// OTP BOX INPUT HANDLING
+// ========================================
 
-.seller-order-status-pill.pending {
-    background: #fef3c7;
-    color: #b45309;
-}
+otpDigits.forEach(function (input, index) {
 
-.seller-order-status-pill.failed {
-    background: #fee2e2;
-    color: #dc2626;
-}
 
+    // ========================================
+    // INPUT
+    // ========================================
 
-/* STORE LOGO */
+    input.addEventListener(
+        "input",
+        function () {
 
-.store-logo-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin: 18px 0;
-}
+            // Numbers only
+            this.value =
+                this.value.replace(/\D/g, "");
 
-.store-logo-preview {
-    width: 56px;
-    height: 56px;
-    min-width: 56px;
-    border-radius: 14px;
-    background: var(--purple-soft);
-    color: var(--purple);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    overflow: hidden;
-}
 
-.store-logo-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+            // Keep only one digit
+            if (this.value.length > 1) {
 
-.store-logo-controls {
-    flex: 1;
-}
+                this.value =
+                    this.value.slice(-1);
 
-.store-logo-label {
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    margin-bottom: 6px;
-}
+            }
 
-.store-logo-controls input[type="file"] {
-    font-size: 12px;
-}
 
+            // Update hidden OTP
+            updateCombinedOtp();
 
-/* SELLER DASHBOARD */
 
-.seller-dashboard-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 24px 0 14px;
-}
+            // Move to next box
+            if (
+                this.value &&
+                index < otpDigits.length - 1
+            ) {
 
-.seller-dashboard-header h3 {
-    font-size: 15px;
-    margin: 0;
-}
+                otpDigits[index + 1].focus();
 
-.seller-dashboard-add-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: none;
-    background: var(--purple);
-    color: white;
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-}
+            }
 
-.seller-dashboard-add-button:hover {
-    background: var(--purple-dark);
-}
+        }
+    );
 
-.seller-dashboard-secondary-button {
-    background: var(--white);
-    color: var(--purple);
-    border: 1px solid var(--purple-light, var(--purple));
-}
 
-.seller-dashboard-secondary-button:hover {
-    background: var(--purple-soft);
-}
+    // ========================================
+    // KEYBOARD HANDLING
+    // ========================================
 
-/* WALLET PAGE */
-
-.wallet-balance-card {
-    background: linear-gradient(135deg, var(--purple), var(--purple-dark));
-    border-radius: 16px;
-    padding: 28px 24px;
-    margin-bottom: 24px;
-    color: white;
-    text-align: center;
-}
+    input.addEventListener(
+        "keydown",
+        function (event) {
 
-.wallet-balance-card span {
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    opacity: 0.85;
-    margin-bottom: 8px;
-}
 
-.wallet-balance-card strong {
-    font-size: 34px;
-    font-weight: 800;
-}
+            // Backspace
+            if (
+                event.key === "Backspace" &&
+                !this.value &&
+                index > 0
+            ) {
 
-.wallet-transaction-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-}
+                otpDigits[index - 1].focus();
 
-.wallet-transaction-row:last-child {
-    border-bottom: none;
-}
+            }
 
-.wallet-transaction-info strong {
-    display: block;
-    font-size: 13px;
-    margin-bottom: 3px;
-}
 
-.wallet-transaction-info span {
-    font-size: 11px;
-    color: #9ca3af;
-}
+            // Left arrow
+            if (
+                event.key === "ArrowLeft" &&
+                index > 0
+            ) {
 
-.wallet-transaction-amount {
-    font-size: 14px;
-    font-weight: 800;
-}
+                otpDigits[index - 1].focus();
 
-.wallet-transaction-amount.credit {
-    color: #15803d;
-}
+            }
 
-.wallet-transaction-amount.debit {
-    color: #dc2626;
-}
 
+            // Right arrow
+            if (
+                event.key === "ArrowRight" &&
+                index < otpDigits.length - 1
+            ) {
 
-/* SELLER SALES */
+                otpDigits[index + 1].focus();
 
-.seller-sales-summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--purple-soft);
-    border-radius: 12px;
-    padding: 16px 18px;
-    margin-bottom: 16px;
-}
+            }
 
-.seller-sales-summary span {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--purple-dark);
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-}
+        }
+    );
 
-.seller-sales-summary strong {
-    font-size: 20px;
-    color: var(--purple-dark);
-}
 
-.seller-sale-card {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-}
+    // ========================================
+    // PASTE COMPLETE OTP
+    // ========================================
 
-.seller-sale-card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 8px;
-}
+    input.addEventListener(
+        "paste",
+        function (event) {
 
-.seller-sale-card-top strong {
-    font-size: 13px;
-    display: block;
-    margin-bottom: 2px;
-}
+            event.preventDefault();
 
-.seller-sale-card-top span {
-    font-size: 11px;
-    color: #9ca3af;
-}
+            const pastedText =
+                event.clipboardData
+                    .getData("text")
+                    .replace(/\D/g, "")
+                    .slice(0, 6);
 
-.seller-sale-amount {
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--purple-dark);
-    white-space: nowrap;
-}
 
-.seller-sale-items {
-    font-size: 12px;
-    color: #6b7280;
-    line-height: 1.6;
-}
+            if (!pastedText) {
 
+                return;
 
-.seller-product-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 10px;
-}
+            }
 
-.seller-product-thumb {
-    width: 52px;
-    height: 52px;
-    min-width: 52px;
-    border-radius: 8px;
-    background: var(--purple-soft);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--purple);
-    font-size: 18px;
-    overflow: hidden;
-}
 
-.seller-product-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+            pastedText
+                .split("")
+                .forEach(function (digit, digitIndex) {
 
-.seller-product-info {
-    flex: 1;
-    min-width: 0;
-}
+                    if (
+                        otpDigits[digitIndex]
+                    ) {
 
-.seller-product-info h4 {
-    margin: 0 0 3px;
-    font-size: 13px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+                        otpDigits[digitIndex].value =
+                            digit;
 
-.seller-product-info p {
-    margin: 0;
-    font-size: 12px;
-    color: #6b7280;
-}
+                    }
 
-.seller-product-inactive-tag {
-    display: inline-block;
-    margin-left: 6px;
-    padding: 2px 7px;
-    border-radius: 999px;
-    background: #fee2e2;
-    color: #dc2626;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-}
+                });
 
-.seller-product-actions {
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-}
 
-.seller-product-actions button {
-    border: 1px solid var(--border);
-    background: var(--white);
-    border-radius: 6px;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    font-size: 12px;
-    color: #6b7280;
-}
+            updateCombinedOtp();
 
-.seller-product-actions button:hover {
-    border-color: var(--purple);
-    color: var(--purple);
-}
 
-.seller-dashboard-form-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 16px;
-}
+            const focusIndex =
+                Math.min(
+                    pastedText.length,
+                    otpDigits.length - 1
+                );
 
-.seller-dashboard-form-actions button {
-    flex: 1;
-}
+            if (otpDigits[focusIndex]) {
 
+                otpDigits[focusIndex].focus();
 
-/* PRODUCT CARD — SELLER ATTRIBUTION */
+            }
 
-/* REVIEW PROMPTS */
+        }
+    );
 
-.review-prompt-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--purple-soft);
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
-}
+});
 
-.review-prompt-thumb {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    border-radius: 8px;
-    overflow: hidden;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--purple);
-}
 
-.review-prompt-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+// ========================================
+// VERIFY OTP
+// ========================================
 
-.review-prompt-info {
-    flex: 1;
-    min-width: 0;
-}
+if (verifyOtpButton) {
 
-.review-prompt-info strong {
-    display: block;
-    font-size: 12px;
-    color: var(--purple-dark);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+    verifyOtpButton.addEventListener(
+        "click",
+        async function () {
 
-.review-star-picker {
-    display: flex;
-    gap: 2px;
-}
 
-.review-star-picker i {
-    font-size: 15px;
-    color: #d1d5db;
-    cursor: pointer;
-}
+            // ========================================
+            // COMBINE OTP
+            // ========================================
 
-.review-star-picker i.active {
-    color: #f59e0b;
-}
+            const otp =
+                updateCombinedOtp();
 
 
-.product-rating {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    font-weight: 700;
-    color: #b45309;
-    margin: 2px 0;
-}
+            // ========================================
+            // CLEAR PREVIOUS STATUS
+            // ========================================
 
-.product-rating i {
-    color: #f59e0b;
-    font-size: 11px;
-}
+            if (otpStatusMessage) {
 
-.product-rating-count {
-    font-weight: 500;
-    color: #9ca3af;
-}
+                otpStatusMessage.textContent = "";
 
+            }
 
-.product-sold-by {
-    display: block;
-    font-size: 11px;
-    color: var(--purple);
-    font-weight: 600;
-    margin: 2px 0 6px;
-    cursor: pointer;
-}
 
-.product-sold-by:hover {
-    text-decoration: underline;
-}
+            // ========================================
+            // VALIDATE OTP
+            // ========================================
 
-.product-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: inherit;
-}
+            if (!/^\d{6}$/.test(otp)) {
 
+                if (otpStatusMessage) {
 
-/* SELLER TYPE CARD PICKER */
+                    otpStatusMessage.textContent =
+                        "Please enter the complete 6-digit verification code.";
 
-.seller-type-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
+                }
 
-.seller-type-card {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 14px;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    background: var(--white);
-    cursor: pointer;
-    text-align: left;
-    transition: border-color 0.15s ease, background 0.15s ease;
-}
+                return;
 
-.seller-type-card i {
-    font-size: 16px;
-    color: #9ca3af;
-}
+            }
 
-.seller-type-card span {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1.3;
-}
 
-.seller-type-card:hover {
-    border-color: var(--purple-light);
-}
+            // ========================================
+            // CHECK STUDENT ID
+            // ========================================
+
+            if (!currentStudentId) {
+
+                if (otpStatusMessage) {
+
+                    otpStatusMessage.textContent =
+                        "Your verification session has expired. Please restart registration.";
+
+                }
+
+                return;
+
+            }
+
+
+            // ========================================
+            // DISABLE VERIFY BUTTON
+            // ========================================
+
+            verifyOtpButton.disabled = true;
+
+            verifyOtpButton.innerHTML = `
+                <span class="otp-button-icon">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                </span>
+
+                <span class="otp-button-text">
+                    Verifying...
+                </span>
+
+                <span class="otp-button-arrow">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                </span>
+            `;
+
+
+            try {
+
+
+                // ========================================
+                // SEND OTP TO BACKEND
+                // ========================================
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/students/verify-otp",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body: JSON.stringify({
+
+                                studentId:
+                                    currentStudentId,
+
+                                otp:
+                                    otp
+
+                            })
+
+                        }
+                    );
+
+
+                // ========================================
+                // READ RESPONSE
+                // ========================================
+
+                const data =
+                    await response.json();
+
+
+                // ========================================
+                // INVALID OTP
+                // ========================================
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    if (otpStatusMessage) {
+
+                        otpStatusMessage.textContent =
+                            data.message ||
+                            "Invalid or expired verification code.";
+
+                    }
+
+
+                    verifyOtpButton.disabled =
+                        false;
+
+
+                    verifyOtpButton.innerHTML = `
+                        <span class="otp-button-icon">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </span>
+
+                        <span class="otp-button-text">
+                            Verify Account
+                        </span>
+
+                        <span class="otp-button-arrow">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </span>
+                    `;
+
+
+                    return;
+
+                }
+
+
+                // ========================================
+                // SUCCESS
+                // ========================================
+
+                console.log(
+                    "Student email verified successfully:",
+                    data.student
+                );
+
+
+                if (otpStatusMessage) {
+
+                    otpStatusMessage.textContent =
+                        "Email verified successfully!";
+
+                }
+
+
+                // ========================================
+                // HIDE OTP SCREEN
+                // ========================================
+
+                if (otpScreen) {
+
+                    otpScreen.style.display =
+                        "none";
+
+                }
+
+                stopOtpTimers();
+
+
+                // ========================================
+                // UPDATE MODAL TITLE
+                // ========================================
+
+                const accountModalTitle =
+                    document.getElementById(
+                        "accountModalTitle"
+                    );
+
+                if (accountModalTitle) {
+
+                    accountModalTitle.textContent =
+                        "Account Created Successfully! 🎉";
+
+                }
+
+
+                // ========================================
+                // HIDE MODAL SUBTITLE
+                // ========================================
+
+                const accountModalSubtitle =
+                    document.getElementById(
+                        "accountModalSubtitle"
+                    );
+
+                if (accountModalSubtitle) {
+
+                    accountModalSubtitle.style.display =
+                        "none";
+
+                }
+
+
+                // ========================================
+                // SHOW SUCCESS SCREEN
+                // ========================================
+
+                const successScreen =
+                    document.getElementById(
+                        "accountCreatedSuccessScreen"
+                    );
+
+                if (successScreen) {
+
+                    successScreen.style.display =
+                        "block";
+
+                }
+
+
+                // ========================================
+                // RESET OTP
+                // ========================================
+
+                otpDigits.forEach(
+                    function (input) {
+
+                        input.value = "";
+
+                    }
+                );
+
 
-.seller-type-card.active {
-    border-color: var(--purple);
-    background: var(--purple-soft);
+                if (otpInput) {
+
+                    otpInput.value = "";
+
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "OTP verification error:",
+                    error
+                );
+
+
+                if (otpStatusMessage) {
+
+                    otpStatusMessage.textContent =
+                        "Unable to connect to Kurios Stores server. Please try again.";
+
+                }
+
+
+                verifyOtpButton.disabled =
+                    false;
+
+
+                verifyOtpButton.innerHTML = `
+                    <span class="otp-button-icon">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </span>
+
+                    <span class="otp-button-text">
+                        Verify Account
+                    </span>
+
+                    <span class="otp-button-arrow">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </span>
+                `;
+
+            }
+
+        }
+    );
+
 }
+
+
+// ========================================
+// RESEND OTP
+// ========================================
+
+if (resendOtpButton) {
+
+    resendOtpButton.addEventListener(
+        "click",
+        async function () {
+
+
+            // ========================================
+            // CHECK SESSION
+            // ========================================
+
+            if (
+                !currentStudentId ||
+                !currentStudentEmail
+            ) {
+
+                if (otpStatusMessage) {
+
+                    otpStatusMessage.textContent =
+                        "Unable to resend OTP. Please restart registration.";
+
+                }
+
+                return;
+
+            }
+
+
+            // ========================================
+            // DISABLE RESEND BUTTON
+            // ========================================
+
+            resendOtpButton.disabled =
+                true;
+
+            resendOtpButton.innerHTML = `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <span>Sending...</span>
+            `;
+
+
+            try {
+
+
+                // ========================================
+                // SEND RESEND REQUEST
+                // ========================================
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/students/resend-otp",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body: JSON.stringify({
+
+                                studentId:
+                                    currentStudentId,
+
+                                email:
+                                    currentStudentEmail
+
+                            })
+
+                        }
+                    );
+
+
+                // ========================================
+                // READ RESPONSE
+                // ========================================
+
+                const data =
+                    await response.json();
+
+
+                // ========================================
+                // HANDLE ERROR
+                // ========================================
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    if (otpStatusMessage) {
+
+                        otpStatusMessage.textContent =
+                            data.message ||
+                            "Unable to resend verification code.";
+
+                    }
+
+                    return;
+
+                }
+
+
+                // ========================================
+                // RESEND SUCCESS
+                // ========================================
+
+                if (otpStatusMessage) {
+
+                    otpStatusMessage.textContent =
+                        "A new verification code has been sent to your email.";
+
+                }
+
+
+                // ========================================
+                // RESTART COUNTDOWNS
+                // ========================================
+
+                startOtpExpiryCountdown();
+
+                startOtpResendCooldown();
+
+
+                // ========================================
+                // CLEAR OTP BOXES
+                // ========================================
+
+                otpDigits.forEach(
+                    function (input) {
+
+                        input.value = "";
+
+                    }
+                );
+
+
+                if (otpInput) {
+
+                    otpInput.value = "";
+
+                }
+
+
+                // ========================================
+                // FOCUS FIRST BOX
+                // ========================================
+
+                if (otpDigits.length > 0) {
+
+                    otpDigits[0].focus();
+
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Resend OTP error:",
+                    error
+                );
+
+
+                if (otpStatusMessage) {
+
+                    otpStatusMessage.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
 
-.seller-type-card.active i {
-    color: var(--purple);
+
+                // ========================================
+                // RESTORE RESEND BUTTON
+                // ========================================
+
+                resendOtpButton.disabled =
+                    false;
+
+                resendOtpButton.innerHTML = `
+                    <i class="fa-solid fa-rotate"></i>
+
+                    <span>
+                        Resend OTP
+                    </span>
+                `;
+
+            }
+
+        }
+    );
+
 }
+
+
+// ========================================
+// SUCCESS SCREEN → LOGIN
+// ========================================
+
+const successLoginLink =
+    document.getElementById(
+        "successLoginLink"
+    );
+
+if (successLoginLink) {
+
+    successLoginLink.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+
+            // ========================================
+            // HIDE SUCCESS SCREEN
+            // ========================================
+
+            const successScreen =
+                document.getElementById(
+                    "accountCreatedSuccessScreen"
+                );
+
+            if (successScreen) {
+
+                successScreen.style.display =
+                    "none";
+
+            }
+
+
+            // ========================================
+            // SHOW SIGN IN FORM
+            // ========================================
+
+            const signinForm =
+                document.getElementById(
+                    "signinForm"
+                );
 
+            if (signinForm) {
 
-/* FORM SECTION LABEL */
-
-.form-section-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding-top: 16px;
-    margin-bottom: 4px;
-    border-top: 1px solid var(--border);
+                signinForm.style.display =
+                    "block";
+
+            }
+
+
+            // ========================================
+            // UPDATE MODAL TITLE
+            // ========================================
+
+            const accountModalTitle =
+                document.getElementById(
+                    "accountModalTitle"
+                );
+
+            if (accountModalTitle) {
+
+                accountModalTitle.textContent =
+                    "Welcome Back";
+
+            }
+
+
+            // ========================================
+            // SHOW SIGN IN SUBTITLE
+            // ========================================
+
+            const accountModalSubtitle =
+                document.getElementById(
+                    "accountModalSubtitle"
+                );
+
+            if (accountModalSubtitle) {
+
+                accountModalSubtitle.style.display =
+                    "block";
+
+                accountModalSubtitle.textContent =
+                    "Sign in to your Kurios Stores account.";
+
+            }
+
+        }
+    );
+
 }
+
+// =========================================================
+// PASSCODE ENTRY (SIGNUP, SIGNIN, RESET) + RESET FLOW
+// =========================================================
+
+// ========================================
+// GENERIC DIGIT-BOX GROUP WIRING
+// (auto-advance, backspace, arrows, paste)
+// ========================================
+
+function wireDigitGroup(digitInputs, hiddenInput, onChange) {
+
+    const inputs = Array.prototype.slice.call(digitInputs);
+
+    function updateCombined() {
+
+        let combined = "";
+
+        inputs.forEach(function (input) {
+            combined += input.value;
+        });
 
+        if (hiddenInput) {
+            hiddenInput.value = combined;
+        }
 
-/* TWO-COLUMN FORM ROW */
+        if (typeof onChange === "function") {
+            onChange(combined);
+        }
 
-.form-row-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
+        return combined;
+
+    }
+
+    inputs.forEach(function (input, index) {
+
+        input.addEventListener(
+            "input",
+            function () {
+
+                this.value =
+                    this.value.replace(/\D/g, "");
+
+                if (this.value.length > 1) {
+                    this.value = this.value.slice(-1);
+                }
+
+                updateCombined();
+
+                if (
+                    this.value &&
+                    index < inputs.length - 1
+                ) {
+                    inputs[index + 1].focus();
+                }
+
+            }
+        );
+
+        input.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Backspace" &&
+                    !this.value &&
+                    index > 0
+                ) {
+                    inputs[index - 1].focus();
+                }
+
+                if (
+                    event.key === "ArrowLeft" &&
+                    index > 0
+                ) {
+                    inputs[index - 1].focus();
+                }
+
+                if (
+                    event.key === "ArrowRight" &&
+                    index < inputs.length - 1
+                ) {
+                    inputs[index + 1].focus();
+                }
+
+            }
+        );
+
+        input.addEventListener(
+            "paste",
+            function (event) {
+
+                event.preventDefault();
+
+                const pastedText =
+                    event.clipboardData
+                        .getData("text")
+                        .replace(/\D/g, "")
+                        .slice(0, inputs.length);
+
+                if (!pastedText) {
+                    return;
+                }
+
+                pastedText
+                    .split("")
+                    .forEach(function (digit, digitIndex) {
+
+                        if (inputs[digitIndex]) {
+                            inputs[digitIndex].value = digit;
+                        }
+
+                    });
+
+                updateCombined();
+
+                const focusIndex =
+                    Math.min(
+                        pastedText.length,
+                        inputs.length - 1
+                    );
+
+                inputs[focusIndex].focus();
+
+            }
+        );
+
+    });
+
+    return {
+
+        updateCombined: updateCombined,
+
+        clear: function () {
+
+            inputs.forEach(function (input) {
+                input.value = "";
+            });
+
+            if (hiddenInput) {
+                hiddenInput.value = "";
+            }
+
+        },
+
+        focusFirst: function () {
+
+            if (inputs.length > 0) {
+                inputs[0].focus();
+            }
+
+        }
+
+    };
+
 }
+
+
+// ========================================
+// SIGNUP PASSCODE + CONFIRM MISMATCH CHECK
+// ========================================
+
+const passcodeMismatchMessage =
+    document.getElementById("passcodeMismatchMessage");
+
+function checkSignupPasscodeMatch() {
+
+    const a =
+        document.getElementById("signupPasscode").value;
+
+    const b =
+        document.getElementById("signupConfirmPasscode").value;
+
+    if (!passcodeMismatchMessage) {
+        return;
+    }
+
+    if (a.length === 6 && b.length === 6 && a !== b) {
+
+        passcodeMismatchMessage.style.display = "block";
+
+    } else {
 
-@media (max-width: 480px) {
+        passcodeMismatchMessage.style.display = "none";
 
-    .form-row-2 {
-        grid-template-columns: 1fr;
     }
 
 }
 
+const signupPasscodeGroup =
+    wireDigitGroup(
+        document.querySelectorAll("#signupPasscodeBoxes .passcode-digit"),
+        document.getElementById("signupPasscode"),
+        checkSignupPasscodeMatch
+    );
 
-/* STYLED SELECT */
+const signupConfirmPasscodeGroup =
+    wireDigitGroup(
+        document.querySelectorAll("#signupConfirmPasscodeBoxes .passcode-digit"),
+        document.getElementById("signupConfirmPasscode"),
+        checkSignupPasscodeMatch
+    );
 
-.select-wrap {
-    position: relative;
-}
 
-.select-wrap select {
+// ========================================
+// SIGNIN PASSCODE
+// ========================================
 
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
+const signinPasscodeGroup =
+    wireDigitGroup(
+        document.querySelectorAll("#signinPasscodeBoxes .passcode-digit"),
+        document.getElementById("signinPasscode")
+    );
 
-    width: 100%;
 
-    border: 1px solid var(--border);
-    border-radius: 8px;
+// ========================================
+// RESET FLOW — NEW PASSCODE MISMATCH CHECK
+// ========================================
 
-    padding: 11px 34px 11px 12px;
+const newPasscodeMismatchMessage =
+    document.getElementById("newPasscodeMismatchMessage");
 
-    outline: none;
+function checkNewPasscodeMatch() {
 
-    font-size: 12px;
-    font-family: inherit;
-    color: var(--text);
+    const a =
+        document.getElementById("newPasscodeInput").value;
 
-    background: var(--white);
+    const b =
+        document.getElementById("confirmNewPasscodeInput").value;
 
-    cursor: pointer;
-
-}
-
-.select-wrap select:focus {
-    border-color: var(--purple);
-    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.08);
-}
-
-.select-wrap-arrow {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 11px;
-    color: #9ca3af;
-    pointer-events: none;
-}
-
-
-/* SELLER FEE NOTICE */
-
-.seller-fee-note {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    margin-top: 20px;
-    padding: 13px 14px;
-    border-radius: 10px;
-    background: var(--purple-soft);
-    color: var(--purple-dark);
-    font-size: 12px;
-    line-height: 1.6;
-}
-
-.seller-fee-note i {
-    margin-top: 2px;
-    font-size: 13px;
-}
-
-
-/* PASSCODE MISMATCH */
-
-.passcode-mismatch-message {
-    margin: 8px 0 0;
-    font-size: 13px;
-    font-weight: 600;
-    color: #dc2626;
-}
-
-
-/* RESET PASSCODE INTRO */
-
-.reset-passcode-intro {
-    margin: 0 0 20px;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #6b7280;
-    text-align: center;
-}
-
-
-/* SIGN IN — EMAIL/PHONE TABS */
-
-.signin-tabs {
-    display: flex;
-    gap: 24px;
-    margin-bottom: 0;
-}
-
-.signin-tab {
-    border: none;
-    background: transparent;
-    padding: 0 0 12px;
-    font-size: 15px;
-    font-weight: 700;
-    color: #9ca3af;
-    cursor: pointer;
-}
-
-.signin-tab.active {
-    color: var(--text);
-}
-
-.signin-tabs-track {
-    position: relative;
-    width: 100%;
-    height: 2px;
-    background: var(--border);
-    margin-bottom: 20px;
-}
-
-.signin-tabs-indicator {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 50%;
-    height: 2px;
-    background: var(--purple);
-    transition: left 0.2s ease;
-}
-
-.signin-tabs-indicator.tab-phone {
-    left: 50%;
-}
-
-
-/* PHONE INPUT GROUP */
-
-.phone-input-group {
-    display: flex;
-    align-items: stretch;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--white);
-    overflow: hidden;
-}
-
-.phone-input-group:focus-within {
-    border-color: var(--purple);
-    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.08);
-}
-
-.phone-country-code {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 11px 10px;
-    border-right: 1px solid var(--border);
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text);
-    white-space: nowrap;
-}
-
-.phone-input-group input {
-    flex: 1;
-    min-width: 0;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-}
-
-.otp-expiry-countdown {
-    margin: 0 0 16px;
-
-    font-size: 13px;
-    text-align: center;
-    color: #9ca3af;
-}
-
-.otp-expiry-countdown span {
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: #6b7280;
-}
-
-.otp-expiry-countdown.otp-expiry-urgent span {
-    color: var(--red, #dc2626);
-}
-
-
-/* RESEND COOLDOWN */
-
-.otp-resend-cooldown {
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    color: #9ca3af;
-}
-
-.otp-verify-button {
-    width: 100%;
-    height: 54px;
-
-    border: none;
-    border-radius: 10px;
-
-    background: var(--purple);
-
-    color: white;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    gap: 10px;
-
-    font-size: 15px;
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        transform 0.15s ease;
-}
-
-.otp-verify-button:hover {
-    background: var(--purple-dark);
-    transform: translateY(-1px);
-}
-
-.otp-verify-button:active {
-    transform: translateY(0);
-}
-
-.otp-verify-button:disabled {
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-
-/* BUTTON ARROW */
-
-.otp-button-arrow {
-    font-size: 14px;
-}
-
-
-/* RESEND */
-
-.otp-resend-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-
-    margin-top: 20px;
-
-    font-size: 14px;
-    color: #6b7280;
-}
-
-.otp-resend-button {
-    border: none;
-    background: transparent;
-
-    color: var(--purple-dark);
-
-    font-size: 14px;
-    font-weight: 600;
-
-    cursor: pointer;
-
-    padding: 0;
-
-    text-decoration: underline;
-    text-underline-offset: 2px;
-}
-
-.otp-resend-button:hover {
-    color: var(--purple);
-}
-
-
-/* FOOTER NOTE — plain hairline, no panel */
-
-.otp-footer-note {
-    margin: 28px 0 0;
-    padding-top: 18px;
-
-    border-top: 1px solid #eee7fb;
-
-    font-size: 13px;
-    line-height: 1.6;
-    color: #9ca3af;
-    text-align: center;
-}
-
-
-/* =====================================================
-   MOBILE
-===================================================== */
-
-@media (max-width: 600px) {
-
-    .otp-input-container {
-        gap: 8px;
+    if (!newPasscodeMismatchMessage) {
+        return;
     }
 
-    .otp-digit {
-        width: 38px;
-        height: 50px;
-        font-size: 22px;
-    }
+    if (a.length === 6 && b.length === 6 && a !== b) {
 
-    .otp-header h2 {
-        font-size: 22px;
-    }
+        newPasscodeMismatchMessage.style.display = "block";
 
-    .otp-header {
-        margin-bottom: 20px;
+    } else {
+
+        newPasscodeMismatchMessage.style.display = "none";
+
     }
 
 }
 
-.stat-card-link {
-    border: 1px solid #e5e7eb;
-    text-align: left;
-    font-family: inherit;
-    cursor: pointer;
+const resetOtpGroup =
+    wireDigitGroup(
+        document.querySelectorAll("#resetOtpBoxes .reset-otp-digit"),
+        document.getElementById("resetOtpInput")
+    );
+
+const newPasscodeGroup =
+    wireDigitGroup(
+        document.querySelectorAll("#newPasscodeBoxes .passcode-digit"),
+        document.getElementById("newPasscodeInput"),
+        checkNewPasscodeMatch
+    );
+
+const confirmNewPasscodeGroup =
+    wireDigitGroup(
+        document.querySelectorAll("#confirmNewPasscodeBoxes .passcode-digit"),
+        document.getElementById("confirmNewPasscodeInput"),
+        checkNewPasscodeMatch
+    );
+
+
+// ========================================
+// RESET PASSCODE — SCREEN ELEMENTS
+// ========================================
+
+const resetPasscodeEmailScreen =
+    document.getElementById("resetPasscodeEmailScreen");
+
+const resetPasscodeConfirmScreen =
+    document.getElementById("resetPasscodeConfirmScreen");
+
+const resetPasscodeEmailStatus =
+    document.getElementById("resetPasscodeEmailStatus");
+
+const resetPasscodeConfirmStatus =
+    document.getElementById("resetPasscodeConfirmStatus");
+
+const sendPasscodeResetButton =
+    document.getElementById("sendPasscodeResetButton");
+
+const confirmPasscodeResetButton =
+    document.getElementById("confirmPasscodeResetButton");
+
+const resendResetOtpButton =
+    document.getElementById("resendResetOtpButton");
+
+const resetResendCooldown =
+    document.getElementById("resetResendCooldown");
+
+const resetResendCooldownTime =
+    document.getElementById("resetResendCooldownTime");
+
+const backToSignInFromReset =
+    document.getElementById("backToSignInFromReset");
+
+const forgotPasswordLink =
+    document.getElementById("forgotPassword");
+
+let currentResetStudentId = null;
+let currentResetEmail = null;
+let resetResendInterval = null;
+
+
+function startResetResendCooldown() {
+
+    clearInterval(resetResendInterval);
+
+    let secondsLeft = 30;
+
+    if (resendResetOtpButton) {
+        resendResetOtpButton.style.display = "none";
+    }
+
+    if (resetResendCooldown) {
+        resetResendCooldown.style.display = "inline";
+    }
+
+    function render() {
+
+        if (resetResendCooldownTime) {
+            resetResendCooldownTime.textContent = secondsLeft;
+        }
+
+    }
+
+    render();
+
+    resetResendInterval = setInterval(
+        function () {
+
+            secondsLeft = secondsLeft - 1;
+
+            if (secondsLeft <= 0) {
+
+                clearInterval(resetResendInterval);
+
+                if (resendResetOtpButton) {
+                    resendResetOtpButton.style.display = "inline";
+                }
+
+                if (resetResendCooldown) {
+                    resetResendCooldown.style.display = "none";
+                }
+
+                return;
+
+            }
+
+            render();
+
+        },
+        1000
+    );
+
 }
 
 
-/* DASHBOARD SECTIONS */
+// ========================================
+// SIGN IN — EMAIL / PHONE TABS
+// ========================================
 
-.dashboard-section {
-    margin-top: 32px;
-}
+const signinTabEmail =
+    document.getElementById("signinTabEmail");
 
-.dashboard-section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-}
+const signinTabPhone =
+    document.getElementById("signinTabPhone");
 
-.dashboard-section-header h2 {
-    font-size: 18px;
-    margin: 0;
-    color: #111827;
-}
+const signinEmailPanel =
+    document.getElementById("signinEmailPanel");
 
-.dashboard-section-link {
-    border: none;
-    background: transparent;
-    color: var(--purple);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    text-decoration: none;
-}
+const signinPhonePanel =
+    document.getElementById("signinPhonePanel");
 
-.dashboard-section-link:hover {
-    color: var(--purple-dark);
-}
+const signinTabsIndicator =
+    document.getElementById("signinTabsIndicator");
 
-.dashboard-empty-note {
-    color: #9ca3af;
-    font-size: 13px;
-    background: white;
-    border: 1px dashed #e5e7eb;
-    border-radius: 14px;
-    padding: 24px;
-    text-align: center;
-}
+let signinActiveTab = "email";
 
-.dashboard-order-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+function setSigninTab(tab) {
 
-.dashboard-order-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 16px 18px;
-}
+    signinActiveTab = tab;
 
-.dashboard-order-row-info {
-    min-width: 0;
-}
+    const isEmail = tab === "email";
 
-.dashboard-order-row-info strong {
-    display: block;
-    font-size: 13px;
-    color: #111827;
-    margin-bottom: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+    if (signinTabEmail) {
+        signinTabEmail.classList.toggle("active", isEmail);
+    }
 
-.dashboard-order-row-info span {
-    font-size: 12px;
-    color: #9ca3af;
-}
+    if (signinTabPhone) {
+        signinTabPhone.classList.toggle("active", !isEmail);
+    }
 
-.dashboard-order-row-right {
-    text-align: right;
-    flex-shrink: 0;
-}
+    if (signinEmailPanel) {
+        signinEmailPanel.style.display = isEmail ? "block" : "none";
+    }
 
-.dashboard-order-row-right strong {
-    display: block;
-    font-size: 14px;
-    color: #111827;
-}
+    if (signinPhonePanel) {
+        signinPhonePanel.style.display = isEmail ? "none" : "block";
+    }
 
-.dashboard-order-status {
-    display: inline-block;
-    margin-top: 4px;
-    padding: 2px 9px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-}
+    if (signinTabsIndicator) {
+        signinTabsIndicator.classList.toggle("tab-phone", !isEmail);
+    }
 
-.dashboard-order-status.paid {
-    background: #dcfce7;
-    color: #15803d;
-}
+    const identifierStatus =
+        document.getElementById("signinIdentifierStatus");
 
-.dashboard-order-status.pending {
-    background: #fef3c7;
-    color: #b45309;
-}
-
-.dashboard-order-status.failed {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-.dashboard-recommend-grid {
-    width: 100%;
-    max-width: none;
-    margin: 0;
-}
-
-@media (max-width: 900px) {
-
-    .dashboard-recommend-grid {
-        grid-template-columns: repeat(2, 1fr);
+    if (identifierStatus) {
+        identifierStatus.textContent = "";
     }
 
 }
 
-
-/* =========================================================
-   STUDENT ACCOUNT MENU
-   ========================================================= */
-
-.student-account-menu {
-    position: absolute;
-    top: calc(100% + 12px);
-    right: 0;
-
-    width: 280px;
-
-    background: #ffffff;
-
-    border: 1px solid #e5e7eb;
-
-    border-radius: 16px;
-
-    box-shadow:
-        0 18px 45px rgba(0, 0, 0, 0.12);
-
-    padding: 10px;
-
-    z-index: 1000;
-
-    display: none;
-
-    animation: accountMenuOpen 0.18s ease;
-}
-
-
-/* OPEN STATE */
-
-.student-account-menu.open {
-    display: block;
-}
-
-
-/* =========================================================
-   ACCOUNT HEADER
-   ========================================================= */
-
-.account-menu-header {
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-
-    padding: 12px 10px 14px;
-}
-
-
-/* PROFILE ICON */
-
-.account-menu-icon {
-    width: 44px;
-    height: 44px;
-
-    border-radius: 50%;
-
-    background: #f0e7ff;
-
-    color: #6d28d9;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    font-size: 18px;
-
-    flex-shrink: 0;
-}
-
-
-/* ACCOUNT INFORMATION */
-
-.account-menu-info {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 3px;
-
-    min-width: 0;
-}
-
-
-.account-menu-info strong {
-    color: #111827;
-
-    font-size: 15px;
-
-    font-weight: 700;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-}
-
-
-.account-menu-info span {
-    color: #6b7280;
-
-    font-size: 12px;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-}
-
-
-/* =========================================================
-   DIVIDER
-   ========================================================= */
-
-.account-menu-divider {
-    height: 1px;
-
-    background: #eeeeee;
-
-    margin: 6px 4px;
-}
-
-
-/* =========================================================
-   MENU BUTTONS
-   ========================================================= */
-
-.student-account-menu > button,
-.account-menu-nav-link {
-    width: 100%;
-
-    border: none;
-
-    background: transparent;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-
-    padding: 11px 10px;
-
-    border-radius: 10px;
-
-    cursor: pointer;
-
-    color: #374151;
-
-    font-family: inherit;
-
-    font-size: 14px;
-
-    font-weight: 500;
-
-    text-align: left;
-
-    text-decoration: none;
-
-    transition:
-        background 0.18s ease,
-        color 0.18s ease;
-}
-
-
-/* ICONS */
-
-.student-account-menu > button i,
-.account-menu-nav-link i {
-    width: 20px;
-
-    text-align: center;
-
-    color: #6d28d9;
-
-    font-size: 15px;
-}
-
-
-/* HOVER */
-
-.student-account-menu > button:hover,
-.account-menu-nav-link:hover {
-    background: #f5f0ff;
-
-    color: #5b21b6;
-}
-
-
-.student-account-menu > button:hover i,
-.account-menu-nav-link:hover i {
-    color: #6d28d9;
-}
-
-
-/* =========================================================
-   WALLET
-   ========================================================= */
-
-#accountWallet {
-    position: relative;
-}
-
-
-/* =========================================================
-   SIGN OUT
-   ========================================================= */
-
-.student-account-menu .sign-out-button {
-    color: #dc2626;
-
-    margin-top: 2px;
-}
-
-
-.student-account-menu .sign-out-button i {
-    color: #dc2626;
-}
-
-
-.student-account-menu .sign-out-button:hover {
-    background: #fef2f2;
-
-    color: #b91c1c;
-}
-
-
-.student-account-menu .sign-out-button:hover i {
-    color: #b91c1c;
-}
-
-
-/* =========================================================
-   ANIMATION
-   ========================================================= */
-
-@keyframes accountMenuOpen {
-
-    from {
-        opacity: 0;
-
-        transform:
-            translateY(-6px)
-            scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-
-        transform:
-            translateY(0)
-            scale(1);
-    }
+if (signinTabEmail) {
+
+    signinTabEmail.addEventListener(
+        "click",
+        function () {
+            setSigninTab("email");
+        }
+    );
 
 }
 
-/* =========================================================
-   KURIOS STORES
-   LOGGED-IN STUDENT DASHBOARD
-========================================================= */
-
-.logged-in-dashboard {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-
-/* =========================================================
-   WELCOME AREA
-========================================================= */
-
-.dashboard-welcome {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 40px;
-    margin-bottom: 34px;
-}
-
-
-.welcome-content {
-    flex: 1;
-}
-
-
-.welcome-content .hero-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-
-    margin-bottom: 16px;
-    padding: 6px 14px 6px 8px;
-
-    border-radius: 50px;
-
-    background: #f3e8ff;
-}
-
-
-.welcome-content .hero-label i {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 18px;
-    height: 18px;
-
-    border-radius: 50%;
-
-    background: #6d28d9;
-    color: white;
-
-    font-size: 10px;
-}
-
-
-.welcome-content h1 {
-    margin: 0 0 14px;
-    font-size: clamp(42px, 5vw, 64px);
-    line-height: 1.05;
-    letter-spacing: -2px;
-    font-weight: 800;
-    color: #111111;
-}
-
-
-.welcome-content h1 span {
-    color: #6d28d9;
-}
-
-
-.welcome-content p {
-    margin: 0 0 14px;
-    font-size: 18px;
-    color: #64748b;
-}
-
-
-.student-campus-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    margin-bottom: 24px;
-
-    font-size: 14px;
-    font-weight: 500;
-    color: #64748b;
-}
-
-
-.campus-status-dot {
-    width: 8px;
-    height: 8px;
-    flex-shrink: 0;
-
-    border-radius: 50%;
-
-    background: #16a34a;
-}
-
-
-.campus-info-divider {
-    color: #d4d4d8;
-}
-
-
-.student-campus-info i {
-    color: #a1a1aa;
-    font-size: 13px;
-}
-
-
-.welcome-content .hero-buttons {
-    margin-top: 4px;
-}
-
-
-.button-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
-
-    border-radius: 50px;
-
-    background: #ede9fe;
-    color: #6d28d9;
-
-    font-size: 12px;
-    font-weight: 800;
-}
-
-
-/* =========================================================
-   DASHBOARD STATS
-========================================================= */
-
-.dashboard-stats {
-    display: flex;
-    gap: 16px;
-}
-
-
-.stat-card {
-    flex: 1;
-
-    display: flex;
-    align-items: center;
-    gap: 14px;
-
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-
-    padding: 18px 20px;
-
-    box-shadow: 0 8px 25px rgba(30, 20, 60, 0.05);
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        border-color 0.2s ease;
-}
-
-
-.stat-card:hover {
-    transform: translateY(-3px);
-
-    border-color: #d8c7f5;
-
-    box-shadow: 0 15px 35px rgba(30, 20, 60, 0.09);
-}
-
-
-.stat-icon {
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 12px;
-
-    font-size: 17px;
-}
-
-
-.stat-card--wallet .stat-icon {
-    background: #e0f2fe;
-    color: #0284c7;
-}
-
-
-.stat-card--wishlist .stat-icon {
-    background: #f3e8ff;
-    color: #6d28d9;
-}
-
-
-.stat-card--rewards .stat-icon {
-    background: #fef9c3;
-    color: #b45309;
-}
-
-
-.stat-text {
-    min-width: 0;
-}
-
-
-.stat-value {
-    font-size: 22px;
-    line-height: 1.15;
-    font-weight: 800;
-    color: #111827;
-}
-
-
-.stat-label {
-    font-size: 13px;
-    color: #64748b;
-}
-
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media (max-width: 1000px) {
-
-    .dashboard-stats {
-        flex-wrap: wrap;
-    }
-
-
-    .stat-card {
-        min-width: calc(50% - 8px);
-    }
+if (signinTabPhone) {
+
+    signinTabPhone.addEventListener(
+        "click",
+        function () {
+            setSigninTab("phone");
+        }
+    );
 
 }
 
 
-@media (max-width: 650px) {
+// ========================================
+// SIGN IN — EMAIL/PHONE STEP "NEXT" BUTTON
+// ========================================
 
-    .dashboard-welcome {
-        align-items: flex-start;
-    }
+const signinNextButton =
+    document.getElementById("signinNextButton");
+
+if (signinNextButton) {
+
+    signinNextButton.addEventListener(
+        "click",
+        function () {
+
+            const identifierStatus =
+                document.getElementById("signinIdentifierStatus");
+
+            let identifier = "";
+            let displayValue = "";
+
+            if (signinActiveTab === "email") {
+
+                const emailField =
+                    document.getElementById("signinEmail");
+
+                identifier =
+                    emailField ? emailField.value.trim() : "";
+
+                displayValue = identifier;
+
+                if (!identifier) {
+
+                    if (identifierStatus) {
+                        identifierStatus.textContent =
+                            "Please enter your email address.";
+                    }
+
+                    if (emailField) {
+                        emailField.focus();
+                    }
+
+                    return;
+
+                }
+
+            } else {
+
+                const phoneField =
+                    document.getElementById("signinPhone");
+
+                const rawDigits =
+                    phoneField ?
+                        phoneField.value.replace(/\D/g, "") :
+                        "";
+
+                if (!rawDigits) {
+
+                    if (identifierStatus) {
+                        identifierStatus.textContent =
+                            "Please enter your phone number.";
+                    }
+
+                    if (phoneField) {
+                        phoneField.focus();
+                    }
+
+                    return;
+
+                }
+
+                // Strip a leading 0 (local format) before
+                // attaching the country code.
+
+                const localDigits =
+                    rawDigits.replace(/^0+/, "");
+
+                identifier =
+                    "+234" + localDigits;
+
+                displayValue =
+                    "+234 " + localDigits;
+
+            }
+
+            const identifierValueField =
+                document.getElementById("signinIdentifierValue");
+
+            if (identifierValueField) {
+                identifierValueField.value = identifier;
+            }
+
+            const emailStep =
+                document.getElementById("signinEmailStep");
+
+            const passcodeStep =
+                document.getElementById("signinPasscodeStep");
+
+            const adminPasswordStep =
+                document.getElementById("signinAdminPasswordStep");
 
 
-    .welcome-content h1 {
-        font-size: 38px;
-        letter-spacing: -1.5px;
-    }
+            // ========================================
+            // NOT AN EMAIL/PHONE SHAPE — TREAT AS AN
+            // ADMIN USERNAME INSTEAD
+            // ========================================
 
+            if (
+                signinActiveTab === "email" &&
+                !identifier.includes("@")
+            ) {
 
-    .welcome-content .hero-buttons {
-        width: 100%;
-    }
+                const adminUsernameChip =
+                    document.getElementById("signinAdminUsernameChip");
 
+                if (adminUsernameChip) {
+                    adminUsernameChip.textContent = identifier;
+                }
 
-    .welcome-content .hero-buttons .primary-button,
-    .welcome-content .hero-buttons .secondary-button {
-        flex: 1;
-        justify-content: center;
-    }
+                if (emailStep) {
+                    emailStep.style.display = "none";
+                }
 
+                if (passcodeStep) {
+                    passcodeStep.style.display = "none";
+                }
 
-    .dashboard-stats {
-        flex-direction: column;
-    }
+                if (adminPasswordStep) {
+                    adminPasswordStep.style.display = "block";
+                }
 
+                const adminPasswordField =
+                    document.getElementById("signinAdminPassword");
 
-    .stat-card {
-        min-width: 100%;
-    }
+                if (adminPasswordField) {
+
+                    adminPasswordField.value = "";
+                    adminPasswordField.focus();
+
+                }
+
+                return;
+
+            }
+
+            const emailChip =
+                document.getElementById("signinEmailChip");
+
+            if (emailChip) {
+                emailChip.textContent = displayValue;
+            }
+
+            if (emailStep) {
+                emailStep.style.display = "none";
+            }
+
+            if (passcodeStep) {
+                passcodeStep.style.display = "block";
+            }
+
+            signinPasscodeGroup.clear();
+            signinPasscodeGroup.focusFirst();
+
+        }
+    );
 
 }
 
-/* =========================================================
-   KURIOS SELLER CENTER — DASHBOARD SHELL
-   (structural layout from the reference mockup,
-   recolored to our purple brand throughout)
-   ========================================================= */
-.ks-seller-app{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:calc(100vh - 20px);background:#f8fafb;border:1px solid #e5e7eb;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(15,23,42,.08);margin:0 auto;max-width:1500px;color:#10212a}
-.ks-seller-sidebar{background:linear-gradient(180deg,#4c1d95 0%,#5b21b6 55%,#6d28d9 100%);color:#fff;padding:18px 12px 14px;display:flex;flex-direction:column;min-width:0}
-.ks-seller-brand{display:flex;align-items:center;gap:10px;padding:4px 12px 17px;border-bottom:1px solid rgba(255,255,255,.15);margin-bottom:18px}
-.ks-seller-brand-mark{font-size:25px;color:#c4b5fd}.ks-seller-brand strong{display:block;font-size:21px;line-height:1;font-weight:900;letter-spacing:.3px}.ks-seller-brand span{display:block;color:#c4b5fd;font-size:16px;font-weight:900;letter-spacing:.5px}.ks-seller-profile{display:flex;gap:10px;align-items:center;padding:0 9px 16px}.ks-seller-avatar,.ks-user-avatar{border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#f3e8ff;color:var(--purple)}.ks-seller-avatar{width:43px;height:43px;flex:none}.ks-seller-avatar img,.ks-user-avatar img{width:100%;height:100%;object-fit:cover}.ks-seller-profile-copy strong{display:block;font-size:13px;color:#fff}.ks-seller-profile-copy span{font-size:11px;color:#d8c7f5}.ks-seller-profile-copy i{color:#c4b5fd;margin-left:2px}.ks-seller-nav{display:flex;flex-direction:column;gap:3px}.ks-seller-nav-item{width:100%;display:flex;align-items:center;gap:12px;border:0;background:transparent;color:#f2ecfb;padding:10px 12px;border-radius:8px;font:600 12px/1.2 inherit;text-align:left;cursor:pointer}.ks-seller-nav-item i:first-child{width:16px;text-align:center;font-size:14px}.ks-seller-nav-item:hover{background:rgba(255,255,255,.1)}.ks-seller-nav-item.active{background:rgba(255,255,255,.18);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}.ks-seller-nav-item span{flex:1}.ks-seller-nav-item b{min-width:21px;height:21px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--purple-dark);font-size:10px}.ks-nav-chevron{font-size:9px!important;width:auto!important}.ks-grow-card{position:relative;margin:18px 0 14px;padding:15px 14px;border-radius:9px;background:linear-gradient(135deg,#7c3aed,#5b21b6);overflow:hidden}.ks-grow-card strong{font-size:13px}.ks-grow-card p{font-size:11px;line-height:1.55;color:#ede9fe;margin:7px 0 11px;max-width:150px}.ks-grow-card button{border:0;background:#fff;color:var(--purple-dark);border-radius:5px;padding:7px 10px;font-size:10px;font-weight:800;cursor:pointer}.ks-grow-icon{position:absolute;right:7px;bottom:18px;font-size:34px;transform:rotate(-18deg);opacity:.25}.ks-help-card{margin-top:auto;border-top:1px solid rgba(255,255,255,.14);padding:17px 9px 4px;display:flex;gap:12px;align-items:center}.ks-help-card>i{font-size:20px}.ks-help-card strong,.ks-help-card span{display:block}.ks-help-card strong{font-size:12px}.ks-help-card span{font-size:10px;color:#d8c7f5;margin-top:3px}
-.ks-seller-content{min-width:0;background:#fbfcfd}.ks-seller-topbar{height:66px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:18px;padding:0 24px}.ks-sidebar-toggle{border:0;background:transparent;font-size:18px;color:#182b34;cursor:pointer;display:none}.ks-seller-search{width:min(340px,42vw);height:36px;border:1px solid #dce2e5;border-radius:7px;display:flex;align-items:center;gap:9px;padding:0 11px;color:#5d6b73;margin-left:auto}.ks-seller-search input{border:0;outline:0;width:100%;font:500 12px inherit;color:#152831;background:transparent}.ks-topbar-actions{display:flex;align-items:center;gap:13px}.ks-icon-btn{position:relative;border:0;background:transparent;color:#172b34;font-size:17px;cursor:pointer}.ks-notification-dot{position:absolute;right:-1px;top:0;width:5px;height:5px;border-radius:50%;background:#ef4444}.ks-add-product-top{border:0;background:var(--purple);color:#fff;border-radius:6px;padding:9px 12px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:7px;cursor:pointer}.ks-add-product-top:hover{background:var(--purple-dark)}.ks-user-menu{border:0;background:transparent;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#1b2c34;cursor:pointer}.ks-user-avatar{width:30px;height:30px}.ks-seller-page-head{padding:22px 28px 17px;display:flex;justify-content:space-between;align-items:flex-end;gap:18px}.ks-seller-page-head h2{font-size:24px;line-height:1.2;margin:0 0 5px;font-weight:800;letter-spacing:-.6px}.ks-seller-page-head p{margin:0;color:#6d7a83;font-size:13px}.ks-wave{font-size:21px}.ks-seller-app .seller-dash-tab{padding:0 28px 26px}.ks-metric-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:15px;margin-bottom:18px}.ks-metric-card{background:#fff;border:1px solid #e1e6e9;border-radius:10px;padding:16px 14px;display:flex;align-items:center;gap:11px;min-height:90px}.ks-metric-icon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:15px}.ks-metric-icon.sales{background:#dcfce7;color:#15803d}.ks-metric-icon.orders{background:#e1efff;color:#2585e8}.ks-metric-icon.customers{background:#f3e8ff;color:var(--purple)}.ks-metric-icon.products{background:#ffeadb;color:#e27d2b}.ks-metric-icon.rating{background:#fff2bd;color:#dfaa00}.ks-metric-card span{display:block;color:#1f3039;font-size:11px;margin-bottom:4px}.ks-metric-card strong{display:block;color:#0e1e27;font-size:17px;line-height:1.2}
-.ks-dashboard-grid{display:grid;gap:16px;margin-bottom:16px}.ks-dashboard-grid-top{grid-template-columns:minmax(0,1.55fr) minmax(260px,1fr) minmax(250px,1.08fr)}.ks-dashboard-grid-bottom{grid-template-columns:minmax(0,1.7fr) minmax(270px,.72fr)}.ks-panel{background:#fff;border:1px solid #e1e6e9;border-radius:10px;padding:17px 18px;min-width:0;overflow:hidden}.ks-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}.ks-panel-head h3{font-size:13px;margin:0;font-weight:800;color:#13252e}.ks-panel-head p{margin:4px 0 0;color:#89959c;font-size:9px}.ks-panel-head button{border:0;background:transparent;color:var(--purple-dark);font-size:10px;font-weight:700;cursor:pointer}
-.ks-line-chart{height:200px;position:relative}.ks-line-chart svg{width:100%;height:100%;display:block}
-.ks-donut-wrap{display:flex;align-items:center;gap:22px;min-height:200px}
-.ks-top-product{display:grid;grid-template-columns:42px 1fr auto;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #edf0f2}.ks-top-product:last-child{border-bottom:0}
-.ks-recent-orders{min-height:230px}.ks-recent-orders .seller-orders-table{font-size:10px}.ks-recent-orders .seller-orders-table th{font-size:9px;background:#f7f9fa;color:#52636b;padding:10px 8px}.ks-recent-orders .seller-orders-table td{padding:10px 8px;border-bottom:1px solid #edf0f2;color:#263840}
-.ks-performance-list>div{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:9px;padding:14px 0;border-bottom:1px solid #edf0f2;font-size:10px}.ks-performance-list>div:last-child{border-bottom:0}.ks-performance-list i{font-size:16px;color:var(--purple)}.ks-performance-list span{color:#596970}.ks-performance-list strong{font-size:11px;color:#24363f}
-.ks-seller-app .seller-dashboard-header{margin-bottom:15px}
 
-@media(max-width:1180px){.ks-metric-grid{grid-template-columns:repeat(3,1fr)}.ks-dashboard-grid-top{grid-template-columns:1.3fr 1fr}.ks-top-products{grid-column:1/-1}.ks-seller-app{grid-template-columns:220px minmax(0,1fr)}}
-@media(max-width:900px){.ks-sidebar-toggle{display:block}.ks-seller-app{grid-template-columns:1fr;border-radius:0;margin:0}.ks-seller-sidebar{position:fixed;z-index:100;left:0;top:0;bottom:0;width:244px;transform:translateX(-102%);transition:transform .2s ease;box-shadow:12px 0 30px rgba(0,0,0,.18)}.ks-seller-app.sidebar-open .ks-seller-sidebar{transform:translateX(0)}.ks-seller-content{width:100%}.ks-seller-topbar{padding:0 15px}.ks-seller-search{width:34vw}.ks-topbar-actions{gap:9px}.ks-user-menu>span:not(.ks-user-avatar){display:none}.ks-seller-page-head{padding:18px 15px 14px}.ks-seller-app .seller-dash-tab{padding:0 15px 20px}.ks-dashboard-grid-top,.ks-dashboard-grid-bottom{grid-template-columns:1fr}.ks-top-products{grid-column:auto}.ks-donut-wrap{justify-content:center}}
-@media(max-width:620px){.ks-seller-search{display:none}.ks-add-product-top{font-size:0;padding:9px 10px}.ks-add-product-top i{font-size:12px}.ks-seller-page-head{align-items:flex-start;flex-direction:column}.ks-metric-grid{grid-template-columns:1fr 1fr;gap:9px}.ks-metric-card{min-height:85px;padding:12px 10px}.ks-metric-card strong{font-size:14px}.ks-metric-icon{width:35px;height:35px}.ks-panel{padding:14px}.ks-line-chart{height:180px}.ks-donut-wrap{flex-direction:column}.ks-recent-orders{overflow:auto}.ks-recent-orders .seller-orders-table{min-width:560px}}
+// ========================================
+// SIGN IN — "USE A DIFFERENT EMAIL"
+// ========================================
 
-/* Strip the old application-form chrome for the dashboard view */
-#sellerPage.seller-dashboard-active .full-page-back-row,
-#sellerPage.seller-dashboard-active .full-page-panel>.profile-panel-header{display:none}
-#sellerPage.seller-dashboard-active .full-page-panel{padding:0;border:0;background:transparent;border-radius:0}
+const signinChangeEmail =
+    document.getElementById("signinChangeEmail");
+
+if (signinChangeEmail) {
+
+    signinChangeEmail.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            const emailStep =
+                document.getElementById("signinEmailStep");
+
+            const passcodeStep =
+                document.getElementById("signinPasscodeStep");
+
+            if (passcodeStep) {
+                passcodeStep.style.display = "none";
+            }
+
+            if (emailStep) {
+                emailStep.style.display = "block";
+            }
+
+            signinPasscodeGroup.clear();
+
+        }
+    );
+
+}
 
 
-/* =========================================================
-   CHAT — MOBILE LAYOUT
-   (single-column, list-or-conversation, with a
-   working back button — not two cramped columns)
-   ========================================================= */
+// ========================================
+// ADMIN PASSWORD STEP — "USE A DIFFERENT EMAIL"
+// ========================================
 
-@media (min-width: 781px) {
+const signinAdminChangeEmail =
+    document.getElementById("signinAdminChangeEmail");
 
-    .chat-back-button {
-        display: none !important;
+if (signinAdminChangeEmail) {
+
+    signinAdminChangeEmail.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            const emailStep =
+                document.getElementById("signinEmailStep");
+
+            const adminPasswordStep =
+                document.getElementById("signinAdminPasswordStep");
+
+            const adminStatus =
+                document.getElementById("signinAdminStatus");
+
+            if (adminPasswordStep) {
+                adminPasswordStep.style.display = "none";
+            }
+
+            if (adminStatus) {
+                adminStatus.textContent = "";
+            }
+
+            if (emailStep) {
+                emailStep.style.display = "block";
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// ADMIN SIGN IN SUBMIT
+// ========================================
+
+const signinAdminSubmit =
+    document.getElementById("signinAdminSubmit");
+
+if (signinAdminSubmit) {
+
+    signinAdminSubmit.addEventListener(
+        "click",
+        async function () {
+
+            const usernameChip =
+                document.getElementById("signinAdminUsernameChip");
+
+            const username =
+                usernameChip ? usernameChip.textContent.trim() : "";
+
+            const passwordField =
+                document.getElementById("signinAdminPassword");
+
+            const password =
+                passwordField ? passwordField.value : "";
+
+            const adminStatus =
+                document.getElementById("signinAdminStatus");
+
+            if (!username || !password) {
+
+                if (adminStatus) {
+
+                    adminStatus.textContent =
+                        "Please enter the admin password.";
+
+                }
+
+                return;
+
+            }
+
+            signinAdminSubmit.disabled = true;
+            signinAdminSubmit.textContent = "Signing in...";
+
+            if (adminStatus) {
+                adminStatus.textContent = "";
+            }
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/admin/login",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                username: username,
+                                password: password
+                            })
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (adminStatus) {
+
+                        adminStatus.textContent =
+                            data.message ||
+                            "Invalid username or password.";
+
+                    }
+
+                    return;
+
+                }
+
+                // Store the admin session and hand off to
+                // the admin dashboard — same origin, so the
+                // token carries over via sessionStorage.
+
+                sessionStorage.setItem(
+                    "kuriosAdminToken",
+                    data.token
+                );
+
+                window.location.href =
+                    "/admin-sellers.html";
+
+            } catch (error) {
+
+                console.error(
+                    "Admin login error:",
+                    error
+                );
+
+                if (adminStatus) {
+
+                    adminStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                signinAdminSubmit.disabled = false;
+                signinAdminSubmit.textContent = "Sign In as Admin";
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// OPEN RESET FLOW FROM SIGN IN
+// ========================================
+
+if (forgotPasswordLink) {
+
+    forgotPasswordLink.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            const signinForm =
+                document.getElementById("signinForm");
+
+            if (signinForm) {
+                signinForm.style.display = "none";
+            }
+
+            if (resetPasscodeConfirmScreen) {
+                resetPasscodeConfirmScreen.style.display = "none";
+            }
+
+            if (resetPasscodeEmailScreen) {
+                resetPasscodeEmailScreen.style.display = "block";
+            }
+
+            if (resetPasscodeEmailStatus) {
+                resetPasscodeEmailStatus.textContent = "";
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// BACK TO SIGN IN FROM RESET
+// ========================================
+
+if (backToSignInFromReset) {
+
+    backToSignInFromReset.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            clearInterval(resetResendInterval);
+
+            const signinForm =
+                document.getElementById("signinForm");
+
+            if (resetPasscodeEmailScreen) {
+                resetPasscodeEmailScreen.style.display = "none";
+            }
+
+            if (resetPasscodeConfirmScreen) {
+                resetPasscodeConfirmScreen.style.display = "none";
+            }
+
+            if (signinForm) {
+                signinForm.style.display = "block";
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// SEND PASSCODE RESET CODE
+// ========================================
+
+if (sendPasscodeResetButton) {
+
+    sendPasscodeResetButton.addEventListener(
+        "click",
+        async function () {
+
+            const email =
+                document.getElementById("resetPasscodeEmail").value.trim();
+
+            if (!email) {
+
+                if (resetPasscodeEmailStatus) {
+
+                    resetPasscodeEmailStatus.textContent =
+                        "Please enter your email address.";
+
+                }
+
+                return;
+
+            }
+
+            sendPasscodeResetButton.disabled = true;
+
+            sendPasscodeResetButton.innerHTML =
+                `<i class="fa-solid fa-spinner fa-spin"></i> Sending...`;
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/students/request-passcode-reset",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ email: email })
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+
+                    if (resetPasscodeEmailStatus) {
+
+                        resetPasscodeEmailStatus.textContent =
+                            data.message ||
+                            "Unable to send a reset code.";
+
+                    }
+
+                    return;
+
+                }
+
+                currentResetStudentId = data.studentId;
+                currentResetEmail = data.email;
+
+                const resetPasscodeConfirmMessage =
+                    document.getElementById("resetPasscodeConfirmMessage");
+
+                if (resetPasscodeConfirmMessage) {
+
+                    resetPasscodeConfirmMessage.innerHTML =
+                        `Enter the code sent to
+                        <span class="otp-email-chip">${data.email}</span>,
+                        then choose a new 6-digit passcode.`;
+
+                }
+
+                resetOtpGroup.clear();
+                newPasscodeGroup.clear();
+                confirmNewPasscodeGroup.clear();
+
+                if (newPasscodeMismatchMessage) {
+                    newPasscodeMismatchMessage.style.display = "none";
+                }
+
+                if (resetPasscodeConfirmStatus) {
+                    resetPasscodeConfirmStatus.textContent = "";
+                }
+
+                if (resetPasscodeEmailScreen) {
+                    resetPasscodeEmailScreen.style.display = "none";
+                }
+
+                if (resetPasscodeConfirmScreen) {
+                    resetPasscodeConfirmScreen.style.display = "block";
+                }
+
+                resetOtpGroup.focusFirst();
+
+                startResetResendCooldown();
+
+            } catch (error) {
+
+                console.error(
+                    "Passcode reset request error:",
+                    error.message
+                );
+
+                if (resetPasscodeEmailStatus) {
+
+                    resetPasscodeEmailStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                sendPasscodeResetButton.disabled = false;
+                sendPasscodeResetButton.textContent = "Send Reset Code";
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// RESEND RESET OTP
+// ========================================
+
+if (resendResetOtpButton) {
+
+    resendResetOtpButton.addEventListener(
+        "click",
+        async function () {
+
+            if (!currentResetEmail) {
+                return;
+            }
+
+            resendResetOtpButton.disabled = true;
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/students/request-passcode-reset",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ email: currentResetEmail })
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (resetPasscodeConfirmStatus) {
+
+                    resetPasscodeConfirmStatus.textContent =
+                        data.success ?
+                            "A new code has been sent to your email." :
+                            (data.message || "Unable to resend code.");
+
+                }
+
+                if (data.success) {
+                    startResetResendCooldown();
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Resend reset OTP error:",
+                    error.message
+                );
+
+                if (resetPasscodeConfirmStatus) {
+
+                    resetPasscodeConfirmStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                resendResetOtpButton.disabled = false;
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// CONFIRM PASSCODE RESET
+// ========================================
+
+if (confirmPasscodeResetButton) {
+
+    confirmPasscodeResetButton.addEventListener(
+        "click",
+        async function () {
+
+            const otp =
+                document.getElementById("resetOtpInput").value;
+
+            const newPasscode =
+                document.getElementById("newPasscodeInput").value;
+
+            const confirmNewPasscode =
+                document.getElementById("confirmNewPasscodeInput").value;
+
+            if (
+                otp.length !== 6 ||
+                newPasscode.length !== 6 ||
+                confirmNewPasscode.length !== 6
+            ) {
+
+                if (resetPasscodeConfirmStatus) {
+
+                    resetPasscodeConfirmStatus.textContent =
+                        "Please fill in the code and your new passcode.";
+
+                }
+
+                return;
+
+            }
+
+            if (newPasscode !== confirmNewPasscode) {
+
+                if (newPasscodeMismatchMessage) {
+                    newPasscodeMismatchMessage.style.display = "block";
+                }
+
+                return;
+
+            }
+
+            confirmPasscodeResetButton.disabled = true;
+
+            confirmPasscodeResetButton.innerHTML =
+                `<span class="otp-button-text">Setting passcode...</span>`;
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/students/reset-passcode",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                studentId: currentResetStudentId,
+                                otp: otp,
+                                newPasscode: newPasscode,
+                                confirmNewPasscode: confirmNewPasscode
+                            })
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+
+                    if (resetPasscodeConfirmStatus) {
+
+                        resetPasscodeConfirmStatus.textContent =
+                            data.message ||
+                            "Unable to reset your passcode.";
+
+                    }
+
+                    return;
+
+                }
+
+                clearInterval(resetResendInterval);
+
+                if (resetPasscodeConfirmScreen) {
+                    resetPasscodeConfirmScreen.style.display = "none";
+                }
+
+                const signinForm =
+                    document.getElementById("signinForm");
+
+                if (signinForm) {
+
+                    signinForm.style.display = "block";
+
+                    const signinEmailField =
+                        document.getElementById("signinEmail");
+
+                    if (signinEmailField && currentResetEmail) {
+                        signinEmailField.value = currentResetEmail;
+                    }
+
+                    signinPasscodeGroup.clear();
+
+                }
+
+                let resetToast =
+                    document.getElementById("kuriosToast");
+
+                if (!resetToast) {
+
+                    resetToast =
+                        document.createElement("div");
+
+                    resetToast.id = "kuriosToast";
+                    resetToast.className = "kurios-toast";
+
+                    document.body.appendChild(resetToast);
+
+                }
+
+                resetToast.textContent =
+                    "Your passcode has been reset. Please sign in with your new passcode.";
+
+                resetToast.classList.add("show");
+
+                setTimeout(
+                    function () {
+                        resetToast.classList.remove("show");
+                    },
+                    3000
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Confirm passcode reset error:",
+                    error.message
+                );
+
+                if (resetPasscodeConfirmStatus) {
+
+                    resetPasscodeConfirmStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                confirmPasscodeResetButton.disabled = false;
+
+                confirmPasscodeResetButton.innerHTML =
+                    `<span class="otp-button-text">Set new passcode</span>
+                     <span class="otp-button-arrow"><i class="fa-solid fa-arrow-right"></i></span>`;
+
+            }
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// BECOME A SELLER — APPLICATION FLOW
+// =========================================================
+
+const sellerPage =
+    document.getElementById("sellerPage");
+
+const mainContent =
+    document.getElementById("mainContent");
+
+const sellerBackLink =
+    document.getElementById("sellerBackLink");
+
+const closeSeller =
+    document.getElementById("closeSeller");
+
+const accountBecomeSeller =
+    document.getElementById("accountBecomeSeller");
+
+const sellerLoadingState =
+    document.getElementById("sellerLoadingState");
+
+const sellerPendingState =
+    document.getElementById("sellerPendingState");
+
+const sellerApprovedState =
+    document.getElementById("sellerApprovedState");
+
+const sellerSuspendedState =
+    document.getElementById("sellerSuspendedState");
+
+const sellerApplyForm =
+    document.getElementById("sellerApplyForm");
+
+const sellerApplyStatus =
+    document.getElementById("sellerApplyStatus");
+
+const sellerApplySubmit =
+    document.getElementById("sellerApplySubmit");
+
+
+function hideAllSellerStates() {
+
+    [
+        sellerLoadingState,
+        sellerPendingState,
+        sellerApprovedState,
+        sellerSuspendedState,
+        sellerApplyForm
+    ].forEach(function (el) {
+
+        if (el) {
+            el.style.display = "none";
+        }
+
+    });
+
+    const sellerPageEl =
+        document.getElementById("sellerPage");
+
+    if (sellerPageEl) {
+        sellerPageEl.classList.remove("seller-dashboard-active");
     }
 
 }
 
 
-/* =========================================================
-   CHAT — APP SIDEBAR (matches reference mockup)
-   ========================================================= */
+function closeSellerPanel() {
 
-.chat-app-sidebar {
-    background: #fbfaff;
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 16px 12px;
-    min-height: 0;
-    overflow-y: auto;
-}
+    if (typeof window.goBack === "function") {
 
-.chat-app-brand {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 6px 16px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 14px;
-}
+        window.goBack();
+        return;
 
-.chat-app-brand i {
-    font-size: 18px;
-    color: var(--purple);
-}
-
-.chat-app-brand strong {
-    display: block;
-    font-size: 13px;
-    line-height: 1;
-    color: var(--purple-dark);
-}
-
-.chat-app-brand span {
-    display: block;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    color: var(--purple);
-}
-
-.chat-app-newchat-btn {
-    border: none;
-    background: var(--purple);
-    color: white;
-    border-radius: 9px;
-    padding: 10px;
-    font-size: 12px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    cursor: pointer;
-    margin-bottom: 14px;
-}
-
-.chat-app-newchat-btn:hover {
-    background: var(--purple-dark);
-}
-
-.chat-app-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.chat-app-nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border: none;
-    background: transparent;
-    padding: 9px 10px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #4b5563;
-    cursor: pointer;
-    text-align: left;
-    position: relative;
-}
-
-.chat-app-nav-item i {
-    width: 15px;
-    text-align: center;
-    color: #9ca3af;
-    font-size: 13px;
-}
-
-.chat-app-nav-item:hover {
-    background: var(--purple-soft);
-    color: var(--purple-dark);
-}
-
-.chat-app-nav-item.active {
-    background: var(--purple-soft);
-    color: var(--purple-dark);
-}
-
-.chat-app-nav-item.active i {
-    color: var(--purple);
-}
-
-.chat-app-nav-item.soon {
-    color: #9ca3af;
-}
-
-.soon-pill {
-    margin-left: auto;
-    background: #fef3c7;
-    color: #b45309;
-    font-size: 8px;
-    font-weight: 800;
-    text-transform: uppercase;
-    padding: 2px 6px;
-    border-radius: 999px;
-    letter-spacing: 0.02em;
-}
-
-.chat-app-sidebar-footer {
-    margin-top: auto;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-}
-
-.chat-app-sidebar-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--purple-soft);
-    color: var(--purple);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-
-.chat-app-sidebar-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.chat-app-sidebar-footer strong {
-    display: block;
-    font-size: 11px;
-    color: #111827;
-}
-
-.chat-app-sidebar-footer span {
-    display: block;
-    font-size: 10px;
-    color: #9ca3af;
-}
-
-
-/* FILTER PILLS */
-
-.chat-filter-pills {
-    display: flex;
-    gap: 6px;
-    padding: 0 16px 14px;
-    flex-wrap: wrap;
-}
-
-.chat-filter-pill {
-    border: 1px solid var(--border);
-    background: white;
-    color: #6b7280;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 5px 10px;
-    border-radius: 999px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.chat-filter-pill:hover {
-    border-color: var(--purple);
-    color: var(--purple);
-}
-
-.chat-filter-pill.active {
-    background: var(--purple);
-    border-color: var(--purple);
-    color: white;
-}
-
-.chat-filter-pill.soon {
-    color: #9ca3af;
-}
-
-.chat-filter-pill .soon-pill {
-    margin-left: 0;
-}
-
-
-/* HEADER ACTIONS (call / video / more) */
-
-.chat-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-left: auto;
-}
-
-.chat-header-icon-btn {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: transparent;
-    color: #9ca3af;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-}
-
-.chat-header-icon-btn:hover {
-    background: var(--purple-soft);
-    color: var(--purple);
-}
-
-
-/* MESSAGE INPUT ICON BUTTONS */
-
-.chat-input-icon-btn {
-    border: none;
-    background: transparent;
-    color: #9ca3af;
-    font-size: 15px;
-    width: 32px;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.chat-input-icon-btn:hover {
-    color: var(--purple);
-}
-
-
-/* PROFILE PANEL */
-
-.chat-profile-panel {
-    border-left: 1px solid var(--border);
-    padding: 24px 18px;
-    overflow-y: auto;
-    text-align: center;
-}
-
-.chat-profile-avatar {
-    width: 76px;
-    height: 76px;
-    border-radius: 50%;
-    background: var(--purple-soft);
-    color: var(--purple);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    margin: 0 auto 12px;
-    overflow: hidden;
-}
-
-.chat-profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.chat-profile-panel strong {
-    display: block;
-    font-size: 14px;
-    color: #111827;
-    margin-bottom: 6px;
-}
-
-.chat-profile-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: var(--purple-soft);
-    color: var(--purple-dark);
-    font-size: 10px;
-    font-weight: 700;
-    padding: 3px 9px;
-    border-radius: 999px;
-    margin-bottom: 10px;
-}
-
-.chat-profile-university {
-    font-size: 11px;
-    color: #9ca3af;
-    margin: 0 0 18px;
-}
-
-.chat-profile-actions {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    margin-bottom: 22px;
-}
-
-.chat-profile-action {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    padding: 8px 4px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 9px;
-    font-weight: 700;
-    color: var(--purple-dark);
-}
-
-.chat-profile-action i {
-    font-size: 13px;
-    color: var(--purple);
-}
-
-.chat-profile-action:hover {
-    background: var(--purple-soft);
-}
-
-.chat-profile-action.soon {
-    color: #9ca3af;
-}
-
-.chat-profile-action.soon i {
-    color: #9ca3af;
-}
-
-.chat-profile-section {
-    text-align: left;
-    margin-bottom: 16px;
-}
-
-.chat-profile-section h4 {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #9ca3af;
-    margin: 0 0 10px;
-}
-
-.chat-profile-info-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 11px;
-    color: #374151;
-    padding: 6px 0;
-}
-
-.chat-profile-info-row i {
-    width: 14px;
-    color: var(--purple);
-}
-
-.chat-profile-list-item {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: none;
-    background: transparent;
-    padding: 8px 4px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #374151;
-    cursor: pointer;
-    border-radius: 6px;
-}
-
-.chat-profile-list-item:hover {
-    background: #f9fafb;
-}
-
-.chat-profile-list-item.danger {
-    color: #dc2626;
-}
-
-.chat-profile-list-item .soon-pill {
-    margin-left: auto;
-}
-
-
-@media (max-width: 1180px) {
-
-    .chat-preview,
-    .chat-preview:not(.has-profile-panel) {
-        grid-template-columns: 190px 280px minmax(0, 1fr);
     }
 
-    .chat-profile-panel {
-        display: none !important;
+    if (window.location.hash === "#sell") {
+
+        history.pushState(
+            null,
+            "",
+            window.location.pathname + window.location.search
+        );
+
     }
 
-}
-
-@media (max-width: 780px) {
-
-    .chat-app-sidebar {
-        display: none;
+    if (sellerPage) {
+        sellerPage.style.display = "none";
     }
 
-    .chat-full-page {
-        padding: 0;
-        max-width: 100%;
-    }
-
-    .chat-preview,
-    .chat-preview:not(.has-profile-panel) {
-        grid-template-columns: minmax(0, 1fr);
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-    }
-
-    .chat-sidebar {
-        border-right: none;
-    }
-
-    /* By default show the list, hide the window.
-       Adding .conversation-open flips this. */
-
-    .chat-window {
-        display: none;
-    }
-
-    #chatPreviewApp.conversation-open .chat-sidebar {
-        display: none;
-    }
-
-    #chatPreviewApp.conversation-open .chat-window {
-        display: flex;
-    }
-
-    .chat-back-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    if (mainContent) {
+        mainContent.style.display = "block";
     }
 
 }
 
 
-/* =========================================================
-   CHAT — FULL SCREEN + REMAINING MOCKUP DETAILS
-   ========================================================= */
+function getStoredStudent() {
 
-.chat-full-page {
-    position: fixed;
-    inset: 0;
-    z-index: 3000;
-    background: white;
-    padding: 0;
-    max-width: none;
-    margin: 0;
-}
+    const storedStudent =
+        localStorage.getItem("kuriosLoggedInStudent") ||
+        sessionStorage.getItem("kuriosLoggedInStudent");
 
-.chat-full-page .chat-preview {
-    height: 100vh;
-    height: 100dvh;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
-}
-
-.chat-exit-btn {
-    margin-left: auto;
-    color: #9ca3af;
-    font-size: 13px;
-    text-decoration: none;
-    padding: 4px;
-}
-
-.chat-exit-btn:hover {
-    color: var(--purple);
-}
-
-.chat-app-brand {
-    display: flex;
-    align-items: center;
-}
-
-.chat-view-profile-btn {
-    margin-left: auto;
-    border: 1px solid var(--purple);
-    background: white;
-    color: var(--purple);
-    font-size: 10px;
-    font-weight: 700;
-    padding: 5px 10px;
-    border-radius: 999px;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.chat-view-profile-btn:hover {
-    background: var(--purple);
-    color: white;
-}
-
-.chat-status-dot {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #d1d5db;
-    margin-left: 6px;
-    vertical-align: middle;
-}
-
-.chat-status-dot.online {
-    background: #22c55e;
-}
-
-.chat-contact-seller-tag {
-    display: inline-block;
-    background: var(--purple-soft);
-    color: var(--purple-dark);
-    font-size: 8px;
-    font-weight: 800;
-    text-transform: uppercase;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: 6px;
-    vertical-align: middle;
-}
-
-
-#sellerPage.seller-dashboard-active .ks-seller-brand {
-    display: flex;
-    align-items: center;
-}
-
-.ks-seller-exit-btn {
-    margin-left: auto;
-    color: rgba(255, 255, 255, 0.55);
-    font-size: 13px;
-    text-decoration: none;
-    padding: 4px;
-}
-
-.ks-seller-exit-btn:hover {
-    color: white;
-}
-
-
-/* =========================================================
-   HEADER — REAL MOBILE RESPONSIVENESS
-   (previously this only "worked" on phones because the
-   whole page was incorrectly zoomed out to fit everything —
-   now that that's fixed, the header needs to actually
-   collapse for real, or its content gets clipped)
-   ========================================================= */
-
-@media (max-width: 900px) {
-
-    .main-nav {
-        display: none !important;
+    if (!storedStudent) {
+        return null;
     }
 
-    .nav-container {
-        gap: 12px;
-    }
-
-    .nav-logo {
-        width: 92px;
-    }
-
-    .nav-actions {
-        gap: 6px;
-    }
-
-    .nav-icon-button {
-        width: 36px;
-        height: 36px;
-        font-size: 13px;
+    try {
+        return JSON.parse(storedStudent);
+    } catch (error) {
+        return null;
     }
 
 }
 
-@media (max-width: 480px) {
+function openSignInModalStandalone() {
 
-    .signin-nav-button span {
-        display: none;
+    const signInModalEl =
+        document.getElementById("signInModal");
+
+    if (signInModalEl) {
+        signInModalEl.classList.add("open");
     }
 
-    .signin-nav-button:not(.has-avatar) {
-        width: 36px;
-        height: 36px;
-        padding: 0;
-        border-radius: 50%;
-        justify-content: center;
+    const emailStepEl =
+        document.getElementById("signinEmailStep");
+
+    const passcodeStepEl =
+        document.getElementById("signinPasscodeStep");
+
+    const adminPasswordStepEl =
+        document.getElementById("signinAdminPasswordStep");
+
+    if (emailStepEl) {
+        emailStepEl.style.display = "block";
     }
 
-    .signin-nav-button i {
-        margin: 0;
+    if (passcodeStepEl) {
+        passcodeStepEl.style.display = "none";
+    }
+
+    if (adminPasswordStepEl) {
+        adminPasswordStepEl.style.display = "none";
     }
 
 }
+
+
+async function openSellerPanel() {
+
+    if (typeof setAccountMenuContext === "function") {
+        setAccountMenuContext(false);
+    }
+
+    const student =
+        getStoredStudent();
+
+    const accountMenu =
+        document.getElementById("studentAccountMenu");
+
+    if (accountMenu) {
+        accountMenu.classList.remove("open");
+    }
+
+    if (!student) {
+
+        // Not logged in — don't show the seller page,
+        // just prompt sign-in and clear the #sell hash
+        // so the URL doesn't claim to be on that page.
+
+        if (window.location.hash === "#sell") {
+            history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+
+        openSignInModalStandalone();
+
+        return;
+
+    }
+
+    if (sellerPage) {
+        sellerPage.style.display = "block";
+    }
+
+    if (mainContent) {
+        mainContent.style.display = "none";
+    }
+
+    window.scrollTo({ top: 0 });
+
+
+    // ========================================
+    // RESUME AN OPAY PAYMENT IF WE'RE RETURNING
+    // FROM THE OPAY CHECKOUT PAGE
+    // ========================================
+
+    const pendingOpayRef =
+        localStorage.getItem("kuriosPendingOpaySellerRef");
+
+    if (pendingOpayRef) {
+
+        localStorage.removeItem("kuriosPendingOpaySellerRef");
+
+        await verifySellerApplicationPayment(pendingOpayRef);
+
+        return;
+
+    }
+
+    hideAllSellerStates();
+
+    if (sellerLoadingState) {
+        sellerLoadingState.style.display = "block";
+    }
+
+    // Prefill contact fields from the student's
+    // own profile, in case they end up on the form.
+
+    const phoneField =
+        document.getElementById("sellerContactPhone");
+
+    const whatsappField =
+        document.getElementById("sellerContactWhatsapp");
+
+    if (phoneField) {
+        phoneField.value = student.phone || "";
+    }
+
+    if (whatsappField) {
+
+        whatsappField.value =
+            student.whatsapp_number ||
+            student.whatsappNumber ||
+            "";
+
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/me?studentId=" + student.id
+            );
+
+        const data = await response.json();
+
+        hideAllSellerStates();
+
+        if (!data.success) {
+
+            if (sellerApplyStatus) {
+
+                sellerApplyStatus.textContent =
+                    data.message || "Could not check your seller status.";
+
+            }
+
+            if (sellerApplyForm) {
+                sellerApplyForm.style.display = "block";
+            }
+
+            return;
+
+        }
+
+        const seller = data.seller;
+
+        if (!seller || seller.status === "rejected") {
+
+            const rejectedNote =
+                document.getElementById("sellerRejectedNote");
+
+            const reasonWrap =
+                document.getElementById("sellerRejectionReasonWrap");
+
+            const reasonText =
+                document.getElementById("sellerRejectionReason");
+
+            if (seller && seller.status === "rejected") {
+
+                if (rejectedNote) {
+                    rejectedNote.style.display = "block";
+                }
+
+                if (seller.rejection_reason && reasonWrap && reasonText) {
+
+                    reasonText.textContent =
+                        seller.rejection_reason;
+
+                    reasonWrap.style.display = "inline";
+
+                } else if (reasonWrap) {
+
+                    reasonWrap.style.display = "none";
+
+                }
+
+            } else if (rejectedNote) {
+
+                rejectedNote.style.display = "none";
+
+            }
+
+            if (sellerApplyForm) {
+                sellerApplyForm.style.display = "block";
+            }
+
+            return;
+
+        }
+
+        if (seller.status === "pending") {
+
+            const nameEl =
+                document.getElementById("sellerPendingStoreName");
+
+            if (nameEl) {
+                nameEl.textContent = seller.store_name;
+            }
+
+            if (sellerPendingState) {
+                sellerPendingState.style.display = "block";
+            }
+
+            return;
+
+        }
+
+        if (seller.status === "approved") {
+
+            const nameEl =
+                document.getElementById("sellerApprovedStoreName");
+
+            if (nameEl) {
+                nameEl.textContent = seller.store_name;
+            }
+
+            if (sellerApprovedState) {
+                sellerApprovedState.style.display = "block";
+            }
+
+            window.__kuriosCurrentSeller = seller;
+
+            if (typeof setAccountMenuContext === "function") {
+                setAccountMenuContext(true);
+            }
+
+            const studentDisplayName =
+                [student.first_name, student.last_name].filter(Boolean).join(" ").trim() ||
+                seller.store_name ||
+                "Seller";
+
+            const firstNameOnly =
+                studentDisplayName.split(" ")[0] || "Seller";
+
+            const setDashText = function (id, text) {
+                const el = document.getElementById(id);
+                if (el) el.textContent = text;
+            };
+
+            setDashText("sellerDashboardStoreName", seller.store_name || "Your Store");
+            setDashText("sellerDashboardWelcomeName", firstNameOnly);
+            setDashText("sellerDashboardTopName", firstNameOnly);
+
+            const dashAvatarMarkup =
+                seller.store_image ?
+                    `<img src="${API_URL + seller.store_image}" alt="Store logo">` :
+                    `<i class="fa-solid fa-store"></i>`;
+
+            ["sellerDashboardAvatar", "sellerDashboardTopAvatar"].forEach(function (id) {
+
+                const el = document.getElementById(id);
+
+                if (el) {
+                    el.innerHTML = dashAvatarMarkup;
+                }
+
+            });
+
+            const logoPreview =
+                document.getElementById("storeLogoPreview");
+
+            if (logoPreview) {
+
+                logoPreview.innerHTML =
+                    seller.store_image ?
+                        `<img src="${API_URL + seller.store_image}" alt="Store logo">` :
+                        `<i class="fa-solid fa-store"></i>`;
+
+            }
+
+            if (typeof loadSellerProducts === "function") {
+                loadSellerProducts(student.id);
+            }
+
+            if (typeof loadSellerSales === "function") {
+                loadSellerSales(student.id);
+            }
+
+            if (typeof loadSellerDashboardStats === "function") {
+                loadSellerDashboardStats(student.id);
+            }
+
+            const sellerPageEl =
+                document.getElementById("sellerPage");
+
+            if (sellerPageEl) {
+                sellerPageEl.classList.add("seller-dashboard-active");
+            }
+
+            return;
+
+        }
+
+        if (seller.status === "suspended") {
+
+            const nameEl =
+                document.getElementById("sellerSuspendedStoreName");
+
+            if (nameEl) {
+                nameEl.textContent = seller.store_name;
+            }
+
+            if (sellerSuspendedState) {
+                sellerSuspendedState.style.display = "block";
+            }
+
+            return;
+
+        }
+
+        // Fallback — unexpected status, show the form.
+
+        if (sellerApplyForm) {
+            sellerApplyForm.style.display = "block";
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Seller status check error:",
+            error
+        );
+
+        hideAllSellerStates();
+
+        if (sellerApplyStatus) {
+
+            sellerApplyStatus.textContent =
+                "Unable to connect to Kurios Stores server.";
+
+        }
+
+        if (sellerApplyForm) {
+            sellerApplyForm.style.display = "block";
+        }
+
+    }
+
+}
+
+
+if (accountBecomeSeller) {
+
+    accountBecomeSeller.addEventListener(
+        "click",
+        function () {
+
+            if (typeof switchDashboardWithReload === "function") {
+
+                if (__kuriosInSellerDashboard) {
+
+                    switchDashboardWithReload(null);
+
+                } else {
+
+                    switchDashboardWithReload("sell");
+
+                }
+
+            } else {
+
+                window.location.hash = "sell";
+
+            }
+
+        }
+    );
+
+}
+
+if (closeSeller) {
+
+    closeSeller.addEventListener(
+        "click",
+        closeSellerPanel
+    );
+
+}
+
+if (sellerBackLink) {
+
+    sellerBackLink.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            closeSellerPanel();
+
+        }
+    );
+
+}
+
+
+// ========================================
+// SELLER PAGE — BROWSER BACK/FORWARD
+// AND DIRECT-LINK (#sell) SUPPORT
+// (handled centrally by the unified router
+// inside DOMContentLoaded — see syncPageFromHash)
+// ========================================
+
+
+// ========================================
+// SELLER TYPE CARD PICKER
+// ========================================
+
+const sellerTypeGrid =
+    document.getElementById("sellerTypeGrid");
+
+if (sellerTypeGrid) {
+
+    const sellerTypeCards =
+        sellerTypeGrid.querySelectorAll(".seller-type-card");
+
+    const sellerTypeSelect =
+        document.getElementById("sellerType");
+
+    sellerTypeCards.forEach(function (card) {
+
+        card.addEventListener(
+            "click",
+            function () {
+
+                sellerTypeCards.forEach(function (c) {
+                    c.classList.remove("active");
+                });
+
+                card.classList.add("active");
+
+                if (sellerTypeSelect) {
+                    sellerTypeSelect.value = card.dataset.value;
+                }
+
+            }
+        );
+
+    });
+
+}
+
+
+// ========================================
+// SUBMIT SELLER APPLICATION
+// (pay ₦1,500 application fee, then submit)
+// ========================================
+
+let currentSellerPaymentReference = null;
+
+if (sellerApplyForm) {
+
+    sellerApplyForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            const student =
+                getStoredStudent();
+
+            if (!student) {
+                return;
+            }
+
+            const storeName =
+                document.getElementById("sellerStoreName").value.trim();
+
+            if (!storeName) {
+
+                if (sellerApplyStatus) {
+
+                    sellerApplyStatus.textContent =
+                        "Please enter your store or business name.";
+
+                }
+
+                return;
+
+            }
+
+            const payload = {
+
+                studentId: student.id,
+
+                sellerType:
+                    document.getElementById("sellerType").value,
+
+                storeName: storeName,
+
+                storeDescription:
+                    document.getElementById("sellerStoreDescription").value.trim(),
+
+                businessCategory:
+                    document.getElementById("sellerBusinessCategory").value,
+
+                location:
+                    document.getElementById("sellerLocation").value.trim(),
+
+                contactPhone:
+                    document.getElementById("sellerContactPhone").value.trim(),
+
+                contactWhatsapp:
+                    document.getElementById("sellerContactWhatsapp").value.trim()
+
+            };
+
+            if (sellerApplySubmit) {
+
+                sellerApplySubmit.disabled = true;
+                sellerApplySubmit.textContent = "Starting...";
+
+            }
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/sellers/apply",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(payload)
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (sellerApplyStatus) {
+
+                        sellerApplyStatus.textContent =
+                            data.message ||
+                            "Could not start your application.";
+
+                    }
+
+                    return;
+
+                }
+
+                currentSellerPaymentReference =
+                    data.paymentReference;
+
+                sellerApplyForm.style.display = "none";
+
+                const choiceState =
+                    document.getElementById("sellerPaymentChoiceState");
+
+                if (choiceState) {
+                    choiceState.style.display = "block";
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Seller application submit error:",
+                    error
+                );
+
+                if (sellerApplyStatus) {
+
+                    sellerApplyStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                if (sellerApplySubmit) {
+
+                    sellerApplySubmit.disabled = false;
+                    sellerApplySubmit.textContent = "Continue to Payment";
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// PAY WITH MONNIFY
+// ========================================
+
+const payWithMonnifyButton =
+    document.getElementById("payWithMonnifyButton");
+
+if (payWithMonnifyButton) {
+
+    payWithMonnifyButton.addEventListener(
+        "click",
+        async function () {
+
+            const choiceStatus =
+                document.getElementById("sellerPaymentChoiceStatus");
+
+            if (!currentSellerPaymentReference) {
+                return;
+            }
+
+            payWithMonnifyButton.disabled = true;
+
+            if (choiceStatus) {
+                choiceStatus.textContent = "";
+            }
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/sellers/apply/pay/monnify",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                paymentReference: currentSellerPaymentReference
+                            })
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (choiceStatus) {
+
+                        choiceStatus.textContent =
+                            data.message || "Could not start Monnify checkout.";
+
+                    }
+
+                    return;
+
+                }
+
+                if (typeof MonnifySDK === "undefined") {
+
+                    if (choiceStatus) {
+
+                        choiceStatus.textContent =
+                            "Payment could not load. Please refresh and try again.";
+
+                    }
+
+                    return;
+
+                }
+
+                MonnifySDK.initialize({
+
+                    amount: data.amount,
+
+                    currency: "NGN",
+
+                    reference: data.paymentReference,
+
+                    customerFullName: data.customerName,
+
+                    customerEmail: data.customerEmail,
+
+                    apiKey: data.apiKey,
+
+                    contractCode: data.contractCode,
+
+                    paymentDescription:
+                        "Kurios Stores seller application fee",
+
+                    onComplete: async function () {
+
+                        await verifySellerApplicationPayment(
+                            data.paymentReference
+                        );
+
+                    },
+
+                    onClose: function () {
+
+                        if (choiceStatus) {
+
+                            choiceStatus.textContent =
+                                "Payment was not completed. You can try again.";
+
+                        }
+
+                    }
+
+                });
+
+            } catch (error) {
+
+                console.error(
+                    "Monnify checkout error:",
+                    error
+                );
+
+                if (choiceStatus) {
+
+                    choiceStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                payWithMonnifyButton.disabled = false;
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// PAY WITH OPAY
+// ========================================
+
+const payWithOpayButton =
+    document.getElementById("payWithOpayButton");
+
+if (payWithOpayButton) {
+
+    payWithOpayButton.addEventListener(
+        "click",
+        async function () {
+
+            const choiceStatus =
+                document.getElementById("sellerPaymentChoiceStatus");
+
+            if (!currentSellerPaymentReference) {
+                return;
+            }
+
+            payWithOpayButton.disabled = true;
+
+            if (choiceStatus) {
+                choiceStatus.textContent = "Redirecting to OPay...";
+            }
+
+            try {
+
+                const returnUrl =
+                    window.location.origin + "/#sell";
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/sellers/apply/pay/opay",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                paymentReference: currentSellerPaymentReference,
+                                returnUrl: returnUrl
+                            })
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!data.success || !data.cashierUrl) {
+
+                    if (choiceStatus) {
+
+                        choiceStatus.textContent =
+                            data.message || "Could not start OPay checkout.";
+
+                    }
+
+                    payWithOpayButton.disabled = false;
+
+                    return;
+
+                }
+
+                // Remember which application this was, so we
+                // can verify it automatically once OPay sends
+                // the student back to this page.
+
+                localStorage.setItem(
+                    "kuriosPendingOpaySellerRef",
+                    currentSellerPaymentReference
+                );
+
+                window.location.href = data.cashierUrl;
+
+            } catch (error) {
+
+                console.error(
+                    "OPay checkout error:",
+                    error
+                );
+
+                if (choiceStatus) {
+
+                    choiceStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+                payWithOpayButton.disabled = false;
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// CONFIRM THE SELLER APPLICATION PAYMENT
+// (never trust the widget's onComplete alone)
+// ========================================
+
+async function verifySellerApplicationPayment(paymentReference) {
+
+    if (sellerApplyStatus) {
+
+        sellerApplyStatus.textContent =
+            "Confirming your payment...";
+
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/apply/verify-payment",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        paymentReference: paymentReference
+                    })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            if (sellerApplyStatus) {
+
+                sellerApplyStatus.textContent =
+                    data.message ||
+                    "We couldn't confirm your payment yet. If you completed payment, please try again shortly.";
+
+            }
+
+            return;
+
+        }
+
+        hideAllSellerStates();
+
+        const nameEl =
+            document.getElementById("sellerPendingStoreName");
+
+        if (nameEl && data.seller) {
+            nameEl.textContent = data.seller.store_name;
+        }
+
+        if (sellerPendingState) {
+            sellerPendingState.style.display = "block";
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Seller payment verify error:",
+            error
+        );
+
+        if (sellerApplyStatus) {
+
+            sellerApplyStatus.textContent =
+                "Unable to reach Kurios Stores server to confirm payment.";
+
+        }
+
+    }
+
+}
+
+
+// =========================================================
+// SELLER STOREFRONT (public product listing)
+// =========================================================
+
+const storefrontPage =
+    document.getElementById("storefrontPage");
+
+const storefrontBackLink =
+    document.getElementById("storefrontBackLink");
+
+const STOREFRONT_CATEGORY_ICONS = {
+    "Fashion": "fa-shirt",
+    "Electronics": "fa-plug",
+    "Beauty": "fa-spray-can-sparkles",
+    "Food": "fa-utensils",
+    "Books": "fa-book",
+    "School Materials": "fa-pen",
+    "Phones": "fa-mobile-screen",
+    "Accessories": "fa-gem",
+    "Health": "fa-heart-pulse",
+    "Home": "fa-house",
+    "Services": "fa-screwdriver-wrench",
+    "Others": "fa-box"
+};
+
+function closeStorefrontPage() {
+
+    if (typeof window.goBack === "function") {
+
+        window.goBack();
+        return;
+
+    }
+
+    if (
+        window.location.hash &&
+        window.location.hash.indexOf("#store-") === 0
+    ) {
+
+        history.pushState(
+            null,
+            "",
+            window.location.pathname + window.location.search
+        );
+
+    }
+
+    if (storefrontPage) {
+        storefrontPage.style.display = "none";
+    }
+
+    const mainEl =
+        document.getElementById("mainContent");
+
+    if (mainEl) {
+        mainEl.style.display = "block";
+    }
+
+}
+
+if (storefrontBackLink) {
+
+    storefrontBackLink.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            closeStorefrontPage();
+
+        }
+    );
+
+}
+
+async function openStorefront(sellerId) {
+
+    const mainEl =
+        document.getElementById("mainContent");
+
+    const sellerPageEl =
+        document.getElementById("sellerPage");
+
+    if (sellerPageEl) {
+        sellerPageEl.style.display = "none";
+    }
+
+    if (mainEl) {
+        mainEl.style.display = "none";
+    }
+
+    if (storefrontPage) {
+        storefrontPage.style.display = "block";
+    }
+
+    window.scrollTo({ top: 0 });
+
+    const loadingEl =
+        document.getElementById("storefrontLoading");
+
+    const contentEl =
+        document.getElementById("storefrontContent");
+
+    const notFoundEl =
+        document.getElementById("storefrontNotFound");
+
+    if (loadingEl) loadingEl.style.display = "block";
+    if (contentEl) contentEl.style.display = "none";
+    if (notFoundEl) notFoundEl.style.display = "none";
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/store/" + sellerId);
+
+        const data = await response.json();
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+        if (!data.success) {
+
+            if (notFoundEl) notFoundEl.style.display = "block";
+
+            return;
+
+        }
+
+        if (contentEl) contentEl.style.display = "block";
+
+        const nameEl = document.getElementById("storefrontName");
+        const metaEl = document.getElementById("storefrontMeta");
+        const descEl = document.getElementById("storefrontDescription");
+
+        if (nameEl) nameEl.textContent = data.store.store_name;
+
+        const iconEl =
+            document.querySelector("#storefrontContent .storefront-icon");
+
+        if (iconEl) {
+
+            iconEl.innerHTML =
+                data.store.store_image ?
+                    `<img src="${API_URL + data.store.store_image}" alt="${data.store.store_name} logo">` :
+                    `<i class="fa-solid fa-store"></i>`;
+
+        }
+
+        if (metaEl) {
+
+            metaEl.textContent =
+                [
+                    data.store.business_category,
+                    data.store.location
+                ]
+                    .filter(Boolean)
+                    .join(" · ") || "Kurios Stores seller";
+
+        }
+
+        if (descEl) {
+
+            descEl.textContent =
+                data.store.store_description || "";
+
+        }
+
+        renderStorefrontProducts(data.products);
+
+    } catch (error) {
+
+        console.error(
+            "Load storefront error:",
+            error
+        );
+
+        if (loadingEl) loadingEl.style.display = "none";
+        if (notFoundEl) notFoundEl.style.display = "block";
+
+    }
+
+}
+
+function renderStorefrontProducts(products) {
+
+    const grid =
+        document.getElementById("storefrontProductGrid");
+
+    const emptyEl =
+        document.getElementById("storefrontEmpty");
+
+    if (!grid) {
+        return;
+    }
+
+    grid.innerHTML = "";
+
+    if (!products || products.length === 0) {
+
+        if (emptyEl) emptyEl.style.display = "block";
+
+        return;
+
+    }
+
+    if (emptyEl) emptyEl.style.display = "none";
+
+    products.forEach(function (product) {
+
+        const category =
+            product.category || "General";
+
+        const icon =
+            STOREFRONT_CATEGORY_ICONS[category] || "fa-box";
+
+        const imageMarkup =
+            product.image_url ?
+                `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
+                `<i class="fa-solid ${icon}"></i>`;
+
+        const card = document.createElement("article");
+        card.className = "product-card";
+
+        const ratingMarkup =
+            product.review_count > 0 ?
+                `<span class="product-rating">
+                    <i class="fa-solid fa-star"></i>
+                    ${Number(product.avg_rating).toFixed(1)}
+                    <span class="product-rating-count">(${product.review_count})</span>
+                </span>` :
+                "";
+
+        card.innerHTML = `
+            <div class="product-image">
+                ${imageMarkup}
+            </div>
+            <div class="product-info">
+                <span class="product-category">${category}</span>
+                <h3>${product.name}</h3>
+                ${ratingMarkup}
+                <p>${product.description ? product.description : "&nbsp;"}</p>
+                <div class="product-bottom">
+                    <strong>₦${Number(product.price).toLocaleString()}</strong>
+                </div>
+            </div>
+        `;
+
+        grid.appendChild(card);
+
+    });
+
+}
+
+
+// ========================================
+// HASH ROUTING — INCLUDE #store-<id>
+// (handled centrally by the unified router
+// inside DOMContentLoaded — see syncPageFromHash)
+// ========================================
+
+
+// =========================================================
+// SELLER PRODUCT MANAGEMENT (approved sellers only)
+// =========================================================
+
+const SELLER_CATEGORY_ICONS = {
+    "Fashion": "fa-shirt",
+    "Electronics": "fa-plug",
+    "Beauty": "fa-spray-can-sparkles",
+    "Food": "fa-utensils",
+    "Books": "fa-book",
+    "School Materials": "fa-pen",
+    "Phones": "fa-mobile-screen",
+    "Accessories": "fa-gem",
+    "Health": "fa-heart-pulse",
+    "Home": "fa-house",
+    "Services": "fa-screwdriver-wrench",
+    "Others": "fa-box"
+};
+
+let currentSellerStudentId = null;
+
+async function loadSellerProducts(studentId) {
+
+    currentSellerStudentId = studentId;
+
+    const loadingEl = document.getElementById("sellerProductsLoading");
+    const emptyEl = document.getElementById("sellerProductsEmpty");
+    const listEl = document.getElementById("sellerProductList");
+
+    if (loadingEl) loadingEl.style.display = "block";
+    if (emptyEl) emptyEl.style.display = "none";
+    if (listEl) listEl.innerHTML = "";
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/products?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+        if (!data.success) {
+            return;
+        }
+
+        if (data.products.length === 0) {
+
+            if (emptyEl) emptyEl.style.display = "block";
+
+            return;
+
+        }
+
+        renderSellerProductList(data.products);
+
+    } catch (error) {
+
+        console.error(
+            "Load seller products error:",
+            error
+        );
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+    }
+
+}
+
+function renderSellerProductList(products) {
+
+    const listEl = document.getElementById("sellerProductList");
+
+    if (!listEl) return;
+
+    listEl.innerHTML = "";
+
+    products.forEach(function (product) {
+
+        const category =
+            product.category || "General";
+
+        const icon =
+            SELLER_CATEGORY_ICONS[category] || "fa-box";
+
+        const thumbMarkup =
+            product.image_url ?
+                `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
+                `<i class="fa-solid ${icon}"></i>`;
+
+        const card = document.createElement("div");
+        card.className = "seller-product-card";
+
+        card.innerHTML = `
+            <div class="seller-product-thumb">${thumbMarkup}</div>
+            <div class="seller-product-info">
+                <h4>
+                    ${product.name}
+                    ${!product.is_active ? '<span class="seller-product-inactive-tag">Hidden</span>' : ""}
+                </h4>
+                <p>₦${Number(product.price).toLocaleString()} · Stock: ${product.stock_quantity}</p>
+            </div>
+            <div class="seller-product-actions">
+                <button type="button" class="toggle-active-btn" title="${product.is_active ? "Hide" : "Show"}">
+                    <i class="fa-solid ${product.is_active ? "fa-eye" : "fa-eye-slash"}"></i>
+                </button>
+                <button type="button" class="edit-product-btn" title="Edit">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button type="button" class="delete-product-btn" title="Delete">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        `;
+
+        card.querySelector(".toggle-active-btn").addEventListener(
+            "click",
+            function () {
+                toggleProductActive(product);
+            }
+        );
+
+        card.querySelector(".edit-product-btn").addEventListener(
+            "click",
+            function () {
+                openProductForm(product);
+            }
+        );
+
+        card.querySelector(".delete-product-btn").addEventListener(
+            "click",
+            function () {
+                deleteProduct(product);
+            }
+        );
+
+        listEl.appendChild(card);
+
+    });
+
+}
+
+
+// ========================================
+// ADD / EDIT PRODUCT FORM
+// ========================================
+
+function openProductForm(product) {
+
+    const formWrap = document.getElementById("sellerProductFormWrap");
+    const formTitle = document.getElementById("productFormTitle");
+    const editingIdField = document.getElementById("editingProductId");
+    const nameField = document.getElementById("productName");
+    const descField = document.getElementById("productDescription");
+    const priceField = document.getElementById("productPrice");
+    const stockField = document.getElementById("productStock");
+    const categoryField = document.getElementById("productCategory");
+    const imageField = document.getElementById("productImageInput");
+    const statusEl = document.getElementById("productFormStatus");
+
+    if (statusEl) statusEl.textContent = "";
+    if (imageField) imageField.value = "";
+
+    if (product) {
+
+        if (formTitle) formTitle.textContent = "Edit product";
+        if (editingIdField) editingIdField.value = product.id;
+        if (nameField) nameField.value = product.name || "";
+        if (descField) descField.value = product.description || "";
+        if (priceField) priceField.value = product.price || "";
+        if (stockField) stockField.value = product.stock_quantity || 0;
+        if (categoryField) categoryField.value = product.category || "";
+
+    } else {
+
+        if (formTitle) formTitle.textContent = "Add a product";
+        if (editingIdField) editingIdField.value = "";
+        if (nameField) nameField.value = "";
+        if (descField) descField.value = "";
+        if (priceField) priceField.value = "";
+        if (stockField) stockField.value = "";
+        if (categoryField) categoryField.value = "";
+
+    }
+
+    if (formWrap) formWrap.style.display = "block";
+
+    const listEl = document.getElementById("sellerProductList");
+    if (listEl) listEl.style.display = "none";
+
+    const addBtn = document.getElementById("addProductButton");
+    if (addBtn) addBtn.style.display = "none";
+
+}
+
+function closeProductForm() {
+
+    const formWrap = document.getElementById("sellerProductFormWrap");
+    if (formWrap) formWrap.style.display = "none";
+
+    const listEl = document.getElementById("sellerProductList");
+    if (listEl) listEl.style.display = "block";
+
+    const addBtn = document.getElementById("addProductButton");
+    if (addBtn) addBtn.style.display = "inline-flex";
+
+}
+
+const addProductButton = document.getElementById("addProductButton");
+
+if (addProductButton) {
+
+    addProductButton.addEventListener(
+        "click",
+        function () {
+            openProductForm(null);
+        }
+    );
+
+}
+
+const cancelProductForm = document.getElementById("cancelProductForm");
+
+if (cancelProductForm) {
+
+    cancelProductForm.addEventListener(
+        "click",
+        closeProductForm
+    );
+
+}
+
+const saveProductButton = document.getElementById("saveProductButton");
+
+if (saveProductButton) {
+
+    saveProductButton.addEventListener(
+        "click",
+        async function () {
+
+            const statusEl = document.getElementById("productFormStatus");
+
+            const editingId =
+                document.getElementById("editingProductId").value;
+
+            const name =
+                document.getElementById("productName").value.trim();
+
+            const price =
+                document.getElementById("productPrice").value;
+
+            if (!name || !price) {
+
+                if (statusEl) {
+                    statusEl.textContent = "Please enter a product name and price.";
+                }
+
+                return;
+
+            }
+
+            const formData = new FormData();
+
+            formData.append("studentId", currentSellerStudentId);
+            formData.append("name", name);
+            formData.append(
+                "description",
+                document.getElementById("productDescription").value.trim()
+            );
+            formData.append("price", price);
+            formData.append(
+                "category",
+                document.getElementById("productCategory").value
+            );
+            formData.append(
+                "stockQuantity",
+                document.getElementById("productStock").value || "0"
+            );
+
+            const imageInput = document.getElementById("productImageInput");
+
+            if (imageInput && imageInput.files[0]) {
+                formData.append("image", imageInput.files[0]);
+            }
+
+            saveProductButton.disabled = true;
+            saveProductButton.textContent = "Saving...";
+
+            try {
+
+                const url =
+                    editingId ?
+                        API_URL + "/api/sellers/products/" + editingId + "/update" :
+                        API_URL + "/api/sellers/products";
+
+                const response = await fetch(url, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (statusEl) {
+                        statusEl.textContent = data.message || "Could not save product.";
+                    }
+
+                    return;
+
+                }
+
+                closeProductForm();
+
+                loadSellerProducts(currentSellerStudentId);
+
+            } catch (error) {
+
+                console.error(
+                    "Save product error:",
+                    error
+                );
+
+                if (statusEl) {
+                    statusEl.textContent = "Unable to connect to Kurios Stores server.";
+                }
+
+            } finally {
+
+                saveProductButton.disabled = false;
+                saveProductButton.textContent = "Save Product";
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// TOGGLE ACTIVE / DELETE
+// ========================================
+
+async function toggleProductActive(product) {
+
+    const formData = new FormData();
+
+    formData.append("studentId", currentSellerStudentId);
+    formData.append("isActive", (!product.is_active).toString());
+
+    try {
+
+        const response = await fetch(
+            API_URL + "/api/sellers/products/" + product.id + "/update",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+            loadSellerProducts(currentSellerStudentId);
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Toggle product active error:",
+            error
+        );
+
+    }
+
+}
+
+async function deleteProduct(product) {
+
+    if (!confirm("Delete \"" + product.name + "\"? This can't be undone.")) {
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            API_URL + "/api/sellers/products/" + product.id + "/delete",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    studentId: currentSellerStudentId
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+            loadSellerProducts(currentSellerStudentId);
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Delete product error:",
+            error
+        );
+
+    }
+
+}
+
+
+// =========================================================
+// STORE LOGO UPLOAD
+// =========================================================
+
+const storeLogoInput =
+    document.getElementById("storeLogoInput");
+
+if (storeLogoInput) {
+
+    storeLogoInput.addEventListener(
+        "change",
+        async function () {
+
+            const file =
+                storeLogoInput.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            const statusEl =
+                document.getElementById("storeLogoStatus");
+
+            const previewEl =
+                document.getElementById("storeLogoPreview");
+
+            if (statusEl) {
+                statusEl.textContent = "Uploading...";
+            }
+
+            const formData = new FormData();
+
+            formData.append("studentId", currentSellerStudentId);
+            formData.append("logo", file);
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/sellers/logo",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (statusEl) {
+
+                        statusEl.textContent =
+                            data.message || "Could not update your logo.";
+
+                    }
+
+                    return;
+
+                }
+
+                if (statusEl) {
+                    statusEl.textContent = "Logo updated.";
+                }
+
+                if (previewEl && data.seller && data.seller.store_image) {
+
+                    previewEl.innerHTML =
+                        `<img src="${API_URL + data.seller.store_image}" alt="Store logo">`;
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Store logo upload error:",
+                    error
+                );
+
+                if (statusEl) {
+
+                    statusEl.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                storeLogoInput.value = "";
+
+            }
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// CSV PRODUCT IMPORT
+// =========================================================
+
+let csvImportFile = null;
+
+function parseCsvHeaderLine(line) {
+
+    // Simple quoted-field-aware split for a
+    // single header line (good enough for
+    // detecting column names).
+
+    const fields = [];
+    let field = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+
+        const char = line[i];
+
+        if (inQuotes) {
+
+            if (char === '"') {
+
+                if (line[i + 1] === '"') {
+                    field += '"';
+                    i++;
+                } else {
+                    inQuotes = false;
+                }
+
+            } else {
+
+                field += char;
+
+            }
+
+        } else {
+
+            if (char === '"') {
+                inQuotes = true;
+            } else if (char === ",") {
+                fields.push(field);
+                field = "";
+            } else {
+                field += char;
+            }
+
+        }
+
+    }
+
+    fields.push(field);
+
+    return fields.map(function (f) {
+        return f.trim();
+    });
+
+}
+
+function detectCsvLocations(headers) {
+
+    const locations = new Set();
+
+    headers.forEach(function (header) {
+
+        const match =
+            header.match(/^Fixed Sell Price \[(.+)\]$/);
+
+        if (match) {
+            locations.add(match[1]);
+        }
+
+    });
+
+    return Array.from(locations);
+
+}
+
+const importCsvButton =
+    document.getElementById("importCsvButton");
+
+const csvImportPanel =
+    document.getElementById("csvImportPanel");
+
+const csvFileInput =
+    document.getElementById("csvFileInput");
+
+const csvLocationGroup =
+    document.getElementById("csvLocationGroup");
+
+const csvLocationSelect =
+    document.getElementById("csvLocationSelect");
+
+const confirmCsvImport =
+    document.getElementById("confirmCsvImport");
+
+const cancelCsvImport =
+    document.getElementById("cancelCsvImport");
+
+
+// ========================================
+// DOWNLOAD A SAMPLE CSV
+// ========================================
+
+const downloadSampleCsv =
+    document.getElementById("downloadSampleCsv");
+
+if (downloadSampleCsv) {
+
+    downloadSampleCsv.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            const headers =
+                ["Item Name", "Category", "Fixed Sell Price", "Stock", "SKU"];
+
+            const sampleRows = [
+                ["Bottled Water 50cl", "Drinks", "300", "50", "KUR-001"],
+                ["Instant Noodles", "Food", "450", "30", "KUR-002"],
+                ["A4 Notebook", "Stationary", "500", "20", "KUR-003"]
+            ];
+
+            function csvEscape(value) {
+
+                if (value.includes(",") || value.includes('"')) {
+
+                    return '"' + value.replace(/"/g, '""') + '"';
+
+                }
+
+                return value;
+
+            }
+
+            const lines = [headers.map(csvEscape).join(",")];
+
+            sampleRows.forEach(function (row) {
+                lines.push(row.map(csvEscape).join(","));
+            });
+
+            const csvContent = lines.join("\r\n");
+
+            const blob =
+                new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+            const url =
+                URL.createObjectURL(blob);
+
+            const link =
+                document.createElement("a");
+
+            link.href = url;
+            link.download = "kurios-stores-product-import-sample.csv";
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            URL.revokeObjectURL(url);
+
+        }
+    );
+
+}
+
+if (importCsvButton) {
+
+    importCsvButton.addEventListener(
+        "click",
+        function () {
+
+            csvImportFile = null;
+
+            if (csvFileInput) csvFileInput.value = "";
+
+            if (csvLocationGroup) csvLocationGroup.style.display = "none";
+
+            if (confirmCsvImport) confirmCsvImport.disabled = true;
+
+            const statusEl = document.getElementById("csvImportStatus");
+
+            if (statusEl) statusEl.textContent = "";
+
+            if (csvImportPanel) csvImportPanel.style.display = "block";
+
+            const listEl = document.getElementById("sellerProductList");
+            if (listEl) listEl.style.display = "none";
+
+            if (importCsvButton) importCsvButton.style.display = "none";
+
+            const addBtn = document.getElementById("addProductButton");
+            if (addBtn) addBtn.style.display = "none";
+
+        }
+    );
+
+}
+
+function closeCsvImportPanel() {
+
+    if (csvImportPanel) csvImportPanel.style.display = "none";
+
+    const listEl = document.getElementById("sellerProductList");
+    if (listEl) listEl.style.display = "block";
+
+    if (importCsvButton) importCsvButton.style.display = "inline-flex";
+
+    const addBtn = document.getElementById("addProductButton");
+    if (addBtn) addBtn.style.display = "inline-flex";
+
+}
+
+if (cancelCsvImport) {
+
+    cancelCsvImport.addEventListener(
+        "click",
+        closeCsvImportPanel
+    );
+
+}
+
+if (csvFileInput) {
+
+    csvFileInput.addEventListener(
+        "change",
+        function () {
+
+            const file = csvFileInput.files[0];
+
+            const statusEl = document.getElementById("csvImportStatus");
+
+            if (!file) {
+                return;
+            }
+
+            csvImportFile = file;
+
+            if (statusEl) statusEl.textContent = "";
+
+            // Read just enough of the file to get
+            // the header line, to detect locations.
+
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+
+                const text = event.target.result;
+
+                const firstLine =
+                    text.split(/\r\n|\n|\r/)[0] || "";
+
+                const headers =
+                    parseCsvHeaderLine(firstLine);
+
+                const locations =
+                    detectCsvLocations(headers);
+
+                if (locations.length > 0) {
+
+                    if (csvLocationSelect) {
+
+                        csvLocationSelect.innerHTML =
+                            locations.map(function (loc) {
+                                return `<option value="${loc}">${loc}</option>`;
+                            }).join("") +
+                            `<option value="">Don't use a location (general columns)</option>`;
+
+                    }
+
+                    if (csvLocationGroup) csvLocationGroup.style.display = "block";
+
+                } else {
+
+                    if (csvLocationGroup) csvLocationGroup.style.display = "none";
+
+                }
+
+                if (confirmCsvImport) confirmCsvImport.disabled = false;
+
+            };
+
+            // Only need the first ~64kb to reliably
+            // capture the header line.
+
+            reader.readAsText(file.slice(0, 65536));
+
+        }
+    );
+
+}
+
+if (confirmCsvImport) {
+
+    confirmCsvImport.addEventListener(
+        "click",
+        async function () {
+
+            if (!csvImportFile) {
+                return;
+            }
+
+            const statusEl =
+                document.getElementById("csvImportStatus");
+
+            const location =
+                csvLocationSelect ? csvLocationSelect.value : "";
+
+            confirmCsvImport.disabled = true;
+            confirmCsvImport.textContent = "Importing...";
+
+            if (statusEl) {
+                statusEl.textContent = "Importing your products — this can take a moment for large files...";
+            }
+
+            const formData = new FormData();
+
+            formData.append("studentId", currentSellerStudentId);
+            formData.append("file", csvImportFile);
+
+            if (location) {
+                formData.append("location", location);
+            }
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/sellers/products/import",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    if (statusEl) {
+
+                        statusEl.textContent =
+                            data.message || "Could not import that file.";
+
+                    }
+
+                    return;
+
+                }
+
+                if (statusEl) {
+                    statusEl.textContent = data.message;
+                }
+
+                loadSellerProducts(currentSellerStudentId);
+
+                setTimeout(closeCsvImportPanel, 2000);
+
+            } catch (error) {
+
+                console.error(
+                    "CSV import error:",
+                    error
+                );
+
+                if (statusEl) {
+
+                    statusEl.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+            } finally {
+
+                confirmCsvImport.disabled = false;
+                confirmCsvImport.textContent = "Import";
+
+            }
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// PASSCODE REVEAL/HIDE TOGGLES
+// =========================================================
+
+document.querySelectorAll(".passcode-reveal-btn").forEach(function (button) {
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            const targetId =
+                button.dataset.target;
+
+            const container =
+                document.getElementById(targetId);
+
+            if (!container) {
+                return;
+            }
+
+            const digits =
+                container.querySelectorAll(".passcode-digit");
+
+            const icon =
+                button.querySelector("i");
+
+            const isCurrentlyHidden =
+                digits.length > 0 && digits[0].type === "password";
+
+            digits.forEach(function (digit) {
+                digit.type = isCurrentlyHidden ? "text" : "password";
+            });
+
+            if (icon) {
+
+                icon.classList.toggle("fa-eye", !isCurrentlyHidden);
+                icon.classList.toggle("fa-eye-slash", isCurrentlyHidden);
+
+            }
+
+            button.setAttribute(
+                "aria-label",
+                isCurrentlyHidden ? "Hide passcode" : "Show passcode"
+            );
+
+        }
+    );
+
+});
+
+document.querySelectorAll(".password-toggle-btn").forEach(function (button) {
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            const targetId =
+                button.dataset.target;
+
+            const input =
+                document.getElementById(targetId);
+
+            if (!input) {
+                return;
+            }
+
+            const icon =
+                button.querySelector("i");
+
+            if (input.type === "password") {
+
+                input.type = "text";
+
+                if (icon) {
+                    icon.classList.remove("fa-eye");
+                    icon.classList.add("fa-eye-slash");
+                }
+
+                button.setAttribute("aria-label", "Hide password");
+
+            } else {
+
+                input.type = "password";
+
+                if (icon) {
+                    icon.classList.remove("fa-eye-slash");
+                    icon.classList.add("fa-eye");
+                }
+
+                button.setAttribute("aria-label", "Show password");
+
+            }
+
+        }
+    );
+
+});
+
+
+// =========================================================
+// STUDENT DASHBOARD — RECENT ORDERS + RECOMMENDATIONS
+// =========================================================
+
+async function loadDashboardRecentOrders(studentId) {
+
+    const listEl =
+        document.getElementById("dashboardRecentOrders");
+
+    const emptyEl =
+        document.getElementById("dashboardOrdersEmpty");
+
+    if (!listEl) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/orders?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+            return;
+        }
+
+        const recentOrders =
+            data.orders.slice(0, 3);
+
+        listEl.innerHTML = "";
+
+        if (recentOrders.length === 0) {
+
+            if (emptyEl) emptyEl.style.display = "block";
+
+            return;
+
+        }
+
+        if (emptyEl) emptyEl.style.display = "none";
+
+        recentOrders.forEach(function (order) {
+
+            let items = [];
+
+            try {
+                items =
+                    typeof order.items === "string" ?
+                        JSON.parse(order.items) :
+                        order.items;
+            } catch (error) {
+                items = [];
+            }
+
+            const itemSummary =
+                items.length > 0 ?
+                    items.length + " item" + (items.length === 1 ? "" : "s") +
+                        (items[0].name ? " · " + items[0].name + (items.length > 1 ? " + more" : "") : "") :
+                    "Order";
+
+            const orderDate =
+                new Date(order.created_at).toLocaleDateString(
+                    undefined,
+                    { month: "short", day: "numeric" }
+                );
+
+            const row =
+                document.createElement("div");
+
+            row.className = "dashboard-order-row";
+
+            row.innerHTML = `
+                <div class="dashboard-order-row-info">
+                    <strong>${itemSummary}</strong>
+                    <span>${orderDate}</span>
+                </div>
+                <div class="dashboard-order-row-right">
+                    <strong>₦${Number(order.amount).toLocaleString()}</strong>
+                    <span class="dashboard-order-status ${order.status}">${order.status}</span>
+                </div>
+            `;
+
+            row.style.cursor = "pointer";
+
+            row.addEventListener(
+                "click",
+                function () {
+                    window.location.hash = "orders";
+                }
+            );
+
+            listEl.appendChild(row);
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Load dashboard orders error:",
+            error
+        );
+
+    }
+
+}
+
+
+function renderDashboardRecommendations(products) {
+
+    const grid =
+        document.getElementById("dashboardRecommendations");
+
+    if (!grid) {
+        return;
+    }
+
+    grid.innerHTML = "";
+
+    products.forEach(function (product) {
+
+        const category =
+            product.category || "General";
+
+        const icon =
+            STOREFRONT_CATEGORY_ICONS[category] || "fa-box";
+
+        const imageMarkup =
+            product.image_url ?
+                `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
+                `<i class="fa-solid ${icon}"></i>`;
+
+        const card =
+            document.createElement("article");
+
+        card.className = "product-card";
+        card.style.cursor = "pointer";
+
+        card.innerHTML = `
+            <div class="product-image">
+                ${imageMarkup}
+            </div>
+            <div class="product-info">
+                <span class="product-category">${category}</span>
+                <h3>${product.name}</h3>
+                <div class="product-bottom">
+                    <strong>₦${Number(product.price).toLocaleString()}</strong>
+                </div>
+            </div>
+        `;
+
+        card.addEventListener(
+            "click",
+            function () {
+                window.location.hash = "shop";
+            }
+        );
+
+        grid.appendChild(card);
+
+    });
+
+}
+
+
+// ========================================
+// DASHBOARD STAT CARD SHORTCUTS
+// ========================================
+
+const dashboardWalletCard =
+    document.getElementById("dashboardWalletCard");
+
+if (dashboardWalletCard) {
+
+    dashboardWalletCard.addEventListener(
+        "click",
+        function () {
+            window.location.hash = "wallet";
+        }
+    );
+
+}
+
+const dashboardWishlistCard =
+    document.getElementById("dashboardWishlistCard");
+
+if (dashboardWishlistCard) {
+
+    dashboardWishlistCard.addEventListener(
+        "click",
+        function () {
+            window.location.hash = "wishlist";
+        }
+    );
+
+}
+
+const dashboardRewardsCard =
+    document.getElementById("dashboardRewardsCard");
+
+if (dashboardRewardsCard) {
+
+    dashboardRewardsCard.addEventListener(
+        "click",
+        function () {
+            window.location.hash = "rewards";
+        }
+    );
+
+}
+
+const dashboardViewAllOrders =
+    document.getElementById("dashboardViewAllOrders");
+
+if (dashboardViewAllOrders) {
+
+    dashboardViewAllOrders.addEventListener(
+        "click",
+        function () {
+            window.location.hash = "orders";
+        }
+    );
+
+}
+
+
+// =========================================================
+// SELLER SALES
+// =========================================================
+
+async function loadSellerSales(studentId) {
+
+    const loadingEl =
+        document.getElementById("sellerSalesLoading");
+
+    const emptyEl =
+        document.getElementById("sellerSalesEmpty");
+
+    const listEl =
+        document.getElementById("sellerSalesList");
+
+    const summaryEl =
+        document.getElementById("sellerSalesSummary");
+
+    if (!listEl) {
+        return;
+    }
+
+    if (loadingEl) loadingEl.style.display = "block";
+    if (emptyEl) emptyEl.style.display = "none";
+    if (summaryEl) summaryEl.style.display = "none";
+    listEl.innerHTML = "";
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/orders?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+        if (!data.success) {
+            return;
+        }
+
+        if (data.orders.length === 0) {
+
+            if (emptyEl) emptyEl.style.display = "block";
+
+            return;
+
+        }
+
+        if (summaryEl) {
+
+            summaryEl.style.display = "flex";
+
+            const revenueEl =
+                document.getElementById("sellerTotalRevenue");
+
+            if (revenueEl) {
+
+                revenueEl.textContent =
+                    "₦" + Number(data.totalRevenue).toLocaleString();
+
+            }
+
+        }
+
+        data.orders.forEach(function (order) {
+
+            const itemsSummary =
+                order.items.map(function (item) {
+                    return item.quantity + "× " + item.name;
+                }).join(", ");
+
+            const orderDate =
+                new Date(order.createdAt).toLocaleDateString(
+                    undefined,
+                    { month: "short", day: "numeric", year: "numeric" }
+                );
+
+            const card =
+                document.createElement("div");
+
+            card.className = "seller-sale-card";
+
+            card.innerHTML = `
+                <div class="seller-sale-card-top">
+                    <div>
+                        <strong>${order.buyerName}</strong>
+                        <span>${orderDate} · ${order.buyerEmail || order.buyerPhone || ""}</span>
+                    </div>
+                    <div class="seller-sale-amount">
+                        ₦${Number(order.subtotal).toLocaleString()}
+                    </div>
+                </div>
+                <div class="seller-sale-items">
+                    ${itemsSummary}
+                </div>
+            `;
+
+            listEl.appendChild(card);
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Load seller sales error:",
+            error
+        );
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+    }
+
+}
+
+
+// =========================================================
+// WALLET PAGE
+// =========================================================
+
+async function loadWalletPage() {
+
+    const student =
+        getStoredStudent();
+
+    const loadingEl =
+        document.getElementById("walletLoading");
+
+    const notSellerEl =
+        document.getElementById("walletNotSellerState");
+
+    const sellerStateEl =
+        document.getElementById("walletSellerState");
+
+    if (loadingEl) loadingEl.style.display = "block";
+    if (notSellerEl) notSellerEl.style.display = "none";
+    if (sellerStateEl) sellerStateEl.style.display = "none";
+
+    if (!student) {
+        if (loadingEl) loadingEl.style.display = "none";
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/wallet?studentId=" + student.id
+            );
+
+        const data = await response.json();
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+        if (!data.success) {
+
+            if (notSellerEl) notSellerEl.style.display = "block";
+
+            return;
+
+        }
+
+        if (sellerStateEl) sellerStateEl.style.display = "block";
+
+        const balanceEl =
+            document.getElementById("walletBalance");
+
+        if (balanceEl) {
+
+            balanceEl.textContent =
+                "₦" + Number(data.balance).toLocaleString();
+
+        }
+
+        const listEl =
+            document.getElementById("walletTransactionList");
+
+        const emptyEl =
+            document.getElementById("walletTransactionsEmpty");
+
+        if (listEl) {
+
+            listEl.innerHTML = "";
+
+            if (data.transactions.length === 0) {
+
+                if (emptyEl) emptyEl.style.display = "block";
+
+            } else {
+
+                if (emptyEl) emptyEl.style.display = "none";
+
+                data.transactions.forEach(function (tx) {
+
+                    const txDate =
+                        new Date(tx.created_at).toLocaleDateString(
+                            undefined,
+                            { month: "short", day: "numeric", year: "numeric" }
+                        );
+
+                    const row =
+                        document.createElement("div");
+
+                    row.className = "wallet-transaction-row";
+
+                    row.innerHTML = `
+                        <div class="wallet-transaction-info">
+                            <strong>${tx.description || (tx.type === "credit" ? "Wallet credit" : "Wallet debit")}</strong>
+                            <span>${txDate}</span>
+                        </div>
+                        <div class="wallet-transaction-amount ${tx.type}">
+                            ${tx.type === "credit" ? "+" : "-"}₦${Number(tx.amount).toLocaleString()}
+                        </div>
+                    `;
+
+                    listEl.appendChild(row);
+
+                });
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Load wallet error:",
+            error
+        );
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+    }
+
+}
+
+
+// ========================================
+// DASHBOARD WALLET STAT CARD
+// ========================================
+
+async function loadDashboardWalletBalance(studentId) {
+
+    const balanceEl =
+        document.getElementById("dashboardWalletBalance");
+
+    if (!balanceEl) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/wallet?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            balanceEl.textContent =
+                Number(data.balance).toLocaleString(
+                    undefined,
+                    { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                );
+
+        }
+
+        // If not a seller (403), the card just
+        // keeps showing 0.00 — that's accurate.
+
+    } catch (error) {
+
+        console.error(
+            "Load dashboard wallet balance error:",
+            error
+        );
+
+    }
+
+}
+
+
+// =========================================================
+// SELLER DASHBOARD — TAB SWITCHING + NAV ACTIONS
+// =========================================================
+
+function switchSellerDashTab(targetTab) {
+
+    document.querySelectorAll("[data-seller-tab]").forEach(function (btn) {
+        btn.classList.remove("active");
+    });
+
+    document.querySelectorAll('[data-seller-tab="' + targetTab + '"]').forEach(function (btn) {
+        btn.classList.add("active");
+    });
+
+    document.querySelectorAll(".seller-dash-tab").forEach(function (tab) {
+        tab.style.display = "none";
+    });
+
+    const targetEl =
+        document.getElementById(
+            "sellerTab" +
+            targetTab.charAt(0).toUpperCase() +
+            targetTab.slice(1)
+        );
+
+    if (targetEl) {
+        targetEl.style.display = "block";
+    }
+
+}
+
+document.addEventListener("click", function (event) {
+
+    const tabTrigger =
+        event.target.closest("[data-seller-tab]");
+
+    if (tabTrigger) {
+
+        event.preventDefault();
+        switchSellerDashTab(tabTrigger.dataset.sellerTab);
+        return;
+
+    }
+
+    const actionTrigger =
+        event.target.closest("[data-seller-action]");
+
+    if (!actionTrigger) {
+        return;
+    }
+
+    const action =
+        actionTrigger.dataset.sellerAction;
+
+    if (action === "wallet") {
+
+        window.location.hash = "wallet";
+
+    } else if (action === "messages") {
+
+        window.location.hash = "chat";
+
+    } else if (action === "store") {
+
+        const seller = window.__kuriosCurrentSeller;
+
+        if (seller && seller.id) {
+            window.location.hash = "store-" + seller.id;
+        }
+
+    } else if (action === "switch-to-student") {
+
+        if (typeof switchDashboardWithReload === "function") {
+
+            switchDashboardWithReload(null);
+
+        } else if (typeof goHome === "function") {
+
+            goHome();
+
+        }
+
+    } else if (action === "marketing" || action === "discounts") {
+
+        showMessage(
+            "This seller tool isn't built yet — coming in a future update."
+        );
+
+    } else if (action === "notifications" || action === "profile") {
+
+        // These duplicate features already available
+        // elsewhere on the site (the header's own
+        // notification bell / account menu) — no
+        // separate handling needed here.
+
+    }
+
+});
+
+document.addEventListener("click", function (event) {
+
+    const addProductShortcut =
+        event.target.closest("#sellerDashboardAddProduct");
+
+    if (!addProductShortcut) {
+        return;
+    }
+
+    switchSellerDashTab("products");
+
+    setTimeout(
+        function () {
+
+            const existingButton =
+                document.getElementById("addProductButton");
+
+            if (existingButton) {
+                existingButton.click();
+            }
+
+        },
+        0
+    );
+
+});
+
+const ksSellerSidebarToggle =
+    document.getElementById("ksSellerSidebarToggle");
+
+if (ksSellerSidebarToggle) {
+
+    ksSellerSidebarToggle.addEventListener(
+        "click",
+        function () {
+
+            const app =
+                document.querySelector(".ks-seller-app");
+
+            if (app) {
+                app.classList.toggle("sidebar-open");
+            }
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// SELLER DASHBOARD STATS (Overview tab)
+// =========================================================
+
+async function loadSellerDashboardStats(studentId) {
+
+    const loadingEl =
+        document.getElementById("sellerStatsLoading");
+
+    const contentEl =
+        document.getElementById("sellerStatsContent");
+
+    if (!loadingEl || !contentEl) {
+        return;
+    }
+
+    loadingEl.style.display = "block";
+    contentEl.style.display = "none";
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/dashboard-stats?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        loadingEl.style.display = "none";
+
+        if (!data.success) {
+            return;
+        }
+
+        contentEl.style.display = "block";
+
+
+        // ------------------------------------
+        // STAT CARDS
+        // ------------------------------------
+
+        const setText = function (id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+
+        setText("statTotalSales", "₦" + Number(data.totalSales).toLocaleString());
+        setText("statOrderCount", data.orderCount);
+        setText("statProductCount", data.productCount);
+        setText("statCustomerCount", data.uniqueCustomers);
+        setText("statWalletBalance", "₦" + Number(data.walletBalance).toLocaleString());
+
+        setText(
+            "statStoreRating",
+            data.storeReviewCount > 0 ?
+                data.storeRating.toFixed(1) + " ★ (" + data.storeReviewCount + ")" :
+                "No ratings yet"
+        );
+
+
+        // ------------------------------------
+        // SALES CHART — real SVG line chart
+        // ------------------------------------
+
+        const chartEl =
+            document.getElementById("sellerSalesChart");
+
+        if (chartEl) {
+
+            const days =
+                Array.isArray(data.salesByDay) ? data.salesByDay : [];
+
+            if (days.length === 0) {
+
+                chartEl.innerHTML =
+                    '<div class="seller-chart-empty">No sales data yet.</div>';
+
+            } else {
+
+                const width = 620;
+                const height = 160;
+                const pad = { left: 42, right: 12, top: 12, bottom: 26 };
+                const innerW = width - pad.left - pad.right;
+                const innerH = height - pad.top - pad.bottom;
+
+                const maxValue =
+                    Math.max(1, ...days.map(function (d) { return Number(d.total) || 0; }));
+
+                const points =
+                    days.map(function (d, i) {
+
+                        const x =
+                            pad.left + (days.length === 1 ? innerW / 2 : (i * innerW) / (days.length - 1));
+
+                        const y =
+                            pad.top + innerH - ((Number(d.total) || 0) / maxValue) * innerH;
+
+                        return { x: x, y: y, label: d.label, value: Number(d.total) || 0 };
+
+                    });
+
+                const polyline =
+                    points.map(function (p) { return p.x + "," + p.y; }).join(" ");
+
+                const area =
+                    pad.left + "," + (pad.top + innerH) + " " +
+                    polyline + " " +
+                    points[points.length - 1].x + "," + (pad.top + innerH);
+
+                const gridLines =
+                    [0, 0.25, 0.5, 0.75, 1].map(function (r) {
+
+                        const y = pad.top + innerH - r * innerH;
+                        const value = Math.round(maxValue * r);
+                        const label = value >= 1000 ? Math.round(value / 1000) + "K" : value;
+
+                        return `<line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke="#f0f0f2" stroke-width="1"/>` +
+                            `<text x="${pad.left - 8}" y="${y + 3}" text-anchor="end" fill="#9ca3af" font-size="10">₦${label}</text>`;
+
+                    }).join("");
+
+                const dayLabels =
+                    points.map(function (p) {
+                        return `<text x="${p.x}" y="${height - 6}" text-anchor="middle" fill="#9ca3af" font-size="10">${p.label}</text>`;
+                    }).join("");
+
+                const dots =
+                    points.map(function (p) {
+                        return `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#6d28d9" stroke="#fff" stroke-width="2"><title>₦${p.value.toLocaleString()}</title></circle>`;
+                    }).join("");
+
+                chartEl.innerHTML =
+                    `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img">` +
+                    gridLines +
+                    `<polygon points="${area}" fill="rgba(109,40,217,0.08)"/>` +
+                    `<polyline points="${polyline}" fill="none" stroke="#6d28d9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
+                    dots +
+                    dayLabels +
+                    `</svg>`;
+
+            }
+
+        }
+
+
+        // ------------------------------------
+        // ORDER STATUS — real donut chart
+        // ------------------------------------
+
+        const statusColors = {
+            paid: "#15803d",
+            pending: "#b45309",
+            failed: "#dc2626"
+        };
+
+        const statusEntries =
+            Object.entries(data.statusBreakdown || {});
+
+        const totalStatuses =
+            Math.max(1, statusEntries.reduce(function (sum, entry) { return sum + Number(entry[1] || 0); }, 0));
+
+        const donutEl =
+            document.getElementById("sellerOrderDonut");
+
+        const statusEl =
+            document.getElementById("sellerStatusBreakdown");
+
+        let cursor = 0;
+
+        const stops =
+            statusEntries.map(function (entry) {
+
+                const status = entry[0];
+                const value = Number(entry[1] || 0);
+
+                const startDeg = (cursor * 360) / totalStatuses;
+                cursor += value;
+                const endDeg = (cursor * 360) / totalStatuses;
+
+                return (statusColors[status] || "#9ca3af") + " " + startDeg + "deg " + endDeg + "deg";
+
+            });
+
+        if (donutEl) {
+
+            donutEl.style.background =
+                stops.length > 0 ?
+                    "conic-gradient(" + stops.join(",") + ")" :
+                    "conic-gradient(#e5e7eb 0deg 360deg)";
+
+        }
+
+        const donutTotalEl =
+            document.getElementById("sellerDonutTotal");
+
+        if (donutTotalEl) {
+
+            donutTotalEl.textContent =
+                statusEntries.reduce(function (sum, entry) { return sum + Number(entry[1] || 0); }, 0);
+
+        }
+
+        if (statusEl) {
+
+            statusEl.innerHTML =
+                statusEntries.map(function (entry) {
+
+                    const status = entry[0];
+                    const count = Number(entry[1] || 0);
+                    const pct = ((count / totalStatuses) * 100).toFixed(0);
+
+                    return `
+                        <div class="seller-status-row">
+                            <span class="seller-status-dot" style="background:${statusColors[status] || "#9ca3af"};"></span>
+                            <span class="seller-status-row-label">${status}</span>
+                            <span class="seller-status-row-count">${count} (${pct}%)</span>
+                        </div>
+                    `;
+
+                }).join("");
+
+        }
+
+
+        // ------------------------------------
+        // TOP SELLING PRODUCTS — with thumbnail + price
+        // ------------------------------------
+
+        const topProductsEl =
+            document.getElementById("sellerTopProducts");
+
+        const topProductsEmptyEl =
+            document.getElementById("sellerTopProductsEmpty");
+
+        if (topProductsEl) {
+
+            const topProducts =
+                Array.isArray(data.topProducts) ? data.topProducts : [];
+
+            if (topProducts.length === 0) {
+
+                topProductsEl.innerHTML = "";
+
+                if (topProductsEmptyEl) topProductsEmptyEl.style.display = "block";
+
+            } else {
+
+                if (topProductsEmptyEl) topProductsEmptyEl.style.display = "none";
+
+                topProductsEl.innerHTML =
+                    topProducts.map(function (product) {
+
+                        const thumbMarkup =
+                            product.image_url ?
+                                `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
+                                `<i class="fa-solid fa-box"></i>`;
+
+                        return `
+                            <div class="seller-top-product-row seller-top-product-row-with-thumb">
+                                <div class="seller-top-product-thumb">${thumbMarkup}</div>
+                                <div class="seller-top-product-details">
+                                    <strong>${product.name}</strong>
+                                    <span>₦${Number(product.price || 0).toLocaleString()}</span>
+                                </div>
+                                <span class="seller-top-product-qty">${product.quantitySold} sold</span>
+                            </div>
+                        `;
+
+                    }).join("");
+
+            }
+
+        }
+
+
+        // ------------------------------------
+        // RECENT ORDERS TABLE — now with product
+        // ------------------------------------
+
+        const recentOrdersEl =
+            document.getElementById("sellerRecentOrdersTable");
+
+        const recentOrdersEmptyEl =
+            document.getElementById("sellerRecentOrdersEmpty");
+
+        if (recentOrdersEl) {
+
+            const recentOrders =
+                Array.isArray(data.recentOrders) ? data.recentOrders : [];
+
+            if (recentOrders.length === 0) {
+
+                recentOrdersEl.innerHTML = "";
+
+                if (recentOrdersEmptyEl) recentOrdersEmptyEl.style.display = "block";
+
+            } else {
+
+                if (recentOrdersEmptyEl) recentOrdersEmptyEl.style.display = "none";
+
+                const rows =
+                    recentOrders.map(function (order) {
+
+                        const firstItem =
+                            Array.isArray(order.items) && order.items[0] ?
+                                order.items[0].name :
+                                "Product";
+
+                        const orderDate =
+                            new Date(order.createdAt).toLocaleDateString(
+                                undefined,
+                                { month: "short", day: "numeric" }
+                            );
+
+                        return `
+                            <tr>
+                                <td>#${order.orderId}</td>
+                                <td>${order.buyerName}</td>
+                                <td>${firstItem}</td>
+                                <td>₦${Number(order.subtotal).toLocaleString()}</td>
+                                <td><span class="seller-order-status-pill ${order.status}">${order.status}</span></td>
+                                <td>${orderDate}</td>
+                            </tr>
+                        `;
+
+                    }).join("");
+
+                recentOrdersEl.innerHTML = `
+                    <table class="seller-orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                `;
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Load seller dashboard stats error:",
+            error
+        );
+
+        loadingEl.style.display = "none";
+
+    }
+
+}
+
+
+// =========================================================
+// REVIEW PROMPTS (on My Orders page)
+// =========================================================
+
+async function loadReviewablePrompts(studentId) {
+
+    const container =
+        document.getElementById("reviewablePrompts");
+
+    if (!container) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/students/reviewable-products?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        if (!data.success || data.products.length === 0) {
+
+            container.style.display = "none";
+            container.innerHTML = "";
+
+            return;
+
+        }
+
+        container.style.display = "block";
+
+        container.innerHTML =
+            `<div class="form-section-label">Rate what you bought</div>` +
+            data.products.map(function (product) {
+
+                const thumbMarkup =
+                    product.image_url ?
+                        `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
+                        `<i class="fa-solid fa-box"></i>`;
+
+                return `
+                    <div class="review-prompt-card" data-product-id="${product.id}">
+                        <div class="review-prompt-thumb">${thumbMarkup}</div>
+                        <div class="review-prompt-info">
+                            <strong>${product.name}</strong>
+                        </div>
+                        <div class="review-star-picker" data-product-id="${product.id}">
+                            <i class="fa-solid fa-star" data-star="1"></i>
+                            <i class="fa-solid fa-star" data-star="2"></i>
+                            <i class="fa-solid fa-star" data-star="3"></i>
+                            <i class="fa-solid fa-star" data-star="4"></i>
+                            <i class="fa-solid fa-star" data-star="5"></i>
+                        </div>
+                    </div>
+                `;
+
+            }).join("");
+
+        container.querySelectorAll(".review-star-picker").forEach(function (picker) {
+
+            const stars =
+                picker.querySelectorAll("i");
+
+            stars.forEach(function (star) {
+
+                star.addEventListener(
+                    "click",
+                    async function () {
+
+                        const rating =
+                            parseInt(star.dataset.star, 10);
+
+                        const productId =
+                            picker.dataset.productId;
+
+                        stars.forEach(function (s) {
+                            s.classList.toggle(
+                                "active",
+                                parseInt(s.dataset.star, 10) <= rating
+                            );
+                        });
+
+                        const student =
+                            getStoredStudent();
+
+                        if (!student) {
+                            return;
+                        }
+
+                        try {
+
+                            await fetch(
+                                API_URL + "/api/products/" + productId + "/reviews",
+                                {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json"
+                                    },
+                                    body: JSON.stringify({
+                                        studentId: student.id,
+                                        rating: rating
+                                    })
+                                }
+                            );
+
+                            const card =
+                                picker.closest(".review-prompt-card");
+
+                            if (card) {
+
+                                setTimeout(function () {
+
+                                    card.style.opacity = "0.5";
+                                    picker.style.pointerEvents = "none";
+
+                                }, 300);
+
+                            }
+
+                        } catch (error) {
+
+                            console.error(
+                                "Submit review error:",
+                                error
+                            );
+
+                        }
+
+                    }
+                );
+
+            });
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Load reviewable prompts error:",
+            error
+        );
+
+    }
+
+}
+
+
+// =========================================================
+// STUDENT / SELLER DUAL DASHBOARD
+// =========================================================
+
+let __kuriosApprovedSellerCache = null;
+let __kuriosInSellerDashboard = false;
+
+function switchDashboardWithReload(hash) {
+
+    if (hash) {
+
+        window.location.hash = hash;
+
+    } else if (window.location.hash) {
+
+        history.replaceState(
+            null,
+            "",
+            window.location.pathname + window.location.search
+        );
+
+    }
+
+    window.location.reload();
+
+}
+
+function setAccountMenuContext(inSellerDashboard) {
+
+    __kuriosInSellerDashboard = inSellerDashboard;
+
+    const labelEl =
+        document.getElementById("accountBecomeSellerLabel");
+
+    if (!labelEl) {
+        return;
+    }
+
+    if (inSellerDashboard) {
+
+        labelEl.textContent = "Switch to Student";
+
+    } else {
+
+        labelEl.textContent =
+            __kuriosApprovedSellerCache ? "Switch to Seller" : "Sell on Kurios";
+
+    }
+
+}
+
+async function updateSellerMenuLabel(studentId) {
+
+    const labelEl =
+        document.getElementById("accountBecomeSellerLabel");
+
+    if (!labelEl) {
+        return null;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/sellers/me?studentId=" + studentId
+            );
+
+        const data = await response.json();
+
+        const isApprovedSeller =
+            data.success &&
+            data.seller &&
+            data.seller.status === "approved";
+
+        __kuriosApprovedSellerCache = isApprovedSeller;
+
+        setAccountMenuContext(__kuriosInSellerDashboard);
+
+        return isApprovedSeller;
+
+    } catch (error) {
+
+        console.error(
+            "Check seller status for menu error:",
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
+
+// ========================================
+// DASHBOARD CHOICE MODAL
+// (shown once, right after a fresh login,
+// only if the student is an approved seller —
+// not shown again on ordinary page reloads)
+// ========================================
+
+const DASHBOARD_CHOICE_TIMEOUT_MS = 60 * 1000;
+const DASHBOARD_CHOICE_STORAGE_KEY = "kuriosDashboardChoicePendingSince";
+
+let __kuriosDashboardChoiceTimer = null;
+
+function clearDashboardChoicePending() {
+
+    localStorage.removeItem(DASHBOARD_CHOICE_STORAGE_KEY);
+    sessionStorage.removeItem(DASHBOARD_CHOICE_STORAGE_KEY);
+
+    if (__kuriosDashboardChoiceTimer) {
+
+        clearTimeout(__kuriosDashboardChoiceTimer);
+        __kuriosDashboardChoiceTimer = null;
+
+    }
+
+}
+
+function autoLogoutFromPendingChoice() {
+
+    clearDashboardChoicePending();
+
+    localStorage.removeItem("kuriosLoggedInStudent");
+    sessionStorage.removeItem("kuriosLoggedInStudent");
+
+    const message =
+        "You were signed out after not choosing a dashboard in time. Please sign in again.";
+
+    if (typeof showMessage === "function") {
+
+        showMessage(message);
+
+    } else {
+
+        alert(message);
+
+    }
+
+    setTimeout(
+        function () {
+            window.location.reload();
+        },
+        1200
+    );
+
+}
+
+function startDashboardChoiceTimer(pendingSince) {
+
+    if (__kuriosDashboardChoiceTimer) {
+        clearTimeout(__kuriosDashboardChoiceTimer);
+    }
+
+    const elapsed =
+        Date.now() - pendingSince;
+
+    const remaining =
+        DASHBOARD_CHOICE_TIMEOUT_MS - elapsed;
+
+    if (remaining <= 0) {
+
+        autoLogoutFromPendingChoice();
+        return;
+
+    }
+
+    __kuriosDashboardChoiceTimer =
+        setTimeout(
+            autoLogoutFromPendingChoice,
+            remaining
+        );
+
+}
+
+function showDashboardChoiceModal(student) {
+
+    const modal =
+        document.getElementById("dashboardChoiceModal");
+
+    if (!modal) {
+        return;
+    }
+
+    const greetingEl =
+        document.getElementById("dashboardChoiceGreeting");
+
+    if (greetingEl) {
+
+        const firstName =
+            (student.first_name || "").trim();
+
+        greetingEl.textContent =
+            "Welcome back" + (firstName ? ", " + firstName : "") + "!";
+
+    }
+
+    modal.classList.add("open");
+
+
+    // Remember that a decision is pending, with WHEN it
+    // started — so a page refresh can resume the same
+    // countdown instead of silently dropping into the
+    // student dashboard or restarting the clock.
+
+    const alreadyPendingSince =
+        parseInt(
+            localStorage.getItem(DASHBOARD_CHOICE_STORAGE_KEY) ||
+            sessionStorage.getItem(DASHBOARD_CHOICE_STORAGE_KEY) ||
+            "0",
+            10
+        );
+
+    const pendingSince =
+        alreadyPendingSince || Date.now();
+
+    if (!alreadyPendingSince) {
+
+        localStorage.setItem(
+            DASHBOARD_CHOICE_STORAGE_KEY,
+            String(pendingSince)
+        );
+
+    }
+
+    startDashboardChoiceTimer(pendingSince);
+
+}
+
+function closeDashboardChoiceModal() {
+
+    const modal =
+        document.getElementById("dashboardChoiceModal");
+
+    if (modal) {
+        modal.classList.remove("open");
+    }
+
+    clearDashboardChoicePending();
+
+}
+
+
+// ========================================
+// RESUME A PENDING DECISION AFTER REFRESH
+// (runs on every page load — if a choice
+// was left unmade, re-show the splash +
+// modal and resume the countdown instead
+// of letting the dashboard render)
+// ========================================
+
+(function resumePendingDashboardChoice() {
+
+    const pendingSinceRaw =
+        localStorage.getItem(DASHBOARD_CHOICE_STORAGE_KEY) ||
+        sessionStorage.getItem(DASHBOARD_CHOICE_STORAGE_KEY);
+
+    if (!pendingSinceRaw) {
+        return;
+    }
+
+    const student =
+        typeof getStoredStudent === "function" ?
+            getStoredStudent() :
+            null;
+
+    if (!student) {
+
+        // No session to resume — clear the stale flag.
+
+        clearDashboardChoicePending();
+        return;
+
+    }
+
+    const pendingSince =
+        parseInt(pendingSinceRaw, 10);
+
+    const elapsed =
+        Date.now() - pendingSince;
+
+    if (elapsed >= DASHBOARD_CHOICE_TIMEOUT_MS) {
+
+        autoLogoutFromPendingChoice();
+        return;
+
+    }
+
+    const splashEl =
+        document.getElementById("postLoginSplash");
+
+    if (splashEl) {
+        splashEl.style.display = "flex";
+    }
+
+    const mainEl =
+        document.getElementById("mainContent");
+
+    if (mainEl) {
+        mainEl.style.display = "none";
+    }
+
+    showDashboardChoiceModal(student);
+
+})();
+
+
+const dashboardChoiceStudent =
+    document.getElementById("dashboardChoiceStudent");
+
+if (dashboardChoiceStudent) {
+
+    dashboardChoiceStudent.addEventListener(
+        "click",
+        function () {
+
+            // Hide the choice cards but leave the splash
+            // showing underneath for a beat before we go.
+
+            closeDashboardChoiceModal();
+
+            setTimeout(
+                function () {
+
+                    if (typeof switchDashboardWithReload === "function") {
+
+                        switchDashboardWithReload(null);
+
+                    } else if (typeof goHome === "function") {
+
+                        goHome();
+
+                    }
+
+                },
+                5000
+            );
+
+        }
+    );
+
+}
+
+const dashboardChoiceSeller =
+    document.getElementById("dashboardChoiceSeller");
+
+if (dashboardChoiceSeller) {
+
+    dashboardChoiceSeller.addEventListener(
+        "click",
+        function () {
+
+            closeDashboardChoiceModal();
+
+            setTimeout(
+                function () {
+
+                    if (typeof switchDashboardWithReload === "function") {
+
+                        switchDashboardWithReload("sell");
+
+                    } else {
+
+                        window.location.hash = "sell";
+
+                    }
+
+                },
+                5000
+            );
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// CONTACT SELLER ABOUT A PRODUCT
+// =========================================================
+
+async function contactSellerAboutProduct(productId) {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) {
+
+        if (typeof openSignInModalStandalone === "function") {
+            openSignInModalStandalone();
+        }
+
+        return;
+
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/chat/contact-seller",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        studentId: student.id,
+                        productId: productId
+                    })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            alert(data.message || "Could not start a chat with this seller.");
+            return;
+
+        }
+
+        window.__kuriosPendingChatOpen = {
+            conversationId: data.conversationId,
+            sellerStudentId: data.sellerStudentId,
+            storeName: data.storeName,
+            productName: data.productName
+        };
+
+        window.location.hash = "chat";
+
+    } catch (error) {
+
+        console.error(
+            "Contact seller error:",
+            error
+        );
+
+        alert("Unable to connect to Kurios Stores server.");
+
+    }
+
+}
+
+
+// =========================================================
+// CHAT — "COMING SOON" ELEMENTS
+// (every feature shown in the reference design that
+// isn't actually built yet — clearly tagged, not faked)
+// =========================================================
+
+document.addEventListener("click", function (event) {
+
+    const soonTrigger =
+        event.target.closest('[data-chat-action="soon"], [data-chat-sidebar-action="soon"], .chat-filter-pill.soon');
+
+    if (!soonTrigger) {
+        return;
+    }
+
+    if (typeof showMessage === "function") {
+
+        showMessage("This feature isn't built yet — coming soon.");
+
+    } else {
+
+        alert("This feature isn't built yet — coming soon.");
+
+    }
+
+});
+
+
+// ========================================
+// CHAT APP SIDEBAR — REAL NAV DESTINATIONS
+// ========================================
+
+document.addEventListener("click", function (event) {
+
+    const navItem =
+        event.target.closest("[data-chat-sidebar-action]");
+
+    if (!navItem) {
+        return;
+    }
+
+    const action =
+        navItem.dataset.chatSidebarAction;
+
+    if (action === "notifications") {
+
+        const notificationButton =
+            document.getElementById("notificationButton");
+
+        if (notificationButton) {
+            notificationButton.click();
+        }
+
+    } else if (action === "orders") {
+
+        window.location.hash = "orders";
+
+    } else if (action === "rewards") {
+
+        window.location.hash = "rewards";
+
+    } else if (action === "wallet") {
+
+        window.location.hash = "wallet";
+
+    } else if (action === "profile" || action === "settings") {
+
+        window.location.hash = "profile";
+
+    }
+
+});
+
+const appSidebarNewChat =
+    document.getElementById("appSidebarNewChat");
+
+if (appSidebarNewChat) {
+
+    appSidebarNewChat.addEventListener(
+        "click",
+        function () {
+
+            const realButton =
+                document.getElementById("newChatButton");
+
+            if (realButton) {
+                realButton.click();
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// CHAT FILTER PILLS (real filtering for
+// All / Students / Sellers — the rest are
+// tagged Coming Soon above)
+// ========================================
+
+let __kuriosChatFilter = "all";
+
+document.addEventListener("click", function (event) {
+
+    const pill =
+        event.target.closest(".chat-filter-pill:not(.soon)");
+
+    if (!pill) {
+        return;
+    }
+
+    document.querySelectorAll(".chat-filter-pill").forEach(function (p) {
+        p.classList.remove("active");
+    });
+
+    pill.classList.add("active");
+
+    __kuriosChatFilter =
+        pill.dataset.chatFilter;
+
+    if (typeof window.renderChatContactList === "function") {
+        window.renderChatContactList();
+    }
+
+});
+
+
+// =========================================================
+// VIEW PROFILE BUTTON — reveals the real profile panel
+// =========================================================
+
+const chatViewProfileBtn =
+    document.getElementById("chatViewProfileBtn");
+
+if (chatViewProfileBtn) {
+
+    chatViewProfileBtn.addEventListener(
+        "click",
+        function () {
+
+            const panel =
+                document.getElementById("chatProfilePanel");
+
+            if (!panel || panel.style.display === "none") {
+                return;
+            }
+
+            panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+            panel.style.outline = "2px solid #6d28d9";
+
+            setTimeout(
+                function () {
+                    panel.style.outline = "none";
+                },
+                900
+            );
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// HEADER CHAT ICON
+// =========================================================
+
+const chatIconButton =
+    document.getElementById("chatIconButton");
+
+if (chatIconButton) {
+
+    chatIconButton.addEventListener(
+        "click",
+        function () {
+            window.location.hash = "chat";
+        }
+    );
+
+}
+
+
+// =========================================================
+// ACCOUNT MENU NAV LINKS (Dashboard/Shop/Categories/Rewards)
+// — close the dropdown once clicked, matching every other
+// item in this menu
+// =========================================================
+
+document.querySelectorAll(".account-menu-nav-link").forEach(function (link) {
+
+    link.addEventListener(
+        "click",
+        function () {
+
+            const menu =
+                document.getElementById("studentAccountMenu");
+
+            if (menu) {
+                menu.classList.remove("open");
+            }
+
+        }
+    );
+
+});
