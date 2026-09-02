@@ -5421,7 +5421,23 @@ img {
    ========================================================= */
 
 #sellerPage.seller-dashboard-active {
-    max-width: 1300px;
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: #f8fafb;
+    padding: 0;
+    max-width: none;
+    margin: 0;
+    overflow-y: auto;
+}
+
+#sellerPage.seller-dashboard-active .ks-seller-app {
+    min-height: 100vh;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    max-width: none;
+    margin: 0;
 }
 
 .seller-dash-layout {
@@ -7382,8 +7398,7 @@ img {
 @media(max-width:900px){.ks-sidebar-toggle{display:block}.ks-seller-app{grid-template-columns:1fr;border-radius:0;margin:0}.ks-seller-sidebar{position:fixed;z-index:100;left:0;top:0;bottom:0;width:244px;transform:translateX(-102%);transition:transform .2s ease;box-shadow:12px 0 30px rgba(0,0,0,.18)}.ks-seller-app.sidebar-open .ks-seller-sidebar{transform:translateX(0)}.ks-seller-content{width:100%}.ks-seller-topbar{padding:0 15px}.ks-seller-search{width:34vw}.ks-topbar-actions{gap:9px}.ks-user-menu>span:not(.ks-user-avatar){display:none}.ks-seller-page-head{padding:18px 15px 14px}.ks-seller-app .seller-dash-tab{padding:0 15px 20px}.ks-dashboard-grid-top,.ks-dashboard-grid-bottom{grid-template-columns:1fr}.ks-top-products{grid-column:auto}.ks-donut-wrap{justify-content:center}}
 @media(max-width:620px){.ks-seller-search{display:none}.ks-add-product-top{font-size:0;padding:9px 10px}.ks-add-product-top i{font-size:12px}.ks-seller-page-head{align-items:flex-start;flex-direction:column}.ks-metric-grid{grid-template-columns:1fr 1fr;gap:9px}.ks-metric-card{min-height:85px;padding:12px 10px}.ks-metric-card strong{font-size:14px}.ks-metric-icon{width:35px;height:35px}.ks-panel{padding:14px}.ks-line-chart{height:180px}.ks-donut-wrap{flex-direction:column}.ks-recent-orders{overflow:auto}.ks-recent-orders .seller-orders-table{min-width:560px}}
 
-/* Widen the seller page for this dashboard, and strip the old application-form chrome */
-#sellerPage.seller-dashboard-active{max-width:1600px;padding:14px 12px 50px}
+/* Strip the old application-form chrome for the dashboard view */
 #sellerPage.seller-dashboard-active .full-page-back-row,
 #sellerPage.seller-dashboard-active .full-page-panel>.profile-panel-header{display:none}
 #sellerPage.seller-dashboard-active .full-page-panel{padding:0;border:0;background:transparent;border-radius:0}
@@ -7957,4 +7972,22 @@ img {
     border-radius: 4px;
     margin-left: 6px;
     vertical-align: middle;
+}
+
+
+#sellerPage.seller-dashboard-active .ks-seller-brand {
+    display: flex;
+    align-items: center;
+}
+
+.ks-seller-exit-btn {
+    margin-left: auto;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 13px;
+    text-decoration: none;
+    padding: 4px;
+}
+
+.ks-seller-exit-btn:hover {
+    color: white;
 }
