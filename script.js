@@ -4484,13 +4484,20 @@ showOtpVerificationScreen(
         const sidebarName =
             document.getElementById("chatAppSidebarName");
 
+        const mobileAvatar =
+            document.getElementById("chatMobileAvatar");
+
+        const avatarMarkup =
+            student.profile_picture ?
+                `<img src="${API_URL + student.profile_picture}" alt="You">` :
+                `<i class="fa-regular fa-user"></i>`;
+
         if (sidebarAvatar) {
+            sidebarAvatar.innerHTML = avatarMarkup;
+        }
 
-            sidebarAvatar.innerHTML =
-                student.profile_picture ?
-                    `<img src="${API_URL + student.profile_picture}" alt="You">` :
-                    `<i class="fa-regular fa-user"></i>`;
-
+        if (mobileAvatar) {
+            mobileAvatar.innerHTML = avatarMarkup;
         }
 
         if (sidebarName) {
@@ -13383,6 +13390,8 @@ if (chatEmojiPicker) {
             return `<button type="button">${emoji}</button>`;
         }).join("");
 
+    let __kuriosEmojiPickerReactionTarget = null;
+
     chatEmojiPicker.addEventListener(
         "click",
         function (event) {
@@ -13392,6 +13401,15 @@ if (chatEmojiPicker) {
 
             if (!btn) {
                 return;
+            }
+
+            if (__kuriosEmojiPickerReactionTarget) {
+
+                toggleMessageReaction(__kuriosEmojiPickerReactionTarget, btn.textContent);
+                __kuriosEmojiPickerReactionTarget = null;
+                chatEmojiPicker.style.display = "none";
+                return;
+
             }
 
             const input =
@@ -13407,6 +13425,24 @@ if (chatEmojiPicker) {
         }
     );
 
+    window.openFullEmojiPickerForReaction = function (messageId) {
+
+        __kuriosEmojiPickerReactionTarget = messageId;
+        chatEmojiPicker.style.display = "grid";
+
+        // Position it near the message rather than the
+        // message input, since it's being used for a
+        // reaction here, not typing.
+
+        chatEmojiPicker.style.position = "fixed";
+        chatEmojiPicker.style.bottom = "";
+        chatEmojiPicker.style.right = "";
+        chatEmojiPicker.style.top = "50%";
+        chatEmojiPicker.style.left = "50%";
+        chatEmojiPicker.style.transform = "translate(-50%, -50%)";
+
+    };
+
 }
 
 if (chatEmojiButton && chatEmojiPicker) {
@@ -13416,6 +13452,16 @@ if (chatEmojiButton && chatEmojiPicker) {
         function (event) {
 
             event.stopPropagation();
+
+            // Reset any reaction-mode positioning back to
+            // its normal spot above the message input.
+
+            chatEmojiPicker.style.position = "";
+            chatEmojiPicker.style.top = "";
+            chatEmojiPicker.style.left = "";
+            chatEmojiPicker.style.transform = "";
+            chatEmojiPicker.style.bottom = "74px";
+            chatEmojiPicker.style.right = "16px";
 
             chatEmojiPicker.style.display =
                 chatEmojiPicker.style.display === "none" ? "grid" : "none";
@@ -13872,9 +13918,21 @@ function openReactionPopover(triggerEl, messageId) {
     popover.innerHTML =
         KURIOS_QUICK_REACTIONS.map(function (emoji) {
             return `<button type="button" data-emoji="${emoji}">${emoji}</button>`;
-        }).join("");
+        }).join("") +
+        `<button type="button" class="chat-reaction-more" data-more="1"><i class="fa-solid fa-plus"></i></button>`;
 
     popover.addEventListener("click", function (event) {
+
+        const moreBtn =
+            event.target.closest(".chat-reaction-more");
+
+        if (moreBtn) {
+
+            closeReactionPopover();
+            openFullEmojiPickerForReaction(messageId);
+            return;
+
+        }
 
         const btn = event.target.closest("button");
 
