@@ -1323,9 +1323,11 @@ img {
 
     display: grid;
 
-    grid-template-columns: 280px 1fr;
+    grid-template-columns: 320px 1fr;
 
-    min-height: 560px;
+    height: min(720px, calc(100vh - 180px));
+
+    min-height: 480px;
 
     border: 1px solid var(--border);
 
@@ -1339,6 +1341,11 @@ img {
 }
 
 
+.chat-full-page .full-page-back-row {
+    margin-bottom: 16px;
+}
+
+
 /* Chat sidebar */
 
 .chat-sidebar {
@@ -1346,6 +1353,22 @@ img {
     border-right: 1px solid var(--border);
 
     background: #fcfcfc;
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-height: 0;
+}
+
+
+#chatContactList {
+
+    flex: 1;
+
+    overflow-y: auto;
+
+    min-height: 0;
 }
 
 
@@ -1371,17 +1394,32 @@ img {
 
 .chat-sidebar-header button {
 
-    width: 34px;
+    display: flex;
 
-    height: 34px;
+    align-items: center;
 
-    border: 1px solid var(--border);
+    gap: 6px;
 
-    background: var(--white);
+    padding: 8px 14px;
 
-    color: var(--purple);
+    border: none;
+
+    background: var(--purple);
+
+    color: var(--white);
+
+    font-size: 12px;
+
+    font-weight: 700;
 
     border-radius: 8px;
+
+    cursor: pointer;
+}
+
+.chat-sidebar-header button:hover {
+
+    background: var(--purple-dark);
 }
 
 
@@ -1626,6 +1664,8 @@ img {
     flex-direction: column;
 
     min-width: 0;
+
+    min-height: 0;
 }
 
 
@@ -1633,7 +1673,7 @@ img {
 
 .chat-window-header {
 
-    min-height: 75px;
+    min-height: 70px;
 
     padding: 15px 20px;
 
@@ -1643,7 +1683,131 @@ img {
 
     align-items: center;
 
-    justify-content: space-between;
+    gap: 12px;
+}
+
+
+.chat-back-button {
+
+    display: none;
+
+    border: none;
+
+    background: transparent;
+
+    color: var(--text);
+
+    font-size: 16px;
+
+    width: 32px;
+
+    height: 32px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    flex-shrink: 0;
+}
+
+.chat-back-button:hover {
+
+    background: var(--purple-soft);
+
+    color: var(--purple);
+}
+
+
+/* Context banner */
+
+.chat-context-banner {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px 20px;
+
+    background: var(--purple-soft);
+
+    color: var(--purple-dark);
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.chat-context-banner i {
+
+    font-size: 12px;
+}
+
+
+/* Typing indicator */
+
+.chat-typing-indicator {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 8px 20px;
+
+    font-size: 11px;
+
+    color: var(--muted);
+
+    background: #fafafa;
+}
+
+.chat-typing-dots {
+
+    display: inline-flex;
+
+    gap: 3px;
+}
+
+.chat-typing-dots i {
+
+    width: 5px;
+
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: var(--purple-light);
+
+    display: inline-block;
+
+    animation: chatTypingBounce 1.2s infinite ease-in-out;
+}
+
+.chat-typing-dots i:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.chat-typing-dots i:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes chatTypingBounce {
+
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+
+    30% {
+        transform: translateY(-3px);
+        opacity: 1;
+    }
+
 }
 
 
@@ -1783,11 +1947,29 @@ img {
 
 .message span {
 
+    display: flex;
+
+    align-items: center;
+
+    gap: 4px;
+
     color: var(--muted);
 
     font-size: 9px;
 
     margin-top: 5px;
+}
+
+.message-read-receipt {
+
+    font-size: 10px;
+
+    color: #9ca3af;
+}
+
+.message-read-receipt.read {
+
+    color: var(--purple);
 }
 
 
@@ -7166,3 +7348,65 @@ img {
 #sellerPage.seller-dashboard-active .full-page-back-row,
 #sellerPage.seller-dashboard-active .full-page-panel>.profile-panel-header{display:none}
 #sellerPage.seller-dashboard-active .full-page-panel{padding:0;border:0;background:transparent;border-radius:0}
+
+
+/* =========================================================
+   CHAT — MOBILE LAYOUT
+   (single-column, list-or-conversation, with a
+   working back button — not two cramped columns)
+   ========================================================= */
+
+@media (max-width: 780px) {
+
+    .chat-full-page {
+        padding: 0;
+        max-width: 100%;
+    }
+
+    .chat-full-page .full-page-back-row {
+        padding: 12px 16px 0;
+        margin-bottom: 8px;
+    }
+
+    .chat-preview {
+        grid-template-columns: 1fr;
+        height: calc(100vh - 110px);
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    .chat-sidebar {
+        border-right: none;
+    }
+
+    /* By default show the list, hide the window.
+       Adding .conversation-open flips this. */
+
+    .chat-window {
+        display: none;
+    }
+
+    #chatPreviewApp.conversation-open .chat-sidebar {
+        display: none;
+    }
+
+    #chatPreviewApp.conversation-open .chat-window {
+        display: flex;
+    }
+
+    .chat-back-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+}
+
+@media (min-width: 781px) {
+
+    .chat-back-button {
+        display: none !important;
+    }
+
+}
