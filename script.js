@@ -4581,6 +4581,8 @@ showOtpVerificationScreen(
             messageElement.className =
                 "message " + (isSent ? "sent" : "received");
 
+            messageElement.dataset.messageId = message.id;
+
             const time =
                 new Date(message.created_at).toLocaleTimeString(
                     [],
@@ -4598,6 +4600,9 @@ showOtpVerificationScreen(
                 message.attachment_url ?
                     (message.attachment_url.indexOf("http") === 0 ? message.attachment_url : API_URL + message.attachment_url) :
                     null;
+
+            const isTextMessage =
+                !message.message_type || message.message_type === "TEXT";
 
             if (message.message_type === "IMAGE" && attachmentUrl) {
 
@@ -4634,13 +4639,45 @@ showOtpVerificationScreen(
             } else {
 
                 bubbleContent =
-                    `<div class="message-bubble">${escapeChatText(message.body)}</div>`;
+                    `<div class="message-bubble" data-bubble-text="${encodeURIComponent(message.body)}">${escapeChatText(message.body)}</div>`;
 
             }
 
+            const editedLabel =
+                message.edited_at ? ' <span class="message-edited-label">(edited)</span>' : "";
+
+            // Reactions
+            const reactions =
+                Array.isArray(message.reactions) ? message.reactions : [];
+
+            const reactionsMarkup =
+                reactions.length > 0 ?
+                    `<div class="message-reactions">` +
+                    reactions.map(function (r) {
+                        return `<button type="button" class="message-reaction-pill ${r.reactedByMe ? "mine" : ""}" data-reaction-emoji="${r.emoji}">${r.emoji} ${r.count}</button>`;
+                    }).join("") +
+                    `</div>` :
+                    "";
+
+            // Hover actions: react, and edit (own text messages < 15 min old)
+            const ageMs =
+                Date.now() - new Date(message.created_at).getTime();
+
+            const canEdit =
+                isSent && isTextMessage && ageMs < 15 * 60 * 1000;
+
+            const actionsMarkup = `
+                <div class="message-hover-actions">
+                    <button type="button" class="message-react-trigger" title="React"><i class="fa-regular fa-face-smile"></i></button>
+                    ${canEdit ? '<button type="button" class="message-edit-trigger" title="Edit"><i class="fa-solid fa-pen"></i></button>' : ""}
+                </div>
+            `;
+
             messageElement.innerHTML = `
+                ${actionsMarkup}
                 ${bubbleContent}
-                <span>${time}${receiptMarkup}</span>
+                ${reactionsMarkup}
+                <span>${time}${editedLabel}${receiptMarkup}</span>
             `;
 
             messages.appendChild(messageElement);
@@ -13758,3 +13795,318 @@ if (chatSendRecording) {
     );
 
 }
+
+
+// =========================================================
+// CHAT — MESSAGE REACTIONS
+// =========================================================
+
+const KURIOS_QUICK_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
+
+async function toggleMessageReaction(messageId, emoji) {
+
+    const student =
+        typeof getLoggedInStudent === "function" ? getLoggedInStudent() : null;
+
+    if (!student) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/chat/messages/" + messageId + "/react",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId: student.id, emoji: emoji })
+                }
+            );
+
+        const data = await response.json();
+
+        if (data.success && window.activeChatPartnerId) {
+
+            if (typeof window.loadThread === "function") {
+
+                window.loadThread(
+                    window.activeChatPartnerId,
+                    student.id,
+                    window.activeConversationId
+                );
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.error("React to message error:", error);
+
+    }
+
+}
+
+function closeReactionPopover() {
+
+    const existing =
+        document.getElementById("chatReactionPopover");
+
+    if (existing) {
+        existing.remove();
+    }
+
+}
+
+function openReactionPopover(triggerEl, messageId) {
+
+    closeReactionPopover();
+
+    const popover =
+        document.createElement("div");
+
+    popover.id = "chatReactionPopover";
+    popover.className = "chat-reaction-popover";
+
+    popover.innerHTML =
+        KURIOS_QUICK_REACTIONS.map(function (emoji) {
+            return `<button type="button" data-emoji="${emoji}">${emoji}</button>`;
+        }).join("");
+
+    popover.addEventListener("click", function (event) {
+
+        const btn = event.target.closest("button");
+
+        if (btn) {
+
+            toggleMessageReaction(messageId, btn.dataset.emoji);
+            closeReactionPopover();
+
+        }
+
+    });
+
+    triggerEl.closest(".message").appendChild(popover);
+
+    setTimeout(function () {
+
+        document.addEventListener("click", function onceHandler(e) {
+
+            if (!popover.contains(e.target)) {
+                closeReactionPopover();
+                document.removeEventListener("click", onceHandler);
+            }
+
+        });
+
+    }, 0);
+
+}
+
+const messagesContainer =
+    document.getElementById("messages");
+
+if (messagesContainer) {
+
+    messagesContainer.addEventListener("click", function (event) {
+
+        const reactTrigger =
+            event.target.closest(".message-react-trigger");
+
+        if (reactTrigger) {
+
+            const messageEl =
+                reactTrigger.closest(".message");
+
+            openReactionPopover(reactTrigger, messageEl.dataset.messageId);
+            return;
+
+        }
+
+        const reactionPill =
+            event.target.closest(".message-reaction-pill");
+
+        if (reactionPill) {
+
+            const messageEl =
+                reactionPill.closest(".message");
+
+            toggleMessageReaction(messageEl.dataset.messageId, reactionPill.dataset.reactionEmoji);
+            return;
+
+        }
+
+        const editTrigger =
+            event.target.closest(".message-edit-trigger");
+
+        if (editTrigger) {
+
+            const messageEl =
+                editTrigger.closest(".message");
+
+            beginEditingMessage(messageEl);
+            return;
+
+        }
+
+    });
+
+}
+
+
+// =========================================================
+// CHAT — EDIT A MESSAGE
+// =========================================================
+
+function beginEditingMessage(messageEl) {
+
+    const bubble =
+        messageEl.querySelector(".message-bubble");
+
+    if (!bubble) {
+        return;
+    }
+
+    const currentText =
+        decodeURIComponent(bubble.dataset.bubbleText || "");
+
+    const messageId =
+        messageEl.dataset.messageId;
+
+    bubble.innerHTML = `
+        <textarea class="message-edit-textarea">${currentText}</textarea>
+        <div class="message-edit-actions">
+            <button type="button" class="message-edit-cancel">Cancel</button>
+            <button type="button" class="message-edit-save">Save</button>
+        </div>
+    `;
+
+    const textarea =
+        bubble.querySelector(".message-edit-textarea");
+
+    if (textarea) {
+
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+    }
+
+    const cancelBtn =
+        bubble.querySelector(".message-edit-cancel");
+
+    const saveBtn =
+        bubble.querySelector(".message-edit-save");
+
+    if (cancelBtn) {
+
+        cancelBtn.addEventListener("click", function () {
+
+            bubble.dataset.bubbleText = encodeURIComponent(currentText);
+            bubble.innerHTML = escapeChatTextGlobal(currentText);
+
+        });
+
+    }
+
+    if (saveBtn) {
+
+        saveBtn.addEventListener("click", function () {
+            saveEditedMessage(messageId, textarea.value, bubble, currentText);
+        });
+
+    }
+
+}
+
+function escapeChatTextGlobal(text) {
+
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+
+}
+
+async function saveEditedMessage(messageId, newText, bubble, fallbackText) {
+
+    const student =
+        typeof getLoggedInStudent === "function" ? getLoggedInStudent() : null;
+
+    if (!student || !newText.trim()) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/chat/messages/" + messageId,
+                {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId: student.id, body: newText.trim() })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            if (typeof showMessage === "function") {
+                showMessage(data.message || "Could not edit this message.", "error");
+            }
+
+            bubble.dataset.bubbleText = encodeURIComponent(fallbackText);
+            bubble.innerHTML = escapeChatTextGlobal(fallbackText);
+            return;
+
+        }
+
+        if (window.activeChatPartnerId && typeof window.loadThread === "function") {
+
+            window.loadThread(
+                window.activeChatPartnerId,
+                student.id,
+                window.activeConversationId
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error("Edit message error:", error);
+
+        bubble.dataset.bubbleText = encodeURIComponent(fallbackText);
+        bubble.innerHTML = escapeChatTextGlobal(fallbackText);
+
+    }
+
+}
+
+// Live-update when the OTHER person's message you're
+// viewing gets edited by them.
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    if (window.__kuriosChatSocket) {
+
+        window.__kuriosChatSocket.on("message_edited", function () {
+
+            const student =
+                typeof getLoggedInStudent === "function" ? getLoggedInStudent() : null;
+
+            if (student && window.activeChatPartnerId && typeof window.loadThread === "function") {
+
+                window.loadThread(
+                    window.activeChatPartnerId,
+                    student.id,
+                    window.activeConversationId
+                );
+
+            }
+
+        });
+
+    }
+
+});
