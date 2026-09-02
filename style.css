@@ -2194,7 +2194,7 @@ img {
 
     position: fixed;
 
-    z-index: 1500;
+    z-index: 3100;
 
     top: 85px;
 
@@ -7873,4 +7873,88 @@ img {
         grid-template-columns: 1fr;
     }
 
+}
+
+
+/* =========================================================
+   CHAT — FULL SCREEN + REMAINING MOCKUP DETAILS
+   ========================================================= */
+
+.chat-full-page {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: white;
+    padding: 0;
+    max-width: none;
+    margin: 0;
+}
+
+.chat-full-page .chat-preview {
+    height: 100vh;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+}
+
+.chat-exit-btn {
+    margin-left: auto;
+    color: #9ca3af;
+    font-size: 13px;
+    text-decoration: none;
+    padding: 4px;
+}
+
+.chat-exit-btn:hover {
+    color: var(--purple);
+}
+
+.chat-app-brand {
+    display: flex;
+    align-items: center;
+}
+
+.chat-view-profile-btn {
+    margin-left: auto;
+    border: 1px solid var(--purple);
+    background: white;
+    color: var(--purple);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.chat-view-profile-btn:hover {
+    background: var(--purple);
+    color: white;
+}
+
+.chat-status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #d1d5db;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.chat-status-dot.online {
+    background: #22c55e;
+}
+
+.chat-contact-seller-tag {
+    display: inline-block;
+    background: var(--purple-soft);
+    color: var(--purple-dark);
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
 }
