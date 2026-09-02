@@ -3225,6 +3225,18 @@ if (signInForm) {
                     "Login successful. Welcome back to Kurios Stores."
                 );
 
+                if (
+                    window.__kuriosChatSocket &&
+                    window.__kuriosChatSocket.connected
+                ) {
+
+                    window.__kuriosChatSocket.emit(
+                        "join",
+                        data.student.id
+                    );
+
+                }
+
                 const postLoginSplash =
                     document.getElementById("postLoginSplash");
 
@@ -4383,7 +4395,7 @@ showOtpVerificationScreen(
             function () {
                 loadThread(partnerId, student.id);
             },
-            4000
+            20000
         );
 
     }
@@ -4686,14 +4698,72 @@ showOtpVerificationScreen(
 
 
     // Load the conversation list once, and keep it
-    // fresh while the student is on the site.
+    // fresh while the student is on the site. (Now
+    // that Socket.IO delivers messages instantly,
+    // this poll is just a resilience fallback in
+    // case the socket connection drops.)
 
     loadConversations();
 
     conversationsPollInterval = setInterval(
         loadConversations,
-        15000
+        30000
     );
+
+
+    // ========================================
+    // REAL-TIME CHAT (Socket.IO)
+    // ========================================
+
+    if (typeof io !== "undefined") {
+
+        const chatSocket =
+            io(API_URL);
+
+        window.__kuriosChatSocket = chatSocket;
+
+        chatSocket.on("connect", function () {
+
+            const currentStudent =
+                getLoggedInStudent();
+
+            if (currentStudent) {
+
+                chatSocket.emit("join", currentStudent.id);
+
+            }
+
+        });
+
+        chatSocket.on("new_message", function (incomingMessage) {
+
+            const currentStudent =
+                getLoggedInStudent();
+
+            if (!currentStudent) {
+                return;
+            }
+
+            // Refresh the sidebar either way, so
+            // unread badges/previews stay current.
+
+            loadConversations();
+
+            // If this message belongs to the thread
+            // that's currently open, refresh it too.
+
+            if (
+                activeChatPartnerId &&
+                String(incomingMessage.sender_id) === String(activeChatPartnerId)
+            ) {
+
+                loadThread(activeChatPartnerId, currentStudent.id);
+
+            }
+
+        });
+
+    }
 
 
 
