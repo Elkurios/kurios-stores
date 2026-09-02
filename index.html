@@ -1378,17 +1378,10 @@
 
 
     <section
-        class="full-page-section chat-full-page"
+        class="chat-full-page"
         id="chatPage"
         style="display: none;"
     >
-
-        <div class="full-page-back-row">
-            <a href="#" class="full-page-back-link page-back-link">
-                <i class="fa-solid fa-arrow-left"></i>
-                Back to Kurios Stores
-            </a>
-        </div>
 
             <div class="chat-preview" id="chatPreviewApp">
 
@@ -1403,6 +1396,9 @@
                             <strong>KURIOS</strong>
                             <span>STORES</span>
                         </div>
+                        <a href="#" class="chat-exit-btn page-back-link" title="Back to Kurios Stores">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </a>
                     </div>
 
                     <button type="button" class="chat-app-newchat-btn" id="appSidebarNewChat">
@@ -1605,7 +1601,8 @@
                             <div>
 
                                 <strong id="activeChatName">
-                                    Select a conversation
+                                    <span id="activeChatNameText">Select a conversation</span>
+                                    <span class="chat-status-dot" id="activeChatStatusDot"></span>
                                 </strong>
 
                                 <span id="activeChatStatus">
@@ -1641,6 +1638,7 @@
                     <div class="chat-context-banner" id="chatContextBanner" style="display: none;">
                         <i class="fa-solid fa-user-group"></i>
                         <span>This is a normal conversation — you're chatting with a fellow student.</span>
+                        <button type="button" class="chat-view-profile-btn" id="chatViewProfileBtn">View profile</button>
                     </div>
 
 
