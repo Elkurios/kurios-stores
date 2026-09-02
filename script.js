@@ -6051,9 +6051,67 @@ showOtpVerificationScreen(
 
     }
 
+    let __kuriosRouteToken = 0;
+
     function syncPageFromHash() {
 
         const hash = window.location.hash;
+
+        const thisRouteToken =
+            ++__kuriosRouteToken;
+
+        const splashMessages = {
+            "#sell": "Loading your store...",
+            "#profile": "Loading your profile...",
+            "#orders": "Loading your orders...",
+            "#wishlist": "Loading your wishlist...",
+            "#wallet": "Loading your wallet...",
+            "#chat": "Loading chat..."
+        };
+
+        const splashMessage =
+            hash.indexOf("#store-") === 0 ?
+                "Loading store..." :
+                (splashMessages[hash] || "Loading...");
+
+        const splashEl =
+            document.getElementById("postLoginSplash");
+
+        const splashTextEl =
+            splashEl ? splashEl.querySelector("p") : null;
+
+        if (splashTextEl) {
+            splashTextEl.textContent = splashMessage;
+        }
+
+        if (splashEl) {
+            splashEl.style.display = "flex";
+        }
+
+        setTimeout(
+            function () {
+
+                // If another navigation started after this
+                // one, let that one win — don't route to a
+                // now-stale destination.
+
+                if (thisRouteToken !== __kuriosRouteToken) {
+                    return;
+                }
+
+                performPageRouting(hash);
+
+                if (splashEl) {
+                    splashEl.style.display = "none";
+                }
+
+            },
+            800
+        );
+
+    }
+
+    function performPageRouting(hash) {
 
         if (typeof closeNotificationPanel === "function") {
             closeNotificationPanel();
