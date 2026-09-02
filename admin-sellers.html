@@ -1122,9 +1122,14 @@
                         `<span class="status-pill status-approved">Active</span>` :
                         `<span class="status-pill status-pending">Unverified</span>`);
 
+            const supportBadge =
+                student.is_support ?
+                    `<span class="status-pill status-approved">KSupport</span>` :
+                    "";
+
             card.innerHTML = `
                 <div class="student-card-info">
-                    <h4>${escapeHtml(fullName || "—")} ${suspendedBadge}</h4>
+                    <h4>${escapeHtml(fullName || "—")} ${suspendedBadge} ${supportBadge}</h4>
                     <p>${escapeHtml(student.email || "")} · ${escapeHtml(student.phone || "—")}</p>
                     <p>${escapeHtml(student.university || "—")} · ${escapeHtml(student.student_id || "—")}</p>
                 </div>
@@ -1159,9 +1164,71 @@
 
             actions.appendChild(toggleBtn);
 
+            const supportBtn = document.createElement("button");
+
+            if (student.is_support) {
+
+                supportBtn.className = "btn-reject";
+                supportBtn.textContent = "Remove KSupport";
+                supportBtn.addEventListener("click", function () {
+
+                    if (confirm("Remove KSupport access from " + (fullName || "this student") + "?")) {
+                        updateStudentSupportStatus(student.id, false);
+                    }
+
+                });
+
+            } else {
+
+                supportBtn.className = "btn-approve";
+                supportBtn.textContent = "Make KSupport";
+                supportBtn.addEventListener("click", function () {
+
+                    if (confirm("Make " + (fullName || "this student") + " a KSupport staff member? They'll start receiving customer support conversations.")) {
+                        updateStudentSupportStatus(student.id, true);
+                    }
+
+                });
+
+            }
+
+            actions.appendChild(supportBtn);
+
             studentList.appendChild(card);
 
         });
+
+    }
+
+    async function updateStudentSupportStatus(studentId, makeSupport) {
+
+        try {
+
+            const response = await fetch(
+                API_URL + "/api/admin/students/" + studentId + "/" + (makeSupport ? "make-support" : "remove-support"),
+                {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + getAdminToken()
+                    }
+                }
+            );
+
+            const data = await response.json();
+
+            if (!data.success) {
+                alert(data.message || "Could not update this student's KSupport status.");
+                return;
+            }
+
+            loadStudents();
+
+        } catch (error) {
+
+            console.error("Update student support status error:", error);
+            alert("Unable to connect to Kurios Stores server.");
+
+        }
 
     }
 
