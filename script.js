@@ -4270,7 +4270,17 @@ showOtpVerificationScreen(
 
         chatContactList.innerHTML = "";
 
-        if (cachedConversations.length === 0) {
+        const activeFilter =
+            (typeof __kuriosChatFilter !== "undefined" && __kuriosChatFilter) || "all";
+
+        const visibleConversations =
+            activeFilter === "all" ?
+                cachedConversations :
+                cachedConversations.filter(function (c) {
+                    return c.type === activeFilter;
+                });
+
+        if (visibleConversations.length === 0) {
 
             if (chatContactsEmpty) {
                 chatContactsEmpty.style.display = "block";
@@ -4284,7 +4294,7 @@ showOtpVerificationScreen(
             chatContactsEmpty.style.display = "none";
         }
 
-        cachedConversations.forEach(function (conversation) {
+        visibleConversations.forEach(function (conversation) {
 
             const fullName =
                 ((conversation.first_name || "") + " " + (conversation.last_name || "")).trim();
@@ -4345,6 +4355,8 @@ showOtpVerificationScreen(
 
     }
 
+    window.renderChatContactList = renderChatContactList;
+
 
     async function loadConversations() {
 
@@ -4353,6 +4365,28 @@ showOtpVerificationScreen(
 
         if (!student) {
             return;
+        }
+
+        const sidebarAvatar =
+            document.getElementById("chatAppSidebarAvatar");
+
+        const sidebarName =
+            document.getElementById("chatAppSidebarName");
+
+        if (sidebarAvatar) {
+
+            sidebarAvatar.innerHTML =
+                student.profile_picture ?
+                    `<img src="${API_URL + student.profile_picture}" alt="You">` :
+                    `<i class="fa-regular fa-user"></i>`;
+
+        }
+
+        if (sidebarName) {
+
+            sidebarName.textContent =
+                (student.first_name || "You");
+
         }
 
         try {
@@ -4509,7 +4543,7 @@ showOtpVerificationScreen(
     }
 
 
-    function openChatWith(partnerId, partnerName, conversationId, productContext) {
+    function openChatWith(partnerId, partnerName, conversationId, productContext, partnerData) {
 
         const student =
             getLoggedInStudent();
@@ -4531,6 +4565,99 @@ showOtpVerificationScreen(
 
         if (activeChatAvatar) {
             activeChatAvatar.innerHTML = `<i class="fa-solid fa-user"></i>`;
+        }
+
+
+        // ------------------------------------
+        // PROFILE PANEL — real data only
+        // ------------------------------------
+
+        const partner =
+            partnerData ||
+            cachedConversations.find(function (c) { return c.id === partnerId; }) ||
+            {};
+
+        const profilePanel =
+            document.getElementById("chatProfilePanel");
+
+        const chatPreviewApp =
+            document.getElementById("chatPreviewApp");
+
+        if (profilePanel) {
+
+            profilePanel.style.display = "block";
+
+            if (chatPreviewApp) {
+                chatPreviewApp.classList.add("has-profile-panel");
+            }
+
+            const profileAvatar =
+                document.getElementById("chatProfileAvatar");
+
+            if (profileAvatar) {
+
+                profileAvatar.innerHTML =
+                    partner.profile_picture ?
+                        `<img src="${API_URL + partner.profile_picture}" alt="${partnerName}">` :
+                        `<i class="fa-regular fa-user"></i>`;
+
+            }
+
+            const profileName =
+                document.getElementById("chatProfileName");
+
+            if (profileName) {
+                profileName.textContent = partnerName || "Kurios Student";
+            }
+
+            const profileUniversity =
+                document.getElementById("chatProfileUniversity");
+
+            if (profileUniversity) {
+
+                profileUniversity.textContent =
+                    partner.university || "";
+
+                profileUniversity.style.display =
+                    partner.university ? "block" : "none";
+
+            }
+
+            const infoList =
+                document.getElementById("chatProfileInfoList");
+
+            if (infoList) {
+
+                let infoRows = "";
+
+                if (partner.university) {
+
+                    infoRows += `
+                        <div class="chat-profile-info-row">
+                            <i class="fa-solid fa-building-columns"></i>
+                            <span>${partner.university}</span>
+                        </div>
+                    `;
+
+                }
+
+                if (partner.phone) {
+
+                    infoRows += `
+                        <div class="chat-profile-info-row">
+                            <i class="fa-solid fa-phone"></i>
+                            <span>${partner.phone}</span>
+                        </div>
+                    `;
+
+                }
+
+                infoList.innerHTML =
+                    infoRows ||
+                    `<p style="font-size:11px; color:#9ca3af;">No further details available.</p>`;
+
+            }
+
         }
 
         const contextBanner =
@@ -4894,7 +5021,7 @@ showOtpVerificationScreen(
                         newChatForm.style.display = "none";
                     }
 
-                    openChatWith(data.student.id, fullName);
+                    openChatWith(data.student.id, fullName, null, null, data.student);
 
                 } catch (error) {
 
@@ -12675,3 +12802,131 @@ async function contactSellerAboutProduct(productId) {
     }
 
 }
+
+
+// =========================================================
+// CHAT — "COMING SOON" ELEMENTS
+// (every feature shown in the reference design that
+// isn't actually built yet — clearly tagged, not faked)
+// =========================================================
+
+document.addEventListener("click", function (event) {
+
+    const soonTrigger =
+        event.target.closest('[data-chat-action="soon"], [data-chat-sidebar-action="soon"], .chat-filter-pill.soon');
+
+    if (!soonTrigger) {
+        return;
+    }
+
+    if (typeof showMessage === "function") {
+
+        showMessage("This feature isn't built yet — coming soon.");
+
+    } else {
+
+        alert("This feature isn't built yet — coming soon.");
+
+    }
+
+});
+
+
+// ========================================
+// CHAT APP SIDEBAR — REAL NAV DESTINATIONS
+// ========================================
+
+document.addEventListener("click", function (event) {
+
+    const navItem =
+        event.target.closest("[data-chat-sidebar-action]");
+
+    if (!navItem) {
+        return;
+    }
+
+    const action =
+        navItem.dataset.chatSidebarAction;
+
+    if (action === "notifications") {
+
+        const notificationButton =
+            document.getElementById("notificationButton");
+
+        if (notificationButton) {
+            notificationButton.click();
+        }
+
+    } else if (action === "orders") {
+
+        window.location.hash = "orders";
+
+    } else if (action === "rewards") {
+
+        window.location.hash = "rewards";
+
+    } else if (action === "wallet") {
+
+        window.location.hash = "wallet";
+
+    } else if (action === "profile" || action === "settings") {
+
+        window.location.hash = "profile";
+
+    }
+
+});
+
+const appSidebarNewChat =
+    document.getElementById("appSidebarNewChat");
+
+if (appSidebarNewChat) {
+
+    appSidebarNewChat.addEventListener(
+        "click",
+        function () {
+
+            const realButton =
+                document.getElementById("newChatButton");
+
+            if (realButton) {
+                realButton.click();
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// CHAT FILTER PILLS (real filtering for
+// All / Students / Sellers — the rest are
+// tagged Coming Soon above)
+// ========================================
+
+let __kuriosChatFilter = "all";
+
+document.addEventListener("click", function (event) {
+
+    const pill =
+        event.target.closest(".chat-filter-pill:not(.soon)");
+
+    if (!pill) {
+        return;
+    }
+
+    document.querySelectorAll(".chat-filter-pill").forEach(function (p) {
+        p.classList.remove("active");
+    });
+
+    pill.classList.add("active");
+
+    __kuriosChatFilter =
+        pill.dataset.chatFilter;
+
+    if (typeof window.renderChatContactList === "function") {
+        window.renderChatContactList();
+    }
+
+});
