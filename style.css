@@ -1121,6 +1121,41 @@ img {
 
 /* Add button */
 
+.contact-seller-btn {
+
+    border: 1px solid var(--border);
+
+    background: white;
+
+    color: #6b7280;
+
+    width: 32px;
+
+    height: 32px;
+
+    border-radius: 8px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 12px;
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+.contact-seller-btn:hover {
+
+    border-color: var(--purple);
+
+    color: var(--purple);
+}
+
+
 .add-to-cart {
 
     border: none;
