@@ -1,13195 +1,8035 @@
 /* =========================================================
    KURIOS STORES
-   MAIN JAVASCRIPT
+   MAIN STYLESHEET
    ========================================================= */
 
 
 /* =========================================================
-   1. BASIC SETTINGS
+   1. GLOBAL SETTINGS
    ========================================================= */
 
-/*
-    This is the address of our Node.js backend.
+:root {
 
-    Our frontend is here:
+    /* Kurios brand colours */
+    --purple: #6d28d9;
+    --purple-dark: #4c1d95;
+    --purple-light: #8b5cf6;
+    --purple-soft: #f3e8ff;
 
-    C:\Users\HomePC\Desktop\CODE WITH ELKURIOS\kurios-stores
+    /* General colours */
+    --white: #ffffff;
+    --black: #171717;
+    --text: #27272a;
+    --muted: #71717a;
+    --border: #e4e4e7;
+    --background: #fafafa;
+    --light-background: #f7f5fb;
 
-    Our backend is here:
+    /* Status colours */
+    --green: #16a34a;
+    --red: #dc2626;
+    --orange: #ea580c;
 
-    C:\Users\HomePC\Desktop\kurios-stores-backend
-*/
+    /* Effects */
+    --shadow-small: 0 4px 15px rgba(0, 0, 0, 0.06);
+    --shadow-medium: 0 10px 30px rgba(0, 0, 0, 0.09);
+    --shadow-large: 0 20px 50px rgba(0, 0, 0, 0.14);
 
-const API_URL = "https://kurios-stores-backend.onrender.com";
+    --radius-small: 8px;
+    --radius-medium: 14px;
+    --radius-large: 22px;
 
+    --transition: 0.25s ease;
+}
 
-/*
-    Wait until the HTML has completely loaded
-    before JavaScript starts working.
-*/
 
-document.addEventListener("DOMContentLoaded", function () {
+/* Remove default browser spacing */
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-    console.log("Kurios Stores website loaded successfully.");
 
+/* Smooth scrolling */
 
+html {
+    scroll-behavior: smooth;
+    max-width: 100vw;
+    overflow-x: hidden;
+}
 
-    /* =====================================================
-       2. GET IMPORTANT HTML ELEMENTS
-       ===================================================== */
 
+/* Main body */
 
-    const productGrid =
-        document.getElementById("productGrid");
+body {
 
+    font-family: "Inter", Arial, sans-serif;
 
-    const cartButton =
-        document.getElementById("cartButton");
+    background: var(--white);
 
+    color: var(--text);
 
-    const cartOverlay =
-        document.getElementById("cartOverlay");
+    line-height: 1.6;
 
+    max-width: 100vw;
 
-    const closeCart =
-        document.getElementById("closeCart");
+    overflow-x: hidden;
+}
 
 
-    const cartItems =
-        document.getElementById("cartItems");
+/* Links */
 
+a {
+    text-decoration: none;
+    color: inherit;
+}
 
-    const cartCount =
-        document.getElementById("cartBadge");
 
+/* Buttons */
 
-    const cartTotal =
-        document.getElementById("cartTotal");
+button,
+input,
+textarea {
+    font-family: inherit;
+}
 
 
-    const checkoutButton =
-        document.getElementById("checkoutButton");
+/* Buttons should look clickable */
 
+button {
+    cursor: pointer;
+}
 
 
-    /* =====================================================
-       3. SHOPPING CART
-       ===================================================== */
+/* Images */
 
+img {
+    max-width: 100%;
+    display: block;
+}
 
-    /*
-        The cart is stored in this array.
 
-        Example:
+/* Logged-in dashboard is hidden by default — JS reveals it (and
+   hides #loggedOutHero) once it confirms a student is signed in.
+   Without this, both heroes render on first paint until the
+   script at the bottom of the page runs. */
 
-        [
-            {
-                id: 1,
-                name: "Instant Noodles",
-                price: 1200,
-                quantity: 2
-            }
-        ]
-    */
+#loggedInHero {
+    display: none;
+}
 
-    let cart = JSON.parse(
-        localStorage.getItem("kuriosCart")
-    ) || [];
 
+/* =========================================================
+   2. REUSABLE CONTAINER
+   ========================================================= */
 
+.footer-container,
+.rewards-container {
 
-    /*
-        Save the cart in the browser.
+    width: min(1180px, 92%);
 
-        This means refreshing the page
-        won't immediately empty the cart.
-    */
+    margin: 0 auto;
+}
 
-    function saveCart() {
 
-        localStorage.setItem(
-            "kuriosCart",
-            JSON.stringify(cart)
-        );
+/* Nav bar gets more breathing room on wide screens so the
+   links/icons/account cluster sits closer to the true edge
+   instead of stopping at the same 1180px column as the page
+   content sections. */
 
-    }
+.nav-container {
 
+    width: min(1440px, 96%);
 
+    margin: 0 auto;
+}
 
-    /*
-        Format Nigerian currency.
-    */
 
-    function formatMoney(amount) {
+/* =========================================================
+   3. NAVIGATION
+   ========================================================= */
 
-        return "₦" + Number(amount).toLocaleString();
+.navbar {
 
-    }
+    position: sticky;
 
+    top: 0;
 
+    z-index: 1000;
 
-    /* =====================================================
-       4. DISPLAY CART
-       ===================================================== */
+    background: rgba(255, 255, 255, 0.96);
 
+    backdrop-filter: blur(12px);
 
-    function updateCart() {
+    border-bottom: 1px solid var(--border);
+}
 
 
-        /*
-            Make sure the cart container exists.
-        */
+.nav-container {
 
-        if (!cartItems) {
-            return;
-        }
+    min-height: 76px;
 
+    display: flex;
 
-        /*
-            Empty the current cart display.
-        */
+    align-items: center;
 
-        cartItems.innerHTML = "";
+    justify-content: space-between;
 
+    gap: 30px;
+}
 
 
-        /*
-            If there are no products...
-        */
+/* Logo */
 
-        if (cart.length === 0) {
+.logo-link {
 
-            cartItems.innerHTML = `
+    display: flex;
 
-                <div class="empty-cart">
+    align-items: center;
 
-                    <i class="fa-solid fa-cart-shopping"></i>
+    flex-shrink: 0;
+}
 
-                    <h3>
-                        Your cart is empty
-                    </h3>
 
-                    <p>
-                        Add some products to get started.
-                    </p>
+.nav-logo {
 
-                </div>
+    width: 125px;
 
-            `;
+    height: auto;
 
-        }
+    object-fit: contain;
+}
 
 
+/* Desktop navigation */
 
-        /*
-            Otherwise display the products.
-        */
+.main-nav {
 
-        else {
+    display: flex;
 
-            cart.forEach(function (item, index) {
+    align-items: center;
 
+    gap: 30px;
 
-                const itemTotal =
-                    item.price * item.quantity;
+    margin-left: auto;
+}
 
 
-                cartItems.innerHTML += `
+.nav-link {
 
-                    <div class="cart-item">
+    position: relative;
 
+    color: var(--muted);
 
-                        <div class="cart-item-image">
+    font-size: 14px;
 
-                            <i class="fa-solid fa-bag-shopping"></i>
+    font-weight: 600;
 
-                        </div>
+    padding: 27px 0;
 
+    transition: var(--transition);
+}
 
 
-                        <div class="cart-item-info">
+.nav-link:hover,
+.nav-link.active {
 
-                            <h3>
-                                ${item.name}
-                            </h3>
+    color: var(--purple);
+}
 
 
-                            <div class="cart-item-price">
+.nav-link.active::after {
 
-                                ${formatMoney(item.price)}
+    content: "";
 
-                            </div>
+    position: absolute;
 
+    left: 0;
 
+    right: 0;
 
-                            <div class="quantity-controls">
+    bottom: 18px;
 
+    height: 2px;
 
-                                <button
-                                    class="quantity-button"
-                                    data-action="decrease"
-                                    data-index="${index}"
-                                >
-                                    −
-                                </button>
+    border-radius: 5px;
 
+    background: var(--purple);
+}
 
-                                <strong>
-                                    ${item.quantity}
-                                </strong>
 
+/* Navigation actions */
 
-                                <button
-                                    class="quantity-button"
-                                    data-action="increase"
-                                    data-index="${index}"
-                                >
-                                    +
-                                </button>
+.nav-actions {
 
+    position: relative;
 
-                                <button
-                                    class="remove-item"
-                                    data-action="remove"
-                                    data-index="${index}"
-                                >
-                                    Remove
-                                </button>
+    display: flex;
 
+    align-items: center;
 
-                            </div>
+    gap: 10px;
+}
 
 
-                        </div>
+/* Icon buttons */
 
+.nav-icon-button {
 
+    position: relative;
 
-                        <strong>
+    width: 42px;
 
-                            ${formatMoney(itemTotal)}
+    height: 42px;
 
-                        </strong>
+    border: 1px solid var(--border);
 
+    background: var(--white);
 
-                    </div>
+    color: var(--text);
 
-                `;
+    border-radius: 50%;
 
-            });
+    display: flex;
 
-        }
+    align-items: center;
 
+    justify-content: center;
 
+    transition: var(--transition);
+}
 
-        /*
-            Calculate total number of items.
-        */
 
-        let totalQuantity = 0;
+.nav-icon-button:hover {
 
+    color: var(--purple);
 
-        cart.forEach(function (item) {
+    border-color: var(--purple-light);
 
-            totalQuantity += item.quantity;
+    background: var(--purple-soft);
 
-        });
+    transform: translateY(-2px);
+}
 
 
+/* Notification/cart numbers */
 
-        /*
-            Update cart badge.
-        */
+.notification-badge,
+.cart-badge {
 
-        if (cartCount) {
+    position: absolute;
 
-            cartCount.textContent =
-                totalQuantity;
+    top: -3px;
 
-        }
+    right: -3px;
 
+    min-width: 18px;
 
+    height: 18px;
 
-        /*
-            Calculate total price.
-        */
+    padding: 0 4px;
 
-        let totalPrice = 0;
+    border-radius: 50px;
 
+    background: var(--purple);
 
-        cart.forEach(function (item) {
+    color: var(--white);
 
-            totalPrice +=
-                item.price * item.quantity;
+    font-size: 10px;
 
-        });
+    font-weight: 700;
 
+    display: flex;
 
+    align-items: center;
 
-        /*
-            Display total price.
-        */
+    justify-content: center;
+}
 
-        if (cartTotal) {
 
-            cartTotal.textContent =
-                formatMoney(totalPrice);
+/* Sign in button */
 
-        }
+.signin-nav-button {
 
-    }
+    border: none;
 
+    background: var(--purple);
 
+    color: var(--white);
 
-    /* =====================================================
-       5. ADD PRODUCT TO CART
-       ===================================================== */
+    padding: 11px 18px;
 
+    border-radius: 9px;
 
-    function addToCart(product) {
+    display: flex;
 
+    align-items: center;
 
-        /*
-            Check whether the product
-            already exists in the cart.
-        */
+    gap: 8px;
 
-        const existingProduct =
-            cart.find(function (item) {
+    font-size: 13px;
 
-                return item.id === product.id;
+    font-weight: 700;
 
-            });
+    transition: var(--transition);
+}
 
 
+.signin-nav-button.has-avatar {
 
-        /*
-            If it already exists,
-            increase quantity.
-        */
+    background: transparent;
 
-        if (existingProduct) {
+    padding: 0;
 
-            existingProduct.quantity += 1;
+    border-radius: 50%;
+}
 
-        }
+.signin-nav-button.has-avatar:hover {
 
+    background: transparent;
 
+    transform: none;
 
-        /*
-            Otherwise add a new product.
-        */
+    box-shadow: none;
+}
 
-        else {
+.header-avatar-circle {
 
-            cart.push({
+    width: 40px;
+    height: 40px;
 
-                id: product.id,
+    border-radius: 50%;
 
-                name: product.name,
+    overflow: hidden;
 
-                price: Number(product.price),
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-                quantity: 1
-
-            });
-
-        }
-
-
-
-        /*
-            Save cart.
-        */
-
-        saveCart();
-
-
-        /*
-            Update display.
-        */
-
-        updateCart();
-
-
-        /*
-            Open cart.
-        */
-
-        openCart();
-
-
-        /*
-            Show confirmation.
-        */
-
-        showMessage(
-            product.name + " added to your cart."
-        );
-
-    }
-
-
-
-    /* =====================================================
-       6. CART BUTTON
-       ===================================================== */
-
-
-    function openCart() {
-
-        if (typeof closeNotificationPanel === "function") {
-            closeNotificationPanel();
-        }
-
-        if (cartOverlay) {
-
-            cartOverlay.classList.add("open");
-
-        }
-
-        document.body.classList.add("cart-open");
-
-        const choiceEl =
-            document.getElementById("orderPaymentChoice");
-
-        if (choiceEl) {
-            choiceEl.style.display = "none";
-        }
-
-        if (checkoutButton) {
-            checkoutButton.style.display = "";
-        }
-
-    }
-
-
-
-    function closeCartPanel() {
-
-        if (cartOverlay) {
-
-            cartOverlay.classList.remove("open");
-
-        }
-
-        document.body.classList.remove("cart-open");
-
-    }
-
-
-
-    if (cartButton) {
-
-        cartButton.addEventListener(
-            "click",
-            openCart
-        );
-
-    }
-
-
-
-    if (closeCart) {
-
-        closeCart.addEventListener(
-            "click",
-            closeCartPanel
-        );
-
-    }
-
-
-
-    /*
-        The cart overlay is click-through now
-        (so the shop stays interactive behind it),
-        so there's no "click outside" region to
-        listen for anymore — closing happens via
-        the visible X button instead.
-    */
-
-
-
-    /* =====================================================
-       7. CART QUANTITY BUTTONS
-       ===================================================== */
-
-
-    if (cartItems) {
-
-        cartItems.addEventListener(
-            "click",
-            function (event) {
-
-
-                const button =
-                    event.target.closest("button");
-
-
-                if (!button) {
-                    return;
-                }
-
-
-                const action =
-                    button.dataset.action;
-
-
-                const index =
-                    Number(button.dataset.index);
-
-
-
-                /*
-                    Increase quantity.
-                */
-
-                if (action === "increase") {
-
-                    cart[index].quantity += 1;
-
-                }
-
-
-
-                /*
-                    Decrease quantity.
-                */
-
-                if (action === "decrease") {
-
-                    cart[index].quantity -= 1;
-
-
-                    /*
-                        Remove product when
-                        quantity reaches zero.
-                    */
-
-                    if (
-                        cart[index].quantity <= 0
-                    ) {
-
-                        cart.splice(index, 1);
-
-                    }
-
-                }
-
-
-
-                /*
-                    Remove product.
-                */
-
-                if (action === "remove") {
-
-                    cart.splice(index, 1);
-
-                }
-
-
-
-                saveCart();
-
-                updateCart();
-
-            }
-        );
-
-    }
-
-
-
-    /* =====================================================
-       8. LOAD PRODUCTS FROM NODE BACKEND
-       ===================================================== */
-
-
-    async function loadProducts() {
-
-
-        /*
-            Tell the browser:
-
-            "Go to my backend and
-             ask for the products."
-        */
-
-        try {
-
-
-            const response =
-                await fetch(
-                    API_URL + "/api/products"
-                );
-
-
-
-            /*
-                Check whether the backend
-                responded successfully.
-            */
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "Backend returned an error."
-                );
-
-            }
-
-
-
-            /*
-                Convert the response
-                into JavaScript data.
-            */
-
-            const products =
-                await response.json();
-
-
-
-            console.log(
-                "Products from Kurios Backend:",
-                products
-            );
-
-
-
-            /*
-                Display products
-                on the website.
-            */
-
-            displayProducts(products);
-
-
-            /*
-                Show a handful of them as
-                "Recommended for You" on the
-                logged-in student dashboard.
-            */
-
-            if (typeof renderDashboardRecommendations === "function") {
-
-                renderDashboardRecommendations(
-                    products.slice(0, 4)
-                );
-
-            }
-
-
-        }
-
-
-        catch (error) {
-
-
-            console.error(
-                "Error connecting to backend:",
-                error
-            );
-
-
-
-            /*
-                Tell the user that
-                the backend isn't available.
-            */
-
-            if (productGrid) {
-
-                productGrid.innerHTML = `
-
-                    <div class="empty-state">
-
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-
-                        <h3>
-                            Products could not be loaded
-                        </h3>
-
-                        <p>
-                            Please make sure the Kurios Stores
-                            backend is running.
-                        </p>
-
-                    </div>
-
-                `;
-
-            }
-
-        }
-
-    }
-
-
-
-    /* =====================================================
-       9. DISPLAY PRODUCTS
-       ===================================================== */
-
-
-    function displayProducts(products) {
-
-
-        if (!productGrid) {
-            return;
-        }
-
-
-        /*
-            Remove the old hard-coded products.
-        */
-
-        productGrid.innerHTML = "";
-
-
-
-        /*
-            If there are no products.
-        */
-
-        if (
-            !products ||
-            products.length === 0
-        ) {
-
-            productGrid.innerHTML = `
-
-                <div class="empty-state">
-
-                    <i class="fa-solid fa-box-open"></i>
-
-                    <h3>
-                        No products available
-                    </h3>
-
-                    <p>
-                        Please check back later.
-                    </p>
-
-                </div>
-
-            `;
-
-            return;
-
-        }
-
-
-
-        /*
-            Go through each product.
-        */
-
-        const categoryIcons = {
-            "Fashion": "fa-shirt",
-            "Electronics": "fa-plug",
-            "Beauty": "fa-spray-can-sparkles",
-            "Food": "fa-utensils",
-            "Books": "fa-book",
-            "School Materials": "fa-pen",
-            "Phones": "fa-mobile-screen",
-            "Accessories": "fa-gem",
-            "Health": "fa-heart-pulse",
-            "Home": "fa-house",
-            "Services": "fa-screwdriver-wrench",
-            "Others": "fa-box"
-        };
-
-        products.forEach(function (product) {
-
-            const category =
-                product.category || "General";
-
-            const icon =
-                categoryIcons[category] || "fa-box";
-
-
-            /*
-                Create the product card.
-            */
-
-            const productCard =
-                document.createElement("article");
-
-
-            productCard.className =
-                "product-card";
-
-
-            productCard.dataset.category =
-                category;
-
-
-            const imageMarkup =
-                product.image_url ?
-                    `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
-                    `<i class="fa-solid ${icon}"></i>`;
-
-            const soldByMarkup =
-                product.seller_id ?
-                    `<span class="product-sold-by" data-seller-id="${product.seller_id}">
-                        Sold by ${product.seller_store_name || "a Kurios seller"}
-                    </span>` :
-                    `<p>Available at Kurios Stores.</p>`;
-
-            const ratingMarkup =
-                product.review_count > 0 ?
-                    `<span class="product-rating">
-                        <i class="fa-solid fa-star"></i>
-                        ${Number(product.avg_rating).toFixed(1)}
-                        <span class="product-rating-count">(${product.review_count})</span>
-                    </span>` :
-                    "";
-
-            productCard.innerHTML = `
-
-                <div class="product-image">
-
-                    ${imageMarkup}
-
-                </div>
-
-
-                <div class="product-info">
-
-
-                    <span class="product-category">
-
-                        ${category}
-
-                    </span>
-
-
-                    <h3>
-
-                        ${product.name}
-
-                    </h3>
-
-
-                    ${ratingMarkup}
-
-
-                    ${soldByMarkup}
-
-
-                    <div class="product-bottom">
-
-
-                        <strong>
-
-                            ${formatMoney(product.price)}
-
-                        </strong>
-
-
-                        <div style="display:flex; gap:6px;">
-
-                            ${product.seller_id ? `
-                                <button
-                                    class="contact-seller-btn"
-                                    data-product-id="${product.id}"
-                                    title="Message the seller about this product"
-                                >
-                                    <i class="fa-regular fa-comment"></i>
-                                </button>
-                            ` : ""}
-
-                            <button
-
-                                class="add-to-cart"
-
-                                data-product-id="${product.id}"
-
-                            >
-
-                                <i class="fa-solid fa-plus"></i>
-
-                                Add
-
-                            </button>
-
-                        </div>
-
-
-                    </div>
-
-
-                </div>
-
-            `;
-
-
-
-            /*
-                Put the card inside
-                the product grid.
-            */
-
-            productGrid.appendChild(
-                productCard
-            );
-
-
-
-            /*
-                Add click event to
-                the Add button.
-            */
-
-            const addButton =
-                productCard.querySelector(
-                    ".add-to-cart"
-                );
-
-
-            addButton.addEventListener(
-                "click",
-                function () {
-
-                    addToCart(product);
-
-                }
-            );
-
-
-            /*
-                Contact Seller button.
-            */
-
-            const contactSellerBtn =
-                productCard.querySelector(
-                    ".contact-seller-btn"
-                );
-
-            if (contactSellerBtn) {
-
-                contactSellerBtn.addEventListener(
-                    "click",
-                    function () {
-
-                        if (typeof contactSellerAboutProduct === "function") {
-                            contactSellerAboutProduct(product.id);
-                        }
-
-                    }
-                );
-
-            }
-
-
-            /*
-                Add click event to
-                the "Sold by" label.
-            */
-
-            const soldByLabel =
-                productCard.querySelector(
-                    ".product-sold-by"
-                );
-
-            if (soldByLabel) {
-
-                soldByLabel.addEventListener(
-                    "click",
-                    function () {
-
-                        window.location.hash =
-                            "store-" + product.seller_id;
-
-                    }
-                );
-
-            }
-
-        });
-
-    }
-
-
-
-    /* =====================================================
-       10. PRODUCT FILTERS
-       ===================================================== */
-
-
-    const filterButtons =
-        document.querySelectorAll(
-            ".filter-button"
-        );
-
-
-
-    filterButtons.forEach(
-        function (button) {
-
-
-            button.addEventListener(
-                "click",
-                function () {
-
-
-                    /*
-                        Remove active state
-                        from all buttons.
-                    */
-
-                    filterButtons.forEach(
-                        function (item) {
-
-                            item.classList.remove(
-                                "active"
-                            );
-
-                        }
-                    );
-
-
-
-                    /*
-                        Activate clicked button.
-                    */
-
-                    button.classList.add(
-                        "active"
-                    );
-
-
-
-                    const selectedCategory =
-                        button.dataset.filter;
-
-
-
-                    const productCards =
-                        document.querySelectorAll(
-                            ".product-card"
-                        );
-
-
-
-                    productCards.forEach(
-                        function (card) {
-
-
-                            if (
-                                selectedCategory ===
-                                "all"
-                            ) {
-
-                                card.style.display =
-                                    "";
-
-                                return;
-
-                            }
-
-
-
-                            if (
-                                card.dataset.category ===
-                                selectedCategory
-                            ) {
-
-                                card.style.display =
-                                    "";
-
-                            }
-
-                            else {
-
-                                card.style.display =
-                                    "none";
-
-                            }
-
-                        }
-                    );
-
-                }
-            );
-
-        }
+    background: linear-gradient(
+        135deg,
+        var(--purple),
+        var(--purple-light)
     );
 
+    border: 2px solid var(--purple-soft);
+}
+
+.header-avatar-circle img {
+
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.header-avatar-initial {
+
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 700;
+}
 
 
-    /* =====================================================
-       11. CATEGORY CARDS
-       ===================================================== */
+.signin-nav-button:hover {
+
+    background: var(--purple-dark);
+
+    transform: translateY(-2px);
+
+    box-shadow: var(--shadow-small);
+}
 
 
-    const categoryCards =
-        document.querySelectorAll(
-            ".category-card"
+/* Mobile menu button */
+
+.mobile-menu-button {
+
+    display: none;
+
+    width: 42px;
+
+    height: 42px;
+
+    border: 1px solid var(--border);
+
+    background: var(--white);
+
+    border-radius: 9px;
+
+    color: var(--text);
+
+    font-size: 18px;
+}
+
+
+/* Mobile navigation */
+
+.mobile-menu {
+
+    display: none;
+
+    flex-direction: column;
+
+    padding: 10px 5% 20px;
+
+    border-top: 1px solid var(--border);
+
+    background: var(--white);
+}
+
+
+.mobile-menu a {
+
+    padding: 13px 0;
+
+    border-bottom: 1px solid #f0f0f0;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+
+.mobile-menu a:hover {
+
+    color: var(--purple);
+}
+
+
+/* =========================================================
+   4. HERO
+   ========================================================= */
+
+.hero {
+
+    position: relative;
+
+    min-height: 600px;
+
+    display: flex;
+
+    align-items: center;
+
+    overflow: hidden;
+
+    background:
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(139, 92, 246, 0.18),
+            transparent 30%
+        ),
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #faf7ff 55%,
+            #f3e8ff 100%
         );
+}
 
 
-    categoryCards.forEach(
-        function (card) {
+.hero-content {
 
-            card.addEventListener(
-                "click",
-                function () {
+    position: relative;
 
+    z-index: 2;
 
-                    const category =
-                        card.dataset.category;
+    width: min(1180px, 92%);
 
+    margin: 0 auto;
 
-                    /*
-                        Find matching shop filter.
-                    */
-
-                    const filter =
-                        document.querySelector(
-                            `.filter-button[data-filter="${category}"]`
-                        );
+    padding: 80px 0;
+}
 
 
-                    if (filter) {
+.hero-label {
 
-                        filter.click();
+    display: inline-block;
 
-                    }
+    margin-bottom: 18px;
+
+    color: var(--purple);
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
 
 
-                    /*
-                        Scroll to shop.
-                    */
+.hero h1 {
 
-                    const shop =
-                        document.getElementById(
-                            "shop"
-                        );
+    max-width: 750px;
+
+    color: var(--black);
+
+    font-size: clamp(45px, 7vw, 78px);
+
+    line-height: 1.04;
+
+    letter-spacing: -3px;
+
+    margin-bottom: 25px;
+
+    font-weight: 800;
+}
 
 
-                    if (shop) {
+.hero h1 span {
 
-                        shop.scrollIntoView({
-                            behavior: "smooth"
-                        });
+    color: var(--purple);
+}
 
-                    }
 
-                }
-            );
+.hero p {
 
-        }
+    max-width: 600px;
+
+    color: var(--muted);
+
+    font-size: 20px;
+
+    margin-bottom: 8px;
+}
+
+
+.hero .hero-subtext {
+
+    font-size: 15px;
+
+    margin-bottom: 30px;
+}
+
+
+/* Hero buttons */
+
+.hero-buttons {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+}
+
+
+/* Main purple button */
+
+.primary-button {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    border: none;
+
+    background: var(--purple);
+
+    color: var(--white);
+
+    padding: 14px 22px;
+
+    border-radius: 10px;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    transition: var(--transition);
+}
+
+
+.primary-button:hover {
+
+    background: var(--purple-dark);
+
+    transform: translateY(-2px);
+
+    box-shadow: var(--shadow-medium);
+}
+
+
+/* Secondary button */
+
+.secondary-button {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: 1px solid var(--border);
+
+    background: var(--white);
+
+    color: var(--text);
+
+    padding: 13px 21px;
+
+    border-radius: 10px;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    transition: var(--transition);
+}
+
+
+.secondary-button:hover {
+
+    border-color: var(--purple);
+
+    color: var(--purple);
+
+    transform: translateY(-2px);
+}
+
+
+/* Decorative circles */
+
+.hero-decoration {
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+}
+
+
+.hero-circle {
+
+    position: absolute;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(109, 40, 217, 0.12);
+}
+
+
+.circle-one {
+
+    width: 420px;
+
+    height: 420px;
+
+    right: -120px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+}
+
+
+.circle-two {
+
+    width: 260px;
+
+    height: 260px;
+
+    right: 40px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+}
+
+
+/* =========================================================
+   5. GENERAL SECTIONS
+   ========================================================= */
+
+.section {
+
+    width: min(1180px, 92%);
+
+    margin: 0 auto;
+
+    padding: 90px 0;
+}
+
+
+.section-heading {
+
+    text-align: center;
+
+    max-width: 650px;
+
+    margin: 0 auto 45px;
+}
+
+
+.section-heading > span,
+.section-label {
+
+    display: block;
+
+    color: var(--purple);
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 9px;
+}
+
+
+.section-heading h2 {
+
+    font-size: clamp(30px, 4vw, 42px);
+
+    line-height: 1.15;
+
+    color: var(--black);
+
+    margin-bottom: 12px;
+
+    letter-spacing: -1px;
+}
+
+
+.section-heading p {
+
+    color: var(--muted);
+
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   6. CATEGORIES
+   ========================================================= */
+
+.category-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 18px;
+}
+
+
+.category-card {
+
+    text-align: left;
+
+    border: 1px solid var(--border);
+
+    background: var(--white);
+
+    border-radius: var(--radius-medium);
+
+    padding: 25px;
+
+    transition: var(--transition);
+}
+
+
+.category-card:hover {
+
+    border-color: rgba(109, 40, 217, 0.3);
+
+    transform: translateY(-6px);
+
+    box-shadow: var(--shadow-medium);
+}
+
+
+.category-icon {
+
+    width: 52px;
+
+    height: 52px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: var(--purple-soft);
+
+    color: var(--purple);
+
+    font-size: 20px;
+
+    margin-bottom: 20px;
+}
+
+
+.category-card h3 {
+
+    font-size: 16px;
+
+    margin-bottom: 8px;
+
+    color: var(--black);
+}
+
+
+.category-card p {
+
+    font-size: 13px;
+
+    color: var(--muted);
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   7. SHOP
+   ========================================================= */
+
+.shop-section {
+
+    max-width: none;
+
+    width: 100%;
+
+    padding-left: 4%;
+
+    padding-right: 4%;
+
+    background: var(--light-background);
+}
+
+
+.shop-section .section-heading {
+
+    margin-bottom: 30px;
+}
+
+
+/* Product filters */
+
+.product-filters {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 35px;
+}
+
+
+.filter-button {
+
+    border: 1px solid var(--border);
+
+    background: var(--white);
+
+    color: var(--muted);
+
+    padding: 9px 16px;
+
+    border-radius: 50px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    transition: var(--transition);
+}
+
+
+.filter-button:hover,
+.filter-button.active {
+
+    background: var(--purple);
+
+    color: var(--white);
+
+    border-color: var(--purple);
+}
+
+
+/* Product grid */
+
+.product-grid {
+
+    width: min(1180px, 100%);
+
+    margin: 0 auto;
+
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 20px;
+}
+
+
+/* Product card */
+
+.product-card {
+
+    background: var(--white);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius-medium);
+
+    overflow: hidden;
+
+    transition: var(--transition);
+}
+
+
+.product-card:hover {
+
+    transform: translateY(-6px);
+
+    box-shadow: var(--shadow-medium);
+}
+
+
+/* Product image area */
+
+.product-image {
+
+    position: relative;
+
+    height: 210px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: linear-gradient(
+        145deg,
+        #fafafa,
+        #f2eafa
     );
 
-// ========================================
-// UPDATE HEADER LOGIN STATE
-// ========================================
+    color: var(--purple);
 
-function updateLoginState() {
+    font-size: 55px;
+}
 
-        // ========================================
-    // HERO LOGIN STATE
-    // ========================================
 
-    const loggedOutHero =
-        document.getElementById("loggedOutHero");
+/* Product tag */
 
-    const loggedInHero =
-        document.getElementById("loggedInHero");
+.product-tag {
 
-    const heroStudentName =
-        document.getElementById("heroStudentName");
+    position: absolute;
 
-    const heroStudentCampus =
-        document.getElementById("heroStudentCampus");
+    top: 12px;
 
-    const signInButton =
-        document.getElementById("openSignIn");
+    left: 12px;
 
-    if (!signInButton) {
-        return;
+    padding: 6px 9px;
+
+    border-radius: 6px;
+
+    background: var(--purple);
+
+    color: var(--white);
+
+    font-size: 9px;
+
+    font-weight: 700;
+}
+
+
+/* Product information */
+
+.product-info {
+
+    padding: 20px;
+}
+
+
+.product-category {
+
+    color: var(--purple);
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.8px;
+}
+
+
+.product-info h3 {
+
+    color: var(--black);
+
+    font-size: 16px;
+
+    margin: 7px 0;
+}
+
+
+.product-info p {
+
+    min-height: 42px;
+
+    color: var(--muted);
+
+    font-size: 12px;
+
+    line-height: 1.6;
+
+    margin-bottom: 17px;
+}
+
+
+/* Product bottom */
+
+.product-bottom {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+
+.product-bottom strong {
+
+    color: var(--black);
+
+    font-size: 16px;
+}
+
+
+/* Add button */
+
+.contact-seller-btn {
+
+    border: 1px solid var(--border);
+
+    background: white;
+
+    color: #6b7280;
+
+    width: 32px;
+
+    height: 32px;
+
+    border-radius: 8px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 12px;
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+.contact-seller-btn:hover {
+
+    border-color: var(--purple);
+
+    color: var(--purple);
+}
+
+
+.add-to-cart {
+
+    border: none;
+
+    background: var(--purple-soft);
+
+    color: var(--purple);
+
+    padding: 9px 12px;
+
+    border-radius: 8px;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    transition: var(--transition);
+}
+
+
+.add-to-cart:hover {
+
+    background: var(--purple);
+
+    color: var(--white);
+}
+
+
+/* =========================================================
+   8. REWARDS
+   ========================================================= */
+
+.rewards-section {
+
+    padding: 80px 0;
+
+    background: var(--purple);
+
+    color: var(--white);
+}
+
+
+.rewards-container {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 60px;
+}
+
+
+.rewards-content {
+
+    max-width: 650px;
+}
+
+
+.rewards-content .section-label {
+
+    color: #ddd6fe;
+}
+
+
+.rewards-content h2 {
+
+    font-size: clamp(32px, 5vw, 48px);
+
+    line-height: 1.15;
+
+    letter-spacing: -1.5px;
+
+    margin-bottom: 18px;
+}
+
+
+.rewards-content h2 span {
+
+    color: #ddd6fe;
+}
+
+
+.rewards-content p {
+
+    color: #ede9fe;
+
+    max-width: 550px;
+
+    font-size: 15px;
+
+    margin-bottom: 28px;
+}
+
+
+.rewards-content .primary-button {
+
+    background: var(--white);
+
+    color: var(--purple);
+}
+
+
+.rewards-content .primary-button:hover {
+
+    background: #f5f3ff;
+}
+
+
+/* Rewards card */
+
+.rewards-card {
+
+    min-width: 230px;
+
+    padding: 30px;
+
+    border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.12);
+
+    border: 1px solid rgba(255, 255, 255, 0.22);
+
+    backdrop-filter: blur(10px);
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    text-align: center;
+}
+
+
+.reward-icon {
+
+    width: 58px;
+
+    height: 58px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.16);
+
+    margin-bottom: 18px;
+
+    font-size: 23px;
+}
+
+
+.rewards-card strong {
+
+    font-size: 25px;
+
+    margin-bottom: 4px;
+}
+
+
+.rewards-card span {
+
+    font-size: 12px;
+
+    color: #ddd6fe;
+}
+
+
+/* =========================================================
+   9. CHAT SECTION
+   ========================================================= */
+
+.chat-section {
+
+    max-width: 1100px;
+}
+
+
+.chat-full-page {
+
+    max-width: 1100px;
+}
+
+
+/* Chat main box */
+
+.chat-preview {
+
+    display: grid;
+
+    grid-template-columns: 210px 300px minmax(0, 1fr) 280px;
+
+    height: min(760px, calc(100vh - 180px));
+
+    min-height: 480px;
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius-large);
+
+    overflow: hidden;
+
+    background: var(--white);
+
+    box-shadow: var(--shadow-small);
+}
+
+.chat-preview:not(.has-profile-panel) {
+    grid-template-columns: 210px 300px minmax(0, 1fr);
+}
+
+
+.chat-full-page .full-page-back-row {
+    margin-bottom: 16px;
+}
+
+
+/* Chat sidebar */
+
+.chat-sidebar {
+
+    border-right: 1px solid var(--border);
+
+    background: #fcfcfc;
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-height: 0;
+}
+
+
+#chatContactList {
+
+    flex: 1;
+
+    overflow-y: auto;
+
+    min-height: 0;
+}
+
+
+.chat-sidebar-header {
+
+    padding: 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border-bottom: 1px solid var(--border);
+}
+
+
+.chat-sidebar-header h3 {
+
+    font-size: 16px;
+}
+
+
+.chat-sidebar-header button {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 8px 14px;
+
+    border: none;
+
+    background: var(--purple);
+
+    color: var(--white);
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+.chat-sidebar-header button:hover {
+
+    background: var(--purple-dark);
+}
+
+
+/* Chat search */
+
+.chat-search {
+
+    position: relative;
+
+    margin: 15px;
+}
+
+
+.chat-search i {
+
+    position: absolute;
+
+    left: 12px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+
+.chat-search input {
+
+    width: 100%;
+
+    border: 1px solid var(--border);
+
+    background: var(--white);
+
+    border-radius: 8px;
+
+    padding: 10px 10px 10px 34px;
+
+    outline: none;
+
+    font-size: 12px;
+}
+
+
+.chat-search input:focus {
+
+    border-color: var(--purple);
+}
+
+
+/* NEW CHAT — ADD BY PHONE NUMBER */
+
+#newChatForm {
+    margin: 0 15px 15px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--purple-soft);
+}
+
+.new-chat-phone-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 10px;
+    outline: none;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.new-chat-phone-input:focus {
+    border-color: var(--purple);
+}
+
+.new-chat-find-button {
+    width: 100%;
+    border: none;
+    background: var(--purple);
+    color: white;
+    border-radius: 8px;
+    padding: 9px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.new-chat-find-button:hover {
+    background: var(--purple-dark);
+}
+
+.new-chat-status {
+    margin: 8px 0 0;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.chat-contacts-status {
+    padding: 0 15px;
+    font-size: 12px;
+    color: #9ca3af;
+    text-align: center;
+}
+
+.chat-contact-unread-badge {
+    background: var(--purple);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 999px;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+}
+
+
+/* Chat contact */
+
+.chat-contact {
+
+    width: 100%;
+
+    border: none;
+
+    border-left: 3px solid transparent;
+
+    background: transparent;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    text-align: left;
+
+    padding: 13px 16px;
+
+    transition: var(--transition);
+}
+
+
+.chat-contact:hover {
+
+    background: #f5f3ff;
+}
+
+
+.chat-contact.active {
+
+    background: var(--purple-soft);
+
+    border-left-color: var(--purple);
+}
+
+
+/* Avatar */
+
+.chat-avatar {
+
+    width: 40px;
+
+    height: 40px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #e4e4e7;
+
+    color: var(--text);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 13px;
+
+    font-weight: 800;
+}
+
+
+.owner-avatar {
+
+    background: var(--purple);
+
+    color: var(--white);
+}
+
+
+.chat-contact-info {
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: hidden;
+}
+
+
+.chat-contact-info strong {
+
+    font-size: 12px;
+}
+
+
+.chat-contact-info span {
+
+    font-size: 10px;
+
+    color: var(--muted);
+}
+
+
+.online-dot {
+
+    width: 8px;
+
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: var(--green);
+
+    margin-left: auto;
+}
+
+
+/* Chat window */
+
+.chat-window {
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-width: 0;
+
+    min-height: 0;
+}
+
+
+/* Chat header */
+
+.chat-window-header {
+
+    min-height: 70px;
+
+    padding: 15px 20px;
+
+    border-bottom: 1px solid var(--border);
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.chat-back-button {
+
+    display: none;
+
+    border: none;
+
+    background: transparent;
+
+    color: var(--text);
+
+    font-size: 16px;
+
+    width: 32px;
+
+    height: 32px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    flex-shrink: 0;
+}
+
+.chat-back-button:hover {
+
+    background: var(--purple-soft);
+
+    color: var(--purple);
+}
+
+
+/* Context banner */
+
+.chat-context-banner {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px 20px;
+
+    background: var(--purple-soft);
+
+    color: var(--purple-dark);
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.chat-context-banner i {
+
+    font-size: 12px;
+}
+
+
+/* Typing indicator */
+
+.chat-typing-indicator {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 8px 20px;
+
+    font-size: 11px;
+
+    color: var(--muted);
+
+    background: #fafafa;
+}
+
+.chat-typing-dots {
+
+    display: inline-flex;
+
+    gap: 3px;
+}
+
+.chat-typing-dots i {
+
+    width: 5px;
+
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: var(--purple-light);
+
+    display: inline-block;
+
+    animation: chatTypingBounce 1.2s infinite ease-in-out;
+}
+
+.chat-typing-dots i:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.chat-typing-dots i:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes chatTypingBounce {
+
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.5;
     }
 
-
-    // ========================================
-    // GET LOGGED-IN STUDENT
-    // ========================================
-
-    let storedStudent =
-        localStorage.getItem("kuriosLoggedInStudent");
-
-    if (!storedStudent) {
-
-        storedStudent =
-            sessionStorage.getItem(
-                "kuriosLoggedInStudent"
-            );
-
+    30% {
+        transform: translateY(-3px);
+        opacity: 1;
     }
-
-
-    // ========================================
-    // STUDENT IS NOT LOGGED IN
-    // ========================================
-
-    if (!storedStudent) {
-
-    signInButton.classList.remove("has-avatar");
-
-    signInButton.innerHTML = `
-        <i class="fa-regular fa-user"></i>
-
-        <span>
-            Sign In
-        </span>
-    `;
-
-
-    // ========================================
-    // SHOW LOGGED-OUT HERO
-    // ========================================
-
-    const loggedOutHero =
-        document.getElementById("loggedOutHero");
-
-    const loggedInHero =
-        document.getElementById("loggedInHero");
-
-
-    if (loggedOutHero) {
-
-        loggedOutHero.style.display =
-            "block";
-
-    }
-
-
-    if (loggedInHero) {
-
-        loggedInHero.style.display =
-            "none";
-
-    }
-
-    const mainNavEl =
-        document.getElementById("mainNav");
-
-    if (mainNavEl) {
-        mainNavEl.style.display = "flex";
-    }
-
-    return;
 
 }
 
 
-    // ========================================
-    // READ STUDENT DATA
-    // ========================================
+.chat-user {
 
-    let student;
+    display: flex;
 
-    try {
+    align-items: center;
 
-        student =
-            JSON.parse(storedStudent);
+    gap: 11px;
+}
 
-    } catch (error) {
 
-        console.error(
-            "Unable to read logged-in student:",
-            error
-        );
+.chat-user > div:last-child {
 
-        return;
+    display: flex;
 
-    }
+    flex-direction: column;
+}
 
 
-    // ========================================
-    // UPDATE HERO FOR LOGGED-IN STUDENT
-    // ========================================
+.chat-user strong {
 
+    font-size: 13px;
+}
 
-    // ========================================
-    // HIDE LOGGED-OUT HERO
-    // ========================================
 
-    if (loggedOutHero) {
+.chat-user span {
 
-        loggedOutHero.style.display =
-            "none";
+    color: var(--green);
 
-    }
+    font-size: 10px;
+}
 
-    // ========================================
-    // SHOW LOGGED-IN HERO
-    // ========================================
 
-    if (loggedInHero) {
+.chat-more-button {
 
-        loggedInHero.style.display =
-            "block";
+    width: 36px;
 
-    }
+    height: 36px;
 
-    const mainNavEl =
-        document.getElementById("mainNav");
+    border: none;
 
-    if (mainNavEl) {
-        mainNavEl.style.display = "none";
-    }
+    background: transparent;
 
+    color: var(--muted);
 
-    // ========================================
-    // STUDENT NAME
-    // ========================================
+    border-radius: 8px;
+}
 
-    if (heroStudentName) {
 
-        heroStudentName.textContent =
-            student.first_name ||
-            student.firstName ||
-            "Student";
+.chat-more-button:hover {
 
-    }
+    background: var(--purple-soft);
 
+    color: var(--purple);
+}
 
-    // ========================================
-    // STUDENT INFORMATION
-    // ========================================
 
-    if (heroStudentCampus) {
+/* Messages */
 
-        const university =
-            student.university ||
-            "";
+.messages {
 
-        const studentId =
-            student.student_id ||
-            student.studentId ||
-            "";
+    flex: 1;
 
+    padding: 25px;
 
-        if (university) {
+    overflow-y: auto;
 
-            heroStudentCampus.textContent =
-                university;
+    background: #fafafa;
 
-        } else if (studentId) {
+    display: flex;
 
-            heroStudentCampus.textContent =
-                studentId;
+    flex-direction: column;
 
-        } else {
+    gap: 18px;
+}
 
-            heroStudentCampus.textContent =
-                "Your campus";
 
-        }
+.message {
 
-    }
+    display: flex;
 
+    flex-direction: column;
 
-    // ========================================
-    // ACTIVE ORDERS
-    // ========================================
+    max-width: 70%;
+}
 
-    refreshOrderCountBadge(student.id);
 
-    if (typeof loadDashboardRecentOrders === "function") {
-        loadDashboardRecentOrders(student.id);
-    }
+.message.sent {
 
-    if (typeof loadDashboardWalletBalance === "function") {
-        loadDashboardWalletBalance(student.id);
-    }
+    align-self: flex-end;
 
-    if (typeof updateSellerMenuLabel === "function") {
-        updateSellerMenuLabel(student.id);
-    }
+    align-items: flex-end;
+}
 
 
-    // ========================================
-    // GET DISPLAY NAME
-    // ========================================
+.message.received {
 
-    const firstName =
-        student.first_name || "";
+    align-self: flex-start;
 
-    const lastName =
-        student.last_name || "";
+    align-items: flex-start;
+}
 
-    const displayName =
-        firstName ||
-        lastName ||
-        "Account";
 
+.message-bubble {
 
-    // ========================================
-    // UPDATE HEADER
-    // ========================================
+    padding: 11px 14px;
 
-    const avatarMarkup =
-        student.profile_picture ?
-            `<img src="${API_URL + student.profile_picture}" alt="${displayName}">` :
-            `<span class="header-avatar-initial">${displayName.charAt(0).toUpperCase()}</span>`;
+    border-radius: 13px;
 
-    signInButton.classList.add("has-avatar");
+    font-size: 12px;
 
-    signInButton.innerHTML = `
-        <span class="header-avatar-circle">
-            ${avatarMarkup}
-        </span>
-    `;
+    line-height: 1.55;
+}
 
-    signInButton.setAttribute("aria-label", displayName);
 
+.message.received .message-bubble {
 
-    // ========================================
-    // ACCOUNT DROPDOWN MENU HEADER
-    // ========================================
+    background: var(--white);
 
-    const accountMenuName =
-        document.getElementById("accountMenuName");
+    border: 1px solid var(--border);
 
-    const accountMenuStudentInfo =
-        document.getElementById("accountMenuStudentInfo");
+    border-bottom-left-radius: 4px;
+}
 
-    if (accountMenuName) {
 
-        const fullName =
-            `${firstName} ${lastName}`.trim();
+.message.sent .message-bubble {
 
-        accountMenuName.textContent =
-            fullName || "Student";
+    background: var(--purple);
 
-    }
+    color: var(--white);
 
-    if (accountMenuStudentInfo) {
+    border-bottom-right-radius: 4px;
+}
 
-        const university =
-            student.university || "";
 
-        const studentIdValue =
-            student.student_id ||
-            student.studentId ||
-            "";
+.message span {
 
-        if (university && studentIdValue) {
+    display: flex;
 
-            accountMenuStudentInfo.textContent =
-                university + " · " + studentIdValue;
+    align-items: center;
 
-        } else {
+    gap: 4px;
 
-            accountMenuStudentInfo.textContent =
-                university ||
-                studentIdValue ||
-                "Student account";
+    color: var(--muted);
 
-        }
+    font-size: 9px;
+
+    margin-top: 5px;
+}
+
+.message-read-receipt {
+
+    font-size: 10px;
+
+    color: #9ca3af;
+}
+
+.message-read-receipt.read {
+
+    color: var(--purple);
+}
+
+
+/* Message form */
+
+.message-form {
+
+    min-height: 70px;
+
+    padding: 12px 16px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    border-top: 1px solid var(--border);
+
+    background: var(--white);
+}
+
+
+.message-form button:first-child {
+
+    width: 38px;
+
+    height: 38px;
+
+    border: none;
+
+    background: transparent;
+
+    color: var(--muted);
+}
+
+
+.message-form input {
+
+    flex: 1;
+
+    min-width: 0;
+
+    border: 1px solid var(--border);
+
+    outline: none;
+
+    border-radius: 50px;
+
+    padding: 11px 15px;
+
+    font-size: 12px;
+}
+
+
+.message-form input:focus {
+
+    border-color: var(--purple);
+}
+
+
+.send-message-button {
+
+    width: 40px;
+
+    height: 40px;
+
+    flex-shrink: 0;
+
+    border: none;
+
+    background: var(--purple);
+
+    color: var(--white);
+
+    border-radius: 50%;
+
+    transition: var(--transition);
+}
+
+
+.send-message-button:hover {
+
+    background: var(--purple-dark);
+
+    transform: scale(1.05);
+}
+
+
+/* =========================================================
+   10. WHY KURIOS
+   ========================================================= */
+
+.why-section {
+
+    background: var(--light-background);
+
+    padding: 80px 4%;
+}
+
+
+.why-grid {
+
+    width: min(1180px, 100%);
+
+    margin: 0 auto;
+
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 18px;
+}
+
+
+.why-card {
+
+    padding: 25px;
+
+    background: var(--white);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius-medium);
+
+    transition: var(--transition);
+}
+
+
+.why-card:hover {
+
+    transform: translateY(-5px);
+
+    box-shadow: var(--shadow-small);
+}
+
+
+.why-icon {
+
+    width: 48px;
+
+    height: 48px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: var(--purple-soft);
+
+    color: var(--purple);
+
+    border-radius: 11px;
+
+    margin-bottom: 17px;
+}
+
+
+.why-card h3 {
+
+    font-size: 15px;
+
+    margin-bottom: 8px;
+}
+
+
+.why-card p {
+
+    font-size: 12px;
+
+    color: var(--muted);
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   11. NOTIFICATION PANEL
+   ========================================================= */
+
+.notification-panel {
+
+    position: fixed;
+
+    z-index: 3100;
+
+    top: 85px;
+
+    right: 25px;
+
+    width: 360px;
+
+    max-width: calc(100% - 30px);
+
+    max-height: 600px;
+
+    background: var(--white);
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-large);
+
+    overflow: hidden;
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transform: translateY(-10px);
+
+    transition: var(--transition);
+}
+
+
+.notification-panel.open {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    transform: translateY(0);
+}
+
+
+.notification-header {
+
+    padding: 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border-bottom: 1px solid var(--border);
+}
+
+
+.notification-header h3 {
+
+    font-size: 16px;
+
+    margin-bottom: 3px;
+}
+
+
+.notification-header p {
+
+    color: var(--muted);
+
+    font-size: 10px;
+}
+
+
+.panel-close,
+.modal-close {
+
+    width: 34px;
+
+    height: 34px;
+
+    border: none;
+
+    background: #f4f4f5;
+
+    color: var(--muted);
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+
+.notification-list {
+
+    max-height: 500px;
+
+    overflow-y: auto;
+}
+
+
+.notification-item {
+
+    display: flex;
+
+    gap: 12px;
+
+    padding: 16px;
+
+    border-bottom: 1px solid #f1f1f1;
+
+    transition: var(--transition);
+}
+
+
+.notification-item:hover {
+
+    background: #fafafa;
+}
+
+
+.notification-item.unread {
+
+    background: #faf7ff;
+}
+
+
+.notification-icon {
+
+    width: 38px;
+
+    height: 38px;
+
+    flex-shrink: 0;
+
+    border-radius: 10px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: var(--purple-soft);
+
+    color: var(--purple);
+}
+
+
+.notification-content strong {
+
+    display: block;
+
+    font-size: 12px;
+
+    margin-bottom: 3px;
+}
+
+
+.notification-content p {
+
+    color: var(--muted);
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+.notification-content span {
+
+    display: block;
+
+    color: #a1a1aa;
+
+    font-size: 9px;
+
+    margin-top: 5px;
+}
+
+
+/* =========================================================
+   12. EMPTY STATES
+   ========================================================= */
+
+.empty-state,
+.empty-cart {
+
+    padding: 45px 20px;
+
+    text-align: center;
+
+    color: var(--muted);
+}
+
+
+.empty-state i,
+.empty-cart i {
+
+    color: #c4b5fd;
+
+    font-size: 32px;
+
+    margin-bottom: 12px;
+}
+
+
+.empty-state h4,
+.empty-cart h3 {
+
+    color: var(--text);
+
+    font-size: 14px;
+
+    margin-bottom: 4px;
+}
+
+
+.empty-state p,
+.empty-cart p {
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   13. CART
+   ========================================================= */
+
+.modal-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 2000;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transition: var(--transition);
+}
+
+
+.modal-overlay.open {
+
+    opacity: 1;
+
+    visibility: visible;
+}
+
+
+/* Cart coexists with shopping — no dimmed backdrop
+   blocking the page, and clicks pass straight through
+   to whatever's behind it except on the panel itself. */
+
+.cart-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 2000;
+
+    pointer-events: none;
+
+    visibility: hidden;
+
+    overflow: hidden;
+
+}
+
+
+.cart-overlay.open {
+
+    visibility: visible;
+}
+
+
+/* Profile & Orders are full pages, not drawers */
+
+.profile-overlay,
+.orders-overlay {
+
+    display: none;
+}
+
+.profile-overlay.open,
+.orders-overlay.open {
+
+    display: block;
+
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+}
+
+
+@media (min-width: 900px) {
+
+    body.cart-open #mainContent {
+
+        padding-right: 430px;
+
+        transition: padding-right 0.3s ease;
+
+        box-sizing: border-box;
 
     }
 
 }
 
-// ========================================
-// CHECK LOGIN STATE
-// ========================================
 
-updateLoginState();
+/* Cart panel */
+
+.cart-panel {
+
+    position: absolute;
+
+    top: 0;
+
+    right: 0;
+
+    height: 100%;
+
+    width: 430px;
+
+    max-width: 100%;
+
+    background: var(--white);
+
+    display: flex;
+
+    flex-direction: column;
+
+    transform: translateX(100%);
+
+    transition: 0.3s ease;
+
+    pointer-events: auto;
+
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.12);
+}
 
 
-// ========================================
-// SIGN OUT
-// ========================================
+.cart-overlay.open .cart-panel {
 
-const signOutButton =
-    document.getElementById("signOutButton");
+    transform: translateX(0);
+}
 
-if (signOutButton) {
 
-    signOutButton.addEventListener(
-        "click",
-        function (event) {
+.cart-header {
 
-            event.preventDefault();
+    padding: 22px;
 
-            localStorage.removeItem(
-                "kuriosLoggedInStudent"
-            );
+    display: flex;
 
-            sessionStorage.removeItem(
-                "kuriosLoggedInStudent"
-            );
+    align-items: center;
 
-            updateLoginState();
+    justify-content: space-between;
 
-            const studentAccountMenu =
-                document.getElementById(
-                    "studentAccountMenu"
-                );
+    border-bottom: 1px solid var(--border);
+}
 
-            if (studentAccountMenu) {
 
-                studentAccountMenu.classList.remove(
-                    "open"
-                );
+.cart-header h2 {
 
-            }
+    font-size: 20px;
 
-            const notificationsPanel =
-                document.getElementById(
-                    "notificationPanel"
-                );
+    margin-bottom: 2px;
+}
 
-            if (notificationsPanel) {
 
-                notificationsPanel.classList.remove(
-                    "open"
-                );
+.cart-header p {
 
-            }
+    color: var(--muted);
 
-            window.location.hash = "";
+    font-size: 11px;
+}
 
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
 
-        }
+.close-cart {
+
+    width: 38px;
+
+    height: 38px;
+
+    border: none;
+
+    background: #f4f4f5;
+
+    border-radius: 50%;
+
+    color: var(--muted);
+}
+
+
+.cart-items {
+
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 20px;
+}
+
+
+.cart-item {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 12px;
+
+    padding: 14px 0;
+
+    border-bottom: 1px solid var(--border);
+}
+
+
+.cart-item-image {
+
+    width: 60px;
+
+    height: 60px;
+
+    border-radius: 9px;
+
+    background: var(--purple-soft);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: var(--purple);
+}
+
+
+.cart-item-info h3 {
+
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 6px;
+    text-decoration: none;
+}
+
+
+.cart-item-price {
+
+    font-size: 12px;
+    font-weight: 600;
+    color: #9ca3af;
+    margin-bottom: 10px;
+}
+
+
+.quantity-controls {
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.quantity-button {
+
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--white);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quantity-button:hover {
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+
+.quantity-controls strong {
+
+    min-width: 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+
+.remove-item {
+
+    margin-left: auto;
+    border: none;
+    background: transparent;
+    color: #dc2626;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 6px;
+    text-decoration: none;
+}
+
+.remove-item:hover {
+    text-decoration: underline;
+}
+
+
+.cart-item > strong {
+
+    align-self: flex-start;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+
+.cart-item-image i {
+    font-size: 20px;
+}
+
+
+.cart-item-info {
+
+    flex: 1;
+}
+
+
+.cart-item-info h4 {
+
+    font-size: 13px;
+
+    margin-bottom: 4px;
+}
+
+
+.cart-item-info span {
+
+    color: var(--purple);
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+
+.cart-quantity {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 8px;
+}
+
+
+.cart-quantity button {
+
+    width: 25px;
+
+    height: 25px;
+
+    border: 1px solid var(--border);
+
+    background: var(--white);
+
+    border-radius: 5px;
+}
+
+
+.cart-quantity span {
+
+    color: var(--text);
+
+    font-size: 11px;
+}
+
+
+/* Cart footer */
+
+.cart-footer {
+
+    padding: 20px;
+
+    border-top: 1px solid var(--border);
+
+    background: var(--white);
+}
+
+
+.cart-total {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 15px;
+}
+
+
+.cart-total span {
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+
+.cart-total strong {
+
+    color: var(--black);
+
+    font-size: 22px;
+}
+
+
+.checkout-button {
+
+    width: 100%;
+
+    border: none;
+
+    background: var(--purple);
+
+    color: var(--white);
+
+    padding: 14px;
+
+    border-radius: 9px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+}
+
+
+.checkout-button:hover {
+
+    background: var(--purple-dark);
+}
+
+
+/* =========================================================
+   MY PROFILE PANEL
+   ========================================================= */
+
+.profile-panel {
+
+    background: var(--white);
+
+    border: 1px solid var(--border);
+    border-radius: 16px;
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+.profile-panel-header {
+
+    padding: 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border-bottom: 1px solid var(--border);
+}
+
+
+.profile-panel-header h2 {
+
+    font-size: 20px;
+
+    margin-bottom: 2px;
+}
+
+
+.profile-panel-header p {
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+
+.profile-panel-body {
+
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 24px 22px;
+}
+
+
+/* Avatar block */
+
+.profile-avatar-block {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+    margin-bottom: 26px;
+}
+
+
+.profile-avatar-circle {
+
+    position: relative;
+
+    width: 68px;
+    height: 68px;
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    overflow: hidden;
+
+    background: linear-gradient(
+        135deg,
+        var(--purple),
+        var(--purple-light)
     );
 
-}
+    color: var(--white);
 
-    /* =====================================================
-       12. SIGN IN MODAL
-       ===================================================== */
+    font-size: 26px;
 
-
-    const openSignIn =
-        document.getElementById(
-            "openSignIn"
-        );
-
-
-    const signInModal =
-        document.getElementById(
-            "signInModal"
-        );
-
-
-    const closeSignIn =
-        document.getElementById(
-            "closeSignIn"
-        );
-
-
-    const signInForm =
-        document.getElementById(
-            "signinForm"
-        );
-
-
-
-    function openSignInModal() {
-
-        if (typeof closeNotificationPanel === "function") {
-            closeNotificationPanel();
-        }
-
-        if (signInModal) {
-
-            signInModal.classList.add(
-                "open"
-            );
-
-        }
-
-        const emailStep =
-            document.getElementById("signinEmailStep");
-
-        const passcodeStep =
-            document.getElementById("signinPasscodeStep");
-
-        const adminPasswordStep =
-            document.getElementById("signinAdminPasswordStep");
-
-        if (emailStep) {
-            emailStep.style.display = "block";
-        }
-
-        if (passcodeStep) {
-            passcodeStep.style.display = "none";
-        }
-
-        if (adminPasswordStep) {
-            adminPasswordStep.style.display = "none";
-        }
-
-    }
-
-
-
-    function closeSignInModal() {
-
-        if (signInModal) {
-
-            signInModal.classList.remove(
-                "open"
-            );
-
-        }
-
-    }
-
-
-
-    // ========================================
-// STUDENT ACCOUNT / SIGN IN BUTTON
-// ========================================
-
-const studentAccountMenu =
-    document.getElementById(
-        "studentAccountMenu"
-    );
-
-
-if (openSignIn) {
-
-    openSignIn.addEventListener(
-        "click",
-        function (event) {
-
-            event.stopPropagation();
-
-
-            // ========================================
-            // CHECK LOGIN STATE
-            // ========================================
-
-            const loggedInStudent =
-                localStorage.getItem(
-                    "kuriosLoggedInStudent"
-                ) ||
-                sessionStorage.getItem(
-                    "kuriosLoggedInStudent"
-                );
-
-
-            // ========================================
-            // NOT LOGGED IN
-            // ========================================
-
-            if (!loggedInStudent) {
-
-                if (studentAccountMenu) {
-
-                    studentAccountMenu.classList.remove(
-                        "open"
-                    );
-
-                }
-
-                openSignInModal();
-
-                return;
-
-            }
-
-
-            // ========================================
-            // LOGGED IN
-            // ========================================
-
-            if (studentAccountMenu) {
-
-                const willOpen =
-                    !studentAccountMenu.classList.contains("open");
-
-                studentAccountMenu.classList.toggle(
-                    "open"
-                );
-
-                if (
-                    willOpen &&
-                    typeof closeNotificationPanel === "function"
-                ) {
-                    closeNotificationPanel();
-                }
-
-            }
-
-        }
-    );
-
+    box-shadow: 0 0 0 4px var(--purple-soft);
 }
 
 
-// ========================================
-// CLOSE ACCOUNT MENU WHEN CLICKING OUTSIDE
-// ========================================
+.profile-avatar-circle img {
 
-document.addEventListener(
-    "click",
-    function (event) {
+    width: 100%;
+    height: 100%;
 
-        if (!studentAccountMenu) {
-            return;
-        }
-
-
-        if (
-            !studentAccountMenu.contains(event.target) &&
-            event.target !== openSignIn &&
-            !openSignIn.contains(event.target)
-        ) {
-
-            studentAccountMenu.classList.remove(
-                "open"
-            );
-
-        }
-
-    }
-);
-
-// ========================================
-// GET CURRENTLY LOGGED-IN STUDENT
-// ========================================
-
-function getLoggedInStudent() {
-
-    const storedStudent =
-        localStorage.getItem(
-            "kuriosLoggedInStudent"
-        ) ||
-        sessionStorage.getItem(
-            "kuriosLoggedInStudent"
-        );
-
-    if (!storedStudent) {
-        return null;
-    }
-
-    try {
-
-        return JSON.parse(storedStudent);
-
-    } catch (error) {
-
-        console.error(
-            "Unable to read logged-in student:",
-            error
-        );
-
-        return null;
-
-    }
-
+    object-fit: cover;
 }
 
 
-// ========================================
-// SAVE AN UPDATED STUDENT OBJECT BACK TO
-// WHICHEVER STORAGE IT CAME FROM
-// ========================================
+/* Small camera badge shown in edit mode */
 
-function saveLoggedInStudent(student) {
+.profile-avatar-edit-badge {
 
-    const studentJson =
-        JSON.stringify(student);
+    position: absolute;
 
-    if (
-        localStorage.getItem("kuriosLoggedInStudent")
-    ) {
+    bottom: 0;
 
-        localStorage.setItem(
-            "kuriosLoggedInStudent",
-            studentJson
-        );
+    right: 0;
 
-    } else {
+    width: 24px;
+    height: 24px;
 
-        sessionStorage.setItem(
-            "kuriosLoggedInStudent",
-            studentJson
-        );
+    display: none;
 
-    }
+    align-items: center;
+    justify-content: center;
 
+    border-radius: 50%;
+
+    background: var(--purple-dark);
+
+    color: var(--white);
+
+    font-size: 10px;
+
+    border: 2px solid var(--white);
+
+    cursor: pointer;
 }
 
 
-// ========================================
-// MY PROFILE PANEL
-// ========================================
+.profile-panel.editing .profile-avatar-edit-badge {
 
-const accountProfile =
-    document.getElementById("accountProfile");
-
-const profileOverlay =
-    document.getElementById("profileOverlay");
-
-const profilePanel =
-    document.getElementById("profilePanel");
-
-const closeProfile =
-    document.getElementById("closeProfile");
-
-const editProfileButton =
-    document.getElementById("editProfileButton");
-
-const cancelProfileEdit =
-    document.getElementById("cancelProfileEdit");
-
-const saveProfileEdit =
-    document.getElementById("saveProfileEdit");
-
-const profilePhoneInput =
-    document.getElementById("profilePhoneInput");
-
-const profileWhatsappInput =
-    document.getElementById("profileWhatsappInput");
-
-const profileDobInput =
-    document.getElementById("profileDobInput");
-
-const profilePictureInput =
-    document.getElementById("profilePictureInput");
-
-const profileAvatarCircle =
-    document.getElementById("profileAvatarCircle");
-
-const profileAvatarEditBadge =
-    document.getElementById("profileAvatarEditBadge");
-
-
-// Holds the file the student just picked,
-// until they hit Save.
-
-let selectedProfilePictureFile = null;
-
-
-// ========================================
-// SHOW A STUDENT'S DATA IN THE PANEL
-// (view mode fields)
-// ========================================
-
-function renderProfilePanel(student) {
-
-    // FULL NAME
-
-    const fullNameEl =
-        document.getElementById("profileFullName");
-
-    if (fullNameEl) {
-
-        const firstName =
-            student.first_name ||
-            student.firstName ||
-            "";
-
-        const lastName =
-            student.last_name ||
-            student.lastName ||
-            "";
-
-        const fullName =
-            `${firstName} ${lastName}`.trim();
-
-        fullNameEl.textContent =
-            fullName ||
-            "Student";
-
-    }
-
-
-    // STUDENT ID
-
-    const studentIdEl =
-        document.getElementById("profileStudentId");
-
-    if (studentIdEl) {
-
-        studentIdEl.textContent =
-            student.student_id ||
-            student.studentId ||
-            "Not provided";
-
-    }
-
-
-    // UNIVERSITY
-
-    const universityEl =
-        document.getElementById("profileUniversity");
-
-    if (universityEl) {
-
-        universityEl.textContent =
-            student.university ||
-            "Not provided";
-
-    }
-
-
-    // EMAIL
-
-    const emailEl =
-        document.getElementById("profileEmail");
-
-    if (emailEl) {
-
-        emailEl.textContent =
-            student.email ||
-            "Not provided";
-
-    }
-
-
-    // WHATSAPP NUMBER
-
-    const whatsappEl =
-        document.getElementById("profileWhatsapp");
-
-    if (whatsappEl) {
-
-        whatsappEl.textContent =
-            student.whatsapp_number ||
-            student.whatsappNumber ||
-            "Not provided";
-
-    }
-
-    if (profileWhatsappInput) {
-
-        profileWhatsappInput.value =
-            student.whatsapp_number ||
-            student.whatsappNumber ||
-            "";
-
-    }
-
-
-    // PHONE NUMBER
-
-    const phoneEl =
-        document.getElementById("profilePhone");
-
-    if (phoneEl) {
-
-        phoneEl.textContent =
-            student.phone ||
-            "Not provided";
-
-    }
-
-    if (profilePhoneInput) {
-
-        profilePhoneInput.value =
-            student.phone ||
-            "";
-
-    }
-
-
-    // DATE OF BIRTH
-
-    const dobEl =
-        document.getElementById("profileDob");
-
-    const dobRaw =
-        student.date_of_birth ||
-        student.dob ||
-        null;
-
-    // The database sends this back as a full
-    // timestamp — we only want the date part,
-    // both for display and for the date input.
-
-    const dobShort =
-        dobRaw ?
-            dobRaw.slice(0, 10) :
-            null;
-
-    if (dobEl) {
-
-        dobEl.textContent =
-            dobShort ||
-            "Not provided";
-
-    }
-
-    if (profileDobInput) {
-
-        profileDobInput.value =
-            dobShort ||
-            "";
-
-    }
-
-
-    // ACCOUNT STATUS
-
-    const statusEl =
-        document.getElementById("profileAccountStatus");
-
-    if (statusEl) {
-
-        statusEl.textContent =
-            student.email_verified === false ?
-                "Unverified" :
-                "Active";
-
-    }
-
-
-    // PROFILE PICTURE
-
-    renderProfileAvatar(
-        student.profile_picture
-    );
-
+    display: flex;
 }
 
 
-// ========================================
-// SHOW THE AVATAR — PICTURE IF THERE IS ONE,
-// OTHERWISE THE PLAIN PERSON ICON
-// ========================================
+.profile-avatar-info h3 {
 
-function renderProfileAvatar(profilePicturePath) {
+    font-size: 18px;
 
-    if (!profileAvatarCircle) {
-        return;
-    }
+    font-weight: 800;
 
+    color: var(--text);
 
-    const existingImg =
-        profileAvatarCircle.querySelector("img");
-
-    if (existingImg) {
-        existingImg.remove();
-    }
-
-
-    if (profilePicturePath) {
-
-        const img =
-            document.createElement("img");
-
-        img.src =
-            API_URL + profilePicturePath;
-
-        img.alt =
-            "Profile picture";
-
-        profileAvatarCircle.insertBefore(
-            img,
-            profileAvatarCircle.firstChild
-        );
-
-    }
-
+    margin-bottom: 6px;
 }
 
 
-// ========================================
-// OPEN THE PANEL
-// ========================================
+.profile-status-badge {
 
-function openProfilePanel() {
+    display: inline-flex;
 
-    const student =
-        getLoggedInStudent();
+    align-items: center;
 
+    gap: 6px;
 
-    // NOT LOGGED IN — SEND TO SIGN IN INSTEAD
+    padding: 4px 10px;
 
-    if (!student) {
+    border-radius: 50px;
 
-        if (studentAccountMenu) {
+    background: #dcfce7;
 
-            studentAccountMenu.classList.remove(
-                "open"
-            );
+    color: #16a34a;
 
-        }
+    font-size: 11px;
 
-        if (window.location.hash === "#profile") {
+    font-weight: 700;
 
-            history.replaceState(
-                null,
-                "",
-                window.location.pathname + window.location.search
-            );
-
-        }
-
-        openSignInModal();
-
-        return;
-
-    }
-
-
-    renderProfilePanel(student);
-    exitProfileEditMode();
-
-
-    if (studentAccountMenu) {
-
-        studentAccountMenu.classList.remove(
-            "open"
-        );
-
-    }
-
-    if (profileOverlay) {
-
-        profileOverlay.classList.add(
-            "open"
-        );
-
-    }
-
-    const mainEl =
-        document.getElementById("mainContent");
-
-    if (mainEl) {
-        mainEl.style.display = "none";
-    }
-
-    window.scrollTo({ top: 0 });
-
+    letter-spacing: 0.3px;
 }
 
 
-function closeProfilePanel() {
+.profile-status-badge::before {
 
-    if (profileOverlay) {
+    content: "";
 
-        profileOverlay.classList.remove(
-            "open"
-        );
+    width: 6px;
+    height: 6px;
 
-    }
+    border-radius: 50%;
 
-    exitProfileEditMode();
-
-    if (typeof goBack === "function") {
-        goBack();
-    } else if (typeof goHome === "function") {
-        goHome();
-    }
-
+    background: #16a34a;
 }
 
 
-// ========================================
-// ENTER / EXIT EDIT MODE
-// ========================================
+/* Field list (view mode) */
 
-function enterProfileEditMode() {
+.profile-field-list {
 
-    if (profilePanel) {
+    display: flex;
 
-        profilePanel.classList.add(
-            "editing"
-        );
-
-    }
-
+    flex-direction: column;
 }
 
 
-function exitProfileEditMode() {
+.profile-field {
 
-    if (profilePanel) {
+    display: flex;
 
-        profilePanel.classList.remove(
-            "editing"
-        );
+    align-items: center;
 
-    }
+    justify-content: space-between;
 
+    gap: 12px;
 
-    // Undo any unsaved picture preview and
-    // clear the picked file.
+    padding: 14px 0;
 
-    selectedProfilePictureFile = null;
-
-    if (profilePictureInput) {
-
-        profilePictureInput.value = "";
-
-    }
-
-    const student =
-        getLoggedInStudent();
-
-    if (student) {
-
-        renderProfileAvatar(
-            student.profile_picture
-        );
-
-    }
-
+    border-bottom: 1px solid #f1f1f1;
 }
 
 
-// ========================================
-// PICK A NEW PROFILE PICTURE
-// ========================================
+.profile-field:last-child {
 
-if (profileAvatarEditBadge) {
-
-    profileAvatarEditBadge.addEventListener(
-        "click",
-        function () {
-
-            if (profilePictureInput) {
-
-                profilePictureInput.click();
-
-            }
-
-        }
-    );
-
+    border-bottom: none;
 }
 
 
-if (profilePictureInput) {
+.profile-field-label {
 
-    profilePictureInput.addEventListener(
-        "change",
-        function () {
+    display: flex;
 
-            const file =
-                profilePictureInput.files[0];
+    align-items: center;
 
-            if (!file) {
-                return;
-            }
+    gap: 10px;
 
+    color: var(--muted);
 
-            selectedProfilePictureFile =
-                file;
+    font-size: 13px;
+
+    font-weight: 600;
+}
 
 
-            // Instant local preview before saving.
+.profile-field-label i {
 
-            const reader =
-                new FileReader();
+    width: 16px;
 
-            reader.onload = function () {
+    color: #a78bfa;
 
-                if (!profileAvatarCircle) {
-                    return;
-                }
+    font-size: 13px;
 
-                const existingImg =
-                    profileAvatarCircle.querySelector("img");
+    text-align: center;
+}
 
-                if (existingImg) {
-                    existingImg.remove();
-                }
 
-                const img =
-                    document.createElement("img");
+.profile-field-value {
 
-                img.src =
-                    reader.result;
+    color: var(--text);
 
-                img.alt =
-                    "Profile picture preview";
+    font-size: 13px;
 
-                profileAvatarCircle.insertBefore(
-                    img,
-                    profileAvatarCircle.firstChild
-                );
+    font-weight: 700;
 
-            };
+    text-align: right;
 
-            reader.readAsDataURL(file);
+    max-width: 60%;
 
-        }
-    );
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+
+/* Editable fields (edit mode) — only phone and DOB */
+
+.profile-field-editable {
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 10px 0;
+
+    border-bottom: 1px solid #f1f1f1;
+}
+
+
+.profile-field-editable label {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    color: var(--muted);
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+.profile-field-editable label i {
+
+    width: 16px;
+
+    color: #a78bfa;
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+
+.profile-field-editable input {
+
+    width: 60%;
+
+    border: 1px solid var(--border);
+
+    border-radius: 8px;
+
+    padding: 8px 10px;
+
+    outline: none;
+
+    font-size: 13px;
+
+    font-family: inherit;
+
+    color: var(--text);
+
+    text-align: right;
+}
+
+
+.profile-field-editable input:focus {
+
+    border-color: var(--purple);
+
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.08);
+}
+
+
+/* Panel switches between view mode and edit mode.
+   Everything below is driven off one class,
+   .profile-panel.editing, added by JS. */
+
+.profile-panel.editing .profile-field.editable-field {
+
+    display: none;
+}
+
+
+.profile-panel.editing .profile-field-editable {
+
+    display: flex;
+}
+
+
+/* "Edit" button (view mode only) */
+
+.profile-edit-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    margin-bottom: 18px;
+}
+
+
+.profile-panel.editing .profile-edit-actions {
+
+    display: none;
+}
+
+
+.profile-edit-button {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    border: 1px solid var(--border);
+
+    background: var(--white);
+
+    color: var(--text);
+
+    padding: 8px 14px;
+
+    border-radius: 8px;
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+
+.profile-edit-button:hover {
+
+    border-color: var(--purple);
+
+    color: var(--purple);
+}
+
+
+/* Save / Cancel footer (edit mode only) */
+
+.profile-panel-footer {
+
+    padding: 18px 22px;
+
+    border-top: 1px solid var(--border);
+
+    display: none;
+
+    gap: 10px;
+}
+
+
+.profile-panel.editing .profile-panel-footer {
+
+    display: flex;
+}
+
+
+.profile-save-button {
+
+    flex: 1;
+
+    border: none;
+
+    background: var(--purple);
+
+    color: var(--white);
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+
+.profile-save-button:hover {
+
+    background: var(--purple-dark);
+}
+
+
+.profile-save-button:disabled {
+
+    opacity: 0.6;
+
+    cursor: not-allowed;
+}
+
+
+.profile-cancel-button {
+
+    flex: 1;
+
+    border: 1px solid var(--border);
+
+    background: var(--white);
+
+    color: var(--text);
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+
+.profile-cancel-button:hover {
+
+    border-color: #d4d4d8;
+
+    background: #fafafa;
+}
+
+
+/* Note */
+
+.profile-note {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 10px;
+
+    margin-top: 24px;
+
+    padding: 14px;
+
+    border-radius: 12px;
+
+    background: #faf7ff;
+
+    color: #7c6a94;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+}
+
+
+.profile-panel.editing .profile-note {
+
+    display: none;
+}
+
+
+.profile-note i {
+
+    margin-top: 1px;
+
+    color: #a78bfa;
+}
+
+
+/* =========================================================
+   MY ORDERS PANEL
+   ========================================================= */
+
+.orders-panel {
+
+    background: var(--white);
+
+    border: 1px solid var(--border);
+    border-radius: 16px;
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+.orders-panel-header {
+
+    padding: 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border-bottom: 1px solid var(--border);
+}
+
+
+.orders-panel-header h2 {
+
+    font-size: 20px;
+
+    margin-bottom: 2px;
+}
+
+
+.orders-panel-header p {
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+
+.orders-panel-body {
+
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 20px 22px;
+}
+
+
+/* Order card */
+
+.order-card {
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    padding: 16px;
+
+    margin-bottom: 14px;
+}
+
+
+.order-card-top {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 12px;
+}
+
+
+.order-card-reference {
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    color: var(--muted);
+
+    letter-spacing: 0.3px;
+}
+
+
+.order-card-date {
+
+    font-size: 11px;
+
+    color: #a1a1aa;
+
+    margin-top: 3px;
+}
+
+
+.order-status-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 4px 10px;
+
+    border-radius: 50px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.3px;
+
+    white-space: nowrap;
+}
+
+
+.order-status-badge::before {
+
+    content: "";
+
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+}
+
+
+.order-status-badge.status-paid {
+
+    background: #dcfce7;
+
+    color: #16a34a;
+}
+
+
+.order-status-badge.status-paid::before {
+
+    background: #16a34a;
+}
+
+
+.order-status-badge.status-pending {
+
+    background: #fef9c3;
+
+    color: #b45309;
+}
+
+
+.order-status-badge.status-pending::before {
+
+    background: #b45309;
+}
+
+
+.order-status-badge.status-failed {
+
+    background: #fee2e2;
+
+    color: #dc2626;
+}
+
+
+.order-status-badge.status-failed::before {
+
+    background: #dc2626;
+}
+
+
+.order-card-items {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+    margin-bottom: 12px;
+
+    padding-bottom: 12px;
+
+    border-bottom: 1px solid #f1f1f1;
+}
+
+
+.order-card-item-row {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    font-size: 12px;
+
+    color: var(--text);
+}
+
+
+.order-card-item-row span:first-child {
+
+    color: var(--muted);
+}
+
+
+.order-card-total {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+}
+
+
+.order-card-total span {
+
+    font-size: 12px;
+
+    color: var(--muted);
+
+    font-weight: 600;
+}
+
+
+.order-card-total strong {
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    color: var(--text);
+}
+
+
+/* =========================================================
+   AUTH MODAL — COMPACT & RESPONSIVE
+   ========================================================= */
+
+.auth-modal {
+
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    width: 410px;
+    max-width: calc(100% - 30px);
+
+    max-height: calc(100vh - 30px);
+
+    overflow-y: auto;
+
+    box-sizing: border-box;
+
+    padding: 25px;
+
+    background: var(--white);
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-large);
+
+    transform: translate(-50%, -50%);
+
+    transition: var(--transition);
+}
+
+
+.modal-overlay.open .auth-modal {
+
+    transform: translate(-50%, -50%);
 
 }
 
 
-// ========================================
-// SAVE PROFILE CHANGES
-// ========================================
+.auth-modal > .modal-close {
 
-if (saveProfileEdit) {
+    position: absolute;
 
-    saveProfileEdit.addEventListener(
-        "click",
-        async function () {
+    top: 17px;
 
-            const student =
-                getLoggedInStudent();
-
-            if (!student) {
-                return;
-            }
+    right: 17px;
+}
 
 
-            if (
-                profileWhatsappInput &&
-                !profileWhatsappInput.value.trim()
-            ) {
+.auth-header {
 
-                showMessage(
-                    "WhatsApp number is required."
-                );
+    text-align: center;
 
-                profileWhatsappInput.focus();
-
-                return;
-
-            }
+    margin-bottom: 25px;
+}
 
 
-            const formData =
-                new FormData();
+.auth-icon {
 
-            formData.append(
-                "studentId",
-                student.id
-            );
+    width: 52px;
 
-            if (profilePhoneInput) {
+    height: 52px;
 
-                formData.append(
-                    "phone",
-                    profilePhoneInput.value.trim()
-                );
+    margin: 0 auto 15px;
 
-            }
+    display: flex;
 
-            if (profileWhatsappInput) {
+    align-items: center;
 
-                formData.append(
-                    "whatsappNumber",
-                    profileWhatsappInput.value.trim()
-                );
+    justify-content: center;
 
-            }
+    background: var(--purple-soft);
 
-            if (profileDobInput && profileDobInput.value) {
+    color: var(--purple);
 
-                formData.append(
-                    "dateOfBirth",
-                    profileDobInput.value
-                );
+    border-radius: 50%;
 
-            }
-
-            if (selectedProfilePictureFile) {
-
-                formData.append(
-                    "profilePicture",
-                    selectedProfilePictureFile
-                );
-
-            }
+    font-size: 19px;
+}
 
 
-            saveProfileEdit.disabled = true;
+.auth-header h2 {
 
-            saveProfileEdit.textContent =
-                "Saving...";
+    font-size: 23px;
 
-
-            try {
-
-                const response =
-                    await fetch(
-                        API_URL + "/api/students/update-profile",
-                        {
-                            method: "POST",
-                            body: formData
-                        }
-                    );
-
-                const data =
-                    await response.json();
+    margin-bottom: 5px;
+}
 
 
-                if (!data.success) {
+.auth-header p {
 
-                    showMessage(
-                        data.message ||
-                        "Could not update your profile."
-                    );
+    color: var(--muted);
 
-                    return;
-
-                }
+    font-size: 12px;
+}
 
 
-                // Merge the returned fields into the
-                // stored student so nothing already
-                // held (like the password-free login
-                // fields) gets lost.
+/* Form */
 
-                const updatedStudent =
-                    Object.assign(
-                        {},
-                        student,
-                        data.student
-                    );
+.form-group {
 
-                saveLoggedInStudent(
-                    updatedStudent
-                );
+    margin-bottom: 17px;
+}
 
-                renderProfilePanel(
-                    updatedStudent
-                );
 
-                exitProfileEditMode();
+.form-group label {
 
-                showMessage(
-                    "Profile updated successfully."
-                );
+    display: block;
 
-            } catch (error) {
+    font-size: 12px;
 
-                console.error(
-                    "Profile update error:",
-                    error
-                );
+    font-weight: 700;
 
-                showMessage(
-                    "Could not reach the server. Please try again."
-                );
+    margin-bottom: 7px;
+}
 
-            } finally {
 
-                saveProfileEdit.disabled = false;
+/* PASSCODE REVEAL TOGGLE */
 
-                saveProfileEdit.textContent =
-                    "Save Changes";
+.passcode-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 7px;
+}
 
-            }
+.passcode-label-row label {
+    margin-bottom: 0;
+}
 
-        }
-    );
+.passcode-reveal-btn {
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 2px 4px;
+}
+
+.passcode-reveal-btn:hover {
+    color: var(--purple);
+}
+
+
+/* PASSWORD SHOW/HIDE TOGGLE */
+
+.password-field-wrap {
+    position: relative;
+}
+
+.password-field-wrap input {
+    padding-right: 40px !important;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.password-toggle-btn:hover {
+    color: var(--purple);
+}
+
+
+.form-group input,
+.form-group textarea {
+
+    width: 100%;
+
+    border: 1px solid var(--border);
+
+    border-radius: 8px;
+
+    padding: 11px 12px;
+
+    outline: none;
+
+    font-size: 12px;
+
+    color: var(--text);
+
+    background: var(--white);
+
+    resize: vertical;
+}
+
+
+.form-group input:focus,
+.form-group textarea:focus {
+
+    border-color: var(--purple);
+
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.08);
+}
+
+
+/* Form options */
+
+.form-options {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin: 4px 0 20px;
+
+    font-size: 10px;
+}
+
+
+.form-options label {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    color: var(--muted);
+}
+
+
+.form-options a,
+.signup-prompt a {
+
+    color: var(--purple);
+
+    font-weight: 700;
+}
+
+
+/* Auth button */
+
+.auth-button {
+
+    width: 100%;
+
+    border: none;
+
+    background: var(--purple);
+
+    color: var(--white);
+
+    padding: 13px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+}
+
+
+.auth-button:hover {
+
+    background: var(--purple-dark);
+}
+
+
+.signup-prompt {
+
+    text-align: center;
+
+    color: var(--muted);
+
+    font-size: 11px;
+
+    margin-top: 18px;
+}
+
+
+/* =========================================================
+   15. BROADCAST MODAL
+   ========================================================= */
+
+.broadcast-modal {
+
+    width: 500px;
+}
+
+
+/* =========================================================
+   16. TOAST
+   ========================================================= */
+
+.toast {
+
+    position: fixed;
+
+    z-index: 3000;
+
+    right: 25px;
+
+    bottom: 25px;
+
+    max-width: 350px;
+
+    padding: 13px 17px;
+
+    background: var(--black);
+
+    color: var(--white);
+
+    border-radius: 9px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    font-size: 12px;
+
+    box-shadow: var(--shadow-medium);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transform: translateY(15px);
+
+    transition: var(--transition);
+}
+
+
+.toast.show {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    transform: translateY(0);
+}
+
+
+.toast i {
+
+    color: #c4b5fd;
+}
+
+
+/* =========================================================
+   17. FOOTER
+   ========================================================= */
+
+.footer {
+
+    background: #18121f;
+
+    color: var(--white);
+
+    padding-top: 55px;
+}
+
+
+.footer-container {
+
+    display: grid;
+
+    grid-template-columns: 1.4fr 1fr 1.3fr 1.2fr;
+
+    gap: 45px;
+
+    padding-bottom: 45px;
+}
+
+
+/* Footer brand */
+
+.footer-brand {
+
+    max-width: 300px;
+}
+
+
+.footer-logo {
+
+    width: 145px;
+
+    margin-bottom: 18px;
+
+    /* Helps transparent logos blend naturally */
+    mix-blend-mode: screen;
+}
+
+
+.footer-brand h3 {
+
+    font-size: 13px;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 9px;
+}
+
+
+.footer-brand p {
+
+    color: #c4c0c8;
+
+    font-size: 11px;
+
+    line-height: 1.7;
+
+    margin-bottom: 10px;
+}
+
+
+.footer-brand .footer-tagline {
+
+    color: #a9a2af;
+
+    font-size: 10px;
+}
+
+
+/* Footer columns */
+
+.footer-column h4 {
+
+    font-size: 13px;
+
+    margin-bottom: 8px;
+}
+
+
+.footer-title-line {
+
+    width: 25px;
+
+    height: 2px;
+
+    background: var(--purple-light);
+
+    margin-bottom: 17px;
+}
+
+
+.footer-column > a {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    color: #c4c0c8;
+
+    font-size: 11px;
+
+    margin-bottom: 11px;
+
+    transition: var(--transition);
+}
+
+
+.footer-column > a:hover {
+
+    color: var(--white);
+
+    transform: translateX(3px);
+}
+
+
+.footer-column > a i {
+
+    width: 15px;
+
+    color: #a78bfa;
+}
+
+
+/* Footer location */
+
+.footer-info {
+
+    display: flex;
+
+    gap: 10px;
+
+    margin-bottom: 25px;
+}
+
+
+.footer-info > i {
+
+    color: #a78bfa;
+
+    margin-top: 3px;
+}
+
+
+.footer-info div {
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+.footer-info strong {
+
+    color: #d8d4dc;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+.footer-info span {
+
+    color: #99929f;
+
+    font-size: 10px;
+}
+
+
+.footer-subheading {
+
+    margin-top: 18px;
+}
+
+
+.why-footer-item {
+
+    color: #bcb6c2;
+
+    font-size: 10px;
+
+    margin-bottom: 8px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.why-footer-item i {
+
+    color: #a78bfa;
+
+    font-size: 10px;
+}
+
+
+.footer-contact-item {
+
+    color: #bcb6c2;
+
+    font-size: 10px;
+
+    margin-bottom: 11px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+}
+
+
+.footer-contact-item i {
+
+    color: #a78bfa;
+}
+
+
+/* Social links */
+
+.social-links {
+
+    display: flex;
+
+    gap: 8px;
+}
+
+
+.social-links a {
+
+    width: 31px;
+
+    height: 31px;
+
+    border: 1px solid #3b3243;
+
+    border-radius: 7px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #c4c0c8;
+
+    transition: var(--transition);
+}
+
+
+.social-links a:hover {
+
+    background: var(--purple);
+
+    border-color: var(--purple);
+
+    color: var(--white);
+
+    transform: translateY(-2px);
+}
+
+
+/* Footer bottom */
+
+.footer-bottom {
+
+    width: min(1180px, 92%);
+
+    margin: 0 auto;
+
+    min-height: 65px;
+
+    padding: 17px 0;
+
+    border-top: 1px solid #302936;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    color: #8f8796;
+
+    font-size: 9px;
+}
+
+
+.footer-policies {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.footer-policies a:hover {
+
+    color: var(--white);
+}
+
+
+.footer-love {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+}
+
+
+.footer-love i {
+
+    color: #a78bfa;
+}
+
+
+/* =========================================================
+   18. HIDDEN ELEMENTS
+   ========================================================= */
+
+.hidden {
+
+    display: none !important;
+}
+
+
+/* =========================================================
+   19. RESPONSIVE DESIGN
+   ========================================================= */
+
+
+/* Tablets */
+
+@media (max-width: 1000px) {
+
+
+    .main-nav {
+
+        gap: 18px;
+    }
+
+
+    .category-grid,
+    .product-grid,
+    .why-grid {
+
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+
+    .footer-container {
+
+        grid-template-columns: repeat(2, 1fr);
+
+        gap: 35px;
+    }
+
+
+    .chat-preview {
+
+        grid-template-columns: 230px 1fr;
+    }
 
 }
 
 
-if (editProfileButton) {
+/* =========================================================
+   TABLET / SMALL LAPTOP
+   ========================================================= */
 
-    editProfileButton.addEventListener(
-        "click",
-        enterProfileEditMode
-    );
+@media (max-width: 780px) {
 
-}
 
+    .main-nav {
 
-if (cancelProfileEdit) {
-
-    cancelProfileEdit.addEventListener(
-        "click",
-        function () {
-
-            const student =
-                getLoggedInStudent();
-
-            if (student) {
-
-                renderProfilePanel(
-                    student
-                );
-
-            }
-
-            exitProfileEditMode();
-
-        }
-    );
-
-}
-
-
-if (accountProfile) {
-
-    accountProfile.addEventListener(
-        "click",
-        function () {
-            window.location.hash = "profile";
-        }
-    );
-
-}
-
-
-if (closeProfile) {
-
-    closeProfile.addEventListener(
-        "click",
-        closeProfilePanel
-    );
-
-}
-
-
-// Clicking outside the profile panel closes it.
-
-if (profileOverlay) {
-
-    profileOverlay.addEventListener(
-        "click",
-        function (event) {
-
-            if (
-                event.target === profileOverlay
-            ) {
-
-                closeProfilePanel();
-
-            }
-
-        }
-    );
-
-}
-
-
-// ========================================
-// ACCOUNT SETTINGS — OPENS PROFILE IN EDIT MODE
-// ========================================
-
-const accountSettings =
-    document.getElementById("accountSettings");
-
-if (accountSettings) {
-
-    accountSettings.addEventListener(
-        "click",
-        function () {
-
-            if (typeof hideAllFullPages === "function") {
-                hideAllFullPages();
-            }
-
-            history.pushState(null, "", "#profile");
-
-            openProfilePanel();
-
-            if (typeof enterProfileEditMode === "function") {
-                enterProfileEditMode();
-            }
-
-        }
-    );
-
-}
-
-
-// ========================================
-// WISHLIST / WALLET
-// (real pages, feature itself isn't built yet)
-// ========================================
-
-const accountWishlist =
-    document.getElementById("accountWishlist");
-
-if (accountWishlist) {
-
-    accountWishlist.addEventListener(
-        "click",
-        function () {
-
-            if (studentAccountMenu) {
-                studentAccountMenu.classList.remove("open");
-            }
-
-            window.location.hash = "wishlist";
-
-        }
-    );
-
-}
-
-const accountWallet =
-    document.getElementById("accountWallet");
-
-if (accountWallet) {
-
-    accountWallet.addEventListener(
-        "click",
-        function () {
-
-            if (studentAccountMenu) {
-                studentAccountMenu.classList.remove("open");
-            }
-
-            window.location.hash = "wallet";
-
-        }
-    );
-
-}
-
-
-// ========================================
-// MY ORDERS PANEL
-// ========================================
-
-const accountOrders =
-    document.getElementById("accountOrders");
-
-const dashboardMyOrders =
-    document.getElementById("dashboardMyOrders");
-
-const ordersOverlay =
-    document.getElementById("ordersOverlay");
-
-const closeOrders =
-    document.getElementById("closeOrders");
-
-const ordersPanelBody =
-    document.getElementById("ordersPanelBody");
-
-
-const ORDERS_EMPTY_STATE_HTML = `
-    <div class="empty-cart">
-        <i class="fa-solid fa-box"></i>
-        <h3>No orders yet</h3>
-        <p>Your past orders will show up here once you check out.</p>
-    </div>
-`;
-
-
-function formatOrderDate(dateString) {
-
-    const date =
-        new Date(dateString);
-
-    if (isNaN(date.getTime())) {
-        return "";
+        display: none;
     }
 
-    return date.toLocaleDateString(
-        "en-NG",
-        {
-            day: "numeric",
-            month: "short",
-            year: "numeric"
-        }
-    );
+
+    .mobile-menu-button {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+    }
+
+
+    .mobile-menu.show {
+
+        display: flex;
+    }
+
+
+    .signin-nav-button span {
+
+        display: none;
+    }
+
+
+    .signin-nav-button {
+
+        width: 42px;
+
+        height: 42px;
+
+        padding: 0;
+
+        justify-content: center;
+
+        border-radius: 50%;
+    }
+
+
+    .hero {
+
+        min-height: 520px;
+    }
+
+
+    .hero h1 {
+
+        letter-spacing: -2px;
+    }
+
+
+    .rewards-container {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+
+    .rewards-card {
+
+        width: 100%;
+
+        max-width: 280px;
+    }
+
+
+    /* Chat mobile layout is handled in the dedicated
+       CHAT — MOBILE LAYOUT section further down, which
+       correctly accounts for the app sidebar and profile
+       panel added later. */
 
 }
 
 
-function renderOrderCard(order) {
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
-    const statusClass =
-        "status-" + order.status;
-
-    const statusLabel =
-        order.status.charAt(0).toUpperCase() +
-        order.status.slice(1);
-
-    const itemRows =
-        order.items.map(function (item) {
-
-            return `
-                <div class="order-card-item-row">
-                    <span>${item.name} × ${item.quantity}</span>
-                    <span>${formatMoney(item.price * item.quantity)}</span>
-                </div>
-            `;
-
-        }).join("");
-
-    return `
-        <div class="order-card">
-
-            <div class="order-card-top">
-
-                <div>
-                    <div class="order-card-reference">
-                        ${order.payment_reference}
-                    </div>
-                    <div class="order-card-date">
-                        ${formatOrderDate(order.created_at)}
-                    </div>
-                </div>
-
-                <span class="order-status-badge ${statusClass}">
-                    ${statusLabel}
-                </span>
-
-            </div>
-
-            <div class="order-card-items">
-                ${itemRows}
-            </div>
-
-            <div class="order-card-total">
-                <span>Total</span>
-                <strong>${formatMoney(order.amount)}</strong>
-            </div>
-
-        </div>
-    `;
-
-}
+@media (max-width: 600px) {
 
 
-async function loadOrdersIntoPanel(studentId) {
+    .nav-container {
 
-    if (!ordersPanelBody) {
-        return;
+        min-height: 68px;
+
+        gap: 7px;
     }
 
-    if (typeof loadReviewablePrompts === "function") {
-        loadReviewablePrompts(studentId);
+
+    .nav-logo {
+
+        width: 105px;
     }
 
-    ordersPanelBody.innerHTML = `
-        <div class="empty-cart">
-            <i class="fa-solid fa-spinner"></i>
-            <h3>Loading your orders...</h3>
-        </div>
-    `;
 
-    try {
+    .nav-actions {
 
-        const response =
-            await fetch(
-                API_URL + "/api/orders?studentId=" + studentId
-            );
+        gap: 5px;
+    }
 
-        const data =
-            await response.json();
 
-        if (!data.success) {
+    .nav-icon-button,
+    .signin-nav-button,
+    .mobile-menu-button {
 
-            ordersPanelBody.innerHTML = `
-                <div class="empty-cart">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    <h3>Could not load your orders</h3>
-                    <p>${data.message || "Please try again."}</p>
-                </div>
-            `;
+        width: 37px;
 
-            return;
+        height: 37px;
+    }
 
-        }
 
-        if (data.orders.length === 0) {
+    .hero-content {
 
-            ordersPanelBody.innerHTML =
-                ORDERS_EMPTY_STATE_HTML;
+        padding: 70px 0;
+    }
 
-            return;
 
-        }
+    .hero h1 {
 
-        ordersPanelBody.innerHTML =
-            data.orders.map(renderOrderCard).join("");
+        font-size: 43px;
 
-    } catch (error) {
+        letter-spacing: -2px;
+    }
 
-        console.error(
-            "Load orders error:",
-            error
-        );
 
-        ordersPanelBody.innerHTML = `
-            <div class="empty-cart">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <h3>Could not reach the server</h3>
-                <p>Please try again.</p>
-            </div>
-        `;
+    .hero p {
+
+        font-size: 17px;
+    }
+
+
+    .section {
+
+        padding: 65px 0;
+    }
+
+
+    .category-grid,
+    .product-grid,
+    .why-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+
+    .category-card {
+
+        padding: 20px;
+    }
+
+
+    .product-image {
+
+        height: 230px;
+    }
+
+
+    .product-filters {
+
+        justify-content: flex-start;
+
+        overflow-x: auto;
+
+        flex-wrap: nowrap;
+
+        padding-bottom: 5px;
+    }
+
+
+    .filter-button {
+
+        flex-shrink: 0;
+    }
+
+
+    .rewards-section {
+
+        padding: 60px 0;
+    }
+
+
+    .rewards-content h2 {
+
+        font-size: 34px;
+    }
+
+
+    .chat-preview {
+
+        min-height: 600px;
+
+        border-radius: 14px;
+    }
+
+
+    .messages {
+
+        padding: 17px;
+    }
+
+
+    .message {
+
+        max-width: 85%;
+    }
+
+
+    .notification-panel {
+
+        top: 75px;
+
+        right: 10px;
+
+        width: calc(100% - 20px);
+    }
+
+
+    .cart-panel {
+
+        width: 100%;
+    }
+
+
+    .auth-modal {
+
+        padding: 28px 20px;
+    }
+
+
+    .footer {
+
+        padding-top: 45px;
+    }
+
+
+    .footer-container {
+
+        grid-template-columns: 1fr;
+
+        gap: 30px;
+    }
+
+
+    .footer-brand {
+
+        max-width: 100%;
+    }
+
+
+    .footer-bottom {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        padding: 20px 0;
 
     }
 
 }
 
 
-function openOrdersPanel() {
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
 
-    const student =
-        getLoggedInStudent();
+@media (max-width: 380px) {
 
-    if (!student) {
 
-        if (studentAccountMenu) {
+    .nav-logo {
 
-            studentAccountMenu.classList.remove(
-                "open"
-            );
-
-        }
-
-        if (window.location.hash === "#orders") {
-
-            history.replaceState(
-                null,
-                "",
-                window.location.pathname + window.location.search
-            );
-
-        }
-
-        openSignInModal();
-
-        return;
-
-    }
-
-    if (studentAccountMenu) {
-
-        studentAccountMenu.classList.remove(
-            "open"
-        );
-
-    }
-
-    if (ordersOverlay) {
-
-        ordersOverlay.classList.add(
-            "open"
-        );
-
-    }
-
-    const mainEl =
-        document.getElementById("mainContent");
-
-    if (mainEl) {
-        mainEl.style.display = "none";
-    }
-
-    window.scrollTo({ top: 0 });
-
-    loadOrdersIntoPanel(
-        student.id
-    );
-
-}
-
-
-function closeOrdersPanel() {
-
-    if (ordersOverlay) {
-
-        ordersOverlay.classList.remove(
-            "open"
-        );
-
-    }
-
-    if (typeof goBack === "function") {
-        goBack();
-    } else if (typeof goHome === "function") {
-        goHome();
-    }
-
-}
-
-
-// ========================================
-// KEEP THE HERO'S ORDER COUNT ACCURATE
-// ("active" = paid, not yet fulfilled)
-// ========================================
-
-async function refreshOrderCountBadge(studentId) {
-
-    const heroActiveOrdersEl =
-        document.getElementById("heroActiveOrders");
-
-    const heroOrdersBadgeEl =
-        document.getElementById("heroOrdersBadge");
-
-    if (!heroActiveOrdersEl || !heroOrdersBadgeEl) {
-        return;
-    }
-
-    try {
-
-        const response =
-            await fetch(
-                API_URL + "/api/orders?studentId=" + studentId
-            );
-
-        const data =
-            await response.json();
-
-        if (!data.success) {
-            return;
-        }
-
-        const activeOrderCount =
-            data.orders.filter(function (order) {
-
-                return order.status === "paid";
-
-            }).length;
-
-        heroActiveOrdersEl.textContent =
-            `${activeOrderCount} active order${activeOrderCount === 1 ? "" : "s"}`;
-
-        heroOrdersBadgeEl.textContent =
-            activeOrderCount;
-
-    } catch (error) {
-
-        console.error(
-            "Order count refresh error:",
-            error
-        );
-
-    }
-
-}
-
-
-if (accountOrders) {
-
-    accountOrders.addEventListener(
-        "click",
-        function () {
-            window.location.hash = "orders";
-        }
-    );
-
-}
-
-
-if (dashboardMyOrders) {
-
-    dashboardMyOrders.addEventListener(
-        "click",
-        function () {
-            window.location.hash = "orders";
-        }
-    );
-
-}
-
-
-if (closeOrders) {
-
-    closeOrders.addEventListener(
-        "click",
-        closeOrdersPanel
-    );
-
-}
-
-
-if (ordersOverlay) {
-
-    ordersOverlay.addEventListener(
-        "click",
-        function (event) {
-
-            if (
-                event.target === ordersOverlay
-            ) {
-
-                closeOrdersPanel();
-
-            }
-
-        }
-    );
-
-}
-
-
-
-
-    if (closeSignIn) {
-
-        closeSignIn.addEventListener(
-            "click",
-            closeSignInModal
-        );
-
+        width: 90px;
     }
 
 
+    .hero h1 {
 
-    if (signInModal) {
-
-        signInModal.addEventListener(
-            "click",
-            function (event) {
-
-                if (
-                    event.target ===
-                    signInModal
-                ) {
-
-                    closeSignInModal();
-
-                }
-
-            }
-        );
-
+        font-size: 37px;
     }
 
 
+    .hero-buttons {
 
-    /*
-        Current sign-in is still
-        a frontend demonstration.
+        flex-direction: column;
 
-        REAL authentication will be
-        connected to PostgreSQL later.
-    */
-
-    // ========================================
-// STUDENT SIGN IN
-// ========================================
-
-if (signInForm) {
-
-    signInForm.addEventListener(
-        "submit",
-        async function (event) {
-
-            event.preventDefault();
-
-
-            // ========================================
-            // GET FORM VALUES
-            // ========================================
-
-            const identifier =
-                document.getElementById(
-                    "signinIdentifierValue"
-                ).value.trim();
-
-            const passcode =
-                document.getElementById(
-                    "signinPasscode"
-                ).value;
-
-
-            // ========================================
-            // VALIDATE INPUT
-            // ========================================
-
-            if (
-                identifier === "" ||
-                passcode.length !== 6
-            ) {
-
-                showMessage(
-                    "Please enter your email/phone and 6-digit passcode."
-                );
-
-                return;
-
-            }
-
-
-            // ========================================
-            // GET SIGN IN BUTTON
-            // ========================================
-
-            const signInButton =
-                signInForm.querySelector(
-                    'button[type="submit"]'
-                );
-
-
-            // ========================================
-            // DISABLE BUTTON
-            // ========================================
-
-            if (signInButton) {
-
-                signInButton.disabled = true;
-
-                signInButton.innerHTML = `
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    Signing In...
-                `;
-
-            }
-
-
-            try {
-
-                // ========================================
-                // SEND LOGIN REQUEST
-                // ========================================
-
-                const response =
-                    await fetch(
-                        API_URL + "/api/students/login",
-                        {
-
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify({
-
-                                identifier:
-                                    identifier,
-
-                                passcode:
-                                    passcode
-
-                            })
-
-                        }
-                    );
-
-
-                // ========================================
-                // READ RESPONSE
-                // ========================================
-
-                const data =
-                    await response.json();
-
-
-                // ========================================
-                // LOGIN FAILED
-                // ========================================
-
-                if (
-                    !response.ok ||
-                    !data.success
-                ) {
-
-                    // ====================================
-                    // UNVERIFIED EMAIL — SEND THEM TO
-                    // THE OTP VERIFICATION SCREEN
-                    // ====================================
-
-                    if (
-                        data.requiresVerification &&
-                        data.studentId &&
-                        data.email
-                    ) {
-
-                        closeSignInModal();
-
-                        if (signUpModal) {
-
-                            signUpModal.classList.add(
-                                "open"
-                            );
-
-                        }
-
-                        showOtpVerificationScreen(
-                            data.studentId,
-                            data.email
-                        );
-
-                        if (resendOtpButton) {
-
-                            resendOtpButton.click();
-
-                        }
-
-                        return;
-
-                    }
-
-                    showMessage(
-                        data.message ||
-                        "Invalid email or password."
-                    );
-
-                    return;
-
-                }
-
-
-                // ========================================
-                // LOGIN SUCCESSFUL
-                // ========================================
-
-                console.log(
-                    "Student logged in successfully:",
-                    data.student
-                );
-
-
-                // ========================================
-                // SAVE LOGGED-IN STUDENT
-                // ========================================
-
-                const rememberMe =
-                    document.getElementById(
-                        "rememberMe"
-                    );
-
-
-                if (
-                    rememberMe &&
-                    rememberMe.checked
-                ) {
-
-                    localStorage.setItem(
-                        "kuriosLoggedInStudent",
-                        JSON.stringify(
-                            data.student
-                        )
-                    );
-
-                } else {
-
-                    sessionStorage.setItem(
-                        "kuriosLoggedInStudent",
-                        JSON.stringify(
-                            data.student
-                        )
-                    );
-
-                }
-
-
-                // ========================================
-                // SUCCESS MESSAGE
-                // ========================================
-
-                showMessage(
-                    "Login successful. Welcome back to Kurios Stores."
-                );
-
-                if (
-                    window.__kuriosChatSocket &&
-                    window.__kuriosChatSocket.connected
-                ) {
-
-                    window.__kuriosChatSocket.emit(
-                        "join",
-                        data.student.id
-                    );
-
-                }
-
-                const postLoginSplash =
-                    document.getElementById("postLoginSplash");
-
-                if (postLoginSplash) {
-                    postLoginSplash.style.display = "flex";
-                }
-
-                const splashShownAt = Date.now();
-                const SPLASH_MIN_DISPLAY_MS = 5000;
-
-                function proceedAfterSplashDelay(callback) {
-
-                    const elapsed =
-                        Date.now() - splashShownAt;
-
-                    const remaining =
-                        Math.max(0, SPLASH_MIN_DISPLAY_MS - elapsed);
-
-                    setTimeout(callback, remaining);
-
-                }
-
-updateLoginState();
-
-                if (typeof showDashboardChoiceModal === "function") {
-
-                    fetch(
-                        API_URL + "/api/sellers/me?studentId=" + data.student.id
-                    )
-                        .then(function (response) { return response.json(); })
-                        .then(function (sellerData) {
-
-                            const isApprovedSeller =
-                                sellerData.success &&
-                                sellerData.seller &&
-                                sellerData.seller.status === "approved";
-
-                            proceedAfterSplashDelay(function () {
-
-                                if (isApprovedSeller) {
-
-                                    // Keep the splash up — the choice
-                                    // modal renders on top of it.
-
-                                    showDashboardChoiceModal(data.student);
-
-                                } else if (postLoginSplash) {
-
-                                    postLoginSplash.style.display = "none";
-
-                                }
-
-                            });
-
-                        })
-                        .catch(function (error) {
-
-                            console.error(
-                                "Post-login seller check error:",
-                                error
-                            );
-
-                            proceedAfterSplashDelay(function () {
-
-                                if (postLoginSplash) {
-                                    postLoginSplash.style.display = "none";
-                                }
-
-                            });
-
-                        });
-
-                } else {
-
-                    proceedAfterSplashDelay(function () {
-
-                        if (postLoginSplash) {
-                            postLoginSplash.style.display = "none";
-                        }
-
-                    });
-
-                }
-
-
-
-
-
-                // ========================================
-                // CLOSE SIGN-IN MODAL
-                // ========================================
-
-                const signInModal =
-                    document.getElementById(
-                        "signInModal"
-                    );
-
-                if (signInModal) {
-
-                    signInModal.classList.remove(
-                        "open"
-                    );
-
-                }
-
-
-                // ========================================
-                // CLEAR PASSCODE
-                // ========================================
-
-                signinPasscodeGroup.clear();
-
-
-                // ========================================
-                // UPDATE UI
-                // ========================================
-
-                console.log(
-                    "Logged-in student:",
-                    data.student
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    "Sign-in error:",
-                    error
-                );
-
-
-                showMessage(
-                    "Unable to connect to Kurios Stores server."
-                );
-
-
-            } finally {
-
-                // ========================================
-                // RESTORE BUTTON
-                // ========================================
-
-                if (signInButton) {
-
-                    signInButton.disabled = false;
-
-                    signInButton.innerHTML = `
-                        Sign In
-                    `;
-
-                }
-
-            }
-
-        }
-    );
-
-}
-
-
-
-    /* =====================================================
-       13. SIGN UP MODAL
-       ===================================================== */
-
-
-    const signUpModal =
-        document.getElementById(
-            "signUpModal"
-        );
-
-
-    const openSignUp =
-        document.getElementById(
-            "openSignUp"
-        );
-
-
-    const closeSignUp =
-        document.getElementById(
-            "closeSignUp"
-        );
-
-
-    const signupForm =
-        document.getElementById(
-            "signupForm"
-        );
-
-
-    const backToSignIn =
-        document.getElementById(
-            "backToSignIn"
-        );
-
-
-
-    function openSignUpModal() {
-
-        if (typeof closeNotificationPanel === "function") {
-            closeNotificationPanel();
-        }
-
-        if (signInModal) {
-
-            signInModal.classList.remove(
-                "active"
-            );
-
-        }
-
-
-        if (signUpModal) {
-
-            signUpModal.classList.add(
-                "active"
-            );
-
-        }
-
+        align-items: stretch;
     }
 
 
+    .primary-button,
+    .secondary-button {
 
-    function closeSignUpModal() {
-
-        if (signUpModal) {
-
-            signUpModal.classList.remove(
-                "active"
-            );
-
-        }
-
+        width: 100%;
     }
 
 
+    .product-bottom {
 
-    if (openSignUp) {
-
-        openSignUp.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-
-                openSignUpModal();
-
-            }
-        );
-
+        align-items: flex-end;
     }
 
 
+    .product-bottom strong {
 
-    if (closeSignUp) {
-
-        closeSignUp.addEventListener(
-            "click",
-            closeSignUpModal
-        );
-
+        font-size: 14px;
     }
 
 
+    .add-to-cart {
 
-    if (backToSignIn) {
-
-        backToSignIn.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-
-                closeSignUpModal();
-
-                openSignInModal();
-
-            }
-        );
-
+        padding: 8px 9px;
     }
-
-
-
-    if (signupForm) {
-
-    signupForm.addEventListener(
-        "submit",
-        async function (event) {
-
-            event.preventDefault();
-
-            // ========================================
-            // GET FORM VALUES
-            // ========================================
-
-            const firstName =
-                document.getElementById("signupFirstName").value.trim();
-
-            const lastName =
-                document.getElementById("signupLastName").value.trim();
-
-            const email =
-                document.getElementById("signupEmail").value.trim();
-
-            const phone =
-                document.getElementById("signupPhone").value.trim();
-
-            const whatsappNumber =
-                document.getElementById("signupWhatsapp").value.trim();
-
-            const university =
-                document.getElementById("signupUniversity").value.trim();
-
-            const studentId =
-                document.getElementById("signupStudentId").value.trim();
-
-            const passcode =
-                document.getElementById("signupPasscode").value;
-
-            const confirmPasscode =
-                document.getElementById("signupConfirmPasscode").value;
-
-            const agreedStudent =
-                document.getElementById("agreedStudent").checked;
-
-            const agreedTerms =
-                document.getElementById("agreedTerms").checked;
-
-            const agreedPrivacy =
-                document.getElementById("agreedPrivacy").checked;
-
-            const receiveNotifications =
-                document.getElementById("receiveNotifications").checked;
-
-
-            // ========================================
-            // FRONTEND VALIDATION
-            // ========================================
-
-            if (
-                !firstName ||
-                !lastName ||
-                !email ||
-                !phone ||
-                !whatsappNumber ||
-                !university ||
-                !studentId ||
-                !passcode ||
-                !confirmPasscode
-            ) {
-
-                showMessage(
-                    "Please fill in all required fields."
-                );
-
-                return;
-            }
-
-
-            // ========================================
-            // PASSCODE CHECK
-            // ========================================
-
-            if (!/^\d{6}$/.test(passcode)) {
-
-                showMessage(
-                    "Your passcode must be exactly 6 digits."
-                );
-
-                return;
-            }
-
-
-            if (passcode !== confirmPasscode) {
-
-                showMessage(
-                    "Passcodes do not match."
-                );
-
-                return;
-            }
-
-
-            // ========================================
-            // PHONE / WHATSAPP FORMAT CHECK
-            // ========================================
-
-            const digitsOnlyPhone =
-                phone.replace(/\D/g, "");
-
-            if (!/^0\d{10}$/.test(digitsOnlyPhone)) {
-
-                showMessage(
-                    "Please enter a complete, valid phone number (11 digits, starting with 0)."
-                );
-
-                return;
-            }
-
-            const digitsOnlyWhatsapp =
-                whatsappNumber.replace(/\D/g, "");
-
-            if (!/^0\d{10}$/.test(digitsOnlyWhatsapp)) {
-
-                showMessage(
-                    "Please enter a complete, valid WhatsApp number (11 digits, starting with 0)."
-                );
-
-                return;
-            }
-
-
-            // ========================================
-            // STUDENT CONFIRMATION
-            // ========================================
-
-            if (!agreedStudent) {
-
-                showMessage(
-                    "Please confirm that you are a student."
-                );
-
-                return;
-            }
-
-
-            // ========================================
-            // TERMS & PRIVACY
-            // ========================================
-
-            if (!agreedTerms || !agreedPrivacy) {
-
-                showMessage(
-                    "Please agree to the Terms and Privacy Policy."
-                );
-
-                return;
-            }
-
-
-            // ========================================
-            // DISABLE BUTTON WHILE REGISTERING
-            // ========================================
-
-            const submitButton =
-                document.getElementById("signupSubmit");
-
-            if (submitButton) {
-
-                submitButton.disabled = true;
-
-                submitButton.textContent =
-                    "Creating Account...";
-            }
-
-
-            // ========================================
-            // SEND DATA TO BACKEND
-            // ========================================
-
-            try {
-
-                const response = await fetch(
-                    API_URL + "/api/students/register",
-                    {
-
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-
-                        body: JSON.stringify({
-
-                            firstName: firstName,
-
-                            lastName: lastName,
-
-                            email: email,
-
-                            phone: digitsOnlyPhone,
-
-                            whatsappNumber:
-                                digitsOnlyWhatsapp,
-
-                            university: university,
-
-                            studentId: studentId,
-
-                            passcode: passcode,
-
-                            confirmPasscode:
-                                confirmPasscode,
-
-                            agreedStudent:
-                                agreedStudent,
-
-                            agreedTerms:
-                                agreedTerms,
-
-                            agreedPrivacy:
-                                agreedPrivacy,
-
-                            receiveNotifications:
-                                receiveNotifications
-
-                        })
-
-                    }
-                );
-
-
-                // ========================================
-// READ BACKEND RESPONSE
-// ========================================
-
-const data =
-    await response.json();
-
-
-// ========================================
-// CONTINUE UNVERIFIED REGISTRATION
-// ========================================
-
-if (
-    response.ok &&
-    data.success &&
-    data.requiresVerification &&
-    data.continueRegistration
-) {
-
-    console.log(
-        "Continuing unverified registration:",
-        data.student
-    );
-
-
-    showOtpVerificationScreen(
-        data.studentId,
-        data.email
-    );
-
-
-    return;
-
-}
-
-
-// ========================================
-// INVALID OTP
-// ========================================
-
-if (!response.ok || !data.success) {
-
-    showMessage(
-        data.message ||
-        "Something went wrong while creating the account."
-    );
-
-    return;
-}
-
-
-// ========================================
-// SUCCESS - OTP VERIFICATION
-// ========================================
-
-console.log(
-    "Registration successful:",
-    data
-);
-
-
-// ========================================
-// CONFIRM VERIFICATION DATA
-// ========================================
-
-if (
-    !data.studentId ||
-    !data.email
-) {
-
-    console.error(
-        "Missing verification data:",
-        data
-    );
-
-    showMessage(
-        "Account was created, but verification information is missing."
-    );
-
-    return;
-}
-
-
-// ========================================
-// CLEAR REGISTRATION FORM
-// ========================================
-
-signupForm.reset();
-
-
-// ========================================
-// SHOW OTP VERIFICATION SCREEN
-// ========================================
-
-showOtpVerificationScreen(
-    data.studentId,
-    data.email
-);
-
-
-            } catch (error) {
-
-                console.error(
-                    "Registration error:",
-                    error
-                );
-
-                showMessage(
-                    "Unable to connect to Kurios Stores server."
-                );
-
-            } finally {
-
-                // ========================================
-                // ENABLE BUTTON AGAIN
-                // ========================================
-
-                if (submitButton) {
-
-                    submitButton.disabled = false;
-
-                    submitButton.textContent =
-                        "Create Student Account";
-
-                }
-
-            }
-
-        }
-    );
-
-}
-
-
-    /* =====================================================
-       14. NOTIFICATIONS
-       ===================================================== */
-
-
-    const notificationButton =
-        document.getElementById(
-            "notificationButton"
-        );
-
-
-    const notificationPanel =
-        document.getElementById(
-            "notificationPanel"
-        );
-
-
-    function closeNotificationPanel() {
-
-        if (notificationPanel) {
-
-            notificationPanel.classList.remove(
-                "open"
-            );
-
-        }
-
-    }
-
-    window.closeNotificationPanel = closeNotificationPanel;
-
-
-    const closeNotifications =
-        document.getElementById(
-            "closeNotifications"
-        );
-
-
-    const notificationList =
-        document.getElementById(
-            "notificationList"
-        );
-
-
-    const notificationBadge =
-        document.getElementById(
-            "notificationBadge"
-        );
-
-
-
-    /*
-        Notifications now come from the server —
-        every student sees the same admin announcements.
-    */
-
-    let notifications = [];
-
-
-
-    function saveNotifications() {
-
-        localStorage.setItem(
-            "kuriosNotifications",
-            JSON.stringify(
-                notifications
-            )
-        );
-
-    }
-
-
-
-    function renderNotifications() {
-
-
-        if (!notificationList) {
-            return;
-        }
-
-
-
-        notificationList.innerHTML = "";
-
-
-
-        if (
-            notifications.length === 0
-        ) {
-
-            notificationList.innerHTML = `
-
-                <div class="empty-state">
-
-                    <i class="fa-regular fa-bell-slash"></i>
-
-                    <h4>
-                        No notifications
-                    </h4>
-
-                    <p>
-                        You're all caught up.
-                    </p>
-
-                </div>
-
-            `;
-
-        }
-
-
-
-        notifications.forEach(
-            function (notification) {
-
-
-                const item =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                item.className =
-                    "notification-item";
-
-
-                item.innerHTML = `
-
-                    <div class="notification-icon">
-
-                        <i class="fa-solid fa-bell"></i>
-
-                    </div>
-
-                    <div>
-
-                        <strong>
-
-                            ${notification.title}
-
-                        </strong>
-
-                        <p>
-
-                            ${notification.message}
-
-                        </p>
-
-                    </div>
-
-                `;
-
-
-                notificationList.appendChild(
-                    item
-                );
-
-            }
-        );
-
-
-
-        /*
-            Update notification badge — only show
-            a count for notifications the student
-            hasn't seen yet (tracked locally).
-        */
-
-        if (notificationBadge) {
-
-            const seenCount =
-                parseInt(
-                    localStorage.getItem("kuriosNotificationsSeenCount") || "0",
-                    10
-                );
-
-            const unseenCount =
-                Math.max(0, notifications.length - seenCount);
-
-            if (unseenCount > 0) {
-
-                notificationBadge.textContent = unseenCount;
-                notificationBadge.style.display = "";
-
-            } else {
-
-                notificationBadge.style.display = "none";
-
-            }
-
-        }
-
-    }
-
-
-
-    if (notificationButton) {
-
-        notificationButton.addEventListener(
-            "click",
-            function () {
-
-                let willOpen = true;
-
-                if (notificationPanel) {
-
-                    willOpen =
-                        !notificationPanel.classList.contains("open");
-
-                    notificationPanel.classList.toggle(
-                        "open"
-                    );
-
-                }
-
-                if (willOpen) {
-
-                    localStorage.setItem(
-                        "kuriosNotificationsSeenCount",
-                        notifications.length
-                    );
-
-                    if (notificationBadge) {
-                        notificationBadge.style.display = "none";
-                    }
-
-                }
-
-            }
-        );
-
-    }
-
-
-
-    if (closeNotifications) {
-
-        closeNotifications.addEventListener(
-            "click",
-            function () {
-
-                if (notificationPanel) {
-
-                    notificationPanel.classList.remove(
-                        "open"
-                    );
-
-                }
-
-            }
-        );
-
-    }
-
-
-
-    /* =====================================================
-       15. CHAT SYSTEM — REAL, BACKEND-POWERED
-       ===================================================== */
-
-
-    const chatContactList =
-        document.getElementById("chatContactList");
-
-    const chatContactsLoading =
-        document.getElementById("chatContactsLoading");
-
-    const chatContactsEmpty =
-        document.getElementById("chatContactsEmpty");
-
-    const activeChatName =
-        document.getElementById(
-            "activeChatName"
-        );
-
-
-    const activeChatStatus =
-        document.getElementById(
-            "activeChatStatus"
-        );
-
-
-    const activeChatAvatar =
-        document.getElementById(
-            "activeChatAvatar"
-        );
-
-
-    const messages =
-        document.getElementById(
-            "messages"
-        );
-
-
-    const messageForm =
-        document.getElementById(
-            "messageForm"
-        );
-
-
-    const messageInput =
-        document.getElementById(
-            "messageInput"
-        );
-
-
-    let __kuriosLastTypingEmit = 0;
-
-    if (messageInput) {
-
-        messageInput.addEventListener(
-            "input",
-            function () {
-
-                if (
-                    !activeChatPartnerId ||
-                    !window.__kuriosChatSocket
-                ) {
-                    return;
-                }
-
-                const now = Date.now();
-
-                // Throttle — no need to emit on every
-                // keystroke, once every couple seconds
-                // is enough for a "typing..." indicator.
-
-                if (now - __kuriosLastTypingEmit < 2000) {
-                    return;
-                }
-
-                __kuriosLastTypingEmit = now;
-
-                window.__kuriosChatSocket.emit(
-                    "typing",
-                    { recipientId: activeChatPartnerId }
-                );
-
-            }
-        );
-
-    }
-
-
-    const chatSearch =
-        document.getElementById(
-            "chatSearch"
-        );
-
-
-    let activeChatPartnerId = null;
-    let activeConversationId = null;
-    let chatPollInterval = null;
-    let conversationsPollInterval = null;
-    let cachedConversations = [];
-    let onlineStudentIds = new Set();
-
-    async function refreshOnlinePresence() {
-
-        try {
-
-            const response =
-                await fetch(API_URL + "/api/chat/online-students");
-
-            const data = await response.json();
-
-            if (data.success) {
-
-                onlineStudentIds =
-                    new Set(data.onlineIds.map(String));
-
-                if (activeChatPartnerId) {
-
-                    updateHeaderPresence(activeChatPartnerId);
-
-                }
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Refresh online presence error:",
-                error
-            );
-
-        }
-
-    }
-
-    function updateHeaderPresence(partnerId) {
-
-        const isOnline =
-            onlineStudentIds.has(String(partnerId));
-
-        const dot =
-            document.getElementById("activeChatStatusDot");
-
-        if (dot) {
-            dot.classList.toggle("online", isOnline);
-        }
-
-        if (activeChatStatus) {
-
-            activeChatStatus.textContent =
-                isOnline ? "Online" : "Kurios Stores student";
-
-        }
-
-    }
-
-
-    function chatInitial(firstName, lastName) {
-
-        const name =
-            (firstName || "?").trim();
-
-        return name.charAt(0).toUpperCase();
-
-    }
-
-
-    function renderChatContactList() {
-
-        if (!chatContactList) {
-            return;
-        }
-
-        chatContactList.innerHTML = "";
-
-        const activeFilter =
-            (typeof __kuriosChatFilter !== "undefined" && __kuriosChatFilter) || "all";
-
-        const visibleConversations =
-            activeFilter === "all" ?
-                cachedConversations :
-                cachedConversations.filter(function (c) {
-                    return c.type === activeFilter;
-                });
-
-        if (visibleConversations.length === 0) {
-
-            if (chatContactsEmpty) {
-                chatContactsEmpty.style.display = "block";
-            }
-
-            return;
-
-        }
-
-        if (chatContactsEmpty) {
-            chatContactsEmpty.style.display = "none";
-        }
-
-        visibleConversations.forEach(function (conversation) {
-
-            const fullName =
-                ((conversation.first_name || "") + " " + (conversation.last_name || "")).trim();
-
-            const button =
-                document.createElement("button");
-
-            button.className = "chat-contact";
-
-            if (conversation.conversation_id === activeConversationId) {
-                button.classList.add("active");
-            }
-
-            const avatarMarkup =
-                conversation.profile_picture ?
-                    `<img src="${API_URL + conversation.profile_picture}" alt="${fullName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` :
-                    chatInitial(conversation.first_name, conversation.last_name);
-
-            const unreadBadge =
-                conversation.unread_count > 0 ?
-                    `<span class="chat-contact-unread-badge">${conversation.unread_count}</span>` :
-                    "";
-
-            const isProduct =
-                conversation.type === "PRODUCT" && conversation.product_name;
-
-            const sellerTag =
-                conversation.partner_store_name ?
-                    `<span class="chat-contact-seller-tag">Seller</span>` :
-                    "";
-
-            const previewLine =
-                isProduct ?
-                    `<i class="fa-solid fa-box"></i> ${conversation.product_name}` :
-                    (conversation.last_message ? conversation.last_message.slice(0, 32) : "");
-
-            button.innerHTML = `
-                <div class="chat-avatar">${avatarMarkup}</div>
-                <div class="chat-contact-info">
-                    <strong>${fullName || "Kurios Student"}${sellerTag}</strong>
-                    <span>${previewLine}</span>
-                </div>
-                ${unreadBadge}
-            `;
-
-            button.addEventListener(
-                "click",
-                function () {
-
-                    openChatWith(
-                        conversation.id,
-                        fullName,
-                        conversation.conversation_id,
-                        isProduct ? conversation.product_name : null
-                    );
-
-                }
-            );
-
-            chatContactList.appendChild(button);
-
-        });
-
-    }
-
-    window.renderChatContactList = renderChatContactList;
-
-
-    async function loadConversations() {
-
-        const student =
-            getLoggedInStudent();
-
-        if (!student) {
-
-            if (chatContactsLoading) {
-                chatContactsLoading.style.display = "none";
-            }
-
-            return;
-        }
-
-        const sidebarAvatar =
-            document.getElementById("chatAppSidebarAvatar");
-
-        const sidebarName =
-            document.getElementById("chatAppSidebarName");
-
-        if (sidebarAvatar) {
-
-            sidebarAvatar.innerHTML =
-                student.profile_picture ?
-                    `<img src="${API_URL + student.profile_picture}" alt="You">` :
-                    `<i class="fa-regular fa-user"></i>`;
-
-        }
-
-        if (sidebarName) {
-
-            sidebarName.textContent =
-                (student.first_name || "You");
-
-        }
-
-        try {
-
-            const response =
-                await fetch(
-                    API_URL + "/api/chat/conversations?studentId=" + student.id
-                );
-
-            const data = await response.json();
-
-            if (chatContactsLoading) {
-                chatContactsLoading.style.display = "none";
-            }
-
-            if (data.success) {
-
-                cachedConversations = data.conversations;
-                renderChatContactList();
-
-            }
-
-            if (window.__kuriosPendingChatOpen) {
-
-                const pending = window.__kuriosPendingChatOpen;
-                window.__kuriosPendingChatOpen = null;
-
-                openChatWith(
-                    pending.sellerStudentId,
-                    pending.storeName || "Seller",
-                    pending.conversationId,
-                    pending.productName
-                );
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Load conversations error:",
-                error
-            );
-
-            if (chatContactsLoading) {
-                chatContactsLoading.style.display = "none";
-            }
-
-        }
-
-    }
-
-
-    function renderMessages(messageRows, myId) {
-
-        if (!messages) {
-            return;
-        }
-
-        messages.innerHTML = "";
-
-        if (messageRows.length === 0) {
-
-            messages.innerHTML = `
-                <p class="chat-contacts-status" style="padding: 20px;">
-                    No messages yet. Say hello!
-                </p>
-            `;
-
-            return;
-
-        }
-
-        messageRows.forEach(function (message) {
-
-            const isSent =
-                message.sender_id === myId;
-
-            const messageElement =
-                document.createElement("div");
-
-            messageElement.className =
-                "message " + (isSent ? "sent" : "received");
-
-            const time =
-                new Date(message.created_at).toLocaleTimeString(
-                    [],
-                    { hour: "2-digit", minute: "2-digit" }
-                );
-
-            const receiptMarkup =
-                isSent ?
-                    `<i class="fa-solid fa-check-double message-read-receipt ${message.read_at ? "read" : ""}"></i>` :
-                    "";
-
-            messageElement.innerHTML = `
-                <div class="message-bubble">${escapeChatText(message.body)}</div>
-                <span>${time}${receiptMarkup}</span>
-            `;
-
-            messages.appendChild(messageElement);
-
-        });
-
-        messages.scrollTop = messages.scrollHeight;
-
-    }
-
-
-    function escapeChatText(text) {
-
-        const div = document.createElement("div");
-        div.textContent = text;
-        return div.innerHTML;
-
-    }
-
-
-    async function loadThread(partnerId, myId, conversationId) {
-
-        try {
-
-            let url =
-                API_URL + "/api/chat/messages?studentId=" + myId + "&withId=" + partnerId;
-
-            if (conversationId) {
-                url += "&conversationId=" + conversationId;
-            }
-
-            const response =
-                await fetch(url);
-
-            const data = await response.json();
-
-            if (data.success && activeChatPartnerId === partnerId) {
-
-                renderMessages(data.messages, myId);
-
-            }
-
-            // A message may have just been marked read —
-            // refresh the sidebar's unread badges too.
-
-            loadConversations();
-
-        } catch (error) {
-
-            console.error(
-                "Load thread error:",
-                error
-            );
-
-        }
-
-    }
-
-
-    function openChatWith(partnerId, partnerName, conversationId, productContext, partnerData) {
-
-        const student =
-            getLoggedInStudent();
-
-        if (!student) {
-            return;
-        }
-
-        activeChatPartnerId = partnerId;
-        activeConversationId = conversationId || null;
-
-        const nameTextEl =
-            document.getElementById("activeChatNameText");
-
-        if (nameTextEl) {
-            nameTextEl.textContent = partnerName || "Kurios Student";
-        }
-
-        updateHeaderPresence(partnerId);
-
-        if (activeChatAvatar) {
-            activeChatAvatar.innerHTML = `<i class="fa-solid fa-user"></i>`;
-        }
-
-
-        // ------------------------------------
-        // PROFILE PANEL — real data only
-        // ------------------------------------
-
-        const partner =
-            partnerData ||
-            cachedConversations.find(function (c) { return c.id === partnerId; }) ||
-            {};
-
-        const profilePanel =
-            document.getElementById("chatProfilePanel");
-
-        const chatPreviewApp =
-            document.getElementById("chatPreviewApp");
-
-        if (profilePanel) {
-
-            profilePanel.style.display = "block";
-
-            if (chatPreviewApp) {
-                chatPreviewApp.classList.add("has-profile-panel");
-            }
-
-            const profileAvatar =
-                document.getElementById("chatProfileAvatar");
-
-            if (profileAvatar) {
-
-                profileAvatar.innerHTML =
-                    partner.profile_picture ?
-                        `<img src="${API_URL + partner.profile_picture}" alt="${partnerName}">` :
-                        `<i class="fa-regular fa-user"></i>`;
-
-            }
-
-            const profileName =
-                document.getElementById("chatProfileName");
-
-            if (profileName) {
-                profileName.textContent = partnerName || "Kurios Student";
-            }
-
-            const profileUniversity =
-                document.getElementById("chatProfileUniversity");
-
-            if (profileUniversity) {
-
-                profileUniversity.textContent =
-                    partner.university || "";
-
-                profileUniversity.style.display =
-                    partner.university ? "block" : "none";
-
-            }
-
-            const infoList =
-                document.getElementById("chatProfileInfoList");
-
-            if (infoList) {
-
-                let infoRows = "";
-
-                if (partner.university) {
-
-                    infoRows += `
-                        <div class="chat-profile-info-row">
-                            <i class="fa-solid fa-building-columns"></i>
-                            <span>${partner.university}</span>
-                        </div>
-                    `;
-
-                }
-
-                if (partner.phone) {
-
-                    infoRows += `
-                        <div class="chat-profile-info-row">
-                            <i class="fa-solid fa-phone"></i>
-                            <span>${partner.phone}</span>
-                        </div>
-                    `;
-
-                }
-
-                if (partner.whatsapp_number) {
-
-                    infoRows += `
-                        <div class="chat-profile-info-row">
-                            <i class="fa-brands fa-whatsapp"></i>
-                            <span>${partner.whatsapp_number}</span>
-                        </div>
-                    `;
-
-                }
-
-                infoList.innerHTML =
-                    infoRows ||
-                    `<p style="font-size:11px; color:#9ca3af;">No further details available.</p>`;
-
-            }
-
-        }
-
-        const contextBanner =
-            document.getElementById("chatContextBanner");
-
-        if (contextBanner) {
-
-            contextBanner.style.display = "flex";
-
-            const bannerIcon =
-                contextBanner.querySelector("i");
-
-            const bannerText =
-                contextBanner.querySelector("span");
-
-            if (productContext) {
-
-                if (bannerIcon) {
-                    bannerIcon.className = "fa-solid fa-box";
-                }
-
-                if (bannerText) {
-                    bannerText.textContent = "You're chatting about: " + productContext;
-                }
-
-            } else {
-
-                if (bannerIcon) {
-                    bannerIcon.className = "fa-solid fa-user-group";
-                }
-
-                if (bannerText) {
-                    bannerText.textContent = "This is a normal conversation — you're chatting with a fellow student.";
-                }
-
-            }
-
-        }
-
-        const chatApp =
-            document.getElementById("chatPreviewApp");
-
-        if (chatApp) {
-            chatApp.classList.add("conversation-open");
-        }
-
-        const typingIndicator =
-            document.getElementById("chatTypingIndicator");
-
-        if (typingIndicator) {
-            typingIndicator.style.display = "none";
-        }
-
-        renderChatContactList();
-
-        loadThread(partnerId, student.id, activeConversationId);
-
-        clearInterval(chatPollInterval);
-
-        chatPollInterval = setInterval(
-            function () {
-                loadThread(partnerId, student.id, activeConversationId);
-            },
-            20000
-        );
-
-    }
-
-
-    /*
-        Send a message.
-    */
-
-    if (messageForm) {
-
-        messageForm.addEventListener(
-            "submit",
-            async function (event) {
-
-                event.preventDefault();
-
-                const student =
-                    getLoggedInStudent();
-
-                if (!student) {
-
-                    showMessage("Please sign in to chat.");
-                    return;
-
-                }
-
-                if (!activeChatPartnerId) {
-
-                    showMessage("Select or start a conversation first.");
-                    return;
-
-                }
-
-                if (!messageInput) {
-                    return;
-                }
-
-                const text =
-                    messageInput.value.trim();
-
-                if (text === "") {
-                    return;
-                }
-
-                messageInput.value = "";
-
-                try {
-
-                    const response =
-                        await fetch(
-                            API_URL + "/api/chat/messages",
-                            {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    senderId: student.id,
-                                    recipientId: activeChatPartnerId,
-                                    body: text,
-                                    conversationId: activeConversationId
-                                })
-                            }
-                        );
-
-                    const data = await response.json();
-
-                    if (!data.success) {
-
-                        showMessage(
-                            data.message || "Could not send your message."
-                        );
-
-                        return;
-
-                    }
-
-                    loadThread(activeChatPartnerId, student.id, activeConversationId);
-
-                } catch (error) {
-
-                    console.error(
-                        "Send message error:",
-                        error
-                    );
-
-                    showMessage("Unable to connect to Kurios Stores server.");
-
-                }
-
-            }
-        );
-
-    }
-
-
-
-    /* =====================================================
-       16. CHAT SEARCH
-       ===================================================== */
-
-
-    if (chatSearch) {
-
-        chatSearch.addEventListener(
-            "input",
-            function () {
-
-                const search =
-                    chatSearch.value
-                        .toLowerCase()
-                        .trim();
-
-                const contactButtons =
-                    chatContactList ?
-                        chatContactList.querySelectorAll(".chat-contact") :
-                        [];
-
-                contactButtons.forEach(
-                    function (contact) {
-
-                        const name =
-                            contact
-                                .querySelector("strong")
-                                .textContent
-                                .toLowerCase();
-
-                        contact.style.display =
-                            name.includes(search) ? "" : "none";
-
-                    }
-                );
-
-            }
-        );
-
-    }
-
-
-
-    /* =====================================================
-       17. NEW CHAT BUTTON — ADD BY PHONE NUMBER
-       ===================================================== */
-
-
-    const chatBackButton =
-        document.getElementById("chatBackButton");
-
-    if (chatBackButton) {
-
-        chatBackButton.addEventListener(
-            "click",
-            function () {
-
-                const chatApp =
-                    document.getElementById("chatPreviewApp");
-
-                if (chatApp) {
-                    chatApp.classList.remove("conversation-open");
-                }
-
-            }
-        );
-
-    }
-
-
-    const newChatButton =
-        document.getElementById(
-            "newChatButton"
-        );
-
-    const newChatForm =
-        document.getElementById("newChatForm");
-
-    const newChatPhoneInput =
-        document.getElementById("newChatPhoneInput");
-
-    const newChatFindButton =
-        document.getElementById("newChatFindButton");
-
-    const newChatStatus =
-        document.getElementById("newChatStatus");
-
-
-    if (newChatButton) {
-
-        newChatButton.addEventListener(
-            "click",
-            function () {
-
-                const student =
-                    getLoggedInStudent();
-
-                if (!student) {
-
-                    showMessage("Please sign in to start a chat.");
-                    openSignInModal();
-                    return;
-
-                }
-
-                if (newChatForm) {
-
-                    const isVisible =
-                        newChatForm.style.display === "block";
-
-                    newChatForm.style.display =
-                        isVisible ? "none" : "block";
-
-                    if (!isVisible && newChatPhoneInput) {
-                        newChatPhoneInput.focus();
-                    }
-
-                }
-
-            }
-        );
-
-    }
-
-
-    if (newChatFindButton) {
-
-        newChatFindButton.addEventListener(
-            "click",
-            async function () {
-
-                const student =
-                    getLoggedInStudent();
-
-                if (!student) {
-                    return;
-                }
-
-                const phoneNumber =
-                    newChatPhoneInput ? newChatPhoneInput.value.trim() : "";
-
-                if (!phoneNumber) {
-
-                    if (newChatStatus) {
-                        newChatStatus.textContent = "Please enter a phone number.";
-                    }
-
-                    return;
-
-                }
-
-                newChatFindButton.disabled = true;
-
-                if (newChatStatus) {
-                    newChatStatus.textContent = "Searching...";
-                }
-
-                try {
-
-                    const response =
-                        await fetch(
-                            API_URL + "/api/chat/find",
-                            {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    studentId: student.id,
-                                    phoneNumber: phoneNumber
-                                })
-                            }
-                        );
-
-                    const data = await response.json();
-
-                    if (!data.success) {
-
-                        if (newChatStatus) {
-                            newChatStatus.textContent = data.message;
-                        }
-
-                        return;
-
-                    }
-
-                    const fullName =
-                        ((data.student.first_name || "") + " " + (data.student.last_name || "")).trim();
-
-                    if (newChatStatus) {
-                        newChatStatus.textContent = "";
-                    }
-
-                    if (newChatPhoneInput) {
-                        newChatPhoneInput.value = "";
-                    }
-
-                    if (newChatForm) {
-                        newChatForm.style.display = "none";
-                    }
-
-                    openChatWith(data.student.id, fullName, null, null, data.student);
-
-                } catch (error) {
-
-                    console.error(
-                        "Find student by phone error:",
-                        error
-                    );
-
-                    if (newChatStatus) {
-                        newChatStatus.textContent = "Unable to connect to Kurios Stores server.";
-                    }
-
-                } finally {
-
-                    newChatFindButton.disabled = false;
-
-                }
-
-            }
-        );
-
-    }
-
-
-    // Load the conversation list once, and keep it
-    // fresh while the student is on the site. (Now
-    // that Socket.IO delivers messages instantly,
-    // this poll is just a resilience fallback in
-    // case the socket connection drops.)
-
-    loadConversations();
-
-    conversationsPollInterval = setInterval(
-        loadConversations,
-        30000
-    );
-
-    refreshOnlinePresence();
-
-    setInterval(refreshOnlinePresence, 15000);
-
-
-    // ========================================
-    // REAL-TIME CHAT (Socket.IO)
-    // ========================================
-
-    if (typeof io !== "undefined") {
-
-        const chatSocket =
-            io(API_URL);
-
-        window.__kuriosChatSocket = chatSocket;
-
-        chatSocket.on("connect", function () {
-
-            const currentStudent =
-                getLoggedInStudent();
-
-            if (currentStudent) {
-
-                chatSocket.emit("join", currentStudent.id);
-
-            }
-
-        });
-
-        chatSocket.on("new_message", function (incomingMessage) {
-
-            const currentStudent =
-                getLoggedInStudent();
-
-            if (!currentStudent) {
-                return;
-            }
-
-            // Refresh the sidebar either way, so
-            // unread badges/previews stay current.
-
-            loadConversations();
-
-            // If this message belongs to the thread
-            // that's currently open, refresh it too.
-
-            if (
-                activeChatPartnerId &&
-                String(incomingMessage.sender_id) === String(activeChatPartnerId)
-            ) {
-
-                loadThread(activeChatPartnerId, currentStudent.id, activeConversationId);
-
-            }
-
-        });
-
-        let __kuriosTypingHideTimeout = null;
-
-        chatSocket.on("typing", function (data) {
-
-            if (
-                !activeChatPartnerId ||
-                !data ||
-                String(data.fromStudentId) !== String(activeChatPartnerId)
-            ) {
-                return;
-            }
-
-            const typingIndicator =
-                document.getElementById("chatTypingIndicator");
-
-            const typingText =
-                document.getElementById("chatTypingText");
-
-            if (typingText && activeChatName) {
-
-                typingText.textContent =
-                    activeChatName.textContent + " is typing...";
-
-            }
-
-            if (typingIndicator) {
-
-                typingIndicator.style.display = "flex";
-
-                if (__kuriosTypingHideTimeout) {
-                    clearTimeout(__kuriosTypingHideTimeout);
-                }
-
-                __kuriosTypingHideTimeout = setTimeout(
-                    function () {
-                        typingIndicator.style.display = "none";
-                    },
-                    3000
-                );
-
-            }
-
-        });
-
-    }
-
-
-
-
-    /* =====================================================
-       18. ELKURIOS BROADCAST
-       ===================================================== */
-
-
-    const broadcastForm =
-        document.getElementById(
-            "broadcastForm"
-        );
-
-
-    const broadcastModal =
-        document.getElementById(
-            "broadcastModal"
-        );
-
-
-    const closeBroadcast =
-        document.getElementById(
-            "closeBroadcast"
-        );
-
-
-
-    if (closeBroadcast) {
-
-        closeBroadcast.addEventListener(
-            "click",
-            function () {
-
-                if (broadcastModal) {
-
-                    broadcastModal.classList.remove(
-                        "active"
-                    );
-
-                }
-
-            }
-        );
-
-    }
-
-
-
-    /*
-        IMPORTANT:
-
-        This currently demonstrates
-        the frontend behaviour only.
-
-        The real broadcast system will be
-        connected to PostgreSQL and Node.js
-        after we create the notification API.
-    */
-
-    if (broadcastForm) {
-
-        broadcastForm.addEventListener(
-            "submit",
-            function (event) {
-
-                event.preventDefault();
-
-
-                const title =
-                    document.getElementById(
-                        "broadcastTitle"
-                    ).value.trim();
-
-
-                const message =
-                    document.getElementById(
-                        "broadcastMessage"
-                    ).value.trim();
-
-
-
-                if (
-                    title === "" ||
-                    message === ""
-                ) {
-
-                    showMessage(
-                        "Please enter a title and message."
-                    );
-
-                    return;
-
-                }
-
-
-
-                /*
-                    Add a temporary notification
-                    to this browser.
-                */
-
-                notifications.unshift({
-
-                    title: title,
-
-                    message: message
-
-                });
-
-
-
-                saveNotifications();
-
-                renderNotifications();
-
-
-
-                showMessage(
-                    "Announcement created. The real all-students broadcast API comes next."
-                );
-
-
-
-                broadcastForm.reset();
-
-            }
-        );
-
-    }
-
-
-
-    /* =====================================================
-       19. CHECKOUT
-       ===================================================== */
-
-
-    let currentOrderPaymentReference = null;
-
-    if (checkoutButton) {
-
-        checkoutButton.addEventListener(
-            "click",
-            async function () {
-
-
-                if (
-                    cart.length === 0
-                ) {
-
-                    showMessage(
-                        "Your cart is empty."
-                    );
-
-                    return;
-
-                }
-
-
-                // ========================================
-                // MUST BE SIGNED IN TO CHECK OUT
-                // ========================================
-
-                const student =
-                    getLoggedInStudent();
-
-                if (!student) {
-
-                    closeCartPanel();
-
-                    showMessage(
-                        "Please sign in to check out."
-                    );
-
-                    openSignInModal();
-
-                    return;
-
-                }
-
-
-                checkoutButton.disabled = true;
-
-                checkoutButton.textContent =
-                    "Starting checkout...";
-
-
-                try {
-
-                    // ========================================
-                    // START THE ORDER ON OUR SERVER
-                    // (server recalculates the real total —
-                    // never trust prices from the browser)
-                    // ========================================
-
-                    const initiateResponse =
-                        await fetch(
-                            API_URL + "/api/orders/initiate",
-                            {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    studentId: student.id,
-                                    items: cart,
-                                    customerName:
-                                        `${student.first_name || ""} ${student.last_name || ""}`.trim(),
-                                    customerEmail: student.email
-                                })
-                            }
-                        );
-
-                    const initiateData =
-                        await initiateResponse.json();
-
-                    if (!initiateData.success) {
-
-                        showMessage(
-                            initiateData.message ||
-                            "Could not start checkout."
-                        );
-
-                        return;
-
-                    }
-
-                    currentOrderPaymentReference =
-                        initiateData.paymentReference;
-
-                    checkoutButton.style.display = "none";
-
-                    const choiceEl =
-                        document.getElementById("orderPaymentChoice");
-
-                    if (choiceEl) {
-                        choiceEl.style.display = "block";
-                    }
-
-                } catch (error) {
-
-                    console.error(
-                        "Checkout error:",
-                        error
-                    );
-
-                    showMessage(
-                        "Could not reach the server. Please try again."
-                    );
-
-                } finally {
-
-                    checkoutButton.disabled = false;
-
-                    checkoutButton.textContent =
-                        "Proceed to Checkout";
-
-                }
-
-            }
-        );
-
-    }
-
-
-    // ========================================
-    // PAY ORDER WITH MONNIFY
-    // ========================================
-
-    const payOrderWithMonnifyButton =
-        document.getElementById("payOrderWithMonnifyButton");
-
-    if (payOrderWithMonnifyButton) {
-
-        payOrderWithMonnifyButton.addEventListener(
-            "click",
-            async function () {
-
-                const statusEl =
-                    document.getElementById("orderPaymentStatus");
-
-                if (!currentOrderPaymentReference) {
-                    return;
-                }
-
-                const student =
-                    getLoggedInStudent();
-
-                if (!student) {
-                    return;
-                }
-
-                payOrderWithMonnifyButton.disabled = true;
-
-                if (statusEl) statusEl.textContent = "";
-
-                try {
-
-                    const response =
-                        await fetch(
-                            API_URL + "/api/orders/pay/monnify",
-                            {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    paymentReference: currentOrderPaymentReference
-                                })
-                            }
-                        );
-
-                    const data = await response.json();
-
-                    if (!data.success) {
-
-                        if (statusEl) {
-                            statusEl.textContent =
-                                data.message || "Could not start Monnify checkout.";
-                        }
-
-                        return;
-
-                    }
-
-                    if (typeof MonnifySDK === "undefined") {
-
-                        if (statusEl) {
-                            statusEl.textContent =
-                                "Payment could not load. Please refresh and try again.";
-                        }
-
-                        return;
-
-                    }
-
-                    if (
-                        !data.apiKey ||
-                        !data.contractCode
-                    ) {
-
-                        console.error(
-                            "Checkout error: missing Monnify credentials from server",
-                            data
-                        );
-
-                        if (statusEl) {
-                            statusEl.textContent =
-                                "Monnify is not fully configured yet. Try OPay instead, or contact support.";
-                        }
-
-                        return;
-
-                    }
-
-                    closeCartPanel();
-
-                    MonnifySDK.initialize({
-
-                        amount: data.amount,
-
-                        currency: "NGN",
-
-                        reference: data.paymentReference,
-
-                        customerFullName:
-                            `${student.first_name || ""} ${student.last_name || ""}`.trim(),
-
-                        customerEmail: student.email,
-
-                        apiKey: data.apiKey,
-
-                        contractCode: data.contractCode,
-
-                        paymentDescription:
-                            "Kurios Stores order",
-
-                        onComplete: async function () {
-
-                            await verifyOrderPayment(
-                                data.paymentReference
-                            );
-
-                        },
-
-                        onClose: function () {
-
-                            // Student closed the widget without
-                            // finishing — we'll still catch a
-                            // completed payment via the webhook,
-                            // so nothing else to do here.
-
-                        }
-
-                    });
-
-                } catch (error) {
-
-                    console.error(
-                        "Order Monnify checkout error:",
-                        error
-                    );
-
-                    if (statusEl) {
-                        statusEl.textContent =
-                            "Unable to connect to Kurios Stores server.";
-                    }
-
-                } finally {
-
-                    payOrderWithMonnifyButton.disabled = false;
-
-                }
-
-            }
-        );
-
-    }
-
-
-    // ========================================
-    // PAY ORDER WITH OPAY
-    // ========================================
-
-    const payOrderWithOpayButton =
-        document.getElementById("payOrderWithOpayButton");
-
-    if (payOrderWithOpayButton) {
-
-        payOrderWithOpayButton.addEventListener(
-            "click",
-            async function () {
-
-                const statusEl =
-                    document.getElementById("orderPaymentStatus");
-
-                if (!currentOrderPaymentReference) {
-                    return;
-                }
-
-                const student =
-                    getLoggedInStudent();
-
-                if (!student) {
-                    return;
-                }
-
-                payOrderWithOpayButton.disabled = true;
-
-                if (statusEl) statusEl.textContent = "Redirecting to OPay...";
-
-                try {
-
-                    const returnUrl =
-                        window.location.origin + "/#orders";
-
-                    const response =
-                        await fetch(
-                            API_URL + "/api/orders/pay/opay",
-                            {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    paymentReference: currentOrderPaymentReference,
-                                    returnUrl: returnUrl,
-                                    customerName:
-                                        `${student.first_name || ""} ${student.last_name || ""}`.trim(),
-                                    customerEmail: student.email
-                                })
-                            }
-                        );
-
-                    const data = await response.json();
-
-                    if (!data.success || !data.cashierUrl) {
-
-                        if (statusEl) {
-                            statusEl.textContent =
-                                data.message || "Could not start OPay checkout.";
-                        }
-
-                        payOrderWithOpayButton.disabled = false;
-
-                        return;
-
-                    }
-
-                    localStorage.setItem(
-                        "kuriosPendingOpayOrderRef",
-                        currentOrderPaymentReference
-                    );
-
-                    window.location.href = data.cashierUrl;
-
-                } catch (error) {
-
-                    console.error(
-                        "Order OPay checkout error:",
-                        error
-                    );
-
-                    if (statusEl) {
-                        statusEl.textContent =
-                            "Unable to connect to Kurios Stores server.";
-                    }
-
-                    payOrderWithOpayButton.disabled = false;
-
-                }
-
-            }
-        );
-
-    }
-
-
-    // ========================================
-    // CONFIRM A PAYMENT WITH OUR SERVER
-    // (never trust the widget's onComplete alone)
-    // ========================================
-
-    async function verifyOrderPayment(paymentReference) {
-
-        try {
-
-            const response =
-                await fetch(
-                    API_URL + "/api/orders/verify",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            paymentReference: paymentReference
-                        })
-                    }
-                );
-
-            const data =
-                await response.json();
-
-            if (data.success) {
-
-                cart = [];
-
-                saveCart();
-
-                updateCart();
-
-                showMessage(
-                    "Payment confirmed! Your order has been placed."
-                );
-
-            } else {
-
-                showMessage(
-                    "We couldn't confirm your payment yet. Check My Orders shortly, or contact support if this continues."
-                );
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Payment verification error:",
-                error
-            );
-
-            showMessage(
-                "We couldn't confirm your payment. Check My Orders shortly, or contact support if this continues."
-            );
-
-        } finally {
-
-            currentOrderPaymentReference = null;
-
-            if (checkoutButton) {
-                checkoutButton.style.display = "";
-            }
-
-            const choiceEl =
-                document.getElementById("orderPaymentChoice");
-
-            if (choiceEl) {
-                choiceEl.style.display = "none";
-            }
-
-        }
-
-    }
-
-
-    // ========================================
-    // RESUME AN OPAY ORDER PAYMENT IF WE'RE
-    // RETURNING FROM THE OPAY CHECKOUT PAGE
-    // ========================================
-
-    const pendingOpayOrderRef =
-        localStorage.getItem("kuriosPendingOpayOrderRef");
-
-    if (pendingOpayOrderRef) {
-
-        localStorage.removeItem("kuriosPendingOpayOrderRef");
-
-        verifyOrderPayment(pendingOpayOrderRef);
-
-    }
-
-
-
-    /* =====================================================
-       20. FOOTER INTERACTIONS
-       ===================================================== */
-
-
-    const socialLinks =
-        document.querySelectorAll(
-            ".social-links a"
-        );
-
-
-    socialLinks.forEach(
-        function (link) {
-
-            link.addEventListener(
-                "click",
-                function (event) {
-
-                    event.preventDefault();
-
-
-                    const label =
-                        link.getAttribute(
-                            "aria-label"
-                        ) ||
-                        "Social media";
-
-
-                    showMessage(
-                        label +
-                        " link will be connected soon."
-                    );
-
-                }
-            );
-
-        }
-    );
-
-
-
-    /*
-        Footer policy links.
-    */
-
-    const privacyLink =
-        document.getElementById(
-            "privacyLink"
-        );
-
-
-    const termsLink =
-        document.getElementById(
-            "termsLink"
-        );
-
-
-    const refundLink =
-        document.getElementById(
-            "refundLink"
-        );
-
-
-
-    if (privacyLink) {
-
-        privacyLink.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-
-                showMessage(
-                    "Privacy Policy page coming soon."
-                );
-
-            }
-        );
-
-    }
-
-
-
-    if (termsLink) {
-
-        termsLink.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-
-                showMessage(
-                    "Terms of Service page coming soon."
-                );
-
-            }
-        );
-
-    }
-
-
-
-    if (refundLink) {
-
-        refundLink.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-
-                showMessage(
-                    "Refund Policy page coming soon."
-                );
-
-            }
-        );
-
-    }
-
-
-
-    /* =====================================================
-       21. FOOTER HEART
-       ===================================================== */
-
-
-    const footerHeart =
-        document.querySelector(
-            ".footer-love i"
-        );
-
-
-    if (footerHeart) {
-
-        footerHeart.addEventListener(
-            "click",
-            function () {
-
-
-                footerHeart.classList.toggle(
-                    "fa-regular"
-                );
-
-
-                footerHeart.classList.toggle(
-                    "fa-solid"
-                );
-
-
-                showMessage(
-                    "Together for a greater campus ❤️"
-                );
-
-            }
-        );
-
-    }
-
-
-
-    /* =====================================================
-       22. GENERAL MESSAGE / TOAST
-       ===================================================== */
-
-
-    function showMessage(message) {
-
-
-        /*
-            Create a toast notification.
-        */
-
-        let toast =
-            document.getElementById(
-                "kuriosToast"
-            );
-
-
-
-        /*
-            If the toast doesn't exist,
-            create it.
-        */
-
-        if (!toast) {
-
-            toast =
-                document.createElement(
-                    "div"
-                );
-
-
-            toast.id =
-                "kuriosToast";
-
-
-            toast.className =
-                "kurios-toast";
-
-
-            document.body.appendChild(
-                toast
-            );
-
-        }
-
-
-
-        toast.textContent =
-            message;
-
-
-        toast.classList.add(
-            "show"
-        );
-
-
-
-        /*
-            Remove it after 3 seconds.
-        */
-
-        setTimeout(
-            function () {
-
-                toast.classList.remove(
-                    "show"
-                );
-
-            },
-            3000
-        );
-
-    }
-
-
-
-    /* =====================================================
-       23. SMOOTH SCROLLING
-       ===================================================== */
-
-
-    /*
-        Smooth-scrolling for plain "#section" links
-        used to be handled here directly — but that
-        approach called preventDefault() on every
-        "#" link click and did its own manual scroll,
-        which silently broke navigation the moment the
-        target section was hidden (i.e. from any page
-        other than the homepage itself). The unified
-        hash router below now owns all of this — it
-        already scrolls to the right section as part
-        of normal navigation, and works correctly from
-        any page, not just the homepage.
-    */
-
-    document.querySelectorAll('a[href="#signin"]').forEach(function (link) {
-
-        link.addEventListener("click", function (event) {
-
-            event.preventDefault();
-            openSignInModal();
-
-        });
-
-    });
-
-
-
-
-
-    /* =====================================================
-       24. INITIALIZE EVERYTHING
-       ===================================================== */
-
-
-    /*
-        Show saved cart.
-    */
-
-    updateCart();
-
-
-
-    /*
-        Load notifications from the server.
-    */
-
-    async function loadNotificationsFromServer() {
-
-        try {
-
-            const response =
-                await fetch(API_URL + "/api/notifications");
-
-            const data =
-                await response.json();
-
-            if (data.success) {
-
-                notifications = data.notifications;
-
-                renderNotifications();
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Load notifications error:",
-                error
-            );
-
-        }
-
-    }
-
-    loadNotificationsFromServer();
-
-
-
-    /*
-        IMPORTANT:
-
-        This is where the frontend
-        contacts our Node.js backend.
-    */
-
-    loadProducts();
-
-
-    // =====================================================
-    // UNIFIED FULL-PAGE ROUTER
-    // (single source of truth for every #hash-based full
-    // page: #sell, #store-<id>, #profile, #orders,
-    // #wishlist, #wallet — replaces the separate per-page
-    // listeners that used to duplicate this logic)
-    // =====================================================
-
-    function hideAllFullPages() {
-
-        ["sellerPage", "storefrontPage", "wishlistPage", "walletPage", "chatPage"]
-            .forEach(function (id) {
-
-                const el = document.getElementById(id);
-
-                if (el) {
-                    el.style.display = "none";
-                }
-
-            });
-
-        if (profileOverlay) {
-            profileOverlay.classList.remove("open");
-        }
-
-        if (ordersOverlay) {
-            ordersOverlay.classList.remove("open");
-        }
-
-    }
-
-    function goHome() {
-
-        if (window.location.hash) {
-
-            history.pushState(
-                null,
-                "",
-                window.location.pathname + window.location.search
-            );
-
-        }
-
-        hideAllFullPages();
-
-        const mainEl =
-            document.getElementById("mainContent");
-
-        if (mainEl) {
-            mainEl.style.display = "block";
-        }
-
-    }
-
-    function goBack() {
-
-        const previousHash =
-            window.__kuriosPreviousHash;
-
-        const currentHash =
-            window.location.hash;
-
-        // Only honor it if it's a real, different, non-empty
-        // page — never bounce back to the page we're already
-        // on, and never chase an empty/home-equivalent hash.
-
-        if (
-            previousHash &&
-            previousHash.length > 1 &&
-            previousHash !== currentHash
-        ) {
-
-            window.location.hash =
-                previousHash.slice(1);
-
-        } else {
-
-            goHome();
-
-        }
-
-    }
-
-    window.goBack = goBack;
-
-    function showSimplePage(pageId) {
-
-        hideAllFullPages();
-
-        const pageEl =
-            document.getElementById(pageId);
-
-        if (pageEl) {
-            pageEl.style.display = "block";
-        }
-
-        const mainEl =
-            document.getElementById("mainContent");
-
-        if (mainEl) {
-            mainEl.style.display = "none";
-        }
-
-        window.scrollTo({ top: 0 });
-
-    }
-
-    let __kuriosRouteToken = 0;
-    let __kuriosLastKnownHash = "";
-
-    function syncPageFromHash() {
-
-        const hash = window.location.hash;
-
-        // Remember what page we were just on, so "back"
-        // buttons can return there instead of always
-        // dropping the user on the dashboard home.
-
-        window.__kuriosPreviousHash = __kuriosLastKnownHash;
-        __kuriosLastKnownHash = hash;
-
-        const thisRouteToken =
-            ++__kuriosRouteToken;
-
-        const splashMessages = {
-            "#sell": "Loading your store...",
-            "#profile": "Loading your profile...",
-            "#orders": "Loading your orders...",
-            "#wishlist": "Loading your wishlist...",
-            "#wallet": "Loading your wallet...",
-            "#chat": "Loading chat..."
-        };
-
-        const splashMessage =
-            hash.indexOf("#store-") === 0 ?
-                "Loading store..." :
-                (splashMessages[hash] || "Loading...");
-
-        const splashEl =
-            document.getElementById("postLoginSplash");
-
-        const splashTextEl =
-            splashEl ? splashEl.querySelector("p") : null;
-
-        if (splashTextEl) {
-            splashTextEl.textContent = splashMessage;
-        }
-
-        if (splashEl) {
-            splashEl.style.display = "flex";
-        }
-
-        setTimeout(
-            function () {
-
-                // If another navigation started after this
-                // one, let that one win — don't route to a
-                // now-stale destination.
-
-                if (thisRouteToken !== __kuriosRouteToken) {
-                    return;
-                }
-
-                performPageRouting(hash);
-
-                if (splashEl) {
-                    splashEl.style.display = "none";
-                }
-
-            },
-            800
-        );
-
-    }
-
-    function performPageRouting(hash) {
-
-        if (typeof closeNotificationPanel === "function") {
-            closeNotificationPanel();
-        }
-
-        if (hash !== "#sell" && typeof setAccountMenuContext === "function") {
-            setAccountMenuContext(false);
-        }
-
-        if (hash === "#sell") {
-
-            hideAllFullPages();
-
-            if (typeof openSellerPanel === "function") {
-                openSellerPanel();
-            }
-
-            return;
-
-        }
-
-        if (hash.indexOf("#store-") === 0) {
-
-            const sellerId =
-                hash.replace("#store-", "");
-
-            if (sellerId && typeof openStorefront === "function") {
-
-                hideAllFullPages();
-                openStorefront(sellerId);
-                return;
-
-            }
-
-        }
-
-        if (hash === "#profile") {
-
-            hideAllFullPages();
-            openProfilePanel();
-            return;
-
-        }
-
-        if (hash === "#orders") {
-
-            hideAllFullPages();
-            openOrdersPanel();
-            return;
-
-        }
-
-        if (hash === "#wishlist") {
-
-            showSimplePage("wishlistPage");
-            return;
-
-        }
-
-        if (hash === "#wallet") {
-
-            showSimplePage("walletPage");
-
-            if (typeof loadWalletPage === "function") {
-                loadWalletPage();
-            }
-
-            return;
-
-        }
-
-        if (hash === "#chat") {
-
-            showSimplePage("chatPage");
-
-            if (typeof loadConversations === "function") {
-                loadConversations();
-            }
-
-            return;
-
-        }
-
-        // No matching hash — show the homepage.
-        // (This also covers plain section anchors like
-        // #shop, #categories, #rewards — the browser's
-        // native scroll-to-anchor can silently fail if
-        // that section was hidden at the moment the hash
-        // changed, e.g. coming back from another page, so
-        // we scroll to it manually here instead.)
-
-        hideAllFullPages();
-
-        const mainEl =
-            document.getElementById("mainContent");
-
-        if (mainEl) {
-            mainEl.style.display = "block";
-        }
-
-        if (hash && hash.length > 1) {
-
-            const targetEl =
-                document.getElementById(hash.slice(1));
-
-            if (targetEl) {
-
-                setTimeout(
-                    function () {
-                        targetEl.scrollIntoView({ behavior: "smooth" });
-                    },
-                    0
-                );
-
-            }
-
-        }
-
-    }
-
-    // Generic "Back" links used across full pages
-    // (Wishlist, Wallet, Chat, Seller Dashboard) —
-    // return to wherever the student actually came
-    // from, not always the dashboard home.
-
-    document.querySelectorAll(".page-back-link").forEach(function (link) {
-
-        link.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-                goBack();
-
-            }
-        );
-
-    });
-
-    // Make these reachable from outer-scope code too
-    // (e.g. closeSellerPanel calling goHome()).
-
-    window.goHome = goHome;
-    window.syncPageFromHash = syncPageFromHash;
-
-    window.addEventListener("popstate", syncPageFromHash);
-    window.addEventListener("hashchange", syncPageFromHash);
-
-    syncPageFromHash();
-
-
-});
-
-/* =========================================
-   SIGN UP MODAL
-========================================= */
-
-const signUpModal =
-    document.getElementById("signUpModal");
-
-const openSignUp =
-    document.getElementById("openSignUp");
-
-const closeSignUp =
-    document.getElementById("closeSignUp");
-
-const backToSignIn =
-    document.getElementById("backToSignIn");
-
-
-/* OPEN SIGN UP */
-
-if (openSignUp) {
-
-    openSignUp.addEventListener(
-        "click",
-        function(event) {
-
-            event.preventDefault();
-
-            if (signInModal) {
-                signInModal.classList.remove("open");
-            }
-
-            if (signUpModal) {
-                signUpModal.classList.add("open");
-            }
-
-            // Reset header visibility in case a previous
-            // OTP flow hid it.
-
-            const authIconEl =
-                document.querySelector("#signUpModal .auth-icon");
-
-            if (authIconEl) {
-                authIconEl.style.display = "";
-            }
-
-            const titleEl =
-                document.getElementById("accountModalTitle");
-
-            if (titleEl) {
-                titleEl.style.display = "";
-            }
-
-            const subtitleEl =
-                document.getElementById("accountModalSubtitle");
-
-            if (subtitleEl) {
-                subtitleEl.style.display = "";
-            }
-
-        }
-    );
-
-}
-
-
-/* CLOSE SIGN UP */
-
-if (closeSignUp) {
-
-    closeSignUp.addEventListener(
-        "click",
-        function() {
-
-            if (signUpModal) {
-                signUpModal.classList.remove("open");
-            }
-
-            if (typeof stopOtpTimers === "function") {
-                stopOtpTimers();
-            }
-
-        }
-    );
-
-}
-
-
-/* BACK TO SIGN IN */
-
-if (backToSignIn) {
-
-    backToSignIn.addEventListener(
-        "click",
-        function(event) {
-
-            event.preventDefault();
-
-            if (signUpModal) {
-                signUpModal.classList.remove("open");
-            }
-
-            if (signInModal) {
-                signInModal.classList.add("open");
-            }
-
-            if (typeof stopOtpTimers === "function") {
-                stopOtpTimers();
-            }
-
-        }
-    );
 
 }
 
 /* =========================================
-   SIGNUP MODAL SCROLLBAR
+   KURIOS TOAST MESSAGE
 ========================================= */
 
-const signupModalContent =
-    document.querySelector("#signUpModal .auth-modal");
+.kurios-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(30px);
 
-let signupScrollbarTimer;
+    background: #ffffff;
+    color: #4b0082;
 
-if (signupModalContent) {
+    padding: 14px 22px;
 
-    signupModalContent.addEventListener(
-        "scroll",
-        function () {
+    border-radius: 10px;
 
-            // Show scrollbar while scrolling
-            signupModalContent.classList.add(
-                "is-scrolling"
-            );
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.20);
 
-            // Reset the timer
-            clearTimeout(
-                signupScrollbarTimer
-            );
+    font-weight: 600;
 
-            // Hide scrollbar after scrolling stops
-            signupScrollbarTimer = setTimeout(
-                function () {
+    z-index: 99999;
 
-                    signupModalContent.classList.remove(
-                        "is-scrolling"
-                    );
+    opacity: 0;
 
-                },
-                700
-            );
+    pointer-events: none;
 
-        }
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+}
+
+
+.kurios-toast.show {
+
+    opacity: 1;
+
+    transform:
+        translateX(-50%)
+        translateY(0);
+
+}
+
+/* =========================================
+   CREATE STUDENT ACCOUNT BUTTON
+========================================= */
+
+.create-account-btn {
+    width: 100%;
+    max-width: 360px;
+    height: 46px;
+
+    margin: 8px auto 0;
+
+    border: none;
+    border-radius: 9px;
+
+    background: linear-gradient(
+        135deg,
+        #6d28d9,
+        #7c3aed
     );
 
+    color: #ffffff;
+
+    padding: 0 18px;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 6px 15px rgba(109, 40, 217, 0.22);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
 }
 
-// ========================================
-// STUDENT EMAIL OTP VERIFICATION
-// ========================================
 
-let currentStudentId = null;
-let currentStudentEmail = null;
+/* User icon */
 
-
-// ========================================
-// OTP ELEMENTS
-// ========================================
-
-const otpScreen =
-    document.getElementById("otpVerificationScreen");
-
-const otpDigits =
-    document.querySelectorAll(".otp-digit");
-
-const otpInput =
-    document.getElementById("otpInput");
-
-const verifyOtpButton =
-    document.getElementById("verifyOtpButton");
-
-const resendOtpButton =
-    document.getElementById("resendOtpButton");
-
-const otpStatusMessage =
-    document.getElementById("otpStatusMessage");
-
-const otpExpiryTime =
-    document.getElementById("otpExpiryTime");
-
-const otpExpiryCountdown =
-    document.getElementById("otpExpiryCountdown");
-
-const otpResendCooldown =
-    document.getElementById("otpResendCooldown");
-
-const otpResendCooldownTime =
-    document.getElementById("otpResendCooldownTime");
+.create-account-btn i:first-child {
+    font-size: 15px;
+}
 
 
-// ========================================
-// COUNTDOWN TIMER STATE
-// ========================================
+/* Arrow */
 
-let otpExpiryInterval = null;
-let otpResendInterval = null;
+.create-account-btn i:last-child {
+    font-size: 15px;
+    margin-left: 2px;
+
+    transition: transform 0.2s ease;
+}
 
 
-// ========================================
-// START THE 10-MINUTE EXPIRY COUNTDOWN
-// ========================================
+/* =========================================
+   HOVER EFFECT
+========================================= */
 
-function startOtpExpiryCountdown() {
-
-    clearInterval(otpExpiryInterval);
-
-    let secondsLeft = 10 * 60;
-
-    function render() {
-
-        const minutes =
-            Math.floor(secondsLeft / 60);
-
-        const seconds =
-            secondsLeft % 60;
-
-        if (otpExpiryTime) {
-
-            otpExpiryTime.textContent =
-                String(minutes).padStart(2, "0") +
-                ":" +
-                String(seconds).padStart(2, "0");
-
-        }
-
-        if (otpExpiryCountdown) {
-
-            otpExpiryCountdown.classList.toggle(
-                "otp-expiry-urgent",
-                secondsLeft <= 60
-            );
-
-        }
-
-    }
-
-    render();
-
-    otpExpiryInterval = setInterval(
-        function () {
-
-            secondsLeft = secondsLeft - 1;
-
-            if (secondsLeft <= 0) {
-
-                clearInterval(otpExpiryInterval);
-
-                secondsLeft = 0;
-
-                if (otpExpiryTime) {
-                    otpExpiryTime.textContent = "00:00";
-                }
-
-                if (otpStatusMessage) {
-
-                    otpStatusMessage.textContent =
-                        "This code has expired. Please resend a new one.";
-
-                }
-
-            }
-
-            render();
-
-        },
-        1000
+.create-account-btn:hover {
+    background: linear-gradient(
+        135deg,
+        #5b21b6,
+        #6d28d9
     );
 
-}
-
-
-// ========================================
-// START THE 30-SECOND RESEND COOLDOWN
-// ========================================
-
-function startOtpResendCooldown() {
-
-    clearInterval(otpResendInterval);
-
-    let secondsLeft = 30;
-
-    if (resendOtpButton) {
-        resendOtpButton.style.display = "none";
-    }
-
-    if (otpResendCooldown) {
-        otpResendCooldown.style.display = "inline";
-    }
-
-    function render() {
-
-        if (otpResendCooldownTime) {
-
-            otpResendCooldownTime.textContent =
-                secondsLeft;
-
-        }
-
-    }
-
-    render();
-
-    otpResendInterval = setInterval(
-        function () {
-
-            secondsLeft = secondsLeft - 1;
-
-            if (secondsLeft <= 0) {
-
-                clearInterval(otpResendInterval);
-
-                if (resendOtpButton) {
-                    resendOtpButton.style.display = "inline";
-                }
-
-                if (otpResendCooldown) {
-                    otpResendCooldown.style.display = "none";
-                }
-
-                return;
-
-            }
-
-            render();
-
-        },
-        1000
-    );
-
-}
-
-
-// ========================================
-// STOP BOTH TIMERS
-// ========================================
-
-function stopOtpTimers() {
-
-    clearInterval(otpExpiryInterval);
-    clearInterval(otpResendInterval);
-
-}
-
-
-// ========================================
-// SHOW OTP VERIFICATION SCREEN
-// ========================================
-
-function showOtpVerificationScreen(studentId, email) {
-
-    currentStudentId = studentId;
-    currentStudentEmail = email;
-
-
-    // ========================================
-    // HIDE SIGNUP FORM
-    // ========================================
-
-    const signupForm =
-        document.getElementById("signupForm");
-
-    if (signupForm) {
-
-        signupForm.style.display = "none";
-
-    }
-
-
-    // ========================================
-    // SHOW OTP SCREEN
-    // ========================================
-
-    if (otpScreen) {
-
-        otpScreen.style.display = "block";
-
-    }
-
-
-    // ========================================
-    // HIDE THE PERSISTENT SIGNUP HEADER
-    // (icon + subtitle) — the OTP screen has
-    // its own header, so showing both stacked
-    // on top of each other wastes space,
-    // especially on mobile.
-    // ========================================
-
-    const authIcon =
-        document.querySelector("#signUpModal .auth-icon");
-
-    if (authIcon) {
-        authIcon.style.display = "none";
-    }
-
-    const accountModalSubtitleEl =
-        document.getElementById("accountModalSubtitle");
-
-    if (accountModalSubtitleEl) {
-        accountModalSubtitleEl.style.display = "none";
-    }
-
-    const accountModalTitleEl =
-        document.getElementById("accountModalTitle");
-
-    if (accountModalTitleEl) {
-        accountModalTitleEl.style.display = "none";
-    }
-
-
-    // ========================================
-    // UPDATE EMAIL MESSAGE
-    // ========================================
-
-    const otpMessage =
-        document.getElementById(
-            "otpVerificationMessage"
-        );
-
-    if (otpMessage) {
-
-        otpMessage.innerHTML = `
-            We sent a 6-digit code to
-            <span class="otp-email-chip">${email}</span>.
-            Enter it below to activate your account.
-        `;
-
-    }
-
-
-    // ========================================
-    // CLEAR OTP BOXES
-    // ========================================
-
-    otpDigits.forEach(function (input) {
-
-        input.value = "";
-
-    });
-
-
-    if (otpInput) {
-
-        otpInput.value = "";
-
-    }
-
-
-    // ========================================
-    // CLEAR STATUS
-    // ========================================
-
-    if (otpStatusMessage) {
-
-        otpStatusMessage.textContent = "";
-
-    }
-
-
-    // ========================================
-    // FOCUS FIRST BOX
-    // ========================================
-
-    if (otpDigits.length > 0) {
-
-        otpDigits[0].focus();
-
-    }
-
-
-    // ========================================
-    // START COUNTDOWNS
-    // ========================================
-
-    startOtpExpiryCountdown();
-
-    startOtpResendCooldown();
-
-}
-
-
-// ========================================
-// UPDATE COMBINED OTP
-// ========================================
-
-function updateCombinedOtp() {
-
-    let combinedOtp = "";
-
-    otpDigits.forEach(function (input) {
-
-        combinedOtp += input.value;
-
-    });
-
-
-    if (otpInput) {
-
-        otpInput.value = combinedOtp;
-
-    }
-
-
-    return combinedOtp;
-
-}
-
-
-// ========================================
-// OTP BOX INPUT HANDLING
-// ========================================
-
-otpDigits.forEach(function (input, index) {
-
-
-    // ========================================
-    // INPUT
-    // ========================================
-
-    input.addEventListener(
-        "input",
-        function () {
-
-            // Numbers only
-            this.value =
-                this.value.replace(/\D/g, "");
-
-
-            // Keep only one digit
-            if (this.value.length > 1) {
-
-                this.value =
-                    this.value.slice(-1);
-
-            }
-
-
-            // Update hidden OTP
-            updateCombinedOtp();
-
-
-            // Move to next box
-            if (
-                this.value &&
-                index < otpDigits.length - 1
-            ) {
-
-                otpDigits[index + 1].focus();
-
-            }
-
-        }
-    );
-
-
-    // ========================================
-    // KEYBOARD HANDLING
-    // ========================================
-
-    input.addEventListener(
-        "keydown",
-        function (event) {
-
-
-            // Backspace
-            if (
-                event.key === "Backspace" &&
-                !this.value &&
-                index > 0
-            ) {
-
-                otpDigits[index - 1].focus();
-
-            }
-
-
-            // Left arrow
-            if (
-                event.key === "ArrowLeft" &&
-                index > 0
-            ) {
-
-                otpDigits[index - 1].focus();
-
-            }
-
-
-            // Right arrow
-            if (
-                event.key === "ArrowRight" &&
-                index < otpDigits.length - 1
-            ) {
-
-                otpDigits[index + 1].focus();
-
-            }
-
-        }
-    );
-
-
-    // ========================================
-    // PASTE COMPLETE OTP
-    // ========================================
-
-    input.addEventListener(
-        "paste",
-        function (event) {
-
-            event.preventDefault();
-
-            const pastedText =
-                event.clipboardData
-                    .getData("text")
-                    .replace(/\D/g, "")
-                    .slice(0, 6);
-
-
-            if (!pastedText) {
-
-                return;
-
-            }
-
-
-            pastedText
-                .split("")
-                .forEach(function (digit, digitIndex) {
-
-                    if (
-                        otpDigits[digitIndex]
-                    ) {
-
-                        otpDigits[digitIndex].value =
-                            digit;
-
-                    }
-
-                });
-
-
-            updateCombinedOtp();
-
-
-            const focusIndex =
-                Math.min(
-                    pastedText.length,
-                    otpDigits.length - 1
-                );
-
-            if (otpDigits[focusIndex]) {
-
-                otpDigits[focusIndex].focus();
-
-            }
-
-        }
-    );
-
-});
-
-
-// ========================================
-// VERIFY OTP
-// ========================================
-
-if (verifyOtpButton) {
-
-    verifyOtpButton.addEventListener(
-        "click",
-        async function () {
-
-
-            // ========================================
-            // COMBINE OTP
-            // ========================================
-
-            const otp =
-                updateCombinedOtp();
-
-
-            // ========================================
-            // CLEAR PREVIOUS STATUS
-            // ========================================
-
-            if (otpStatusMessage) {
-
-                otpStatusMessage.textContent = "";
-
-            }
-
-
-            // ========================================
-            // VALIDATE OTP
-            // ========================================
-
-            if (!/^\d{6}$/.test(otp)) {
-
-                if (otpStatusMessage) {
-
-                    otpStatusMessage.textContent =
-                        "Please enter the complete 6-digit verification code.";
-
-                }
-
-                return;
-
-            }
-
-
-            // ========================================
-            // CHECK STUDENT ID
-            // ========================================
-
-            if (!currentStudentId) {
-
-                if (otpStatusMessage) {
-
-                    otpStatusMessage.textContent =
-                        "Your verification session has expired. Please restart registration.";
-
-                }
-
-                return;
-
-            }
-
-
-            // ========================================
-            // DISABLE VERIFY BUTTON
-            // ========================================
-
-            verifyOtpButton.disabled = true;
-
-            verifyOtpButton.innerHTML = `
-                <span class="otp-button-icon">
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                </span>
-
-                <span class="otp-button-text">
-                    Verifying...
-                </span>
-
-                <span class="otp-button-arrow">
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                </span>
-            `;
-
-
-            try {
-
-
-                // ========================================
-                // SEND OTP TO BACKEND
-                // ========================================
-
-                const response =
-                    await fetch(
-                        API_URL + "/api/students/verify-otp",
-                        {
-
-                            method: "POST",
-
-                            headers: {
-
-                                "Content-Type":
-                                    "application/json"
-
-                            },
-
-                            body: JSON.stringify({
-
-                                studentId:
-                                    currentStudentId,
-
-                                otp:
-                                    otp
-
-                            })
-
-                        }
-                    );
-
-
-                // ========================================
-                // READ RESPONSE
-                // ========================================
-
-                const data =
-                    await response.json();
-
-
-                // ========================================
-                // INVALID OTP
-                // ========================================
-
-                if (
-                    !response.ok ||
-                    !data.success
-                ) {
-
-                    if (otpStatusMessage) {
-
-                        otpStatusMessage.textContent =
-                            data.message ||
-                            "Invalid or expired verification code.";
-
-                    }
-
-
-                    verifyOtpButton.disabled =
-                        false;
-
-
-                    verifyOtpButton.innerHTML = `
-                        <span class="otp-button-icon">
-                            <i class="fa-solid fa-shield-halved"></i>
-                        </span>
-
-                        <span class="otp-button-text">
-                            Verify Account
-                        </span>
-
-                        <span class="otp-button-arrow">
-                            <i class="fa-solid fa-arrow-right"></i>
-                        </span>
-                    `;
-
-
-                    return;
-
-                }
-
-
-                // ========================================
-                // SUCCESS
-                // ========================================
-
-                console.log(
-                    "Student email verified successfully:",
-                    data.student
-                );
-
-
-                if (otpStatusMessage) {
-
-                    otpStatusMessage.textContent =
-                        "Email verified successfully!";
-
-                }
-
-
-                // ========================================
-                // HIDE OTP SCREEN
-                // ========================================
-
-                if (otpScreen) {
-
-                    otpScreen.style.display =
-                        "none";
-
-                }
-
-                stopOtpTimers();
-
-
-                // ========================================
-                // UPDATE MODAL TITLE
-                // ========================================
-
-                const accountModalTitle =
-                    document.getElementById(
-                        "accountModalTitle"
-                    );
-
-                if (accountModalTitle) {
-
-                    accountModalTitle.textContent =
-                        "Account Created Successfully! 🎉";
-
-                }
-
-
-                // ========================================
-                // HIDE MODAL SUBTITLE
-                // ========================================
-
-                const accountModalSubtitle =
-                    document.getElementById(
-                        "accountModalSubtitle"
-                    );
-
-                if (accountModalSubtitle) {
-
-                    accountModalSubtitle.style.display =
-                        "none";
-
-                }
-
-
-                // ========================================
-                // SHOW SUCCESS SCREEN
-                // ========================================
-
-                const successScreen =
-                    document.getElementById(
-                        "accountCreatedSuccessScreen"
-                    );
-
-                if (successScreen) {
-
-                    successScreen.style.display =
-                        "block";
-
-                }
-
-
-                // ========================================
-                // RESET OTP
-                // ========================================
-
-                otpDigits.forEach(
-                    function (input) {
-
-                        input.value = "";
-
-                    }
-                );
-
-
-                if (otpInput) {
-
-                    otpInput.value = "";
-
-                }
-
-
-            } catch (error) {
-
-                console.error(
-                    "OTP verification error:",
-                    error
-                );
-
-
-                if (otpStatusMessage) {
-
-                    otpStatusMessage.textContent =
-                        "Unable to connect to Kurios Stores server. Please try again.";
-
-                }
-
-
-                verifyOtpButton.disabled =
-                    false;
-
-
-                verifyOtpButton.innerHTML = `
-                    <span class="otp-button-icon">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </span>
-
-                    <span class="otp-button-text">
-                        Verify Account
-                    </span>
-
-                    <span class="otp-button-arrow">
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </span>
-                `;
-
-            }
-
-        }
-    );
-
-}
-
-
-// ========================================
-// RESEND OTP
-// ========================================
-
-if (resendOtpButton) {
-
-    resendOtpButton.addEventListener(
-        "click",
-        async function () {
-
-
-            // ========================================
-            // CHECK SESSION
-            // ========================================
-
-            if (
-                !currentStudentId ||
-                !currentStudentEmail
-            ) {
-
-                if (otpStatusMessage) {
-
-                    otpStatusMessage.textContent =
-                        "Unable to resend OTP. Please restart registration.";
-
-                }
-
-                return;
-
-            }
-
-
-            // ========================================
-            // DISABLE RESEND BUTTON
-            // ========================================
-
-            resendOtpButton.disabled =
-                true;
-
-            resendOtpButton.innerHTML = `
-                <i class="fa-solid fa-spinner fa-spin"></i>
-                <span>Sending...</span>
-            `;
-
-
-            try {
-
-
-                // ========================================
-                // SEND RESEND REQUEST
-                // ========================================
-
-                const response =
-                    await fetch(
-                        API_URL + "/api/students/resend-otp",
-                        {
-
-                            method: "POST",
-
-                            headers: {
-
-                                "Content-Type":
-                                    "application/json"
-
-                            },
-
-                            body: JSON.stringify({
-
-                                studentId:
-                                    currentStudentId,
-
-                                email:
-                                    currentStudentEmail
-
-                            })
-
-                        }
-                    );
-
-
-                // ========================================
-                // READ RESPONSE
-                // ========================================
-
-                const data =
-                    await response.json();
-
-
-                // ========================================
-                // HANDLE ERROR
-                // ========================================
-
-                if (
-                    !response.ok ||
-                    !data.success
-                ) {
-
-                    if (otpStatusMessage) {
-
-                        otpStatusMessage.textContent =
-                            data.message ||
-                            "Unable to resend verification code.";
-
-                    }
-
-                    return;
-
-                }
-
-
-                // ========================================
-                // RESEND SUCCESS
-                // ========================================
-
-                if (otpStatusMessage) {
-
-                    otpStatusMessage.textContent =
-                        "A new verification code has been sent to your email.";
-
-                }
-
-
-                // ========================================
-                // RESTART COUNTDOWNS
-                // ========================================
-
-                startOtpExpiryCountdown();
-
-                startOtpResendCooldown();
-
-
-                // ========================================
-                // CLEAR OTP BOXES
-                // ========================================
-
-                otpDigits.forEach(
-                    function (input) {
-
-                        input.value = "";
-
-                    }
-                );
-
-
-                if (otpInput) {
-
-                    otpInput.value = "";
-
-                }
-
-
-                // ========================================
-                // FOCUS FIRST BOX
-                // ========================================
-
-                if (otpDigits.length > 0) {
-
-                    otpDigits[0].focus();
-
-                }
-
-
-            } catch (error) {
-
-                console.error(
-                    "Resend OTP error:",
-                    error
-                );
-
-
-                if (otpStatusMessage) {
-
-                    otpStatusMessage.textContent =
-                        "Unable to connect to Kurios Stores server.";
-
-                }
-
-            } finally {
-
-
-                // ========================================
-                // RESTORE RESEND BUTTON
-                // ========================================
-
-                resendOtpButton.disabled =
-                    false;
-
-                resendOtpButton.innerHTML = `
-                    <i class="fa-solid fa-rotate"></i>
-
-                    <span>
-                        Resend OTP
-                    </span>
-                `;
-
-            }
-
-        }
-    );
-
-}
-
-
-// ========================================
-// SUCCESS SCREEN → LOGIN
-// ========================================
-
-const successLoginLink =
-    document.getElementById(
-        "successLoginLink"
-    );
-
-if (successLoginLink) {
-
-    successLoginLink.addEventListener(
-        "click",
-        function (event) {
-
-            event.preventDefault();
-
-
-            // ========================================
-            // HIDE SUCCESS SCREEN
-            // ========================================
-
-            const successScreen =
-                document.getElementById(
-                    "accountCreatedSuccessScreen"
-                );
-
-            if (successScreen) {
-
-                successScreen.style.display =
-                    "none";
-
-            }
-
-
-            // ========================================
-            // SHOW SIGN IN FORM
-            // ========================================
-
-            const signinForm =
-                document.getElementById(
-                    "signinForm"
-                );
-
-            if (signinForm) {
-
-                signinForm.style.display =
-                    "block";
-
-            }
-
-
-            // ========================================
-            // UPDATE MODAL TITLE
-            // ========================================
-
-            const accountModalTitle =
-                document.getElementById(
-                    "accountModalTitle"
-                );
-
-            if (accountModalTitle) {
-
-                accountModalTitle.textContent =
-                    "Welcome Back";
-
-            }
-
-
-            // ========================================
-            // SHOW SIGN IN SUBTITLE
-            // ========================================
-
-            const accountModalSubtitle =
-                document.getElementById(
-                    "accountModalSubtitle"
-                );
-
-            if (accountModalSubtitle) {
-
-                accountModalSubtitle.style.display =
-                    "block";
-
-                accountModalSubtitle.textContent =
-                    "Sign in to your Kurios Stores account.";
-
-            }
-
-        }
-    );
-
-}
-
-// =========================================================
-// PASSCODE ENTRY (SIGNUP, SIGNIN, RESET) + RESET FLOW
-// =========================================================
-
-// ========================================
-// GENERIC DIGIT-BOX GROUP WIRING
-// (auto-advance, backspace, arrows, paste)
-// ========================================
-
-function wireDigitGroup(digitInputs, hiddenInput, onChange) {
-
-    const inputs = Array.prototype.slice.call(digitInputs);
-
-    function updateCombined() {
-
-        let combined = "";
-
-        inputs.forEach(function (input) {
-            combined += input.value;
-        });
-
-        if (hiddenInput) {
-            hiddenInput.value = combined;
-        }
-
-        if (typeof onChange === "function") {
-            onChange(combined);
-        }
-
-        return combined;
-
-    }
-
-    inputs.forEach(function (input, index) {
-
-        input.addEventListener(
-            "input",
-            function () {
-
-                this.value =
-                    this.value.replace(/\D/g, "");
-
-                if (this.value.length > 1) {
-                    this.value = this.value.slice(-1);
-                }
-
-                updateCombined();
-
-                if (
-                    this.value &&
-                    index < inputs.length - 1
-                ) {
-                    inputs[index + 1].focus();
-                }
-
-            }
-        );
-
-        input.addEventListener(
-            "keydown",
-            function (event) {
-
-                if (
-                    event.key === "Backspace" &&
-                    !this.value &&
-                    index > 0
-                ) {
-                    inputs[index - 1].focus();
-                }
-
-                if (
-                    event.key === "ArrowLeft" &&
-                    index > 0
-                ) {
-                    inputs[index - 1].focus();
-                }
-
-                if (
-                    event.key === "ArrowRight" &&
-                    index < inputs.length - 1
-                ) {
-                    inputs[index + 1].focus();
-                }
-
-            }
-        );
-
-        input.addEventListener(
-            "paste",
-            function (event) {
-
-                event.preventDefault();
-
-                const pastedText =
-                    event.clipboardData
-                        .getData("text")
-                        .replace(/\D/g, "")
-                        .slice(0, inputs.length);
-
-                if (!pastedText) {
-                    return;
-                }
-
-                pastedText
-                    .split("")
-                    .forEach(function (digit, digitIndex) {
-
-                        if (inputs[digitIndex]) {
-                            inputs[digitIndex].value = digit;
-                        }
-
-                    });
-
-                updateCombined();
-
-                const focusIndex =
-                    Math.min(
-                        pastedText.length,
-                        inputs.length - 1
-                    );
-
-                inputs[focusIndex].focus();
-
-            }
-        );
-
-    });
-
-    return {
-
-        updateCombined: updateCombined,
-
-        clear: function () {
-
-            inputs.forEach(function (input) {
-                input.value = "";
-            });
-
-            if (hiddenInput) {
-                hiddenInput.value = "";
-            }
-
-        },
-
-        focusFirst: function () {
-
-            if (inputs.length > 0) {
-                inputs[0].focus();
-            }
-
-        }
-
-    };
-
-}
-
-
-// ========================================
-// SIGNUP PASSCODE + CONFIRM MISMATCH CHECK
-// ========================================
-
-const passcodeMismatchMessage =
-    document.getElementById("passcodeMismatchMessage");
-
-function checkSignupPasscodeMatch() {
-
-    const a =
-        document.getElementById("signupPasscode").value;
-
-    const b =
-        document.getElementById("signupConfirmPasscode").value;
-
-    if (!passcodeMismatchMessage) {
-        return;
-    }
-
-    if (a.length === 6 && b.length === 6 && a !== b) {
-
-        passcodeMismatchMessage.style.display = "block";
-
-    } else {
-
-        passcodeMismatchMessage.style.display = "none";
-
-    }
-
-}
-
-const signupPasscodeGroup =
-    wireDigitGroup(
-        document.querySelectorAll("#signupPasscodeBoxes .passcode-digit"),
-        document.getElementById("signupPasscode"),
-        checkSignupPasscodeMatch
-    );
-
-const signupConfirmPasscodeGroup =
-    wireDigitGroup(
-        document.querySelectorAll("#signupConfirmPasscodeBoxes .passcode-digit"),
-        document.getElementById("signupConfirmPasscode"),
-        checkSignupPasscodeMatch
-    );
-
-
-// ========================================
-// SIGNIN PASSCODE
-// ========================================
-
-const signinPasscodeGroup =
-    wireDigitGroup(
-        document.querySelectorAll("#signinPasscodeBoxes .passcode-digit"),
-        document.getElementById("signinPasscode")
-    );
-
-
-// ========================================
-// RESET FLOW — NEW PASSCODE MISMATCH CHECK
-// ========================================
-
-const newPasscodeMismatchMessage =
-    document.getElementById("newPasscodeMismatchMessage");
-
-function checkNewPasscodeMatch() {
-
-    const a =
-        document.getElementById("newPasscodeInput").value;
-
-    const b =
-        document.getElementById("confirmNewPasscodeInput").value;
-
-    if (!newPasscodeMismatchMessage) {
-        return;
-    }
-
-    if (a.length === 6 && b.length === 6 && a !== b) {
-
-        newPasscodeMismatchMessage.style.display = "block";
-
-    } else {
-
-        newPasscodeMismatchMessage.style.display = "none";
-
-    }
-
-}
-
-const resetOtpGroup =
-    wireDigitGroup(
-        document.querySelectorAll("#resetOtpBoxes .reset-otp-digit"),
-        document.getElementById("resetOtpInput")
-    );
-
-const newPasscodeGroup =
-    wireDigitGroup(
-        document.querySelectorAll("#newPasscodeBoxes .passcode-digit"),
-        document.getElementById("newPasscodeInput"),
-        checkNewPasscodeMatch
-    );
-
-const confirmNewPasscodeGroup =
-    wireDigitGroup(
-        document.querySelectorAll("#confirmNewPasscodeBoxes .passcode-digit"),
-        document.getElementById("confirmNewPasscodeInput"),
-        checkNewPasscodeMatch
-    );
-
-
-// ========================================
-// RESET PASSCODE — SCREEN ELEMENTS
-// ========================================
-
-const resetPasscodeEmailScreen =
-    document.getElementById("resetPasscodeEmailScreen");
-
-const resetPasscodeConfirmScreen =
-    document.getElementById("resetPasscodeConfirmScreen");
-
-const resetPasscodeEmailStatus =
-    document.getElementById("resetPasscodeEmailStatus");
-
-const resetPasscodeConfirmStatus =
-    document.getElementById("resetPasscodeConfirmStatus");
-
-const sendPasscodeResetButton =
-    document.getElementById("sendPasscodeResetButton");
-
-const confirmPasscodeResetButton =
-    document.getElementById("confirmPasscodeResetButton");
-
-const resendResetOtpButton =
-    document.getElementById("resendResetOtpButton");
-
-const resetResendCooldown =
-    document.getElementById("resetResendCooldown");
-
-const resetResendCooldownTime =
-    document.getElementById("resetResendCooldownTime");
-
-const backToSignInFromReset =
-    document.getElementById("backToSignInFromReset");
-
-const forgotPasswordLink =
-    document.getElementById("forgotPassword");
-
-let currentResetStudentId = null;
-let currentResetEmail = null;
-let resetResendInterval = null;
-
-
-function startResetResendCooldown() {
-
-    clearInterval(resetResendInterval);
-
-    let secondsLeft = 30;
-
-    if (resendResetOtpButton) {
-        resendResetOtpButton.style.display = "none";
-    }
-
-    if (resetResendCooldown) {
-        resetResendCooldown.style.display = "inline";
-    }
-
-    function render() {
-
-        if (resetResendCooldownTime) {
-            resetResendCooldownTime.textContent = secondsLeft;
-        }
-
-    }
-
-    render();
-
-    resetResendInterval = setInterval(
-        function () {
-
-            secondsLeft = secondsLeft - 1;
-
-            if (secondsLeft <= 0) {
-
-                clearInterval(resetResendInterval);
-
-                if (resendResetOtpButton) {
-                    resendResetOtpButton.style.display = "inline";
-                }
-
-                if (resetResendCooldown) {
-                    resetResendCooldown.style.display = "none";
-                }
-
-                return;
-
-            }
-
-            render();
-
-        },
-        1000
-    );
-
-}
-
-
-// ========================================
-// SIGN IN — EMAIL / PHONE TABS
-// ========================================
-
-const signinTabEmail =
-    document.getElementById("signinTabEmail");
-
-const signinTabPhone =
-    document.getElementById("signinTabPhone");
-
-const signinEmailPanel =
-    document.getElementById("signinEmailPanel");
-
-const signinPhonePanel =
-    document.getElementById("signinPhonePanel");
-
-const signinTabsIndicator =
-    document.getElementById("signinTabsIndicator");
-
-let signinActiveTab = "email";
-
-function setSigninTab(tab) {
-
-    signinActiveTab = tab;
-
-    const isEmail = tab === "email";
-
-    if (signinTabEmail) {
-        signinTabEmail.classList.toggle("active", isEmail);
-    }
-
-    if (signinTabPhone) {
-        signinTabPhone.classList.toggle("active", !isEmail);
-    }
-
-    if (signinEmailPanel) {
-        signinEmailPanel.style.display = isEmail ? "block" : "none";
-    }
-
-    if (signinPhonePanel) {
-        signinPhonePanel.style.display = isEmail ? "none" : "block";
-    }
-
-    if (signinTabsIndicator) {
-        signinTabsIndicator.classList.toggle("tab-phone", !isEmail);
-    }
-
-    const identifierStatus =
-        document.getElementById("signinIdentifierStatus");
-
-    if (identifierStatus) {
-        identifierStatus.textContent = "";
-    }
-
-}
-
-if (signinTabEmail) {
-
-    signinTabEmail.addEventListener(
-        "click",
-        function () {
-            setSigninTab("email");
-        }
-    );
-
-}
-
-if (signinTabPhone) {
-
-    signinTabPhone.addEventListener(
-        "click",
-        function () {
-            setSigninTab("phone");
-        }
-    );
-
-}
-
-
-// ========================================
-// SIGN IN — EMAIL/PHONE STEP "NEXT" BUTTON
-// ========================================
-
-const signinNextButton =
-    document.getElementById("signinNextButton");
-
-if (signinNextButton) {
-
-    signinNextButton.addEventListener(
-        "click",
-        function () {
-
-            const identifierStatus =
-                document.getElementById("signinIdentifierStatus");
-
-            let identifier = "";
-            let displayValue = "";
-
-            if (signinActiveTab === "email") {
-
-                const emailField =
-                    document.getElementById("signinEmail");
-
-                identifier =
-                    emailField ? emailField.value.trim() : "";
-
-                displayValue = identifier;
-
-                if (!identifier) {
-
-                    if (identifierStatus) {
-                        identifierStatus.textContent =
-                            "Please enter your email address.";
-                    }
-
-                    if (emailField) {
-                        emailField.focus();
-                    }
-
-                    return;
-
-                }
-
-            } else {
-
-                const phoneField =
-                    document.getElementById("signinPhone");
-
-                const rawDigits =
-                    phoneField ?
-                        phoneField.value.replace(/\D/g, "") :
-                        "";
-
-                if (!rawDigits) {
-
-                    if (identifierStatus) {
-                        identifierStatus.textContent =
-                            "Please enter your phone number.";
-                    }
-
-                    if (phoneField) {
-                        phoneField.focus();
-                    }
-
-                    return;
-
-                }
-
-                // Strip a leading 0 (local format) before
-                // attaching the country code.
-
-                const localDigits =
-                    rawDigits.replace(/^0+/, "");
-
-                identifier =
-                    "+234" + localDigits;
-
-                displayValue =
-                    "+234 " + localDigits;
-
-            }
-
-            const identifierValueField =
-                document.getElementById("signinIdentifierValue");
-
-            if (identifierValueField) {
-                identifierValueField.value = identifier;
-            }
-
-            const emailStep =
-                document.getElementById("signinEmailStep");
-
-            const passcodeStep =
-                document.getElementById("signinPasscodeStep");
-
-            const adminPasswordStep =
-                document.getElementById("signinAdminPasswordStep");
-
-
-            // ========================================
-            // NOT AN EMAIL/PHONE SHAPE — TREAT AS AN
-            // ADMIN USERNAME INSTEAD
-            // ========================================
-
-            if (
-                signinActiveTab === "email" &&
-                !identifier.includes("@")
-            ) {
-
-                const adminUsernameChip =
-                    document.getElementById("signinAdminUsernameChip");
-
-                if (adminUsernameChip) {
-                    adminUsernameChip.textContent = identifier;
-                }
-
-                if (emailStep) {
-                    emailStep.style.display = "none";
-                }
-
-                if (passcodeStep) {
-                    passcodeStep.style.display = "none";
-                }
-
-                if (adminPasswordStep) {
-                    adminPasswordStep.style.display = "block";
-                }
-
-                const adminPasswordField =
-                    document.getElementById("signinAdminPassword");
-
-                if (adminPasswordField) {
-
-                    adminPasswordField.value = "";
-                    adminPasswordField.focus();
-
-                }
-
-                return;
-
-            }
-
-            const emailChip =
-                document.getElementById("signinEmailChip");
-
-            if (emailChip) {
-                emailChip.textContent = displayValue;
-            }
-
-            if (emailStep) {
-                emailStep.style.display = "none";
-            }
-
-            if (passcodeStep) {
-                passcodeStep.style.display = "block";
-            }
-
-            signinPasscodeGroup.clear();
-            signinPasscodeGroup.focusFirst();
-
-        }
-    );
-
-}
-
-
-// ========================================
-// SIGN IN — "USE A DIFFERENT EMAIL"
-// ========================================
-
-const signinChangeEmail =
-    document.getElementById("signinChangeEmail");
-
-if (signinChangeEmail) {
-
-    signinChangeEmail.addEventListener(
-        "click",
-        function (event) {
-
-            event.preventDefault();
-
-            const emailStep =
-                document.getElementById("signinEmailStep");
-
-            const passcodeStep =
-                document.getElementById("signinPasscodeStep");
-
-            if (passcodeStep) {
-                passcodeStep.style.display = "none";
-            }
-
-            if (emailStep) {
-                emailStep.style.display = "block";
-            }
-
-            signinPasscodeGroup.clear();
-
-        }
-    );
-
-}
-
-
-// ========================================
-// ADMIN PASSWORD STEP — "USE A DIFFERENT EMAIL"
-// ========================================
-
-const signinAdminChangeEmail =
-    document.getElementById("signinAdminChangeEmail");
-
-if (signinAdminChangeEmail) {
-
-    signinAdminChangeEmail.addEventListener(
-        "click",
-        function (event) {
-
-            event.preventDefault();
-
-            const emailStep =
-                document.getElementById("signinEmailStep");
-
-            const adminPasswordStep =
-                document.getElementById("signinAdminPasswordStep");
-
-            const adminStatus =
-                document.getElementById("signinAdminStatus");
-
-            if (adminPasswordStep) {
-                adminPasswordStep.style.display = "none";
-            }
-
-            if (adminStatus) {
-                adminStatus.textContent = "";
-            }
-
-            if (emailStep) {
-                emailStep.style.display = "block";
-            }
-
-        }
-    );
-
-}
-
-
-// ========================================
-// ADMIN SIGN IN SUBMIT
-// ========================================
-
-const signinAdminSubmit =
-    document.getElementById("signinAdminSubmit");
-
-if (signinAdminSubmit) {
-
-    signinAdminSubmit.addEventListener(
-        "click",
-        async function () {
-
-            const usernameChip =
-                document.getElementById("signinAdminUsernameChip");
-
-            const username =
-                usernameChip ? usernameChip.textContent.trim() : "";
-
-            const passwordField =
-                document.getElementById("signinAdminPassword");
-
-            const password =
-                passwordField ? passwordField.value : "";
-
-            const adminStatus =
-                document.getElementById("signinAdminStatus");
-
-            if (!username || !password) {
-
-                if (adminStatus) {
-
-                    adminStatus.textContent =
-                        "Please enter the admin password.";
-
-                }
-
-                return;
-
-            }
-
-            signinAdminSubmit.disabled = true;
-            signinAdminSubmit.textContent = "Signing in...";
-
-            if (adminStatus) {
-                adminStatus.textContent = "";
-            }
-
-            try {
-
-                const response =
-                    await fetch(
-                        API_URL + "/api/admin/login",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                username: username,
-                                password: password
-                            })
-                        }
-                    );
-
-                const data = await response.json();
-
-                if (!data.success) {
-
-                    if (adminStatus) {
-
-                        adminStatus.textContent =
-                            data.message ||
-                            "Invalid username or password.";
-
-                    }
-
-                    return;
-
-                }
-
-                // Store the admin session and hand off to
-                // the admin dashboard — same origin, so the
-                // token carries over via sessionStorage.
-
-                sessionStorage.setItem(
-                    "kuriosAdminToken",
-                    data.token
-                );
-
-                window.location.href =
-                    "/admin-sellers.html";
-
-            } catch (error) {
-
-                console.error(
-                    "Admin login error:",
-                    error
-                );
-
-                if (adminStatus) {
-
-                    adminStatus.textContent =
-                        "Unable to connect to Kurios Stores server.";
-
-                }
-
-            } finally {
-
-                signinAdminSubmit.disabled = false;
-                signinAdminSubmit.textContent = "Sign In as Admin";
-
-            }
-
-        }
-    );
-
-}
-
-
-// ========================================
-// OPEN RESET FLOW FROM SIGN IN
-// ========================================
-
-if (forgotPasswordLink) {
-
-    forgotPasswordLink.addEventListener(
-        "click",
-        function (event) {
-
-            event.preventDefault();
-
-            const signinForm =
-                document.getElementById("signinForm");
-
-            if (signinForm) {
-                signinForm.style.display = "none";
-            }
-
-            if (resetPasscodeConfirmScreen) {
-                resetPasscodeConfirmScreen.style.display = "none";
-            }
-
-            if (resetPasscodeEmailScreen) {
-                resetPasscodeEmailScreen.style.display = "block";
-            }
-
-            if (resetPasscodeEmailStatus) {
-                resetPasscodeEmailStatus.textContent = "";
-            }
-
-        }
-    );
-
-}
-
-
-// ========================================
-// BACK TO SIGN IN FROM RESET
-// ========================================
-
-if (backToSignInFromReset) {
-
-    backToSignInFromReset.addEventListener(
-        "click",
-        function (event) {
-
-            event.preventDefault();
-
-            clearInterval(resetResendInterval);
-
-            const signinForm =
-                document.getElementById("signinForm");
-
-            if (resetPasscodeEmailScreen) {
-                resetPasscodeEmailScreen.style.display = "none";
-            }
-
-            if (resetPasscodeConfirmScreen) {
-                resetPasscodeConfirmScreen.style.display = "none";
-            }
-
-            if (signinForm) {
-                signinForm.style.display = "block";
-            }
-
-        }
-    );
-
-}
-
-
-// ========================================
-// SEND PASSCODE RESET CODE
-// ========================================
-
-if (sendPasscodeResetButton) {
-
-    sendPasscodeResetButton.addEventListener(
-        "click",
-        async function () {
-
-            const email =
-                document.getElementById("resetPasscodeEmail").value.trim();
-
-            if (!email) {
-
-                if (resetPasscodeEmailStatus) {
-
-                    resetPasscodeEmailStatus.textContent =
-                        "Please enter your email address.";
-
-                }
-
-                return;
-
-            }
-
-            sendPasscodeResetButton.disabled = true;
-
-            sendPasscodeResetButton.innerHTML =
-                `<i class="fa-solid fa-spinner fa-spin"></i> Sending...`;
-
-            try {
-
-                const response =
-                    await fetch(
-                        API_URL + "/api/students/request-passcode-reset",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({ email: email })
-                        }
-                    );
-
-                const data = await response.json();
-
-                if (!response.ok || !data.success) {
-
-                    if (resetPasscodeEmailStatus) {
-
-                        resetPasscodeEmailStatus.textContent =
-                            data.message ||
-                            "Unable to send a reset code.";
-
-                    }
-
-                    return;
-
-                }
-
-                currentResetStudentId = data.studentId;
-                currentResetEmail = data.email;
-
-                const resetPasscodeConfirmMessage =
-                    document.getElementById("resetPasscodeConfirmMessage");
-
-                if (resetPasscodeConfirmMessage) {
-
-                    resetPasscodeConfirmMessage.innerHTML =
-                        `Enter the code sent to
-                        <span class="otp-email-chip">${data.email}</span>,
-                        then choose a new 6-digit passcode.`;
-
-                }
-
-                resetOtpGroup.clear();
-                newPasscodeGroup.clear();
-                confirmNewPasscodeGroup.clear();
-
-                if (newPasscodeMismatchMessage) {
-                    newPasscodeMismatchMessage.style.display = "none";
-                }
-
-                if (resetPasscodeConfirmStatus) {
-                    resetPasscodeConfirmStatus.textContent = "";
-                }
-
-                if (resetPasscodeEmailScreen) {
-                    resetPasscodeEmailScreen.style.display = "none";
-                }
-
-                if (resetPasscodeConfirmScreen) {
-                    resetPasscodeConfirmScreen.style.display = "block";
-                }
-
-                resetOtpGroup.focusFirst();
-
-                startResetResendCooldown();
-
-            } catch (error) {
-
-                console.error(
-                    "Passcode reset request error:",
-                    error.message
-                );
-
-                if (resetPasscodeEmailStatus) {
-
-                    resetPasscodeEmailStatus.textContent =
-                        "Unable to connect to Kurios Stores server.";
-
-                }
-
-            } finally {
-
-                sendPasscodeResetButton.disabled = false;
-                sendPasscodeResetButton.textContent = "Send Reset Code";
-
-            }
-
-        }
-    );
-
-}
-
-
-// ========================================
-// RESEND RESET OTP
-// ========================================
-
-if (resendResetOtpButton) {
-
-    resendResetOtpButton.addEventListener(
-        "click",
-        async function () {
-
-            if (!currentResetEmail) {
-                return;
-            }
-
-            resendResetOtpButton.disabled = true;
-
-            try {
-
-                const response =
-                    await fetch(
-                        API_URL + "/api/students/request-passcode-reset",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({ email: currentResetEmail })
-                        }
-                    );
-
-                const data = await response.json();
-
-                if (resetPasscodeConfirmStatus) {
-
-                    resetPasscodeConfirmStatus.textContent =
-                        data.success ?
-                            "A new code has been sent to your email." :
-                            (data.message || "Unable to resend code.");
-
-                }
-
-                if (data.success) {
-                    startResetResendCooldown();
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "Resend reset OTP error:",
-                    error.message
-                );
-
-                if (resetPasscodeConfirmStatus) {
-
-                    resetPasscodeConfirmStatus.textContent =
-                        "Unable to connect to Kurios Stores server.";
-
-                }
-
-            } finally {
-
-                resendResetOtpButton.disabled = false;
-
-            }
-
-        }
-    );
-
-}
-
-
-// ========================================
-// CONFIRM PASSCODE RESET
-// ========================================
-
-if (confirmPasscodeResetButton) {
-
-    confirmPasscodeResetButton.addEventListener(
-        "click",
-        async function () {
-
-            const otp =
-                document.getElementById("resetOtpInput").value;
-
-            const newPasscode =
-                document.getElementById("newPasscodeInput").value;
-
-            const confirmNewPasscode =
-                document.getElementById("confirmNewPasscodeInput").value;
-
-            if (
-                otp.length !== 6 ||
-                newPasscode.length !== 6 ||
-                confirmNewPasscode.length !== 6
-            ) {
-
-                if (resetPasscodeConfirmStatus) {
-
-                    resetPasscodeConfirmStatus.textContent =
-                        "Please fill in the code and your new passcode.";
-
-                }
-
-                return;
-
-            }
-
-            if (newPasscode !== confirmNewPasscode) {
-
-                if (newPasscodeMismatchMessage) {
-                    newPasscodeMismatchMessage.style.display = "block";
-                }
-
-                return;
-
-            }
-
-            confirmPasscodeResetButton.disabled = true;
-
-            confirmPasscodeResetButton.innerHTML =
-                `<span class="otp-button-text">Setting passcode...</span>`;
-
-            try {
-
-                const response =
-                    await fetch(
-                        API_URL + "/api/students/reset-passcode",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                studentId: currentResetStudentId,
-                                otp: otp,
-                                newPasscode: newPasscode,
-                                confirmNewPasscode: confirmNewPasscode
-                            })
-                        }
-                    );
-
-                const data = await response.json();
-
-                if (!response.ok || !data.success) {
-
-                    if (resetPasscodeConfirmStatus) {
-
-                        resetPasscodeConfirmStatus.textContent =
-                            data.message ||
-                            "Unable to reset your passcode.";
-
-                    }
-
-                    return;
-
-                }
-
-                clearInterval(resetResendInterval);
-
-                if (resetPasscodeConfirmScreen) {
-                    resetPasscodeConfirmScreen.style.display = "none";
-                }
-
-                const signinForm =
-                    document.getElementById("signinForm");
-
-                if (signinForm) {
-
-                    signinForm.style.display = "block";
-
-                    const signinEmailField =
-                        document.getElementById("signinEmail");
-
-                    if (signinEmailField && currentResetEmail) {
-                        signinEmailField.value = currentResetEmail;
-                    }
-
-                    signinPasscodeGroup.clear();
-
-                }
-
-                let resetToast =
-                    document.getElementById("kuriosToast");
-
-                if (!resetToast) {
-
-                    resetToast =
-                        document.createElement("div");
-
-                    resetToast.id = "kuriosToast";
-                    resetToast.className = "kurios-toast";
-
-                    document.body.appendChild(resetToast);
-
-                }
-
-                resetToast.textContent =
-                    "Your passcode has been reset. Please sign in with your new passcode.";
-
-                resetToast.classList.add("show");
-
-                setTimeout(
-                    function () {
-                        resetToast.classList.remove("show");
-                    },
-                    3000
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "Confirm passcode reset error:",
-                    error.message
-                );
-
-                if (resetPasscodeConfirmStatus) {
-
-                    resetPasscodeConfirmStatus.textContent =
-                        "Unable to connect to Kurios Stores server.";
-
-                }
-
-            } finally {
-
-                confirmPasscodeResetButton.disabled = false;
-
-                confirmPasscodeResetButton.innerHTML =
-                    `<span class="otp-button-text">Set new passcode</span>
-                     <span class="otp-button-arrow"><i class="fa-solid fa-arrow-right"></i></span>`;
-
-            }
-
-        }
-    );
-
-}
-
-
-// =========================================================
-// BECOME A SELLER — APPLICATION FLOW
-// =========================================================
-
-const sellerPage =
-    document.getElementById("sellerPage");
-
-const mainContent =
-    document.getElementById("mainContent");
-
-const sellerBackLink =
-    document.getElementById("sellerBackLink");
-
-const closeSeller =
-    document.getElementById("closeSeller");
-
-const accountBecomeSeller =
-    document.getElementById("accountBecomeSeller");
-
-const sellerLoadingState =
-    document.getElementById("sellerLoadingState");
-
-const sellerPendingState =
-    document.getElementById("sellerPendingState");
-
-const sellerApprovedState =
-    document.getElementById("sellerApprovedState");
-
-const sellerSuspendedState =
-    document.getElementById("sellerSuspendedState");
-
-const sellerApplyForm =
-    document.getElementById("sellerApplyForm");
-
-const sellerApplyStatus =
-    document.getElementById("sellerApplyStatus");
-
-const sellerApplySubmit =
-    document.getElementById("sellerApplySubmit");
-
-
-function hideAllSellerStates() {
-
-    [
-        sellerLoadingState,
-        sellerPendingState,
-        sellerApprovedState,
-        sellerSuspendedState,
-        sellerApplyForm
-    ].forEach(function (el) {
-
-        if (el) {
-            el.style.display = "none";
-        }
-
-    });
-
-    const sellerPageEl =
-        document.getElementById("sellerPage");
-
-    if (sellerPageEl) {
-        sellerPageEl.classList.remove("seller-dashboard-active");
-    }
-
-}
-
-
-function closeSellerPanel() {
-
-    if (typeof window.goBack === "function") {
-
-        window.goBack();
-        return;
-
-    }
-
-    if (window.location.hash === "#sell") {
-
-        history.pushState(
-            null,
-            "",
-            window.location.pathname + window.location.search
-        );
-
-    }
-
-    if (sellerPage) {
-        sellerPage.style.display = "none";
-    }
-
-    if (mainContent) {
-        mainContent.style.display = "block";
-    }
-
-}
-
-
-function getStoredStudent() {
-
-    const storedStudent =
-        localStorage.getItem("kuriosLoggedInStudent") ||
-        sessionStorage.getItem("kuriosLoggedInStudent");
-
-    if (!storedStudent) {
-        return null;
-    }
-
-    try {
-        return JSON.parse(storedStudent);
-    } catch (error) {
-        return null;
-    }
-
-}
-
-function openSignInModalStandalone() {
-
-    const signInModalEl =
-        document.getElementById("signInModal");
-
-    if (signInModalEl) {
-        signInModalEl.classList.add("open");
-    }
-
-    const emailStepEl =
-        document.getElementById("signinEmailStep");
-
-    const passcodeStepEl =
-        document.getElementById("signinPasscodeStep");
-
-    const adminPasswordStepEl =
-        document.getElementById("signinAdminPasswordStep");
-
-    if (emailStepEl) {
-        emailStepEl.style.display = "block";
-    }
-
-    if (passcodeStepEl) {
-        passcodeStepEl.style.display = "none";
-    }
-
-    if (adminPasswordStepEl) {
-        adminPasswordStepEl.style.display = "none";
-    }
-
-}
-
-
-async function openSellerPanel() {
-
-    if (typeof setAccountMenuContext === "function") {
-        setAccountMenuContext(false);
-    }
-
-    const student =
-        getStoredStudent();
-
-    const accountMenu =
-        document.getElementById("studentAccountMenu");
-
-    if (accountMenu) {
-        accountMenu.classList.remove("open");
-    }
-
-    if (!student) {
-
-        // Not logged in — don't show the seller page,
-        // just prompt sign-in and clear the #sell hash
-        // so the URL doesn't claim to be on that page.
-
-        if (window.location.hash === "#sell") {
-            history.replaceState(null, "", window.location.pathname + window.location.search);
-        }
-
-        openSignInModalStandalone();
-
-        return;
-
-    }
-
-    if (sellerPage) {
-        sellerPage.style.display = "block";
-    }
-
-    if (mainContent) {
-        mainContent.style.display = "none";
-    }
-
-    window.scrollTo({ top: 0 });
-
-
-    // ========================================
-    // RESUME AN OPAY PAYMENT IF WE'RE RETURNING
-    // FROM THE OPAY CHECKOUT PAGE
-    // ========================================
-
-    const pendingOpayRef =
-        localStorage.getItem("kuriosPendingOpaySellerRef");
-
-    if (pendingOpayRef) {
-
-        localStorage.removeItem("kuriosPendingOpaySellerRef");
-
-        await verifySellerApplicationPayment(pendingOpayRef);
-
-        return;
-
-    }
-
-    hideAllSellerStates();
-
-    if (sellerLoadingState) {
-        sellerLoadingState.style.display = "block";
-    }
-
-    // Prefill contact fields from the student's
-    // own profile, in case they end up on the form.
-
-    const phoneField =
-        document.getElementById("sellerContactPhone");
-
-    const whatsappField =
-        document.getElementById("sellerContactWhatsapp");
-
-    if (phoneField) {
-        phoneField.value = student.phone || "";
-    }
-
-    if (whatsappField) {
-
-        whatsappField.value =
-            student.whatsapp_number ||
-            student.whatsappNumber ||
-            "";
-
-    }
-
-    try {
-
-        const response =
-            await fetch(
-                API_URL + "/api/sellers/me?studentId=" + student.id
-            );
-
-        const data = await response.json();
-
-        hideAllSellerStates();
-
-        if (!data.success) {
-
-            if (sellerApplyStatus) {
-
-                sellerApplyStatus.textContent =
-                    data.message || "Could not check your seller status.";
-
-            }
-
-            if (sellerApplyForm) {
-                sellerApplyForm.style.display = "block";
-            }
-
-            return;
-
-        }
-
-        const seller = data.seller;
-
-        if (!seller || seller.status === "rejected") {
-
-            const rejectedNote =
-                document.getElementById("sellerRejectedNote");
-
-            const reasonWrap =
-                document.getElementById("sellerRejectionReasonWrap");
-
-            const reasonText =
-                document.getElementById("sellerRejectionReason");
-
-            if (seller && seller.status === "rejected") {
-
-                if (rejectedNote) {
-                    rejectedNote.style.display = "block";
-                }
-
-                if (seller.rejection_reason && reasonWrap && reasonText) {
-
-                    reasonText.textContent =
-                        seller.rejection_reason;
-
-                    reasonWrap.style.display = "inline";
-
-                } else if (reasonWrap) {
-
-                    reasonWrap.style.display = "none";
-
-                }
-
-            } else if (rejectedNote) {
-
-                rejectedNote.style.display = "none";
-
-            }
-
-            if (sellerApplyForm) {
-                sellerApplyForm.style.display = "block";
-            }
-
-            return;
-
-        }
-
-        if (seller.status === "pending") {
-
-            const nameEl =
-                document.getElementById("sellerPendingStoreName");
-
-            if (nameEl) {
-                nameEl.textContent = seller.store_name;
-            }
-
-            if (sellerPendingState) {
-                sellerPendingState.style.display = "block";
-            }
-
-            return;
-
-        }
-
-        if (seller.status === "approved") {
-
-            const nameEl =
-                document.getElementById("sellerApprovedStoreName");
-
-            if (nameEl) {
-                nameEl.textContent = seller.store_name;
-            }
-
-            if (sellerApprovedState) {
-                sellerApprovedState.style.display = "block";
-            }
-
-            window.__kuriosCurrentSeller = seller;
-
-            if (typeof setAccountMenuContext === "function") {
-                setAccountMenuContext(true);
-            }
-
-            const studentDisplayName =
-                [student.first_name, student.last_name].filter(Boolean).join(" ").trim() ||
-                seller.store_name ||
-                "Seller";
-
-            const firstNameOnly =
-                studentDisplayName.split(" ")[0] || "Seller";
-
-            const setDashText = function (id, text) {
-                const el = document.getElementById(id);
-                if (el) el.textContent = text;
-            };
-
-            setDashText("sellerDashboardStoreName", seller.store_name || "Your Store");
-            setDashText("sellerDashboardWelcomeName", firstNameOnly);
-            setDashText("sellerDashboardTopName", firstNameOnly);
-
-            const dashAvatarMarkup =
-                seller.store_image ?
-                    `<img src="${API_URL + seller.store_image}" alt="Store logo">` :
-                    `<i class="fa-solid fa-store"></i>`;
-
-            ["sellerDashboardAvatar", "sellerDashboardTopAvatar"].forEach(function (id) {
-
-                const el = document.getElementById(id);
-
-                if (el) {
-                    el.innerHTML = dashAvatarMarkup;
-                }
-
-            });
-
-            const logoPreview =
-                document.getElementById("storeLogoPreview");
-
-            if (logoPreview) {
-
-                logoPreview.innerHTML =
-                    seller.store_image ?
-                        `<img src="${API_URL + seller.store_image}" alt="Store logo">` :
-                        `<i class="fa-solid fa-store"></i>`;
-
-            }
-
-            if (typeof loadSellerProducts === "function") {
-                loadSellerProducts(student.id);
-            }
-
-            if (typeof loadSellerSales === "function") {
-                loadSellerSales(student.id);
-            }
-
-            if (typeof loadSellerDashboardStats === "function") {
-                loadSellerDashboardStats(student.id);
-            }
-
-            const sellerPageEl =
-                document.getElementById("sellerPage");
-
-            if (sellerPageEl) {
-                sellerPageEl.classList.add("seller-dashboard-active");
-            }
-
-            return;
-
-        }
-
-        if (seller.status === "suspended") {
-
-            const nameEl =
-                document.getElementById("sellerSuspendedStoreName");
-
-            if (nameEl) {
-                nameEl.textContent = seller.store_name;
-            }
-
-            if (sellerSuspendedState) {
-                sellerSuspendedState.style.display = "block";
-            }
-
-            return;
-
-        }
-
-        // Fallback — unexpected status, show the form.
-
-        if (sellerApplyForm) {
-            sellerApplyForm.style.display = "block";
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Seller status check error:",
-            error
-        );
-
-        hideAllSellerStates();
-
-        if (sellerApplyStatus) {
-
-            sellerApplyStatus.textContent =
-                "Unable to connect to Kurios Stores server.";
-
-        }
-
-        if (sellerApplyForm) {
-            sellerApplyForm.style.display = "block";
-        }
-
-    }
-
-}
-
-
-if (accountBecomeSeller) {
-
-    accountBecomeSeller.addEventListener(
-        "click",
-        function () {
-
-            if (typeof switchDashboardWithReload === "function") {
-
-                if (__kuriosInSellerDashboard) {
-
-                    switchDashboardWithReload(null);
-
-                } else {
-
-                    switchDashboardWithReload("sell");
-
-                }
-
-            } else {
-
-                window.location.hash = "sell";
-
-            }
-
-        }
-    );
-
-}
-
-if (closeSeller) {
-
-    closeSeller.addEventListener(
-        "click",
-        closeSellerPanel
-    );
-
-}
-
-if (sellerBackLink) {
-
-    sellerBackLink.addEventListener(
-        "click",
-        function (event) {
-
-            event.preventDefault();
-
-            closeSellerPanel();
-
-        }
-    );
-
-}
-
-
-// ========================================
-// SELLER PAGE — BROWSER BACK/FORWARD
-// AND DIRECT-LINK (#sell) SUPPORT
-// (handled centrally by the unified router
-// inside DOMContentLoaded — see syncPageFromHash)
-// ========================================
-
-
-// ========================================
-// SELLER TYPE CARD PICKER
-// ========================================
-
-const sellerTypeGrid =
-    document.getElementById("sellerTypeGrid");
-
-if (sellerTypeGrid) {
-
-    const sellerTypeCards =
-        sellerTypeGrid.querySelectorAll(".seller-type-card");
-
-    const sellerTypeSelect =
-        document.getElementById("sellerType");
-
-    sellerTypeCards.forEach(function (card) {
-
-        card.addEventListener(
-            "click",
-            function () {
-
-                sellerTypeCards.forEach(function (c) {
-                    c.classList.remove("active");
-                });
-
-                card.classList.add("active");
-
-                if (sellerTypeSelect) {
-                    sellerTypeSelect.value = card.dataset.value;
-                }
-
-            }
-        );
-
-    });
-
-}
-
-
-// ========================================
-// SUBMIT SELLER APPLICATION
-// (pay ₦1,500 application fee, then submit)
-// ========================================
-
-let currentSellerPaymentReference = null;
-
-if (sellerApplyForm) {
-
-    sellerApplyForm.addEventListener(
-        "submit",
-        async function (event) {
-
-            event.preventDefault();
-
-            const student =
-                getStoredStudent();
-
-            if (!student) {
-                return;
-            }
-
-            const storeName =
-                document.getElementById("sellerStoreName").value.trim();
-
-            if (!storeName) {
-
-                if (sellerApplyStatus) {
-
-                    sellerApplyStatus.textContent =
-                        "Please enter your store or business name.";
-
-                }
-
-                return;
-
-            }
-
-            const payload = {
-
-                studentId: student.id,
-
-                sellerType:
-                    document.getElementById("sellerType").value,
-
-                storeName: storeName,
-
-                storeDescription:
-                    document.getElementById("sellerStoreDescription").value.trim(),
-
-                businessCategory:
-                    document.getElementById("sellerBusinessCategory").value,
-
-                location:
-                    document.getElementById("sellerLocation").value.trim(),
-
-                contactPhone:
-                    document.getElementById("sellerContactPhone").value.trim(),
-
-                contactWhatsapp:
-                    document.getElementById("sellerContactWhatsapp").value.trim()
-
-            };
-
-            if (sellerApplySubmit) {
-
-                sellerApplySubmit.disabled = true;
-                sellerApplySubmit.textContent = "Starting...";
-
-            }
-
-            try {
-
-                const response =
-                    await fetch(
-                        API_URL + "/api/sellers/apply",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify(payload)
-                        }
-                    );
-
-                const data = await response.json();
-
-                if (!data.success) {
-
-                    if (sellerApplyStatus) {
-
-                        sellerApplyStatus.textContent =
-                            data.message ||
-                            "Could not start your application.";
-
-                    }
-
-                    return;
-
-                }
-
-                currentSellerPaymentReference =
-                    data.paymentReference;
-
-                sellerApplyForm.style.display = "none";
-
-                const choiceState =
-                    document.getElementById("sellerPaymentChoiceState");
-
-                if (choiceState) {
-                    choiceState.style.display = "block";
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "Seller application submit error:",
-                    error
-                );
-
-                if (sellerApplyStatus) {
-
-                    sellerApplyStatus.textContent =
-                        "Unable to connect to Kurios Stores server.";
-
-                }
-
-            } finally {
-
-                if (sellerApplySubmit) {
-
-                    sellerApplySubmit.disabled = false;
-                    sellerApplySubmit.textContent = "Continue to Payment";
-
-                }
-
-            }
-
-        }
-    );
-
-}
-
-
-// ========================================
-// PAY WITH MONNIFY
-// ========================================
-
-const payWithMonnifyButton =
-    document.getElementById("payWithMonnifyButton");
-
-if (payWithMonnifyButton) {
-
-    payWithMonnifyButton.addEventListener(
-        "click",
-        async function () {
-
-            const choiceStatus =
-                document.getElementById("sellerPaymentChoiceStatus");
-
-            if (!currentSellerPaymentReference) {
-                return;
-            }
-
-            payWithMonnifyButton.disabled = true;
-
-            if (choiceStatus) {
-                choiceStatus.textContent = "";
-            }
-
-            try {
-
-                const response =
-                    await fetch(
-                        API_URL + "/api/sellers/apply/pay/monnify",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                paymentReference: currentSellerPaymentReference
-                            })
-                        }
-                    );
-
-                const data = await response.json();
-
-                if (!data.success) {
-
-                    if (choiceStatus) {
-
-                        choiceStatus.textContent =
-                            data.message || "Could not start Monnify checkout.";
-
-                    }
-
-                    return;
-
-                }
-
-                if (typeof MonnifySDK === "undefined") {
-
-                    if (choiceStatus) {
-
-                        choiceStatus.textContent =
-                            "Payment could not load. Please refresh and try again.";
-
-                    }
-
-                    return;
-
-                }
-
-                MonnifySDK.initialize({
-
-                    amount: data.amount,
-
-                    currency: "NGN",
-
-                    reference: data.paymentReference,
-
-                    customerFullName: data.customerName,
-
-                    customerEmail: data.customerEmail,
-
-                    apiKey: data.apiKey,
-
-                    contractCode: data.contractCode,
-
-                    paymentDescription:
-                        "Kurios Stores seller application fee",
-
-                    onComplete: async function () {
-
-                        await verifySellerApplicationPayment(
-                            data.paymentReference
-                        );
-
-                    },
-
-                    onClose: function () {
-
-                        if (choiceStatus) {
-
-                            choiceStatus.textContent =
-                                "Payment was not completed. You can try again.";
-
-                        }
-
-                    }
-
-                });
-
-            } catch (error) {
-
-                console.error(
-                    "Monnify checkout error:",
-                    error
-                );
-
-                if (choiceStatus) {
-
-                    choiceStatus.textContent =
-                        "Unable to connect to Kurios Stores server.";
-
-                }
-
-            } finally {
-
-                payWithMonnifyButton.disabled = false;
-
-            }
-
-        }
-    );
-
-}
-
-
-// ========================================
-// PAY WITH OPAY
-// ========================================
-
-const payWithOpayButton =
-    document.getElementById("payWithOpayButton");
-
-if (payWithOpayButton) {
-
-    payWithOpayButton.addEventListener(
-        "click",
-        async function () {
-
-            const choiceStatus =
-                document.getElementById("sellerPaymentChoiceStatus");
-
-            if (!currentSellerPaymentReference) {
-                return;
-            }
-
-            payWithOpayButton.disabled = true;
-
-            if (choiceStatus) {
-                choiceStatus.textContent = "Redirecting to OPay...";
-            }
-
-            try {
-
-                const returnUrl =
-                    window.location.origin + "/#sell";
-
-                const response =
-                    await fetch(
-                        API_URL + "/api/sellers/apply/pay/opay",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                paymentReference: currentSellerPaymentReference,
-                                returnUrl: returnUrl
-                            })
-                        }
-                    );
-
-                const data = await response.json();
-
-                if (!data.success || !data.cashierUrl) {
-
-                    if (choiceStatus) {
-
-                        choiceStatus.textContent =
-                            data.message || "Could not start OPay checkout.";
-
-                    }
-
-                    payWithOpayButton.disabled = false;
-
-                    return;
-
-                }
-
-                // Remember which application this was, so we
-                // can verify it automatically once OPay sends
-                // the student back to this page.
-
-                localStorage.setItem(
-                    "kuriosPendingOpaySellerRef",
-                    currentSellerPaymentReference
-                );
-
-                window.location.href = data.cashierUrl;
-
-            } catch (error) {
-
-                console.error(
-                    "OPay checkout error:",
-                    error
-                );
-
-                if (choiceStatus) {
-
-                    choiceStatus.textContent =
-                        "Unable to connect to Kurios Stores server.";
-
-                }
-
-                payWithOpayButton.disabled = false;
-
-            }
-
-        }
-    );
-
-}
-
-
-// ========================================
-// CONFIRM THE SELLER APPLICATION PAYMENT
-// (never trust the widget's onComplete alone)
-// ========================================
-
-async function verifySellerApplicationPayment(paymentReference) {
-
-    if (sellerApplyStatus) {
-
-        sellerApplyStatus.textContent =
-            "Confirming your payment...";
-
-    }
-
-    try {
-
-        const response =
-            await fetch(
-                API_URL + "/api/sellers/apply/verify-payment",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        paymentReference: paymentReference
-                    })
-                }
-            );
-
-        const data = await response.json();
-
-        if (!data.success) {
-
-            if (sellerApplyStatus) {
-
-                sellerApplyStatus.textContent =
-                    data.message ||
-                    "We couldn't confirm your payment yet. If you completed payment, please try again shortly.";
-
-            }
-
-            return;
-
-        }
-
-        hideAllSellerStates();
-
-        const nameEl =
-            document.getElementById("sellerPendingStoreName");
-
-        if (nameEl && data.seller) {
-            nameEl.textContent = data.seller.store_name;
-        }
-
-        if (sellerPendingState) {
-            sellerPendingState.style.display = "block";
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Seller payment verify error:",
-            error
-        );
-
-        if (sellerApplyStatus) {
-
-            sellerApplyStatus.textContent =
-                "Unable to reach Kurios Stores server to confirm payment.";
-
-        }
-
-    }
-
-}
-
-
-// =========================================================
-// SELLER STOREFRONT (public product listing)
-// =========================================================
-
-const storefrontPage =
-    document.getElementById("storefrontPage");
-
-const storefrontBackLink =
-    document.getElementById("storefrontBackLink");
-
-const STOREFRONT_CATEGORY_ICONS = {
-    "Fashion": "fa-shirt",
-    "Electronics": "fa-plug",
-    "Beauty": "fa-spray-can-sparkles",
-    "Food": "fa-utensils",
-    "Books": "fa-book",
-    "School Materials": "fa-pen",
-    "Phones": "fa-mobile-screen",
-    "Accessories": "fa-gem",
-    "Health": "fa-heart-pulse",
-    "Home": "fa-house",
-    "Services": "fa-screwdriver-wrench",
-    "Others": "fa-box"
-};
-
-function closeStorefrontPage() {
-
-    if (typeof window.goBack === "function") {
-
-        window.goBack();
-        return;
-
-    }
-
-    if (
-        window.location.hash &&
-        window.location.hash.indexOf("#store-") === 0
-    ) {
-
-        history.pushState(
-            null,
-            "",
-            window.location.pathname + window.location.search
-        );
-
-    }
-
-    if (storefrontPage) {
-        storefrontPage.style.display = "none";
-    }
-
-    const mainEl =
-        document.getElementById("mainContent");
-
-    if (mainEl) {
-        mainEl.style.display = "block";
-    }
-
-}
-
-if (storefrontBackLink) {
-
-    storefrontBackLink.addEventListener(
-        "click",
-        function (event) {
-
-            event.preventDefault();
-
-            closeStorefrontPage();
-
-        }
-    );
-
-}
-
-async function openStorefront(sellerId) {
-
-    const mainEl =
-        document.getElementById("mainContent");
-
-    const sellerPageEl =
-        document.getElementById("sellerPage");
-
-    if (sellerPageEl) {
-        sellerPageEl.style.display = "none";
-    }
-
-    if (mainEl) {
-        mainEl.style.display = "none";
-    }
-
-    if (storefrontPage) {
-        storefrontPage.style.display = "block";
-    }
-
-    window.scrollTo({ top: 0 });
-
-    const loadingEl =
-        document.getElementById("storefrontLoading");
-
-    const contentEl =
-        document.getElementById("storefrontContent");
-
-    const notFoundEl =
-        document.getElementById("storefrontNotFound");
-
-    if (loadingEl) loadingEl.style.display = "block";
-    if (contentEl) contentEl.style.display = "none";
-    if (notFoundEl) notFoundEl.style.display = "none";
-
-    try {
-
-        const response =
-            await fetch(API_URL + "/api/store/" + sellerId);
-
-        const data = await response.json();
-
-        if (loadingEl) loadingEl.style.display = "none";
-
-        if (!data.success) {
-
-            if (notFoundEl) notFoundEl.style.display = "block";
-
-            return;
-
-        }
-
-        if (contentEl) contentEl.style.display = "block";
-
-        const nameEl = document.getElementById("storefrontName");
-        const metaEl = document.getElementById("storefrontMeta");
-        const descEl = document.getElementById("storefrontDescription");
-
-        if (nameEl) nameEl.textContent = data.store.store_name;
-
-        const iconEl =
-            document.querySelector("#storefrontContent .storefront-icon");
-
-        if (iconEl) {
-
-            iconEl.innerHTML =
-                data.store.store_image ?
-                    `<img src="${API_URL + data.store.store_image}" alt="${data.store.store_name} logo">` :
-                    `<i class="fa-solid fa-store"></i>`;
-
-        }
-
-        if (metaEl) {
-
-            metaEl.textContent =
-                [
-                    data.store.business_category,
-                    data.store.location
-                ]
-                    .filter(Boolean)
-                    .join(" · ") || "Kurios Stores seller";
-
-        }
-
-        if (descEl) {
-
-            descEl.textContent =
-                data.store.store_description || "";
-
-        }
-
-        renderStorefrontProducts(data.products);
-
-    } catch (error) {
-
-        console.error(
-            "Load storefront error:",
-            error
-        );
-
-        if (loadingEl) loadingEl.style.display = "none";
-        if (notFoundEl) notFoundEl.style.display = "block";
-
-    }
-
-}
-
-function renderStorefrontProducts(products) {
-
-    const grid =
-        document.getElementById("storefrontProductGrid");
-
-    const emptyEl =
-        document.getElementById("storefrontEmpty");
-
-    if (!grid) {
-        return;
-    }
-
-    grid.innerHTML = "";
-
-    if (!products || products.length === 0) {
-
-        if (emptyEl) emptyEl.style.display = "block";
-
-        return;
-
-    }
-
-    if (emptyEl) emptyEl.style.display = "none";
-
-    products.forEach(function (product) {
-
-        const category =
-            product.category || "General";
-
-        const icon =
-            STOREFRONT_CATEGORY_ICONS[category] || "fa-box";
-
-        const imageMarkup =
-            product.image_url ?
-                `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
-                `<i class="fa-solid ${icon}"></i>`;
-
-        const card = document.createElement("article");
-        card.className = "product-card";
-
-        const ratingMarkup =
-            product.review_count > 0 ?
-                `<span class="product-rating">
-                    <i class="fa-solid fa-star"></i>
-                    ${Number(product.avg_rating).toFixed(1)}
-                    <span class="product-rating-count">(${product.review_count})</span>
-                </span>` :
-                "";
-
-        card.innerHTML = `
-            <div class="product-image">
-                ${imageMarkup}
-            </div>
-            <div class="product-info">
-                <span class="product-category">${category}</span>
-                <h3>${product.name}</h3>
-                ${ratingMarkup}
-                <p>${product.description ? product.description : "&nbsp;"}</p>
-                <div class="product-bottom">
-                    <strong>₦${Number(product.price).toLocaleString()}</strong>
-                </div>
-            </div>
-        `;
-
-        grid.appendChild(card);
-
-    });
-
-}
-
-
-// ========================================
-// HASH ROUTING — INCLUDE #store-<id>
-// (handled centrally by the unified router
-// inside DOMContentLoaded — see syncPageFromHash)
-// ========================================
-
-
-// =========================================================
-// SELLER PRODUCT MANAGEMENT (approved sellers only)
-// =========================================================
-
-const SELLER_CATEGORY_ICONS = {
-    "Fashion": "fa-shirt",
-    "Electronics": "fa-plug",
-    "Beauty": "fa-spray-can-sparkles",
-    "Food": "fa-utensils",
-    "Books": "fa-book",
-    "School Materials": "fa-pen",
-    "Phones": "fa-mobile-screen",
-    "Accessories": "fa-gem",
-    "Health": "fa-heart-pulse",
-    "Home": "fa-house",
-    "Services": "fa-screwdriver-wrench",
-    "Others": "fa-box"
-};
-
-let currentSellerStudentId = null;
-
-async function loadSellerProducts(studentId) {
-
-    currentSellerStudentId = studentId;
-
-    const loadingEl = document.getElementById("sellerProductsLoading");
-    const emptyEl = document.getElementById("sellerProductsEmpty");
-    const listEl = document.getElementById("sellerProductList");
-
-    if (loadingEl) loadingEl.style.display = "block";
-    if (emptyEl) emptyEl.style.display = "none";
-    if (listEl) listEl.innerHTML = "";
-
-    try {
-
-        const response =
-            await fetch(
-                API_URL + "/api/sellers/products?studentId=" + studentId
-            );
-
-        const data = await response.json();
-
-        if (loadingEl) loadingEl.style.display = "none";
-
-        if (!data.success) {
-            return;
-        }
-
-        if (data.products.length === 0) {
-
-            if (emptyEl) emptyEl.style.display = "block";
-
-            return;
-
-        }
-
-        renderSellerProductList(data.products);
-
-    } catch (error) {
-
-        console.error(
-            "Load seller products error:",
-            error
-        );
-
-        if (loadingEl) loadingEl.style.display = "none";
-
-    }
-
-}
-
-function renderSellerProductList(products) {
-
-    const listEl = document.getElementById("sellerProductList");
-
-    if (!listEl) return;
-
-    listEl.innerHTML = "";
-
-    products.forEach(function (product) {
-
-        const category =
-            product.category || "General";
-
-        const icon =
-            SELLER_CATEGORY_ICONS[category] || "fa-box";
-
-        const thumbMarkup =
-            product.image_url ?
-                `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
-                `<i class="fa-solid ${icon}"></i>`;
-
-        const card = document.createElement("div");
-        card.className = "seller-product-card";
-
-        card.innerHTML = `
-            <div class="seller-product-thumb">${thumbMarkup}</div>
-            <div class="seller-product-info">
-                <h4>
-                    ${product.name}
-                    ${!product.is_active ? '<span class="seller-product-inactive-tag">Hidden</span>' : ""}
-                </h4>
-                <p>₦${Number(product.price).toLocaleString()} · Stock: ${product.stock_quantity}</p>
-            </div>
-            <div class="seller-product-actions">
-                <button type="button" class="toggle-active-btn" title="${product.is_active ? "Hide" : "Show"}">
-                    <i class="fa-solid ${product.is_active ? "fa-eye" : "fa-eye-slash"}"></i>
-                </button>
-                <button type="button" class="edit-product-btn" title="Edit">
-                    <i class="fa-solid fa-pen"></i>
-                </button>
-                <button type="button" class="delete-product-btn" title="Delete">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </div>
-        `;
-
-        card.querySelector(".toggle-active-btn").addEventListener(
-            "click",
-            function () {
-                toggleProductActive(product);
-            }
-        );
-
-        card.querySelector(".edit-product-btn").addEventListener(
-            "click",
-            function () {
-                openProductForm(product);
-            }
-        );
-
-        card.querySelector(".delete-product-btn").addEventListener(
-            "click",
-            function () {
-                deleteProduct(product);
-            }
-        );
-
-        listEl.appendChild(card);
-
-    });
-
-}
-
-
-// ========================================
-// ADD / EDIT PRODUCT FORM
-// ========================================
-
-function openProductForm(product) {
-
-    const formWrap = document.getElementById("sellerProductFormWrap");
-    const formTitle = document.getElementById("productFormTitle");
-    const editingIdField = document.getElementById("editingProductId");
-    const nameField = document.getElementById("productName");
-    const descField = document.getElementById("productDescription");
-    const priceField = document.getElementById("productPrice");
-    const stockField = document.getElementById("productStock");
-    const categoryField = document.getElementById("productCategory");
-    const imageField = document.getElementById("productImageInput");
-    const statusEl = document.getElementById("productFormStatus");
-
-    if (statusEl) statusEl.textContent = "";
-    if (imageField) imageField.value = "";
-
-    if (product) {
-
-        if (formTitle) formTitle.textContent = "Edit product";
-        if (editingIdField) editingIdField.value = product.id;
-        if (nameField) nameField.value = product.name || "";
-        if (descField) descField.value = product.description || "";
-        if (priceField) priceField.value = product.price || "";
-        if (stockField) stockField.value = product.stock_quantity || 0;
-        if (categoryField) categoryField.value = product.category || "";
-
-    } else {
-
-        if (formTitle) formTitle.textContent = "Add a product";
-        if (editingIdField) editingIdField.value = "";
-        if (nameField) nameField.value = "";
-        if (descField) descField.value = "";
-        if (priceField) priceField.value = "";
-        if (stockField) stockField.value = "";
-        if (categoryField) categoryField.value = "";
-
-    }
-
-    if (formWrap) formWrap.style.display = "block";
-
-    const listEl = document.getElementById("sellerProductList");
-    if (listEl) listEl.style.display = "none";
-
-    const addBtn = document.getElementById("addProductButton");
-    if (addBtn) addBtn.style.display = "none";
-
-}
-
-function closeProductForm() {
-
-    const formWrap = document.getElementById("sellerProductFormWrap");
-    if (formWrap) formWrap.style.display = "none";
-
-    const listEl = document.getElementById("sellerProductList");
-    if (listEl) listEl.style.display = "block";
-
-    const addBtn = document.getElementById("addProductButton");
-    if (addBtn) addBtn.style.display = "inline-flex";
-
-}
-
-const addProductButton = document.getElementById("addProductButton");
-
-if (addProductButton) {
-
-    addProductButton.addEventListener(
-        "click",
-        function () {
-            openProductForm(null);
-        }
-    );
-
-}
-
-const cancelProductForm = document.getElementById("cancelProductForm");
-
-if (cancelProductForm) {
-
-    cancelProductForm.addEventListener(
-        "click",
-        closeProductForm
-    );
-
-}
-
-const saveProductButton = document.getElementById("saveProductButton");
-
-if (saveProductButton) {
-
-    saveProductButton.addEventListener(
-        "click",
-        async function () {
-
-            const statusEl = document.getElementById("productFormStatus");
-
-            const editingId =
-                document.getElementById("editingProductId").value;
-
-            const name =
-                document.getElementById("productName").value.trim();
-
-            const price =
-                document.getElementById("productPrice").value;
-
-            if (!name || !price) {
-
-                if (statusEl) {
-                    statusEl.textContent = "Please enter a product name and price.";
-                }
-
-                return;
-
-            }
-
-            const formData = new FormData();
-
-            formData.append("studentId", currentSellerStudentId);
-            formData.append("name", name);
-            formData.append(
-                "description",
-                document.getElementById("productDescription").value.trim()
-            );
-            formData.append("price", price);
-            formData.append(
-                "category",
-                document.getElementById("productCategory").value
-            );
-            formData.append(
-                "stockQuantity",
-                document.getElementById("productStock").value || "0"
-            );
-
-            const imageInput = document.getElementById("productImageInput");
-
-            if (imageInput && imageInput.files[0]) {
-                formData.append("image", imageInput.files[0]);
-            }
-
-            saveProductButton.disabled = true;
-            saveProductButton.textContent = "Saving...";
-
-            try {
-
-                const url =
-                    editingId ?
-                        API_URL + "/api/sellers/products/" + editingId + "/update" :
-                        API_URL + "/api/sellers/products";
-
-                const response = await fetch(url, {
-                    method: "POST",
-                    body: formData
-                });
+    transform: translateY(-2px);
 
-                const data = await response.json();
-
-                if (!data.success) {
-
-                    if (statusEl) {
-                        statusEl.textContent = data.message || "Could not save product.";
-                    }
-
-                    return;
-
-                }
-
-                closeProductForm();
-
-                loadSellerProducts(currentSellerStudentId);
-
-            } catch (error) {
-
-                console.error(
-                    "Save product error:",
-                    error
-                );
-
-                if (statusEl) {
-                    statusEl.textContent = "Unable to connect to Kurios Stores server.";
-                }
-
-            } finally {
-
-                saveProductButton.disabled = false;
-                saveProductButton.textContent = "Save Product";
-
-            }
-
-        }
-    );
-
+    box-shadow:
+        0 9px 20px rgba(109, 40, 217, 0.30);
 }
-
-
-// ========================================
-// TOGGLE ACTIVE / DELETE
-// ========================================
 
-async function toggleProductActive(product) {
 
-    const formData = new FormData();
+/* Arrow moves when hovering */
 
-    formData.append("studentId", currentSellerStudentId);
-    formData.append("isActive", (!product.is_active).toString());
-
-    try {
-
-        const response = await fetch(
-            API_URL + "/api/sellers/products/" + product.id + "/update",
-            {
-                method: "POST",
-                body: formData
-            }
-        );
-
-        const data = await response.json();
-
-        if (data.success) {
-            loadSellerProducts(currentSellerStudentId);
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Toggle product active error:",
-            error
-        );
-
-    }
-
+.create-account-btn:hover i:last-child {
+    transform: translateX(5px);
 }
-
-async function deleteProduct(product) {
 
-    if (!confirm("Delete \"" + product.name + "\"? This can't be undone.")) {
-        return;
-    }
 
-    try {
-
-        const response = await fetch(
-            API_URL + "/api/sellers/products/" + product.id + "/delete",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    studentId: currentSellerStudentId
-                })
-            }
-        );
-
-        const data = await response.json();
-
-        if (data.success) {
-            loadSellerProducts(currentSellerStudentId);
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Delete product error:",
-            error
-        );
+/* =========================================
+   CLICK EFFECT
+========================================= */
 
-    }
+.create-account-btn:active {
+    transform: scale(0.97);
 
+    box-shadow:
+        0 4px 10px rgba(109, 40, 217, 0.20);
 }
-
-
-// =========================================================
-// STORE LOGO UPLOAD
-// =========================================================
-
-const storeLogoInput =
-    document.getElementById("storeLogoInput");
-
-if (storeLogoInput) {
 
-    storeLogoInput.addEventListener(
-        "change",
-        async function () {
 
-            const file =
-                storeLogoInput.files[0];
+/* =========================================
+   FOCUS EFFECT
+========================================= */
 
-            if (!file) {
-                return;
-            }
-
-            const statusEl =
-                document.getElementById("storeLogoStatus");
-
-            const previewEl =
-                document.getElementById("storeLogoPreview");
-
-            if (statusEl) {
-                statusEl.textContent = "Uploading...";
-            }
-
-            const formData = new FormData();
-
-            formData.append("studentId", currentSellerStudentId);
-            formData.append("logo", file);
-
-            try {
-
-                const response =
-                    await fetch(
-                        API_URL + "/api/sellers/logo",
-                        {
-                            method: "POST",
-                            body: formData
-                        }
-                    );
-
-                const data = await response.json();
-
-                if (!data.success) {
-
-                    if (statusEl) {
-
-                        statusEl.textContent =
-                            data.message || "Could not update your logo.";
-
-                    }
-
-                    return;
-
-                }
-
-                if (statusEl) {
-                    statusEl.textContent = "Logo updated.";
-                }
-
-                if (previewEl && data.seller && data.seller.store_image) {
-
-                    previewEl.innerHTML =
-                        `<img src="${API_URL + data.seller.store_image}" alt="Store logo">`;
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "Store logo upload error:",
-                    error
-                );
-
-                if (statusEl) {
-
-                    statusEl.textContent =
-                        "Unable to connect to Kurios Stores server.";
-
-                }
-
-            } finally {
-
-                storeLogoInput.value = "";
-
-            }
-
-        }
-    );
-
+.create-account-btn:focus-visible {
+    outline: 3px solid rgba(124, 58, 237, 0.25);
+    outline-offset: 3px;
 }
-
-
-// =========================================================
-// CSV PRODUCT IMPORT
-// =========================================================
-
-let csvImportFile = null;
-
-function parseCsvHeaderLine(line) {
 
-    // Simple quoted-field-aware split for a
-    // single header line (good enough for
-    // detecting column names).
 
-    const fields = [];
-    let field = "";
-    let inQuotes = false;
+/* =========================================
+   DISABLED STATE
+========================================= */
 
-    for (let i = 0; i < line.length; i++) {
-
-        const char = line[i];
-
-        if (inQuotes) {
-
-            if (char === '"') {
-
-                if (line[i + 1] === '"') {
-                    field += '"';
-                    i++;
-                } else {
-                    inQuotes = false;
-                }
-
-            } else {
-
-                field += char;
-
-            }
-
-        } else {
-
-            if (char === '"') {
-                inQuotes = true;
-            } else if (char === ",") {
-                fields.push(field);
-                field = "";
-            } else {
-                field += char;
-            }
-
-        }
-
-    }
-
-    fields.push(field);
-
-    return fields.map(function (f) {
-        return f.trim();
-    });
-
+.create-account-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
-
-function detectCsvLocations(headers) {
+/* =========================================
+   PROFESSIONAL SIGNUP CHECKBOXES
+========================================= */
 
-    const locations = new Set();
-
-    headers.forEach(function (header) {
-
-        const match =
-            header.match(/^Fixed Sell Price \[(.+)\]$/);
-
-        if (match) {
-            locations.add(match[1]);
-        }
-
-    });
-
-    return Array.from(locations);
-
+#signupForm .form-checkbox {
+    width: 100%;
+    margin-bottom: 10px;
 }
-
-const importCsvButton =
-    document.getElementById("importCsvButton");
-
-const csvImportPanel =
-    document.getElementById("csvImportPanel");
 
-const csvFileInput =
-    document.getElementById("csvFileInput");
 
-const csvLocationGroup =
-    document.getElementById("csvLocationGroup");
+/* Checkbox + text */
 
-const csvLocationSelect =
-    document.getElementById("csvLocationSelect");
+#signupForm .form-checkbox label {
+    display: flex;
+    align-items: flex-start;
 
-const confirmCsvImport =
-    document.getElementById("confirmCsvImport");
+    gap: 8px;
 
-const cancelCsvImport =
-    document.getElementById("cancelCsvImport");
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
 
+    font-size: 13px;
+    font-weight: 400;
 
-// ========================================
-// DOWNLOAD A SAMPLE CSV
-// ========================================
+    line-height: 1.5;
 
-const downloadSampleCsv =
-    document.getElementById("downloadSampleCsv");
+    color: #4b5563;
 
-if (downloadSampleCsv) {
+    cursor: pointer;
 
-    downloadSampleCsv.addEventListener(
-        "click",
-        function (event) {
-
-            event.preventDefault();
-
-            const headers =
-                ["Item Name", "Category", "Fixed Sell Price", "Stock", "SKU"];
-
-            const sampleRows = [
-                ["Bottled Water 50cl", "Drinks", "300", "50", "KUR-001"],
-                ["Instant Noodles", "Food", "450", "30", "KUR-002"],
-                ["A4 Notebook", "Stationary", "500", "20", "KUR-003"]
-            ];
-
-            function csvEscape(value) {
-
-                if (value.includes(",") || value.includes('"')) {
-
-                    return '"' + value.replace(/"/g, '""') + '"';
-
-                }
+    transition: color 0.2s ease;
+}
 
-                return value;
 
-            }
+/* Checkbox itself */
 
-            const lines = [headers.map(csvEscape).join(",")];
+#signupForm .form-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
 
-            sampleRows.forEach(function (row) {
-                lines.push(row.map(csvEscape).join(","));
-            });
+    min-width: 16px;
 
-            const csvContent = lines.join("\r\n");
+    margin: 2px 0 0 0;
 
-            const blob =
-                new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    accent-color: #6d28d9;
 
-            const url =
-                URL.createObjectURL(blob);
+    cursor: pointer;
+}
 
-            const link =
-                document.createElement("a");
 
-            link.href = url;
-            link.download = "kurios-stores-product-import-sample.csv";
+/* Hover */
 
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+#signupForm .form-checkbox label:hover {
+    color: #252525;
+}
 
-            URL.revokeObjectURL(url);
 
-        }
-    );
+/* Keyboard focus */
 
+#signupForm .form-checkbox input[type="checkbox"]:focus-visible {
+    outline: 2px solid rgba(109, 40, 217, 0.35);
+    outline-offset: 2px;
 }
-
-if (importCsvButton) {
-
-    importCsvButton.addEventListener(
-        "click",
-        function () {
 
-            csvImportFile = null;
 
-            if (csvFileInput) csvFileInput.value = "";
+/* Checked text */
 
-            if (csvLocationGroup) csvLocationGroup.style.display = "none";
+#signupForm .form-checkbox input[type="checkbox"]:checked + * {
+    color: #374151;
+}
 
-            if (confirmCsvImport) confirmCsvImport.disabled = true;
+/* =========================================
+   SIGNUP MODAL - HIDDEN SCROLLBAR
+========================================= */
 
-            const statusEl = document.getElementById("csvImportStatus");
+#signUpModal .auth-modal {
+    scrollbar-width: none;
+}
 
-            if (statusEl) statusEl.textContent = "";
+#signUpModal .auth-modal::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+}
 
-            if (csvImportPanel) csvImportPanel.style.display = "block";
+#signUpModal .auth-modal.is-scrolling {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 100, 100, 0.45) transparent;
+}
 
-            const listEl = document.getElementById("sellerProductList");
-            if (listEl) listEl.style.display = "none";
+#signUpModal .auth-modal.is-scrolling::-webkit-scrollbar {
+    width: 5px;
+}
 
-            if (importCsvButton) importCsvButton.style.display = "none";
+#signUpModal .auth-modal.is-scrolling::-webkit-scrollbar-track {
+    background: transparent;
+}
 
-            const addBtn = document.getElementById("addProductButton");
-            if (addBtn) addBtn.style.display = "none";
+#signUpModal .auth-modal.is-scrolling::-webkit-scrollbar-thumb {
+    background: rgba(100, 100, 100, 0.45);
+    border-radius: 10px;
+}
 
-        }
-    );
+/* =====================================================
+   KURIOS STORES - OTP VERIFICATION DESIGN
+===================================================== */
 
+#otpVerificationScreen {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5px 0;
 }
 
-function closeCsvImportPanel() {
 
-    if (csvImportPanel) csvImportPanel.style.display = "none";
+/* OTP HEADER */
 
-    const listEl = document.getElementById("sellerProductList");
-    if (listEl) listEl.style.display = "block";
+.otp-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
 
-    if (importCsvButton) importCsvButton.style.display = "inline-flex";
+.otp-header h2 {
+    margin: 0 0 10px;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #1f2937;
+}
 
-    const addBtn = document.getElementById("addProductButton");
-    if (addBtn) addBtn.style.display = "inline-flex";
+.otp-header p {
+    margin: 0 auto;
+    max-width: 420px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #6b7280;
+}
 
+.otp-email-chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--purple-soft);
+    color: var(--purple-dark);
+    font-weight: 600;
 }
 
-if (cancelCsvImport) {
 
-    cancelCsvImport.addEventListener(
-        "click",
-        closeCsvImportPanel
-    );
+/* OTP INPUT SECTION */
 
+.otp-input-section {
+    width: 100%;
+    max-width: 460px;
+    margin: 0 auto;
 }
 
-if (csvFileInput) {
 
-    csvFileInput.addEventListener(
-        "change",
-        function () {
+/* SIX OTP BOXES — underline style */
 
-            const file = csvFileInput.files[0];
+.otp-input-container {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 22px;
+}
 
-            const statusEl = document.getElementById("csvImportStatus");
+.otp-digit {
+    width: 44px;
+    height: 56px;
 
-            if (!file) {
-                return;
-            }
+    padding: 0;
 
-            csvImportFile = file;
+    border: none;
+    border-bottom: 3px solid #e5e0f5;
+    border-radius: 0;
 
-            if (statusEl) statusEl.textContent = "";
+    background: transparent;
 
-            // Read just enough of the file to get
-            // the header line, to detect locations.
+    text-align: center;
 
-            const reader = new FileReader();
+    font-size: 26px;
+    font-weight: 700;
 
-            reader.onload = function (event) {
+    color: #1f2937;
 
-                const text = event.target.result;
+    outline: none;
 
-                const firstLine =
-                    text.split(/\r\n|\n|\r/)[0] || "";
+    transition:
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
 
-                const headers =
-                    parseCsvHeaderLine(firstLine);
 
-                const locations =
-                    detectCsvLocations(headers);
+/* ACTIVE OTP BOX */
 
-                if (locations.length > 0) {
+.otp-digit:focus {
+    border-color: var(--purple);
+    transform: translateY(-2px);
+}
 
-                    if (csvLocationSelect) {
+.otp-digit:not(:placeholder-shown) {
+    border-color: var(--purple-light);
+}
 
-                        csvLocationSelect.innerHTML =
-                            locations.map(function (loc) {
-                                return `<option value="${loc}">${loc}</option>`;
-                            }).join("") +
-                            `<option value="">Don't use a location (general columns)</option>`;
 
-                    }
+.otp-status-message {
+    min-height: 18px;
+    margin: -8px 0 16px;
 
-                    if (csvLocationGroup) csvLocationGroup.style.display = "block";
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
 
-                } else {
+    color: var(--purple-dark);
+}
 
-                    if (csvLocationGroup) csvLocationGroup.style.display = "none";
 
-                }
+.coming-soon-panel {
+    text-align: center;
+    padding: 60px 30px;
+}
 
-                if (confirmCsvImport) confirmCsvImport.disabled = false;
+.coming-soon-panel i {
+    font-size: 40px;
+    color: var(--purple-light);
+    margin-bottom: 16px;
+    display: block;
+}
 
-            };
+.coming-soon-panel h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+}
 
-            // Only need the first ~64kb to reliably
-            // capture the header line.
+.coming-soon-panel p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 13px;
+}
 
-            reader.readAsText(file.slice(0, 65536));
 
-        }
-    );
+/* SELLER — FULL PAGE (not a drawer) */
 
+.full-page-section {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
 }
-
-if (confirmCsvImport) {
 
-    confirmCsvImport.addEventListener(
-        "click",
-        async function () {
-
-            if (!csvImportFile) {
-                return;
-            }
+.full-page-back-row {
+    margin-bottom: 20px;
+}
 
-            const statusEl =
-                document.getElementById("csvImportStatus");
+.full-page-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted, #6b7280);
+}
 
-            const location =
-                csvLocationSelect ? csvLocationSelect.value : "";
+.full-page-back-link:hover {
+    color: var(--purple);
+}
 
-            confirmCsvImport.disabled = true;
-            confirmCsvImport.textContent = "Importing...";
+.full-page-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+}
 
-            if (statusEl) {
-                statusEl.textContent = "Importing your products — this can take a moment for large files...";
-            }
+.full-page-panel .close-cart {
+    display: none;
+}
 
-            const formData = new FormData();
+@media (max-width: 600px) {
 
-            formData.append("studentId", currentSellerStudentId);
-            formData.append("file", csvImportFile);
+    .full-page-section {
+        padding: 20px 16px 60px;
+    }
 
-            if (location) {
-                formData.append("location", location);
-            }
+    .full-page-panel {
+        padding: 20px;
+        border-radius: 12px;
+    }
 
-            try {
+}
 
-                const response =
-                    await fetch(
-                        API_URL + "/api/sellers/products/import",
-                        {
-                            method: "POST",
-                            body: formData
-                        }
-                    );
 
-                const data = await response.json();
+/* STOREFRONT HEADER */
 
-                if (!data.success) {
+.storefront-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
 
-                    if (statusEl) {
+.storefront-icon {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    border-radius: 14px;
+    background: var(--purple-soft);
+    color: var(--purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    overflow: hidden;
+}
 
-                        statusEl.textContent =
-                            data.message || "Could not import that file.";
+.storefront-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-                    }
+.storefront-header h2 {
+    margin: 0 0 4px;
+    font-size: 18px;
+}
 
-                    return;
+.storefront-header p {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7280;
+}
 
-                }
 
-                if (statusEl) {
-                    statusEl.textContent = data.message;
-                }
+/* OPAY BUTTON */
 
-                loadSellerProducts(currentSellerStudentId);
+.opay-button {
+    background: #1a9c5b;
+}
 
-                setTimeout(closeCsvImportPanel, 2000);
+.opay-button:hover {
+    background: #147d49;
+}
 
-            } catch (error) {
 
-                console.error(
-                    "CSV import error:",
-                    error
-                );
+/* DASHBOARD CHOICE MODAL */
 
-                if (statusEl) {
+/* POST-LOGIN SPLASH */
 
-                    statusEl.textContent =
-                        "Unable to connect to Kurios Stores server.";
+.post-login-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 1900;
+    background: linear-gradient(135deg, var(--purple-dark), var(--purple) 55%, var(--purple-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
 
-                }
+.post-login-splash-pattern {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
 
-            } finally {
+.post-login-splash-pattern i {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.1);
+    font-size: 48px;
+}
 
-                confirmCsvImport.disabled = false;
-                confirmCsvImport.textContent = "Import";
+.post-login-splash-pattern i:nth-child(1) { top: 6%; left: 8%; font-size: 32px; transform: rotate(-15deg); }
+.post-login-splash-pattern i:nth-child(2) { top: 14%; left: 82%; font-size: 60px; transform: rotate(20deg); }
+.post-login-splash-pattern i:nth-child(3) { top: 30%; left: 30%; font-size: 26px; transform: rotate(40deg); }
+.post-login-splash-pattern i:nth-child(4) { top: 22%; left: 55%; font-size: 40px; transform: rotate(-30deg); }
+.post-login-splash-pattern i:nth-child(5) { top: 48%; left: 5%; font-size: 50px; transform: rotate(10deg); }
+.post-login-splash-pattern i:nth-child(6) { top: 60%; left: 90%; font-size: 34px; transform: rotate(-40deg); }
+.post-login-splash-pattern i:nth-child(7) { top: 68%; left: 18%; font-size: 44px; transform: rotate(25deg); }
+.post-login-splash-pattern i:nth-child(8) { top: 78%; left: 60%; font-size: 30px; transform: rotate(-10deg); }
+.post-login-splash-pattern i:nth-child(9) { top: 85%; left: 38%; font-size: 55px; transform: rotate(15deg); }
+.post-login-splash-pattern i:nth-child(10) { top: 5%; left: 45%; font-size: 22px; transform: rotate(-25deg); }
+.post-login-splash-pattern i:nth-child(11) { top: 40%; left: 72%; font-size: 36px; transform: rotate(35deg); }
+.post-login-splash-pattern i:nth-child(12) { top: 90%; left: 8%; font-size: 28px; transform: rotate(-20deg); }
+.post-login-splash-pattern i:nth-child(13) { top: 12%; left: 65%; font-size: 24px; transform: rotate(5deg); }
+.post-login-splash-pattern i:nth-child(14) { top: 55%; left: 45%; font-size: 20px; transform: rotate(-35deg); }
+.post-login-splash-pattern i:nth-child(15) { top: 35%; left: 12%; font-size: 38px; transform: rotate(45deg); }
+.post-login-splash-pattern i:nth-child(16) { top: 72%; left: 80%; font-size: 46px; transform: rotate(-5deg); }
+.post-login-splash-pattern i:nth-child(17) { top: 95%; left: 70%; font-size: 32px; transform: rotate(30deg); }
+.post-login-splash-pattern i:nth-child(18) { top: 2%; left: 25%; font-size: 42px; transform: rotate(-45deg); }
 
-            }
+.post-login-splash-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: white;
+}
 
-        }
-    );
+.post-login-splash-logo {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 18px;
+    animation: postLoginSplashPulse 1.6s ease-in-out infinite;
+}
 
+.post-login-splash-content p {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.02em;
 }
 
+@keyframes postLoginSplashPulse {
 
-// =========================================================
-// PASSCODE REVEAL/HIDE TOGGLES
-// =========================================================
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 
-document.querySelectorAll(".passcode-reveal-btn").forEach(function (button) {
+    50% {
+        transform: scale(1.08);
+        opacity: 0.85;
+    }
 
-    button.addEventListener(
-        "click",
-        function () {
+}
 
-            const targetId =
-                button.dataset.target;
 
-            const container =
-                document.getElementById(targetId);
+.dashboard-choice-modal {
+    text-align: center;
+}
 
-            if (!container) {
-                return;
-            }
+.dashboard-choice-modal p {
+    color: #6b7280;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
 
-            const digits =
-                container.querySelectorAll(".passcode-digit");
+.dashboard-choice-card {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+}
 
-            const icon =
-                button.querySelector("i");
+.dashboard-choice-card:hover {
+    border-color: var(--purple);
+    background: var(--purple-soft);
+}
 
-            const isCurrentlyHidden =
-                digits.length > 0 && digits[0].type === "password";
+.dashboard-choice-card > i {
+    color: #9ca3af;
+    font-size: 12px;
+}
 
-            digits.forEach(function (digit) {
-                digit.type = isCurrentlyHidden ? "text" : "password";
-            });
+.dashboard-choice-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 10px;
+    background: var(--purple-soft);
+    color: var(--purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
 
-            if (icon) {
+.dashboard-choice-card div strong {
+    display: block;
+    font-size: 13px;
+    color: #111827;
+    margin-bottom: 2px;
+}
 
-                icon.classList.toggle("fa-eye", !isCurrentlyHidden);
-                icon.classList.toggle("fa-eye-slash", isCurrentlyHidden);
+.dashboard-choice-card div span {
+    font-size: 11px;
+    color: #9ca3af;
+}
 
-            }
 
-            button.setAttribute(
-                "aria-label",
-                isCurrentlyHidden ? "Hide passcode" : "Show passcode"
-            );
+/* =========================================================
+   SELLER DASHBOARD (tabbed, sidebar layout)
+   ========================================================= */
 
-        }
-    );
+#sellerPage.seller-dashboard-active {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: #f8fafb;
+    padding: 0;
+    max-width: none;
+    margin: 0;
+    overflow-y: auto;
+}
 
-});
+#sellerPage.seller-dashboard-active .ks-seller-app {
+    min-height: 100vh;
+    min-height: 100dvh;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    max-width: none;
+    margin: 0;
+}
 
-document.querySelectorAll(".password-toggle-btn").forEach(function (button) {
+.seller-dash-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+}
 
-    button.addEventListener(
-        "click",
-        function () {
+@media (max-width: 900px) {
 
-            const targetId =
-                button.dataset.target;
+    .seller-dash-layout {
+        grid-template-columns: 1fr;
+    }
 
-            const input =
-                document.getElementById(targetId);
+}
 
-            if (!input) {
-                return;
-            }
 
-            const icon =
-                button.querySelector("i");
+/* SIDEBAR */
 
-            if (input.type === "password") {
+.seller-dash-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px;
+    align-self: flex-start;
+    position: sticky;
+    top: 90px;
+}
 
-                input.type = "text";
+@media (max-width: 900px) {
 
-                if (icon) {
-                    icon.classList.remove("fa-eye");
-                    icon.classList.add("fa-eye-slash");
-                }
+    .seller-dash-sidebar {
+        position: static;
+        flex-direction: row;
+        overflow-x: auto;
+    }
 
-                button.setAttribute("aria-label", "Hide password");
+}
 
-            } else {
+.seller-dash-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: none;
+    background: transparent;
+    text-decoration: none;
+    padding: 11px 14px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: left;
+}
 
-                input.type = "password";
+.seller-dash-nav-item i {
+    width: 16px;
+    text-align: center;
+    color: #9ca3af;
+}
 
-                if (icon) {
-                    icon.classList.remove("fa-eye-slash");
-                    icon.classList.add("fa-eye");
-                }
+.seller-dash-nav-item:hover {
+    background: var(--purple-soft);
+    color: var(--purple-dark);
+}
 
-                button.setAttribute("aria-label", "Show password");
+.seller-dash-nav-item.active {
+    background: var(--purple);
+    color: white;
+}
 
-            }
+.seller-dash-nav-item.active i {
+    color: white;
+}
 
-        }
-    );
 
-});
+/* MAIN CONTENT */
 
+.seller-dash-main {
+    min-width: 0;
+}
 
-// =========================================================
-// STUDENT DASHBOARD — RECENT ORDERS + RECOMMENDATIONS
-// =========================================================
 
-async function loadDashboardRecentOrders(studentId) {
+/* STAT CARDS */
 
-    const listEl =
-        document.getElementById("dashboardRecentOrders");
+.seller-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+}
 
-    const emptyEl =
-        document.getElementById("dashboardOrdersEmpty");
+@media (max-width: 1100px) {
 
-    if (!listEl) {
-        return;
+    .seller-stat-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
-
-    try {
-
-        const response =
-            await fetch(
-                API_URL + "/api/orders?studentId=" + studentId
-            );
-
-        const data = await response.json();
-
-        if (!data.success) {
-            return;
-        }
-
-        const recentOrders =
-            data.orders.slice(0, 3);
-
-        listEl.innerHTML = "";
-
-        if (recentOrders.length === 0) {
-
-            if (emptyEl) emptyEl.style.display = "block";
-
-            return;
 
-        }
-
-        if (emptyEl) emptyEl.style.display = "none";
-
-        recentOrders.forEach(function (order) {
-
-            let items = [];
-
-            try {
-                items =
-                    typeof order.items === "string" ?
-                        JSON.parse(order.items) :
-                        order.items;
-            } catch (error) {
-                items = [];
-            }
+}
 
-            const itemSummary =
-                items.length > 0 ?
-                    items.length + " item" + (items.length === 1 ? "" : "s") +
-                        (items[0].name ? " · " + items[0].name + (items.length > 1 ? " + more" : "") : "") :
-                    "Order";
+@media (max-width: 600px) {
 
-            const orderDate =
-                new Date(order.created_at).toLocaleDateString(
-                    undefined,
-                    { month: "short", day: "numeric" }
-                );
+    .seller-stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 
-            const row =
-                document.createElement("div");
+}
 
-            row.className = "dashboard-order-row";
+.seller-stat-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
-            row.innerHTML = `
-                <div class="dashboard-order-row-info">
-                    <strong>${itemSummary}</strong>
-                    <span>${orderDate}</span>
-                </div>
-                <div class="dashboard-order-row-right">
-                    <strong>₦${Number(order.amount).toLocaleString()}</strong>
-                    <span class="dashboard-order-status ${order.status}">${order.status}</span>
-                </div>
-            `;
+.seller-stat-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+}
 
-            row.style.cursor = "pointer";
+.seller-stat-value {
+    font-size: 17px;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.2;
+}
 
-            row.addEventListener(
-                "click",
-                function () {
-                    window.location.hash = "orders";
-                }
-            );
+.seller-stat-label {
+    font-size: 11px;
+    color: #9ca3af;
+    font-weight: 600;
+}
 
-            listEl.appendChild(row);
 
-        });
+/* PANELS ROW */
 
-    } catch (error) {
+.seller-dash-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
 
-        console.error(
-            "Load dashboard orders error:",
-            error
-        );
+@media (max-width: 900px) {
 
+    .seller-dash-row {
+        grid-template-columns: 1fr;
     }
 
 }
 
-
-function renderDashboardRecommendations(products) {
-
-    const grid =
-        document.getElementById("dashboardRecommendations");
+.seller-dash-panel {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+}
 
-    if (!grid) {
-        return;
-    }
+.seller-dash-panel-header {
+    margin-bottom: 14px;
+}
 
-    grid.innerHTML = "";
+.seller-dash-panel-header h3 {
+    font-size: 14px;
+    margin: 0;
+    color: #111827;
+}
 
-    products.forEach(function (product) {
 
-        const category =
-            product.category || "General";
+/* SALES CHART (custom SVG bars) */
 
-        const icon =
-            STOREFRONT_CATEGORY_ICONS[category] || "fa-box";
+.seller-sales-chart {
+    height: 160px;
+    padding-top: 10px;
+}
 
-        const imageMarkup =
-            product.image_url ?
-                `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
-                `<i class="fa-solid ${icon}"></i>`;
+.seller-sales-chart svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
 
-        const card =
-            document.createElement("article");
+.seller-chart-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    justify-content: flex-end;
+}
 
-        card.className = "product-card";
-        card.style.cursor = "pointer";
+.seller-chart-bar {
+    width: 100%;
+    max-width: 32px;
+    background: linear-gradient(180deg, var(--purple-light), var(--purple));
+    border-radius: 6px 6px 0 0;
+    min-height: 3px;
+    transition: opacity 0.15s ease;
+}
 
-        card.innerHTML = `
-            <div class="product-image">
-                ${imageMarkup}
-            </div>
-            <div class="product-info">
-                <span class="product-category">${category}</span>
-                <h3>${product.name}</h3>
-                <div class="product-bottom">
-                    <strong>₦${Number(product.price).toLocaleString()}</strong>
-                </div>
-            </div>
-        `;
+.seller-chart-bar:hover {
+    opacity: 0.8;
+}
 
-        card.addEventListener(
-            "click",
-            function () {
-                window.location.hash = "shop";
-            }
-        );
+.seller-chart-bar-label {
+    font-size: 10px;
+    color: #9ca3af;
+    white-space: nowrap;
+}
 
-        grid.appendChild(card);
 
-    });
+/* ORDER STATUS BREAKDOWN */
 
+.seller-donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
-
-// ========================================
-// DASHBOARD STAT CARD SHORTCUTS
-// ========================================
+.seller-donut,
+.ks-donut {
+    width: 130px;
+    height: 130px;
+    min-width: 130px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: conic-gradient(#e5e7eb 0deg 360deg);
+}
 
-const dashboardWalletCard =
-    document.getElementById("dashboardWalletCard");
+.seller-donut::after,
+.ks-donut::after {
+    content: "";
+    position: absolute;
+    inset: 22px;
+    background: white;
+    border-radius: 50%;
+}
 
-if (dashboardWalletCard) {
+.seller-donut > div,
+.ks-donut > div {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
 
-    dashboardWalletCard.addEventListener(
-        "click",
-        function () {
-            window.location.hash = "wallet";
-        }
-    );
+.seller-donut strong,
+.ks-donut strong {
+    display: block;
+    font-size: 22px;
+    color: #111827;
+}
 
+.seller-donut span,
+.ks-donut span {
+    display: block;
+    font-size: 10px;
+    color: #9ca3af;
+    margin-top: 2px;
 }
 
-const dashboardWishlistCard =
-    document.getElementById("dashboardWishlistCard");
+.seller-status-breakdown,
+.ks-donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
 
-if (dashboardWishlistCard) {
+.seller-status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-    dashboardWishlistCard.addEventListener(
-        "click",
-        function () {
-            window.location.hash = "wishlist";
-        }
-    );
+.seller-status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
 
+.seller-status-row-label {
+    flex: 1;
+    font-size: 12px;
+    color: #6b7280;
+    text-transform: capitalize;
 }
 
-const dashboardRewardsCard =
-    document.getElementById("dashboardRewardsCard");
+.seller-status-row-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+}
 
-if (dashboardRewardsCard) {
 
-    dashboardRewardsCard.addEventListener(
-        "click",
-        function () {
-            window.location.hash = "rewards";
-        }
-    );
+/* TOP PRODUCTS LIST */
 
+.seller-chart-empty {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 12px;
 }
-
-const dashboardViewAllOrders =
-    document.getElementById("dashboardViewAllOrders");
 
-if (dashboardViewAllOrders) {
-
-    dashboardViewAllOrders.addEventListener(
-        "click",
-        function () {
-            window.location.hash = "orders";
-        }
-    );
+.seller-top-product-row-with-thumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
+.seller-top-product-thumb {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 8px;
+    background: var(--purple-soft);
+    color: var(--purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 13px;
 }
 
+.seller-top-product-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-// =========================================================
-// SELLER SALES
-// =========================================================
+.seller-top-product-details {
+    flex: 1;
+    min-width: 0;
+}
 
-async function loadSellerSales(studentId) {
+.seller-top-product-details span {
+    display: block;
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 2px;
+}
 
-    const loadingEl =
-        document.getElementById("sellerSalesLoading");
 
-    const emptyEl =
-        document.getElementById("sellerSalesEmpty");
+.seller-top-product-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+}
 
-    const listEl =
-        document.getElementById("sellerSalesList");
+.seller-top-product-row:last-child {
+    border-bottom: none;
+}
 
-    const summaryEl =
-        document.getElementById("sellerSalesSummary");
+.seller-top-product-row strong {
+    font-size: 12px;
+    color: #111827;
+}
 
-    if (!listEl) {
-        return;
-    }
+.seller-top-product-qty {
+    color: var(--purple-dark);
+    font-weight: 700;
+    white-space: nowrap;
+}
 
-    if (loadingEl) loadingEl.style.display = "block";
-    if (emptyEl) emptyEl.style.display = "none";
-    if (summaryEl) summaryEl.style.display = "none";
-    listEl.innerHTML = "";
 
-    try {
+/* RECENT ORDERS TABLE */
 
-        const response =
-            await fetch(
-                API_URL + "/api/sellers/orders?studentId=" + studentId
-            );
+.seller-orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
 
-        const data = await response.json();
+.seller-orders-table th {
+    text-align: left;
+    color: #9ca3af;
+    font-weight: 600;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+}
 
-        if (loadingEl) loadingEl.style.display = "none";
+.seller-orders-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    color: #374151;
+}
 
-        if (!data.success) {
-            return;
-        }
+.seller-orders-table tr:last-child td {
+    border-bottom: none;
+}
 
-        if (data.orders.length === 0) {
+.seller-order-status-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
 
-            if (emptyEl) emptyEl.style.display = "block";
+.seller-order-status-pill.paid {
+    background: #dcfce7;
+    color: #15803d;
+}
 
-            return;
+.seller-order-status-pill.pending {
+    background: #fef3c7;
+    color: #b45309;
+}
 
-        }
+.seller-order-status-pill.failed {
+    background: #fee2e2;
+    color: #dc2626;
+}
 
-        if (summaryEl) {
 
-            summaryEl.style.display = "flex";
+/* STORE LOGO */
 
-            const revenueEl =
-                document.getElementById("sellerTotalRevenue");
+.store-logo-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 18px 0;
+}
 
-            if (revenueEl) {
+.store-logo-preview {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    border-radius: 14px;
+    background: var(--purple-soft);
+    color: var(--purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    overflow: hidden;
+}
 
-                revenueEl.textContent =
-                    "₦" + Number(data.totalRevenue).toLocaleString();
+.store-logo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-            }
+.store-logo-controls {
+    flex: 1;
+}
 
-        }
+.store-logo-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
 
-        data.orders.forEach(function (order) {
+.store-logo-controls input[type="file"] {
+    font-size: 12px;
+}
 
-            const itemsSummary =
-                order.items.map(function (item) {
-                    return item.quantity + "× " + item.name;
-                }).join(", ");
 
-            const orderDate =
-                new Date(order.createdAt).toLocaleDateString(
-                    undefined,
-                    { month: "short", day: "numeric", year: "numeric" }
-                );
+/* SELLER DASHBOARD */
 
-            const card =
-                document.createElement("div");
+.seller-dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 24px 0 14px;
+}
 
-            card.className = "seller-sale-card";
+.seller-dashboard-header h3 {
+    font-size: 15px;
+    margin: 0;
+}
 
-            card.innerHTML = `
-                <div class="seller-sale-card-top">
-                    <div>
-                        <strong>${order.buyerName}</strong>
-                        <span>${orderDate} · ${order.buyerEmail || order.buyerPhone || ""}</span>
-                    </div>
-                    <div class="seller-sale-amount">
-                        ₦${Number(order.subtotal).toLocaleString()}
-                    </div>
-                </div>
-                <div class="seller-sale-items">
-                    ${itemsSummary}
-                </div>
-            `;
+.seller-dashboard-add-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    background: var(--purple);
+    color: white;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
 
-            listEl.appendChild(card);
+.seller-dashboard-add-button:hover {
+    background: var(--purple-dark);
+}
 
-        });
+.seller-dashboard-secondary-button {
+    background: var(--white);
+    color: var(--purple);
+    border: 1px solid var(--purple-light, var(--purple));
+}
 
-    } catch (error) {
+.seller-dashboard-secondary-button:hover {
+    background: var(--purple-soft);
+}
 
-        console.error(
-            "Load seller sales error:",
-            error
-        );
+/* WALLET PAGE */
 
-        if (loadingEl) loadingEl.style.display = "none";
+.wallet-balance-card {
+    background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin-bottom: 24px;
+    color: white;
+    text-align: center;
+}
 
-    }
+.wallet-balance-card span {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.85;
+    margin-bottom: 8px;
+}
 
+.wallet-balance-card strong {
+    font-size: 34px;
+    font-weight: 800;
 }
 
+.wallet-transaction-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+}
 
-// =========================================================
-// WALLET PAGE
-// =========================================================
+.wallet-transaction-row:last-child {
+    border-bottom: none;
+}
 
-async function loadWalletPage() {
+.wallet-transaction-info strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 3px;
+}
 
-    const student =
-        getStoredStudent();
+.wallet-transaction-info span {
+    font-size: 11px;
+    color: #9ca3af;
+}
 
-    const loadingEl =
-        document.getElementById("walletLoading");
+.wallet-transaction-amount {
+    font-size: 14px;
+    font-weight: 800;
+}
 
-    const notSellerEl =
-        document.getElementById("walletNotSellerState");
+.wallet-transaction-amount.credit {
+    color: #15803d;
+}
 
-    const sellerStateEl =
-        document.getElementById("walletSellerState");
+.wallet-transaction-amount.debit {
+    color: #dc2626;
+}
 
-    if (loadingEl) loadingEl.style.display = "block";
-    if (notSellerEl) notSellerEl.style.display = "none";
-    if (sellerStateEl) sellerStateEl.style.display = "none";
 
-    if (!student) {
-        if (loadingEl) loadingEl.style.display = "none";
-        return;
-    }
+/* SELLER SALES */
 
-    try {
+.seller-sales-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--purple-soft);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+}
 
-        const response =
-            await fetch(
-                API_URL + "/api/sellers/wallet?studentId=" + student.id
-            );
+.seller-sales-summary span {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--purple-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
 
-        const data = await response.json();
+.seller-sales-summary strong {
+    font-size: 20px;
+    color: var(--purple-dark);
+}
 
-        if (loadingEl) loadingEl.style.display = "none";
+.seller-sale-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
 
-        if (!data.success) {
+.seller-sale-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
 
-            if (notSellerEl) notSellerEl.style.display = "block";
+.seller-sale-card-top strong {
+    font-size: 13px;
+    display: block;
+    margin-bottom: 2px;
+}
 
-            return;
+.seller-sale-card-top span {
+    font-size: 11px;
+    color: #9ca3af;
+}
 
-        }
+.seller-sale-amount {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--purple-dark);
+    white-space: nowrap;
+}
 
-        if (sellerStateEl) sellerStateEl.style.display = "block";
+.seller-sale-items {
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.6;
+}
 
-        const balanceEl =
-            document.getElementById("walletBalance");
 
-        if (balanceEl) {
+.seller-product-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
 
-            balanceEl.textContent =
-                "₦" + Number(data.balance).toLocaleString();
+.seller-product-thumb {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    border-radius: 8px;
+    background: var(--purple-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--purple);
+    font-size: 18px;
+    overflow: hidden;
+}
 
-        }
+.seller-product-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-        const listEl =
-            document.getElementById("walletTransactionList");
+.seller-product-info {
+    flex: 1;
+    min-width: 0;
+}
 
-        const emptyEl =
-            document.getElementById("walletTransactionsEmpty");
+.seller-product-info h4 {
+    margin: 0 0 3px;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
-        if (listEl) {
+.seller-product-info p {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7280;
+}
 
-            listEl.innerHTML = "";
+.seller-product-inactive-tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #fee2e2;
+    color: #dc2626;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
 
-            if (data.transactions.length === 0) {
+.seller-product-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
 
-                if (emptyEl) emptyEl.style.display = "block";
+.seller-product-actions button {
+    border: 1px solid var(--border);
+    background: var(--white);
+    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #6b7280;
+}
 
-            } else {
+.seller-product-actions button:hover {
+    border-color: var(--purple);
+    color: var(--purple);
+}
 
-                if (emptyEl) emptyEl.style.display = "none";
+.seller-dashboard-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
 
-                data.transactions.forEach(function (tx) {
+.seller-dashboard-form-actions button {
+    flex: 1;
+}
 
-                    const txDate =
-                        new Date(tx.created_at).toLocaleDateString(
-                            undefined,
-                            { month: "short", day: "numeric", year: "numeric" }
-                        );
 
-                    const row =
-                        document.createElement("div");
+/* PRODUCT CARD — SELLER ATTRIBUTION */
 
-                    row.className = "wallet-transaction-row";
+/* REVIEW PROMPTS */
 
-                    row.innerHTML = `
-                        <div class="wallet-transaction-info">
-                            <strong>${tx.description || (tx.type === "credit" ? "Wallet credit" : "Wallet debit")}</strong>
-                            <span>${txDate}</span>
-                        </div>
-                        <div class="wallet-transaction-amount ${tx.type}">
-                            ${tx.type === "credit" ? "+" : "-"}₦${Number(tx.amount).toLocaleString()}
-                        </div>
-                    `;
+.review-prompt-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--purple-soft);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+}
 
-                    listEl.appendChild(row);
+.review-prompt-thumb {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--purple);
+}
 
-                });
+.review-prompt-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-            }
+.review-prompt-info {
+    flex: 1;
+    min-width: 0;
+}
 
-        }
+.review-prompt-info strong {
+    display: block;
+    font-size: 12px;
+    color: var(--purple-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
-    } catch (error) {
+.review-star-picker {
+    display: flex;
+    gap: 2px;
+}
 
-        console.error(
-            "Load wallet error:",
-            error
-        );
+.review-star-picker i {
+    font-size: 15px;
+    color: #d1d5db;
+    cursor: pointer;
+}
 
-        if (loadingEl) loadingEl.style.display = "none";
+.review-star-picker i.active {
+    color: #f59e0b;
+}
 
-    }
 
+.product-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #b45309;
+    margin: 2px 0;
 }
 
-
-// ========================================
-// DASHBOARD WALLET STAT CARD
-// ========================================
+.product-rating i {
+    color: #f59e0b;
+    font-size: 11px;
+}
 
-async function loadDashboardWalletBalance(studentId) {
+.product-rating-count {
+    font-weight: 500;
+    color: #9ca3af;
+}
 
-    const balanceEl =
-        document.getElementById("dashboardWalletBalance");
 
-    if (!balanceEl) {
-        return;
-    }
+.product-sold-by {
+    display: block;
+    font-size: 11px;
+    color: var(--purple);
+    font-weight: 600;
+    margin: 2px 0 6px;
+    cursor: pointer;
+}
 
-    try {
+.product-sold-by:hover {
+    text-decoration: underline;
+}
 
-        const response =
-            await fetch(
-                API_URL + "/api/sellers/wallet?studentId=" + studentId
-            );
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}
 
-        const data = await response.json();
 
-        if (data.success) {
+/* SELLER TYPE CARD PICKER */
 
-            balanceEl.textContent =
-                Number(data.balance).toLocaleString(
-                    undefined,
-                    { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-                );
+.seller-type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
 
-        }
+.seller-type-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--white);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
 
-        // If not a seller (403), the card just
-        // keeps showing 0.00 — that's accurate.
+.seller-type-card i {
+    font-size: 16px;
+    color: #9ca3af;
+}
 
-    } catch (error) {
+.seller-type-card span {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+}
 
-        console.error(
-            "Load dashboard wallet balance error:",
-            error
-        );
+.seller-type-card:hover {
+    border-color: var(--purple-light);
+}
 
-    }
+.seller-type-card.active {
+    border-color: var(--purple);
+    background: var(--purple-soft);
+}
 
+.seller-type-card.active i {
+    color: var(--purple);
 }
 
 
-// =========================================================
-// SELLER DASHBOARD — TAB SWITCHING + NAV ACTIONS
-// =========================================================
+/* FORM SECTION LABEL */
 
-function switchSellerDashTab(targetTab) {
+.form-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding-top: 16px;
+    margin-bottom: 4px;
+    border-top: 1px solid var(--border);
+}
 
-    document.querySelectorAll("[data-seller-tab]").forEach(function (btn) {
-        btn.classList.remove("active");
-    });
 
-    document.querySelectorAll('[data-seller-tab="' + targetTab + '"]').forEach(function (btn) {
-        btn.classList.add("active");
-    });
+/* TWO-COLUMN FORM ROW */
 
-    document.querySelectorAll(".seller-dash-tab").forEach(function (tab) {
-        tab.style.display = "none";
-    });
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
 
-    const targetEl =
-        document.getElementById(
-            "sellerTab" +
-            targetTab.charAt(0).toUpperCase() +
-            targetTab.slice(1)
-        );
+@media (max-width: 480px) {
 
-    if (targetEl) {
-        targetEl.style.display = "block";
+    .form-row-2 {
+        grid-template-columns: 1fr;
     }
 
 }
 
-document.addEventListener("click", function (event) {
 
-    const tabTrigger =
-        event.target.closest("[data-seller-tab]");
+/* STYLED SELECT */
 
-    if (tabTrigger) {
+.select-wrap {
+    position: relative;
+}
 
-        event.preventDefault();
-        switchSellerDashTab(tabTrigger.dataset.sellerTab);
-        return;
+.select-wrap select {
 
-    }
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 
-    const actionTrigger =
-        event.target.closest("[data-seller-action]");
+    width: 100%;
 
-    if (!actionTrigger) {
-        return;
-    }
+    border: 1px solid var(--border);
+    border-radius: 8px;
 
-    const action =
-        actionTrigger.dataset.sellerAction;
+    padding: 11px 34px 11px 12px;
 
-    if (action === "wallet") {
+    outline: none;
 
-        window.location.hash = "wallet";
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--text);
 
-    } else if (action === "messages") {
+    background: var(--white);
 
-        window.location.hash = "chat";
+    cursor: pointer;
 
-    } else if (action === "store") {
+}
 
-        const seller = window.__kuriosCurrentSeller;
+.select-wrap select:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.08);
+}
 
-        if (seller && seller.id) {
-            window.location.hash = "store-" + seller.id;
-        }
+.select-wrap-arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: #9ca3af;
+    pointer-events: none;
+}
 
-    } else if (action === "switch-to-student") {
 
-        if (typeof switchDashboardWithReload === "function") {
+/* SELLER FEE NOTICE */
 
-            switchDashboardWithReload(null);
+.seller-fee-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 13px 14px;
+    border-radius: 10px;
+    background: var(--purple-soft);
+    color: var(--purple-dark);
+    font-size: 12px;
+    line-height: 1.6;
+}
 
-        } else if (typeof goHome === "function") {
+.seller-fee-note i {
+    margin-top: 2px;
+    font-size: 13px;
+}
 
-            goHome();
 
-        }
+/* PASSCODE MISMATCH */
 
-    } else if (action === "marketing" || action === "discounts") {
+.passcode-mismatch-message {
+    margin: 8px 0 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #dc2626;
+}
 
-        showMessage(
-            "This seller tool isn't built yet — coming in a future update."
-        );
 
-    } else if (action === "notifications" || action === "profile") {
+/* RESET PASSCODE INTRO */
 
-        // These duplicate features already available
-        // elsewhere on the site (the header's own
-        // notification bell / account menu) — no
-        // separate handling needed here.
+.reset-passcode-intro {
+    margin: 0 0 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #6b7280;
+    text-align: center;
+}
 
-    }
 
-});
+/* SIGN IN — EMAIL/PHONE TABS */
 
-document.addEventListener("click", function (event) {
+.signin-tabs {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 0;
+}
 
-    const addProductShortcut =
-        event.target.closest("#sellerDashboardAddProduct");
+.signin-tab {
+    border: none;
+    background: transparent;
+    padding: 0 0 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #9ca3af;
+    cursor: pointer;
+}
 
-    if (!addProductShortcut) {
-        return;
-    }
+.signin-tab.active {
+    color: var(--text);
+}
 
-    switchSellerDashTab("products");
+.signin-tabs-track {
+    position: relative;
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+    margin-bottom: 20px;
+}
 
-    setTimeout(
-        function () {
+.signin-tabs-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 2px;
+    background: var(--purple);
+    transition: left 0.2s ease;
+}
 
-            const existingButton =
-                document.getElementById("addProductButton");
+.signin-tabs-indicator.tab-phone {
+    left: 50%;
+}
 
-            if (existingButton) {
-                existingButton.click();
-            }
 
-        },
-        0
-    );
+/* PHONE INPUT GROUP */
 
-});
+.phone-input-group {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--white);
+    overflow: hidden;
+}
 
-const ksSellerSidebarToggle =
-    document.getElementById("ksSellerSidebarToggle");
+.phone-input-group:focus-within {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.08);
+}
 
-if (ksSellerSidebarToggle) {
+.phone-country-code {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 11px 10px;
+    border-right: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+}
 
-    ksSellerSidebarToggle.addEventListener(
-        "click",
-        function () {
+.phone-input-group input {
+    flex: 1;
+    min-width: 0;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
 
-            const app =
-                document.querySelector(".ks-seller-app");
+.otp-expiry-countdown {
+    margin: 0 0 16px;
 
-            if (app) {
-                app.classList.toggle("sidebar-open");
-            }
+    font-size: 13px;
+    text-align: center;
+    color: #9ca3af;
+}
 
-        }
-    );
+.otp-expiry-countdown span {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #6b7280;
+}
 
+.otp-expiry-countdown.otp-expiry-urgent span {
+    color: var(--red, #dc2626);
 }
 
 
-// =========================================================
-// SELLER DASHBOARD STATS (Overview tab)
-// =========================================================
+/* RESEND COOLDOWN */
 
-async function loadSellerDashboardStats(studentId) {
+.otp-resend-cooldown {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: #9ca3af;
+}
 
-    const loadingEl =
-        document.getElementById("sellerStatsLoading");
+.otp-verify-button {
+    width: 100%;
+    height: 54px;
 
-    const contentEl =
-        document.getElementById("sellerStatsContent");
+    border: none;
+    border-radius: 10px;
 
-    if (!loadingEl || !contentEl) {
-        return;
-    }
+    background: var(--purple);
 
-    loadingEl.style.display = "block";
-    contentEl.style.display = "none";
+    color: white;
 
-    try {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-        const response =
-            await fetch(
-                API_URL + "/api/sellers/dashboard-stats?studentId=" + studentId
-            );
+    gap: 10px;
 
-        const data = await response.json();
+    font-size: 15px;
+    font-weight: 600;
 
-        loadingEl.style.display = "none";
+    cursor: pointer;
 
-        if (!data.success) {
-            return;
-        }
+    transition:
+        background 0.2s ease,
+        transform 0.15s ease;
+}
 
-        contentEl.style.display = "block";
+.otp-verify-button:hover {
+    background: var(--purple-dark);
+    transform: translateY(-1px);
+}
 
+.otp-verify-button:active {
+    transform: translateY(0);
+}
 
-        // ------------------------------------
-        // STAT CARDS
-        // ------------------------------------
+.otp-verify-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
 
-        const setText = function (id, text) {
-            const el = document.getElementById(id);
-            if (el) el.textContent = text;
-        };
 
-        setText("statTotalSales", "₦" + Number(data.totalSales).toLocaleString());
-        setText("statOrderCount", data.orderCount);
-        setText("statProductCount", data.productCount);
-        setText("statCustomerCount", data.uniqueCustomers);
-        setText("statWalletBalance", "₦" + Number(data.walletBalance).toLocaleString());
+/* BUTTON ARROW */
 
-        setText(
-            "statStoreRating",
-            data.storeReviewCount > 0 ?
-                data.storeRating.toFixed(1) + " ★ (" + data.storeReviewCount + ")" :
-                "No ratings yet"
-        );
+.otp-button-arrow {
+    font-size: 14px;
+}
 
 
-        // ------------------------------------
-        // SALES CHART — real SVG line chart
-        // ------------------------------------
+/* RESEND */
 
-        const chartEl =
-            document.getElementById("sellerSalesChart");
+.otp-resend-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
 
-        if (chartEl) {
+    margin-top: 20px;
 
-            const days =
-                Array.isArray(data.salesByDay) ? data.salesByDay : [];
+    font-size: 14px;
+    color: #6b7280;
+}
 
-            if (days.length === 0) {
+.otp-resend-button {
+    border: none;
+    background: transparent;
 
-                chartEl.innerHTML =
-                    '<div class="seller-chart-empty">No sales data yet.</div>';
+    color: var(--purple-dark);
 
-            } else {
+    font-size: 14px;
+    font-weight: 600;
 
-                const width = 620;
-                const height = 160;
-                const pad = { left: 42, right: 12, top: 12, bottom: 26 };
-                const innerW = width - pad.left - pad.right;
-                const innerH = height - pad.top - pad.bottom;
+    cursor: pointer;
 
-                const maxValue =
-                    Math.max(1, ...days.map(function (d) { return Number(d.total) || 0; }));
+    padding: 0;
 
-                const points =
-                    days.map(function (d, i) {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
 
-                        const x =
-                            pad.left + (days.length === 1 ? innerW / 2 : (i * innerW) / (days.length - 1));
+.otp-resend-button:hover {
+    color: var(--purple);
+}
 
-                        const y =
-                            pad.top + innerH - ((Number(d.total) || 0) / maxValue) * innerH;
 
-                        return { x: x, y: y, label: d.label, value: Number(d.total) || 0 };
+/* FOOTER NOTE — plain hairline, no panel */
 
-                    });
+.otp-footer-note {
+    margin: 28px 0 0;
+    padding-top: 18px;
 
-                const polyline =
-                    points.map(function (p) { return p.x + "," + p.y; }).join(" ");
+    border-top: 1px solid #eee7fb;
 
-                const area =
-                    pad.left + "," + (pad.top + innerH) + " " +
-                    polyline + " " +
-                    points[points.length - 1].x + "," + (pad.top + innerH);
+    font-size: 13px;
+    line-height: 1.6;
+    color: #9ca3af;
+    text-align: center;
+}
 
-                const gridLines =
-                    [0, 0.25, 0.5, 0.75, 1].map(function (r) {
 
-                        const y = pad.top + innerH - r * innerH;
-                        const value = Math.round(maxValue * r);
-                        const label = value >= 1000 ? Math.round(value / 1000) + "K" : value;
+/* =====================================================
+   MOBILE
+===================================================== */
 
-                        return `<line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke="#f0f0f2" stroke-width="1"/>` +
-                            `<text x="${pad.left - 8}" y="${y + 3}" text-anchor="end" fill="#9ca3af" font-size="10">₦${label}</text>`;
+@media (max-width: 600px) {
 
-                    }).join("");
+    .otp-input-container {
+        gap: 8px;
+    }
 
-                const dayLabels =
-                    points.map(function (p) {
-                        return `<text x="${p.x}" y="${height - 6}" text-anchor="middle" fill="#9ca3af" font-size="10">${p.label}</text>`;
-                    }).join("");
+    .otp-digit {
+        width: 38px;
+        height: 50px;
+        font-size: 22px;
+    }
 
-                const dots =
-                    points.map(function (p) {
-                        return `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#6d28d9" stroke="#fff" stroke-width="2"><title>₦${p.value.toLocaleString()}</title></circle>`;
-                    }).join("");
+    .otp-header h2 {
+        font-size: 22px;
+    }
 
-                chartEl.innerHTML =
-                    `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img">` +
-                    gridLines +
-                    `<polygon points="${area}" fill="rgba(109,40,217,0.08)"/>` +
-                    `<polyline points="${polyline}" fill="none" stroke="#6d28d9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
-                    dots +
-                    dayLabels +
-                    `</svg>`;
+    .otp-header {
+        margin-bottom: 20px;
+    }
 
-            }
+}
 
-        }
+.stat-card-link {
+    border: 1px solid #e5e7eb;
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+}
 
 
-        // ------------------------------------
-        // ORDER STATUS — real donut chart
-        // ------------------------------------
+/* DASHBOARD SECTIONS */
 
-        const statusColors = {
-            paid: "#15803d",
-            pending: "#b45309",
-            failed: "#dc2626"
-        };
+.dashboard-section {
+    margin-top: 32px;
+}
 
-        const statusEntries =
-            Object.entries(data.statusBreakdown || {});
+.dashboard-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
 
-        const totalStatuses =
-            Math.max(1, statusEntries.reduce(function (sum, entry) { return sum + Number(entry[1] || 0); }, 0));
+.dashboard-section-header h2 {
+    font-size: 18px;
+    margin: 0;
+    color: #111827;
+}
 
-        const donutEl =
-            document.getElementById("sellerOrderDonut");
+.dashboard-section-link {
+    border: none;
+    background: transparent;
+    color: var(--purple);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
 
-        const statusEl =
-            document.getElementById("sellerStatusBreakdown");
+.dashboard-section-link:hover {
+    color: var(--purple-dark);
+}
 
-        let cursor = 0;
+.dashboard-empty-note {
+    color: #9ca3af;
+    font-size: 13px;
+    background: white;
+    border: 1px dashed #e5e7eb;
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+}
 
-        const stops =
-            statusEntries.map(function (entry) {
+.dashboard-order-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-                const status = entry[0];
-                const value = Number(entry[1] || 0);
+.dashboard-order-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 16px 18px;
+}
 
-                const startDeg = (cursor * 360) / totalStatuses;
-                cursor += value;
-                const endDeg = (cursor * 360) / totalStatuses;
+.dashboard-order-row-info {
+    min-width: 0;
+}
 
-                return (statusColors[status] || "#9ca3af") + " " + startDeg + "deg " + endDeg + "deg";
+.dashboard-order-row-info strong {
+    display: block;
+    font-size: 13px;
+    color: #111827;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
-            });
+.dashboard-order-row-info span {
+    font-size: 12px;
+    color: #9ca3af;
+}
 
-        if (donutEl) {
+.dashboard-order-row-right {
+    text-align: right;
+    flex-shrink: 0;
+}
 
-            donutEl.style.background =
-                stops.length > 0 ?
-                    "conic-gradient(" + stops.join(",") + ")" :
-                    "conic-gradient(#e5e7eb 0deg 360deg)";
+.dashboard-order-row-right strong {
+    display: block;
+    font-size: 14px;
+    color: #111827;
+}
 
-        }
+.dashboard-order-status {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
 
-        const donutTotalEl =
-            document.getElementById("sellerDonutTotal");
+.dashboard-order-status.paid {
+    background: #dcfce7;
+    color: #15803d;
+}
 
-        if (donutTotalEl) {
+.dashboard-order-status.pending {
+    background: #fef3c7;
+    color: #b45309;
+}
 
-            donutTotalEl.textContent =
-                statusEntries.reduce(function (sum, entry) { return sum + Number(entry[1] || 0); }, 0);
+.dashboard-order-status.failed {
+    background: #fee2e2;
+    color: #dc2626;
+}
 
-        }
+.dashboard-recommend-grid {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
 
-        if (statusEl) {
+@media (max-width: 900px) {
 
-            statusEl.innerHTML =
-                statusEntries.map(function (entry) {
+    .dashboard-recommend-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 
-                    const status = entry[0];
-                    const count = Number(entry[1] || 0);
-                    const pct = ((count / totalStatuses) * 100).toFixed(0);
+}
 
-                    return `
-                        <div class="seller-status-row">
-                            <span class="seller-status-dot" style="background:${statusColors[status] || "#9ca3af"};"></span>
-                            <span class="seller-status-row-label">${status}</span>
-                            <span class="seller-status-row-count">${count} (${pct}%)</span>
-                        </div>
-                    `;
 
-                }).join("");
+/* =========================================================
+   STUDENT ACCOUNT MENU
+   ========================================================= */
 
-        }
+.student-account-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
 
+    width: 280px;
 
-        // ------------------------------------
-        // TOP SELLING PRODUCTS — with thumbnail + price
-        // ------------------------------------
+    background: #ffffff;
 
-        const topProductsEl =
-            document.getElementById("sellerTopProducts");
+    border: 1px solid #e5e7eb;
 
-        const topProductsEmptyEl =
-            document.getElementById("sellerTopProductsEmpty");
+    border-radius: 16px;
 
-        if (topProductsEl) {
+    box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.12);
 
-            const topProducts =
-                Array.isArray(data.topProducts) ? data.topProducts : [];
+    padding: 10px;
 
-            if (topProducts.length === 0) {
+    z-index: 1000;
 
-                topProductsEl.innerHTML = "";
+    display: none;
 
-                if (topProductsEmptyEl) topProductsEmptyEl.style.display = "block";
+    animation: accountMenuOpen 0.18s ease;
+}
 
-            } else {
 
-                if (topProductsEmptyEl) topProductsEmptyEl.style.display = "none";
+/* OPEN STATE */
 
-                topProductsEl.innerHTML =
-                    topProducts.map(function (product) {
+.student-account-menu.open {
+    display: block;
+}
 
-                        const thumbMarkup =
-                            product.image_url ?
-                                `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
-                                `<i class="fa-solid fa-box"></i>`;
 
-                        return `
-                            <div class="seller-top-product-row seller-top-product-row-with-thumb">
-                                <div class="seller-top-product-thumb">${thumbMarkup}</div>
-                                <div class="seller-top-product-details">
-                                    <strong>${product.name}</strong>
-                                    <span>₦${Number(product.price || 0).toLocaleString()}</span>
-                                </div>
-                                <span class="seller-top-product-qty">${product.quantitySold} sold</span>
-                            </div>
-                        `;
+/* =========================================================
+   ACCOUNT HEADER
+   ========================================================= */
 
-                    }).join("");
+.account-menu-header {
+    display: flex;
 
-            }
+    align-items: center;
 
-        }
+    gap: 12px;
 
+    padding: 12px 10px 14px;
+}
 
-        // ------------------------------------
-        // RECENT ORDERS TABLE — now with product
-        // ------------------------------------
 
-        const recentOrdersEl =
-            document.getElementById("sellerRecentOrdersTable");
+/* PROFILE ICON */
 
-        const recentOrdersEmptyEl =
-            document.getElementById("sellerRecentOrdersEmpty");
+.account-menu-icon {
+    width: 44px;
+    height: 44px;
 
-        if (recentOrdersEl) {
+    border-radius: 50%;
 
-            const recentOrders =
-                Array.isArray(data.recentOrders) ? data.recentOrders : [];
+    background: #f0e7ff;
 
-            if (recentOrders.length === 0) {
+    color: #6d28d9;
 
-                recentOrdersEl.innerHTML = "";
+    display: flex;
 
-                if (recentOrdersEmptyEl) recentOrdersEmptyEl.style.display = "block";
+    align-items: center;
+    justify-content: center;
 
-            } else {
+    font-size: 18px;
 
-                if (recentOrdersEmptyEl) recentOrdersEmptyEl.style.display = "none";
+    flex-shrink: 0;
+}
 
-                const rows =
-                    recentOrders.map(function (order) {
 
-                        const firstItem =
-                            Array.isArray(order.items) && order.items[0] ?
-                                order.items[0].name :
-                                "Product";
+/* ACCOUNT INFORMATION */
 
-                        const orderDate =
-                            new Date(order.createdAt).toLocaleDateString(
-                                undefined,
-                                { month: "short", day: "numeric" }
-                            );
+.account-menu-info {
+    display: flex;
 
-                        return `
-                            <tr>
-                                <td>#${order.orderId}</td>
-                                <td>${order.buyerName}</td>
-                                <td>${firstItem}</td>
-                                <td>₦${Number(order.subtotal).toLocaleString()}</td>
-                                <td><span class="seller-order-status-pill ${order.status}">${order.status}</span></td>
-                                <td>${orderDate}</td>
-                            </tr>
-                        `;
+    flex-direction: column;
 
-                    }).join("");
+    gap: 3px;
 
-                recentOrdersEl.innerHTML = `
-                    <table class="seller-orders-table">
-                        <thead>
-                            <tr>
-                                <th>Order</th>
-                                <th>Customer</th>
-                                <th>Product</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rows}
-                        </tbody>
-                    </table>
-                `;
+    min-width: 0;
+}
 
-            }
 
-        }
+.account-menu-info strong {
+    color: #111827;
 
-    } catch (error) {
+    font-size: 15px;
 
-        console.error(
-            "Load seller dashboard stats error:",
-            error
-        );
+    font-weight: 700;
 
-        loadingEl.style.display = "none";
+    white-space: nowrap;
 
-    }
+    overflow: hidden;
 
+    text-overflow: ellipsis;
 }
 
 
-// =========================================================
-// REVIEW PROMPTS (on My Orders page)
-// =========================================================
+.account-menu-info span {
+    color: #6b7280;
 
-async function loadReviewablePrompts(studentId) {
+    font-size: 12px;
 
-    const container =
-        document.getElementById("reviewablePrompts");
+    white-space: nowrap;
 
-    if (!container) {
-        return;
-    }
+    overflow: hidden;
 
-    try {
+    text-overflow: ellipsis;
+}
 
-        const response =
-            await fetch(
-                API_URL + "/api/students/reviewable-products?studentId=" + studentId
-            );
 
-        const data = await response.json();
+/* =========================================================
+   DIVIDER
+   ========================================================= */
 
-        if (!data.success || data.products.length === 0) {
+.account-menu-divider {
+    height: 1px;
 
-            container.style.display = "none";
-            container.innerHTML = "";
+    background: #eeeeee;
 
-            return;
+    margin: 6px 4px;
+}
 
-        }
 
-        container.style.display = "block";
+/* =========================================================
+   MENU BUTTONS
+   ========================================================= */
 
-        container.innerHTML =
-            `<div class="form-section-label">Rate what you bought</div>` +
-            data.products.map(function (product) {
+.student-account-menu > button,
+.account-menu-nav-link {
+    width: 100%;
 
-                const thumbMarkup =
-                    product.image_url ?
-                        `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
-                        `<i class="fa-solid fa-box"></i>`;
+    border: none;
 
-                return `
-                    <div class="review-prompt-card" data-product-id="${product.id}">
-                        <div class="review-prompt-thumb">${thumbMarkup}</div>
-                        <div class="review-prompt-info">
-                            <strong>${product.name}</strong>
-                        </div>
-                        <div class="review-star-picker" data-product-id="${product.id}">
-                            <i class="fa-solid fa-star" data-star="1"></i>
-                            <i class="fa-solid fa-star" data-star="2"></i>
-                            <i class="fa-solid fa-star" data-star="3"></i>
-                            <i class="fa-solid fa-star" data-star="4"></i>
-                            <i class="fa-solid fa-star" data-star="5"></i>
-                        </div>
-                    </div>
-                `;
+    background: transparent;
 
-            }).join("");
+    display: flex;
 
-        container.querySelectorAll(".review-star-picker").forEach(function (picker) {
+    align-items: center;
 
-            const stars =
-                picker.querySelectorAll("i");
+    gap: 12px;
 
-            stars.forEach(function (star) {
+    padding: 11px 10px;
 
-                star.addEventListener(
-                    "click",
-                    async function () {
+    border-radius: 10px;
 
-                        const rating =
-                            parseInt(star.dataset.star, 10);
+    cursor: pointer;
 
-                        const productId =
-                            picker.dataset.productId;
+    color: #374151;
 
-                        stars.forEach(function (s) {
-                            s.classList.toggle(
-                                "active",
-                                parseInt(s.dataset.star, 10) <= rating
-                            );
-                        });
+    font-family: inherit;
 
-                        const student =
-                            getStoredStudent();
+    font-size: 14px;
 
-                        if (!student) {
-                            return;
-                        }
+    font-weight: 500;
 
-                        try {
+    text-align: left;
 
-                            await fetch(
-                                API_URL + "/api/products/" + productId + "/reviews",
-                                {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json"
-                                    },
-                                    body: JSON.stringify({
-                                        studentId: student.id,
-                                        rating: rating
-                                    })
-                                }
-                            );
+    text-decoration: none;
 
-                            const card =
-                                picker.closest(".review-prompt-card");
+    transition:
+        background 0.18s ease,
+        color 0.18s ease;
+}
 
-                            if (card) {
 
-                                setTimeout(function () {
+/* ICONS */
 
-                                    card.style.opacity = "0.5";
-                                    picker.style.pointerEvents = "none";
+.student-account-menu > button i,
+.account-menu-nav-link i {
+    width: 20px;
 
-                                }, 300);
+    text-align: center;
 
-                            }
+    color: #6d28d9;
 
-                        } catch (error) {
+    font-size: 15px;
+}
 
-                            console.error(
-                                "Submit review error:",
-                                error
-                            );
 
-                        }
+/* HOVER */
 
-                    }
-                );
+.student-account-menu > button:hover,
+.account-menu-nav-link:hover {
+    background: #f5f0ff;
 
-            });
+    color: #5b21b6;
+}
 
-        });
 
-    } catch (error) {
+.student-account-menu > button:hover i,
+.account-menu-nav-link:hover i {
+    color: #6d28d9;
+}
 
-        console.error(
-            "Load reviewable prompts error:",
-            error
-        );
 
-    }
+/* =========================================================
+   WALLET
+   ========================================================= */
 
+#accountWallet {
+    position: relative;
 }
 
 
-// =========================================================
-// STUDENT / SELLER DUAL DASHBOARD
-// =========================================================
+/* =========================================================
+   SIGN OUT
+   ========================================================= */
 
-let __kuriosApprovedSellerCache = null;
-let __kuriosInSellerDashboard = false;
+.student-account-menu .sign-out-button {
+    color: #dc2626;
 
-function switchDashboardWithReload(hash) {
+    margin-top: 2px;
+}
 
-    if (hash) {
 
-        window.location.hash = hash;
+.student-account-menu .sign-out-button i {
+    color: #dc2626;
+}
 
-    } else if (window.location.hash) {
 
-        history.replaceState(
-            null,
-            "",
-            window.location.pathname + window.location.search
-        );
+.student-account-menu .sign-out-button:hover {
+    background: #fef2f2;
 
-    }
+    color: #b91c1c;
+}
 
-    window.location.reload();
 
+.student-account-menu .sign-out-button:hover i {
+    color: #b91c1c;
 }
 
-function setAccountMenuContext(inSellerDashboard) {
 
-    __kuriosInSellerDashboard = inSellerDashboard;
+/* =========================================================
+   ANIMATION
+   ========================================================= */
 
-    const labelEl =
-        document.getElementById("accountBecomeSellerLabel");
+@keyframes accountMenuOpen {
 
-    if (!labelEl) {
-        return;
-    }
+    from {
+        opacity: 0;
 
-    if (inSellerDashboard) {
+        transform:
+            translateY(-6px)
+            scale(0.98);
+    }
 
-        labelEl.textContent = "Switch to Student";
+    to {
+        opacity: 1;
 
-    } else {
+        transform:
+            translateY(0)
+            scale(1);
+    }
 
-        labelEl.textContent =
-            __kuriosApprovedSellerCache ? "Switch to Seller" : "Sell on Kurios";
+}
 
-    }
+/* =========================================================
+   KURIOS STORES
+   LOGGED-IN STUDENT DASHBOARD
+========================================================= */
 
+.logged-in-dashboard {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-async function updateSellerMenuLabel(studentId) {
 
-    const labelEl =
-        document.getElementById("accountBecomeSellerLabel");
+/* =========================================================
+   WELCOME AREA
+========================================================= */
 
-    if (!labelEl) {
-        return null;
-    }
+.dashboard-welcome {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+    margin-bottom: 34px;
+}
 
-    try {
+
+.welcome-content {
+    flex: 1;
+}
 
-        const response =
-            await fetch(
-                API_URL + "/api/sellers/me?studentId=" + studentId
-            );
 
-        const data = await response.json();
+.welcome-content .hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 
-        const isApprovedSeller =
-            data.success &&
-            data.seller &&
-            data.seller.status === "approved";
+    margin-bottom: 16px;
+    padding: 6px 14px 6px 8px;
 
-        __kuriosApprovedSellerCache = isApprovedSeller;
+    border-radius: 50px;
 
-        setAccountMenuContext(__kuriosInSellerDashboard);
+    background: #f3e8ff;
+}
 
-        return isApprovedSeller;
 
-    } catch (error) {
+.welcome-content .hero-label i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-        console.error(
-            "Check seller status for menu error:",
-            error
-        );
+    width: 18px;
+    height: 18px;
 
-        return null;
+    border-radius: 50%;
 
-    }
+    background: #6d28d9;
+    color: white;
 
+    font-size: 10px;
 }
 
 
-// ========================================
-// DASHBOARD CHOICE MODAL
-// (shown once, right after a fresh login,
-// only if the student is an approved seller —
-// not shown again on ordinary page reloads)
-// ========================================
+.welcome-content h1 {
+    margin: 0 0 14px;
+    font-size: clamp(42px, 5vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -2px;
+    font-weight: 800;
+    color: #111111;
+}
 
-const DASHBOARD_CHOICE_TIMEOUT_MS = 60 * 1000;
-const DASHBOARD_CHOICE_STORAGE_KEY = "kuriosDashboardChoicePendingSince";
 
-let __kuriosDashboardChoiceTimer = null;
+.welcome-content h1 span {
+    color: #6d28d9;
+}
 
-function clearDashboardChoicePending() {
 
-    localStorage.removeItem(DASHBOARD_CHOICE_STORAGE_KEY);
-    sessionStorage.removeItem(DASHBOARD_CHOICE_STORAGE_KEY);
+.welcome-content p {
+    margin: 0 0 14px;
+    font-size: 18px;
+    color: #64748b;
+}
 
-    if (__kuriosDashboardChoiceTimer) {
 
-        clearTimeout(__kuriosDashboardChoiceTimer);
-        __kuriosDashboardChoiceTimer = null;
+.student-campus-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 
-    }
+    margin-bottom: 24px;
 
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
 }
 
-function autoLogoutFromPendingChoice() {
 
-    clearDashboardChoicePending();
+.campus-status-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
 
-    localStorage.removeItem("kuriosLoggedInStudent");
-    sessionStorage.removeItem("kuriosLoggedInStudent");
+    border-radius: 50%;
 
-    const message =
-        "You were signed out after not choosing a dashboard in time. Please sign in again.";
-
-    if (typeof showMessage === "function") {
+    background: #16a34a;
+}
 
-        showMessage(message);
 
-    } else {
+.campus-info-divider {
+    color: #d4d4d8;
+}
 
-        alert(message);
 
-    }
+.student-campus-info i {
+    color: #a1a1aa;
+    font-size: 13px;
+}
 
-    setTimeout(
-        function () {
-            window.location.reload();
-        },
-        1200
-    );
 
+.welcome-content .hero-buttons {
+    margin-top: 4px;
 }
 
-function startDashboardChoiceTimer(pendingSince) {
 
-    if (__kuriosDashboardChoiceTimer) {
-        clearTimeout(__kuriosDashboardChoiceTimer);
-    }
+.button-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-    const elapsed =
-        Date.now() - pendingSince;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
 
-    const remaining =
-        DASHBOARD_CHOICE_TIMEOUT_MS - elapsed;
+    border-radius: 50px;
 
-    if (remaining <= 0) {
+    background: #ede9fe;
+    color: #6d28d9;
 
-        autoLogoutFromPendingChoice();
-        return;
+    font-size: 12px;
+    font-weight: 800;
+}
 
-    }
 
-    __kuriosDashboardChoiceTimer =
-        setTimeout(
-            autoLogoutFromPendingChoice,
-            remaining
-        );
+/* =========================================================
+   DASHBOARD STATS
+========================================================= */
 
+.dashboard-stats {
+    display: flex;
+    gap: 16px;
 }
 
-function showDashboardChoiceModal(student) {
 
-    const modal =
-        document.getElementById("dashboardChoiceModal");
+.stat-card {
+    flex: 1;
 
-    if (!modal) {
-        return;
-    }
+    display: flex;
+    align-items: center;
+    gap: 14px;
 
-    const greetingEl =
-        document.getElementById("dashboardChoiceGreeting");
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
 
-    if (greetingEl) {
+    padding: 18px 20px;
 
-        const firstName =
-            (student.first_name || "").trim();
+    box-shadow: 0 8px 25px rgba(30, 20, 60, 0.05);
 
-        greetingEl.textContent =
-            "Welcome back" + (firstName ? ", " + firstName : "") + "!";
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
 
-    }
 
-    modal.classList.add("open");
+.stat-card:hover {
+    transform: translateY(-3px);
 
+    border-color: #d8c7f5;
 
-    // Remember that a decision is pending, with WHEN it
-    // started — so a page refresh can resume the same
-    // countdown instead of silently dropping into the
-    // student dashboard or restarting the clock.
+    box-shadow: 0 15px 35px rgba(30, 20, 60, 0.09);
+}
 
-    const alreadyPendingSince =
-        parseInt(
-            localStorage.getItem(DASHBOARD_CHOICE_STORAGE_KEY) ||
-            sessionStorage.getItem(DASHBOARD_CHOICE_STORAGE_KEY) ||
-            "0",
-            10
-        );
 
-    const pendingSince =
-        alreadyPendingSince || Date.now();
+.stat-icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
 
-    if (!alreadyPendingSince) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-        localStorage.setItem(
-            DASHBOARD_CHOICE_STORAGE_KEY,
-            String(pendingSince)
-        );
+    border-radius: 12px;
 
-    }
+    font-size: 17px;
+}
 
-    startDashboardChoiceTimer(pendingSince);
 
+.stat-card--wallet .stat-icon {
+    background: #e0f2fe;
+    color: #0284c7;
 }
 
-function closeDashboardChoiceModal() {
 
-    const modal =
-        document.getElementById("dashboardChoiceModal");
-
-    if (modal) {
-        modal.classList.remove("open");
-    }
+.stat-card--wishlist .stat-icon {
+    background: #f3e8ff;
+    color: #6d28d9;
+}
 
-    clearDashboardChoicePending();
 
+.stat-card--rewards .stat-icon {
+    background: #fef9c3;
+    color: #b45309;
 }
 
 
-// ========================================
-// RESUME A PENDING DECISION AFTER REFRESH
-// (runs on every page load — if a choice
-// was left unmade, re-show the splash +
-// modal and resume the countdown instead
-// of letting the dashboard render)
-// ========================================
+.stat-text {
+    min-width: 0;
+}
 
-(function resumePendingDashboardChoice() {
 
-    const pendingSinceRaw =
-        localStorage.getItem(DASHBOARD_CHOICE_STORAGE_KEY) ||
-        sessionStorage.getItem(DASHBOARD_CHOICE_STORAGE_KEY);
+.stat-value {
+    font-size: 22px;
+    line-height: 1.15;
+    font-weight: 800;
+    color: #111827;
+}
 
-    if (!pendingSinceRaw) {
-        return;
-    }
 
-    const student =
-        typeof getStoredStudent === "function" ?
-            getStoredStudent() :
-            null;
+.stat-label {
+    font-size: 13px;
+    color: #64748b;
+}
 
-    if (!student) {
 
-        // No session to resume — clear the stale flag.
+/* =========================================================
+   RESPONSIVE
+========================================================= */
 
-        clearDashboardChoicePending();
-        return;
+@media (max-width: 1000px) {
 
+    .dashboard-stats {
+        flex-wrap: wrap;
     }
-
-    const pendingSince =
-        parseInt(pendingSinceRaw, 10);
 
-    const elapsed =
-        Date.now() - pendingSince;
 
-    if (elapsed >= DASHBOARD_CHOICE_TIMEOUT_MS) {
+    .stat-card {
+        min-width: calc(50% - 8px);
+    }
 
-        autoLogoutFromPendingChoice();
-        return;
+}
 
-    }
 
-    const splashEl =
-        document.getElementById("postLoginSplash");
+@media (max-width: 650px) {
 
-    if (splashEl) {
-        splashEl.style.display = "flex";
+    .dashboard-welcome {
+        align-items: flex-start;
     }
 
-    const mainEl =
-        document.getElementById("mainContent");
 
-    if (mainEl) {
-        mainEl.style.display = "none";
+    .welcome-content h1 {
+        font-size: 38px;
+        letter-spacing: -1.5px;
     }
 
-    showDashboardChoiceModal(student);
 
-})();
+    .welcome-content .hero-buttons {
+        width: 100%;
+    }
 
 
-const dashboardChoiceStudent =
-    document.getElementById("dashboardChoiceStudent");
+    .welcome-content .hero-buttons .primary-button,
+    .welcome-content .hero-buttons .secondary-button {
+        flex: 1;
+        justify-content: center;
+    }
 
-if (dashboardChoiceStudent) {
 
-    dashboardChoiceStudent.addEventListener(
-        "click",
-        function () {
+    .dashboard-stats {
+        flex-direction: column;
+    }
 
-            // Hide the choice cards but leave the splash
-            // showing underneath for a beat before we go.
 
-            closeDashboardChoiceModal();
+    .stat-card {
+        min-width: 100%;
+    }
 
-            setTimeout(
-                function () {
+}
 
-                    if (typeof switchDashboardWithReload === "function") {
+/* =========================================================
+   KURIOS SELLER CENTER — DASHBOARD SHELL
+   (structural layout from the reference mockup,
+   recolored to our purple brand throughout)
+   ========================================================= */
+.ks-seller-app{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:calc(100vh - 20px);background:#f8fafb;border:1px solid #e5e7eb;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(15,23,42,.08);margin:0 auto;max-width:1500px;color:#10212a}
+.ks-seller-sidebar{background:linear-gradient(180deg,#4c1d95 0%,#5b21b6 55%,#6d28d9 100%);color:#fff;padding:18px 12px 14px;display:flex;flex-direction:column;min-width:0}
+.ks-seller-brand{display:flex;align-items:center;gap:10px;padding:4px 12px 17px;border-bottom:1px solid rgba(255,255,255,.15);margin-bottom:18px}
+.ks-seller-brand-mark{font-size:25px;color:#c4b5fd}.ks-seller-brand strong{display:block;font-size:21px;line-height:1;font-weight:900;letter-spacing:.3px}.ks-seller-brand span{display:block;color:#c4b5fd;font-size:16px;font-weight:900;letter-spacing:.5px}.ks-seller-profile{display:flex;gap:10px;align-items:center;padding:0 9px 16px}.ks-seller-avatar,.ks-user-avatar{border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#f3e8ff;color:var(--purple)}.ks-seller-avatar{width:43px;height:43px;flex:none}.ks-seller-avatar img,.ks-user-avatar img{width:100%;height:100%;object-fit:cover}.ks-seller-profile-copy strong{display:block;font-size:13px;color:#fff}.ks-seller-profile-copy span{font-size:11px;color:#d8c7f5}.ks-seller-profile-copy i{color:#c4b5fd;margin-left:2px}.ks-seller-nav{display:flex;flex-direction:column;gap:3px}.ks-seller-nav-item{width:100%;display:flex;align-items:center;gap:12px;border:0;background:transparent;color:#f2ecfb;padding:10px 12px;border-radius:8px;font:600 12px/1.2 inherit;text-align:left;cursor:pointer}.ks-seller-nav-item i:first-child{width:16px;text-align:center;font-size:14px}.ks-seller-nav-item:hover{background:rgba(255,255,255,.1)}.ks-seller-nav-item.active{background:rgba(255,255,255,.18);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}.ks-seller-nav-item span{flex:1}.ks-seller-nav-item b{min-width:21px;height:21px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--purple-dark);font-size:10px}.ks-nav-chevron{font-size:9px!important;width:auto!important}.ks-grow-card{position:relative;margin:18px 0 14px;padding:15px 14px;border-radius:9px;background:linear-gradient(135deg,#7c3aed,#5b21b6);overflow:hidden}.ks-grow-card strong{font-size:13px}.ks-grow-card p{font-size:11px;line-height:1.55;color:#ede9fe;margin:7px 0 11px;max-width:150px}.ks-grow-card button{border:0;background:#fff;color:var(--purple-dark);border-radius:5px;padding:7px 10px;font-size:10px;font-weight:800;cursor:pointer}.ks-grow-icon{position:absolute;right:7px;bottom:18px;font-size:34px;transform:rotate(-18deg);opacity:.25}.ks-help-card{margin-top:auto;border-top:1px solid rgba(255,255,255,.14);padding:17px 9px 4px;display:flex;gap:12px;align-items:center}.ks-help-card>i{font-size:20px}.ks-help-card strong,.ks-help-card span{display:block}.ks-help-card strong{font-size:12px}.ks-help-card span{font-size:10px;color:#d8c7f5;margin-top:3px}
+.ks-seller-content{min-width:0;background:#fbfcfd}.ks-seller-topbar{height:66px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:18px;padding:0 24px}.ks-sidebar-toggle{border:0;background:transparent;font-size:18px;color:#182b34;cursor:pointer;display:none}.ks-seller-search{width:min(340px,42vw);height:36px;border:1px solid #dce2e5;border-radius:7px;display:flex;align-items:center;gap:9px;padding:0 11px;color:#5d6b73;margin-left:auto}.ks-seller-search input{border:0;outline:0;width:100%;font:500 12px inherit;color:#152831;background:transparent}.ks-topbar-actions{display:flex;align-items:center;gap:13px}.ks-icon-btn{position:relative;border:0;background:transparent;color:#172b34;font-size:17px;cursor:pointer}.ks-notification-dot{position:absolute;right:-1px;top:0;width:5px;height:5px;border-radius:50%;background:#ef4444}.ks-add-product-top{border:0;background:var(--purple);color:#fff;border-radius:6px;padding:9px 12px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:7px;cursor:pointer}.ks-add-product-top:hover{background:var(--purple-dark)}.ks-user-menu{border:0;background:transparent;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#1b2c34;cursor:pointer}.ks-user-avatar{width:30px;height:30px}.ks-seller-page-head{padding:22px 28px 17px;display:flex;justify-content:space-between;align-items:flex-end;gap:18px}.ks-seller-page-head h2{font-size:24px;line-height:1.2;margin:0 0 5px;font-weight:800;letter-spacing:-.6px}.ks-seller-page-head p{margin:0;color:#6d7a83;font-size:13px}.ks-wave{font-size:21px}.ks-seller-app .seller-dash-tab{padding:0 28px 26px}.ks-metric-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:15px;margin-bottom:18px}.ks-metric-card{background:#fff;border:1px solid #e1e6e9;border-radius:10px;padding:16px 14px;display:flex;align-items:center;gap:11px;min-height:90px}.ks-metric-icon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:15px}.ks-metric-icon.sales{background:#dcfce7;color:#15803d}.ks-metric-icon.orders{background:#e1efff;color:#2585e8}.ks-metric-icon.customers{background:#f3e8ff;color:var(--purple)}.ks-metric-icon.products{background:#ffeadb;color:#e27d2b}.ks-metric-icon.rating{background:#fff2bd;color:#dfaa00}.ks-metric-card span{display:block;color:#1f3039;font-size:11px;margin-bottom:4px}.ks-metric-card strong{display:block;color:#0e1e27;font-size:17px;line-height:1.2}
+.ks-dashboard-grid{display:grid;gap:16px;margin-bottom:16px}.ks-dashboard-grid-top{grid-template-columns:minmax(0,1.55fr) minmax(260px,1fr) minmax(250px,1.08fr)}.ks-dashboard-grid-bottom{grid-template-columns:minmax(0,1.7fr) minmax(270px,.72fr)}.ks-panel{background:#fff;border:1px solid #e1e6e9;border-radius:10px;padding:17px 18px;min-width:0;overflow:hidden}.ks-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}.ks-panel-head h3{font-size:13px;margin:0;font-weight:800;color:#13252e}.ks-panel-head p{margin:4px 0 0;color:#89959c;font-size:9px}.ks-panel-head button{border:0;background:transparent;color:var(--purple-dark);font-size:10px;font-weight:700;cursor:pointer}
+.ks-line-chart{height:200px;position:relative}.ks-line-chart svg{width:100%;height:100%;display:block}
+.ks-donut-wrap{display:flex;align-items:center;gap:22px;min-height:200px}
+.ks-top-product{display:grid;grid-template-columns:42px 1fr auto;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #edf0f2}.ks-top-product:last-child{border-bottom:0}
+.ks-recent-orders{min-height:230px}.ks-recent-orders .seller-orders-table{font-size:10px}.ks-recent-orders .seller-orders-table th{font-size:9px;background:#f7f9fa;color:#52636b;padding:10px 8px}.ks-recent-orders .seller-orders-table td{padding:10px 8px;border-bottom:1px solid #edf0f2;color:#263840}
+.ks-performance-list>div{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:9px;padding:14px 0;border-bottom:1px solid #edf0f2;font-size:10px}.ks-performance-list>div:last-child{border-bottom:0}.ks-performance-list i{font-size:16px;color:var(--purple)}.ks-performance-list span{color:#596970}.ks-performance-list strong{font-size:11px;color:#24363f}
+.ks-seller-app .seller-dashboard-header{margin-bottom:15px}
 
-                        switchDashboardWithReload(null);
+@media(max-width:1180px){.ks-metric-grid{grid-template-columns:repeat(3,1fr)}.ks-dashboard-grid-top{grid-template-columns:1.3fr 1fr}.ks-top-products{grid-column:1/-1}.ks-seller-app{grid-template-columns:220px minmax(0,1fr)}}
+@media(max-width:900px){.ks-sidebar-toggle{display:block}.ks-seller-app{grid-template-columns:1fr;border-radius:0;margin:0}.ks-seller-sidebar{position:fixed;z-index:100;left:0;top:0;bottom:0;width:244px;transform:translateX(-102%);transition:transform .2s ease;box-shadow:12px 0 30px rgba(0,0,0,.18)}.ks-seller-app.sidebar-open .ks-seller-sidebar{transform:translateX(0)}.ks-seller-content{width:100%}.ks-seller-topbar{padding:0 15px}.ks-seller-search{width:34vw}.ks-topbar-actions{gap:9px}.ks-user-menu>span:not(.ks-user-avatar){display:none}.ks-seller-page-head{padding:18px 15px 14px}.ks-seller-app .seller-dash-tab{padding:0 15px 20px}.ks-dashboard-grid-top,.ks-dashboard-grid-bottom{grid-template-columns:1fr}.ks-top-products{grid-column:auto}.ks-donut-wrap{justify-content:center}}
+@media(max-width:620px){.ks-seller-search{display:none}.ks-add-product-top{font-size:0;padding:9px 10px}.ks-add-product-top i{font-size:12px}.ks-seller-page-head{align-items:flex-start;flex-direction:column}.ks-metric-grid{grid-template-columns:1fr 1fr;gap:9px}.ks-metric-card{min-height:85px;padding:12px 10px}.ks-metric-card strong{font-size:14px}.ks-metric-icon{width:35px;height:35px}.ks-panel{padding:14px}.ks-line-chart{height:180px}.ks-donut-wrap{flex-direction:column}.ks-recent-orders{overflow:auto}.ks-recent-orders .seller-orders-table{min-width:560px}}
 
-                    } else if (typeof goHome === "function") {
+/* Strip the old application-form chrome for the dashboard view */
+#sellerPage.seller-dashboard-active .full-page-back-row,
+#sellerPage.seller-dashboard-active .full-page-panel>.profile-panel-header{display:none}
+#sellerPage.seller-dashboard-active .full-page-panel{padding:0;border:0;background:transparent;border-radius:0}
 
-                        goHome();
 
-                    }
+/* =========================================================
+   CHAT — MOBILE LAYOUT
+   (single-column, list-or-conversation, with a
+   working back button — not two cramped columns)
+   ========================================================= */
 
-                },
-                5000
-            );
+@media (min-width: 781px) {
 
-        }
-    );
+    .chat-back-button {
+        display: none !important;
+    }
 
 }
-
-const dashboardChoiceSeller =
-    document.getElementById("dashboardChoiceSeller");
 
-if (dashboardChoiceSeller) {
 
-    dashboardChoiceSeller.addEventListener(
-        "click",
-        function () {
+/* =========================================================
+   CHAT — APP SIDEBAR (matches reference mockup)
+   ========================================================= */
 
-            closeDashboardChoiceModal();
+.chat-app-sidebar {
+    background: #fbfaff;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    min-height: 0;
+    overflow-y: auto;
+}
 
-            setTimeout(
-                function () {
+.chat-app-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+}
 
-                    if (typeof switchDashboardWithReload === "function") {
+.chat-app-brand i {
+    font-size: 18px;
+    color: var(--purple);
+}
 
-                        switchDashboardWithReload("sell");
+.chat-app-brand strong {
+    display: block;
+    font-size: 13px;
+    line-height: 1;
+    color: var(--purple-dark);
+}
 
-                    } else {
+.chat-app-brand span {
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--purple);
+}
 
-                        window.location.hash = "sell";
+.chat-app-newchat-btn {
+    border: none;
+    background: var(--purple);
+    color: white;
+    border-radius: 9px;
+    padding: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    cursor: pointer;
+    margin-bottom: 14px;
+}
 
-                    }
+.chat-app-newchat-btn:hover {
+    background: var(--purple-dark);
+}
 
-                },
-                5000
-            );
+.chat-app-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
 
-        }
-    );
+.chat-app-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: none;
+    background: transparent;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4b5563;
+    cursor: pointer;
+    text-align: left;
+    position: relative;
+}
 
+.chat-app-nav-item i {
+    width: 15px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 13px;
 }
 
+.chat-app-nav-item:hover {
+    background: var(--purple-soft);
+    color: var(--purple-dark);
+}
 
-// =========================================================
-// CONTACT SELLER ABOUT A PRODUCT
-// =========================================================
+.chat-app-nav-item.active {
+    background: var(--purple-soft);
+    color: var(--purple-dark);
+}
 
-async function contactSellerAboutProduct(productId) {
+.chat-app-nav-item.active i {
+    color: var(--purple);
+}
 
-    const student =
-        getStoredStudent();
+.chat-app-nav-item.soon {
+    color: #9ca3af;
+}
 
-    if (!student) {
+.soon-pill {
+    margin-left: auto;
+    background: #fef3c7;
+    color: #b45309;
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+}
 
-        if (typeof openSignInModalStandalone === "function") {
-            openSignInModalStandalone();
-        }
+.chat-app-sidebar-footer {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
 
-        return;
+.chat-app-sidebar-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--purple-soft);
+    color: var(--purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
 
-    }
+.chat-app-sidebar-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-    try {
+.chat-app-sidebar-footer strong {
+    display: block;
+    font-size: 11px;
+    color: #111827;
+}
 
-        const response =
-            await fetch(
-                API_URL + "/api/chat/contact-seller",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        studentId: student.id,
-                        productId: productId
-                    })
-                }
-            );
+.chat-app-sidebar-footer span {
+    display: block;
+    font-size: 10px;
+    color: #9ca3af;
+}
 
-        const data = await response.json();
 
-        if (!data.success) {
+/* FILTER PILLS */
 
-            alert(data.message || "Could not start a chat with this seller.");
-            return;
+.chat-filter-pills {
+    display: flex;
+    gap: 6px;
+    padding: 0 16px 14px;
+    flex-wrap: wrap;
+}
 
-        }
+.chat-filter-pill {
+    border: 1px solid var(--border);
+    background: white;
+    color: #6b7280;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
 
-        window.__kuriosPendingChatOpen = {
-            conversationId: data.conversationId,
-            sellerStudentId: data.sellerStudentId,
-            storeName: data.storeName,
-            productName: data.productName
-        };
+.chat-filter-pill:hover {
+    border-color: var(--purple);
+    color: var(--purple);
+}
 
-        window.location.hash = "chat";
+.chat-filter-pill.active {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: white;
+}
 
-    } catch (error) {
+.chat-filter-pill.soon {
+    color: #9ca3af;
+}
 
-        console.error(
-            "Contact seller error:",
-            error
-        );
+.chat-filter-pill .soon-pill {
+    margin-left: 0;
+}
 
-        alert("Unable to connect to Kurios Stores server.");
 
-    }
+/* HEADER ACTIONS (call / video / more) */
 
+.chat-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
 }
 
+.chat-header-icon-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+}
 
-// =========================================================
-// CHAT — "COMING SOON" ELEMENTS
-// (every feature shown in the reference design that
-// isn't actually built yet — clearly tagged, not faked)
-// =========================================================
+.chat-header-icon-btn:hover {
+    background: var(--purple-soft);
+    color: var(--purple);
+}
 
-document.addEventListener("click", function (event) {
 
-    const soonTrigger =
-        event.target.closest('[data-chat-action="soon"], [data-chat-sidebar-action="soon"], .chat-filter-pill.soon');
+/* MESSAGE INPUT ICON BUTTONS */
 
-    if (!soonTrigger) {
-        return;
-    }
+.chat-input-icon-btn {
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    font-size: 15px;
+    width: 32px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
 
-    if (typeof showMessage === "function") {
+.chat-input-icon-btn:hover {
+    color: var(--purple);
+}
 
-        showMessage("This feature isn't built yet — coming soon.");
 
-    } else {
+/* PROFILE PANEL */
 
-        alert("This feature isn't built yet — coming soon.");
+.chat-profile-panel {
+    border-left: 1px solid var(--border);
+    padding: 24px 18px;
+    overflow-y: auto;
+    text-align: center;
+}
 
-    }
+.chat-profile-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: var(--purple-soft);
+    color: var(--purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 12px;
+    overflow: hidden;
+}
 
-});
+.chat-profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
+.chat-profile-panel strong {
+    display: block;
+    font-size: 14px;
+    color: #111827;
+    margin-bottom: 6px;
+}
 
-// ========================================
-// CHAT APP SIDEBAR — REAL NAV DESTINATIONS
-// ========================================
+.chat-profile-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--purple-soft);
+    color: var(--purple-dark);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+}
 
-document.addEventListener("click", function (event) {
+.chat-profile-university {
+    font-size: 11px;
+    color: #9ca3af;
+    margin: 0 0 18px;
+}
 
-    const navItem =
-        event.target.closest("[data-chat-sidebar-action]");
+.chat-profile-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 22px;
+}
 
-    if (!navItem) {
-        return;
-    }
+.chat-profile-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 4px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--purple-dark);
+}
 
-    const action =
-        navItem.dataset.chatSidebarAction;
+.chat-profile-action i {
+    font-size: 13px;
+    color: var(--purple);
+}
 
-    if (action === "notifications") {
+.chat-profile-action:hover {
+    background: var(--purple-soft);
+}
 
-        const notificationButton =
-            document.getElementById("notificationButton");
+.chat-profile-action.soon {
+    color: #9ca3af;
+}
 
-        if (notificationButton) {
-            notificationButton.click();
-        }
+.chat-profile-action.soon i {
+    color: #9ca3af;
+}
 
-    } else if (action === "orders") {
+.chat-profile-section {
+    text-align: left;
+    margin-bottom: 16px;
+}
 
-        window.location.hash = "orders";
+.chat-profile-section h4 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #9ca3af;
+    margin: 0 0 10px;
+}
 
-    } else if (action === "rewards") {
+.chat-profile-info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: #374151;
+    padding: 6px 0;
+}
 
-        window.location.hash = "rewards";
+.chat-profile-info-row i {
+    width: 14px;
+    color: var(--purple);
+}
 
-    } else if (action === "wallet") {
+.chat-profile-list-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: transparent;
+    padding: 8px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    border-radius: 6px;
+}
 
-        window.location.hash = "wallet";
+.chat-profile-list-item:hover {
+    background: #f9fafb;
+}
 
-    } else if (action === "profile" || action === "settings") {
+.chat-profile-list-item.danger {
+    color: #dc2626;
+}
 
-        window.location.hash = "profile";
+.chat-profile-list-item .soon-pill {
+    margin-left: auto;
+}
 
-    }
 
-});
+@media (max-width: 1180px) {
 
-const appSidebarNewChat =
-    document.getElementById("appSidebarNewChat");
+    .chat-preview,
+    .chat-preview:not(.has-profile-panel) {
+        grid-template-columns: 190px 280px minmax(0, 1fr);
+    }
 
-if (appSidebarNewChat) {
+    .chat-profile-panel {
+        display: none !important;
+    }
 
-    appSidebarNewChat.addEventListener(
-        "click",
-        function () {
+}
 
-            const realButton =
-                document.getElementById("newChatButton");
+@media (max-width: 780px) {
 
-            if (realButton) {
-                realButton.click();
-            }
+    .chat-app-sidebar {
+        display: none;
+    }
 
-        }
-    );
+    .chat-full-page {
+        padding: 0;
+        max-width: 100%;
+    }
 
-}
+    .chat-preview,
+    .chat-preview:not(.has-profile-panel) {
+        grid-template-columns: minmax(0, 1fr);
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
 
+    .chat-sidebar {
+        border-right: none;
+    }
 
-// ========================================
-// CHAT FILTER PILLS (real filtering for
-// All / Students / Sellers — the rest are
-// tagged Coming Soon above)
-// ========================================
+    /* By default show the list, hide the window.
+       Adding .conversation-open flips this. */
 
-let __kuriosChatFilter = "all";
+    .chat-window {
+        display: none;
+    }
 
-document.addEventListener("click", function (event) {
+    #chatPreviewApp.conversation-open .chat-sidebar {
+        display: none;
+    }
 
-    const pill =
-        event.target.closest(".chat-filter-pill:not(.soon)");
+    #chatPreviewApp.conversation-open .chat-window {
+        display: flex;
+    }
 
-    if (!pill) {
-        return;
+    .chat-back-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    document.querySelectorAll(".chat-filter-pill").forEach(function (p) {
-        p.classList.remove("active");
-    });
+}
 
-    pill.classList.add("active");
 
-    __kuriosChatFilter =
-        pill.dataset.chatFilter;
+/* =========================================================
+   CHAT — FULL SCREEN + REMAINING MOCKUP DETAILS
+   ========================================================= */
 
-    if (typeof window.renderChatContactList === "function") {
-        window.renderChatContactList();
-    }
+.chat-full-page {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: white;
+    padding: 0;
+    max-width: none;
+    margin: 0;
+}
 
-});
+.chat-full-page .chat-preview {
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+}
 
+.chat-exit-btn {
+    margin-left: auto;
+    color: #9ca3af;
+    font-size: 13px;
+    text-decoration: none;
+    padding: 4px;
+}
 
-// =========================================================
-// VIEW PROFILE BUTTON — reveals the real profile panel
-// =========================================================
+.chat-exit-btn:hover {
+    color: var(--purple);
+}
 
-const chatViewProfileBtn =
-    document.getElementById("chatViewProfileBtn");
+.chat-app-brand {
+    display: flex;
+    align-items: center;
+}
 
-if (chatViewProfileBtn) {
+.chat-view-profile-btn {
+    margin-left: auto;
+    border: 1px solid var(--purple);
+    background: white;
+    color: var(--purple);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+}
 
-    chatViewProfileBtn.addEventListener(
-        "click",
-        function () {
+.chat-view-profile-btn:hover {
+    background: var(--purple);
+    color: white;
+}
 
-            const panel =
-                document.getElementById("chatProfilePanel");
+.chat-status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #d1d5db;
+    margin-left: 6px;
+    vertical-align: middle;
+}
 
-            if (!panel || panel.style.display === "none") {
-                return;
-            }
+.chat-status-dot.online {
+    background: #22c55e;
+}
 
-            panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+.chat-contact-seller-tag {
+    display: inline-block;
+    background: var(--purple-soft);
+    color: var(--purple-dark);
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
 
-            panel.style.outline = "2px solid #6d28d9";
 
-            setTimeout(
-                function () {
-                    panel.style.outline = "none";
-                },
-                900
-            );
+#sellerPage.seller-dashboard-active .ks-seller-brand {
+    display: flex;
+    align-items: center;
+}
 
-        }
-    );
+.ks-seller-exit-btn {
+    margin-left: auto;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 13px;
+    text-decoration: none;
+    padding: 4px;
+}
 
+.ks-seller-exit-btn:hover {
+    color: white;
 }
 
 
-// =========================================================
-// HEADER CHAT ICON
-// =========================================================
+/* =========================================================
+   HEADER — REAL MOBILE RESPONSIVENESS
+   (previously this only "worked" on phones because the
+   whole page was incorrectly zoomed out to fit everything —
+   now that that's fixed, the header needs to actually
+   collapse for real, or its content gets clipped)
+   ========================================================= */
 
-const chatIconButton =
-    document.getElementById("chatIconButton");
+@media (max-width: 900px) {
 
-if (chatIconButton) {
+    .main-nav {
+        display: none !important;
+    }
 
-    chatIconButton.addEventListener(
-        "click",
-        function () {
-            window.location.hash = "chat";
-        }
-    );
+    .nav-container {
+        gap: 12px;
+    }
 
-}
+    .nav-logo {
+        width: 92px;
+    }
 
+    .nav-actions {
+        gap: 6px;
+    }
 
-// =========================================================
-// ACCOUNT MENU NAV LINKS (Dashboard/Shop/Categories/Rewards)
-// — close the dropdown once clicked, matching every other
-// item in this menu
-// =========================================================
+    .nav-icon-button {
+        width: 36px;
+        height: 36px;
+        font-size: 13px;
+    }
 
-document.querySelectorAll(".account-menu-nav-link").forEach(function (link) {
+}
 
-    link.addEventListener(
-        "click",
-        function () {
+@media (max-width: 480px) {
 
-            const menu =
-                document.getElementById("studentAccountMenu");
+    .signin-nav-button span {
+        display: none;
+    }
 
-            if (menu) {
-                menu.classList.remove("open");
-            }
+    .signin-nav-button:not(.has-avatar) {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 50%;
+        justify-content: center;
+    }
 
-        }
-    );
+    .signin-nav-button i {
+        margin: 0;
+    }
 
-});
+}
