@@ -3347,6 +3347,166 @@
 
 
     <!-- =====================================================
+         ORDER CHECKOUT / RETRY PAYMENT MODAL
+    ====================================================== -->
+
+    <div class="modal-overlay" id="orderCheckoutModal">
+
+        <div class="auth-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-credit-card"></i>
+            </div>
+
+            <h2>Complete Payment</h2>
+
+            <p style="text-align:center; color:#6b7280; font-size:13px; margin-bottom:16px;">
+                Choose how you'd like to pay.
+            </p>
+
+            <div id="orderCheckoutStatus" class="otp-status-message"></div>
+
+            <button type="button" id="orderCheckoutMonnifyBtn" class="auth-button" style="margin-bottom: 10px;">
+                <i class="fa-solid fa-credit-card"></i>
+                Pay with Monnify
+            </button>
+
+            <button type="button" id="orderCheckoutOpayBtn" class="auth-button opay-button" style="margin-bottom: 10px;">
+                <i class="fa-solid fa-wallet"></i>
+                Pay with OPay
+            </button>
+
+            <button type="button" id="orderCheckoutPaystackBtn" class="auth-button paystack-button">
+                <i class="fa-solid fa-credit-card"></i>
+                Pay with Paystack
+            </button>
+
+            <button type="button" class="modal-close-text-btn" id="orderCheckoutCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         EDIT ORDER MODAL
+    ====================================================== -->
+
+    <div class="modal-overlay" id="editOrderModal">
+
+        <div class="auth-modal" style="max-width: 480px;">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-pen"></i>
+            </div>
+
+            <h2>Edit Order</h2>
+
+            <div id="editOrderStatus" class="otp-status-message"></div>
+
+            <div id="editOrderItemsList"></div>
+
+            <div class="edit-order-total-row">
+                <span>New Total</span>
+                <strong id="editOrderNewTotal">₦0</strong>
+            </div>
+
+            <button type="button" class="auth-button" id="editOrderSaveBtn" style="margin-top: 14px;">
+                Save Changes
+            </button>
+
+            <button type="button" class="modal-close-text-btn" id="editOrderCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         PRINTABLE ORDER RECEIPT
+    ====================================================== -->
+
+    <div class="modal-overlay" id="receiptModal">
+
+        <div class="receipt-modal-wrapper">
+
+            <div class="receipt-modal-actions">
+                <button type="button" id="receiptPrintBtn"><i class="fa-solid fa-print"></i> Print</button>
+                <button type="button" id="receiptCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="receipt-sheet" id="receiptSheet">
+
+                <div class="receipt-header">
+                    <img src="logo.png" alt="Kurios Stores" class="receipt-logo">
+                    <h1>ORDER RECEIPT</h1>
+                    <p>Thank you for shopping with Kurios Stores!</p>
+                </div>
+
+                <div class="receipt-info-grid">
+                    <div>
+                        <span>ORDER ID</span>
+                        <strong id="receiptOrderId">—</strong>
+                    </div>
+                    <div>
+                        <span>DATE</span>
+                        <strong id="receiptDate">—</strong>
+                    </div>
+                    <div>
+                        <span>PAYMENT STATUS</span>
+                        <strong id="receiptPaymentStatus" class="receipt-status-pill">—</strong>
+                    </div>
+                </div>
+
+                <div class="receipt-section">
+                    <h3>Customer Details</h3>
+                    <p id="receiptCustomerName">—</p>
+                    <p id="receiptCustomerPhone">—</p>
+                    <p id="receiptCustomerEmail">—</p>
+                </div>
+
+                <table class="receipt-items-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="receiptItemsBody"></tbody>
+                </table>
+
+                <div class="receipt-totals-section">
+
+                    <div class="receipt-payment-info">
+                        <h3>Payment Information</h3>
+                        <p><span>Payment Method</span><strong id="receiptGateway">—</strong></p>
+                        <p><span>Transaction ID</span><strong id="receiptTransactionId">—</strong></p>
+                    </div>
+
+                    <div class="receipt-totals">
+                        <p><span>Total Paid</span><strong id="receiptTotal">₦0</strong></p>
+                    </div>
+
+                </div>
+
+                <div class="receipt-footer">
+                    <p>Thank you! We appreciate your trust in Kurios Stores.</p>
+                    <p class="receipt-footer-small">www.kuriosstores.com</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
          SIGN IN MODAL
     ====================================================== -->
 
