@@ -8863,35 +8863,47 @@ img {
         visibility: visible;
     }
 
-    /* Release every ancestor's fixed positioning, height
-       cap, and overflow clipping — those are only needed
-       for the on-screen modal, and fighting them during
-       print is exactly what fragments the receipt across
-       several pages instead of fitting on one. */
+    /* visibility:hidden only hides content visually — it
+       does NOT remove it from the page's layout, so the
+       rest of the (invisible) homepage still occupies its
+       full height above the receipt. Pinning the receipt
+       with position:fixed escapes that entirely, so it
+       doesn't matter how much invisible space sits above
+       it — this is what actually keeps it to one page. */
 
-    #receiptModal,
-    .receipt-modal-wrapper,
-    #receiptSheet {
+    #receiptModal {
         position: static !important;
         inset: auto !important;
-        top: auto !important;
-        left: auto !important;
-        transform: none !important;
-        width: auto !important;
         height: auto !important;
-        max-height: none !important;
         min-height: 0 !important;
         overflow: visible !important;
-        margin: 0 !important;
         opacity: 1 !important;
         visibility: visible !important;
         background: white !important;
     }
 
+    .receipt-modal-wrapper {
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: auto !important;
+        max-height: none !important;
+    }
+
     #receiptSheet {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        margin: 0 !important;
         box-shadow: none !important;
         padding: 10mm !important;
         border-radius: 0 !important;
+        background: white !important;
     }
 
     .receipt-modal-actions {
@@ -8903,4 +8915,112 @@ img {
         margin: 10mm;
     }
 
+}
+
+
+/* =========================================================
+   SUPPORT POOL
+   ========================================================= */
+
+.support-pool-badge {
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 1px 6px;
+    margin-left: auto;
+}
+
+.support-pool-panel {
+    grid-column: 2 / 4;
+    padding: 20px;
+    overflow-y: auto;
+    background: #fcfcfc;
+}
+
+.support-pool-header {
+    margin-bottom: 16px;
+}
+
+.support-pool-header h3 {
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 4px;
+}
+
+.support-pool-header p {
+    font-size: 12px;
+    color: #9ca3af;
+    margin: 0;
+}
+
+.support-pool-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.support-pool-card-info strong {
+    display: block;
+    font-size: 13px;
+}
+
+.support-pool-card-info span {
+    display: block;
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 2px;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.support-pool-claim-btn {
+    border: none;
+    background: var(--purple);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.support-pool-claim-btn:hover {
+    background: var(--purple-dark);
+}
+
+.support-pool-claim-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.end-session-btn {
+    border: 1px solid #15803d;
+    background: #dcfce7;
+    color: #15803d;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.end-session-btn:hover {
+    background: #15803d;
+    color: white;
 }
