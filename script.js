@@ -4994,6 +4994,9 @@ showOtpVerificationScreen(
         const closeTicketBtn =
             document.getElementById("closeTicketBtn");
 
+        const transferTicketBtn =
+            document.getElementById("transferTicketBtn");
+
         const currentStudent =
             getLoggedInStudent();
 
@@ -5008,6 +5011,10 @@ showOtpVerificationScreen(
 
         if (closeTicketBtn) {
             closeTicketBtn.style.display = showTicketActions ? "flex" : "none";
+        }
+
+        if (transferTicketBtn) {
+            transferTicketBtn.style.display = showTicketActions ? "flex" : "none";
         }
 
         const chatApp =
@@ -16004,12 +16011,17 @@ async function loadSupportPool() {
                         `<span class="support-pool-claimed-by">Picked up by ${item.claimed_by_first_name || "a staffer"} ${item.claimed_by_last_name || ""}</span>` :
                         "";
 
+                const isMine =
+                    String(item.claimed_by_id) === String(student.id);
+
                 const actionButton =
                     item.support_status === "open" ?
                         `<button type="button" class="support-pool-claim-btn" data-claim-id="${item.conversation_id}" data-claim-name="${fullName}" data-claim-student-id="${item.student_id}">Pick Up</button>` :
-                        ((item.support_status === "closed" || item.support_status === "resolved") ?
-                            `<button type="button" class="support-pool-claim-btn reopen" data-reopen-id="${item.conversation_id}" data-claim-name="${fullName}" data-claim-student-id="${item.student_id}">Reopen</button>` :
-                            "");
+                        (item.support_status === "claimed" && isMine ?
+                            `<button type="button" class="support-pool-claim-btn continue" data-continue-id="${item.conversation_id}" data-claim-name="${fullName}" data-claim-student-id="${item.student_id}">Continue</button>` :
+                            ((item.support_status === "closed" || item.support_status === "resolved") ?
+                                `<button type="button" class="support-pool-claim-btn reopen" data-reopen-id="${item.conversation_id}" data-claim-name="${fullName}" data-claim-student-id="${item.student_id}">Reopen</button>` :
+                                ""));
 
                 return `
                     <div class="support-pool-card">
@@ -16094,6 +16106,32 @@ if (supportPoolListEl) {
 
         const reopenBtn =
             event.target.closest("[data-reopen-id]");
+
+        const continueBtn =
+            event.target.closest("[data-continue-id]");
+
+        if (continueBtn) {
+
+            switchToKChatView();
+
+            if (typeof loadConversations === "function") {
+                loadConversations();
+            }
+
+            if (typeof openChatWith === "function") {
+
+                openChatWith(
+                    parseInt(continueBtn.dataset.claimStudentId, 10),
+                    continueBtn.dataset.claimName,
+                    parseInt(continueBtn.dataset.continueId, 10),
+                    "__SUPPORT__"
+                );
+
+            }
+
+            return;
+
+        }
 
         const btn = claimBtn || reopenBtn;
 
@@ -16211,9 +16249,22 @@ async function handleTicketAction(action, confirmMessage) {
 
             const resolveBtn = document.getElementById("resolveTicketBtn");
             const closeBtn = document.getElementById("closeTicketBtn");
+            const transferBtn = document.getElementById("transferTicketBtn");
 
             if (resolveBtn) resolveBtn.style.display = "none";
             if (closeBtn) closeBtn.style.display = "none";
+            if (transferBtn) transferBtn.style.display = "none";
+
+        }
+
+        if (action === "transfer") {
+
+            // The staffer is no longer a participant once
+            // transferred — the open chat window is no
+            // longer theirs to view, so send them back to
+            // the pool instead of leaving them on it.
+
+            switchToSupportPoolView();
 
         }
 
@@ -16256,6 +16307,22 @@ if (closeTicketBtn) {
         handleTicketAction(
             "close",
             "Close this ticket? The student can always start a new request later."
+        );
+
+    });
+
+}
+
+const transferTicketBtn =
+    document.getElementById("transferTicketBtn");
+
+if (transferTicketBtn) {
+
+    transferTicketBtn.addEventListener("click", function () {
+
+        handleTicketAction(
+            "transfer",
+            "Transfer this ticket back to the support pool for another staffer to pick up?"
         );
 
     });
