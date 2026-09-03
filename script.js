@@ -5927,6 +5927,98 @@ showOtpVerificationScreen(
     }
 
 
+    const payOrderWithPaystackButton =
+        document.getElementById("payOrderWithPaystackButton");
+
+    if (payOrderWithPaystackButton) {
+
+        payOrderWithPaystackButton.addEventListener(
+            "click",
+            async function () {
+
+                const statusEl =
+                    document.getElementById("orderPaymentStatus");
+
+                if (!currentOrderPaymentReference) {
+                    return;
+                }
+
+                const student =
+                    getLoggedInStudent();
+
+                if (!student) {
+                    return;
+                }
+
+                payOrderWithPaystackButton.disabled = true;
+
+                if (statusEl) statusEl.textContent = "Redirecting to Paystack...";
+
+                try {
+
+                    const returnUrl =
+                        window.location.origin + "/#orders";
+
+                    const response =
+                        await fetch(
+                            API_URL + "/api/orders/pay/paystack",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    paymentReference: currentOrderPaymentReference,
+                                    returnUrl: returnUrl,
+                                    customerEmail: student.email
+                                })
+                            }
+                        );
+
+                    const data = await response.json();
+
+                    if (!data.success || !data.authorizationUrl) {
+
+                        if (statusEl) {
+                            statusEl.textContent =
+                                data.message || "Could not start Paystack checkout.";
+                        }
+
+                        payOrderWithPaystackButton.disabled = false;
+
+                        return;
+
+                    }
+
+                    localStorage.setItem(
+                        "kuriosPendingOpayOrderRef",
+                        currentOrderPaymentReference
+                    );
+
+                    window.location.href = data.authorizationUrl;
+
+                } catch (error) {
+
+                    console.error(
+                        "Order Paystack checkout error:",
+                        error
+                    );
+
+                    if (statusEl) {
+                        statusEl.textContent =
+                            "Unable to connect to Kurios Stores server.";
+                    }
+
+                    payOrderWithPaystackButton.disabled = false;
+
+                }
+
+            }
+        );
+
+    }
+
+
     // ========================================
     // CONFIRM A PAYMENT WITH OUR SERVER
     // (never trust the widget's onComplete alone)
@@ -10208,6 +10300,103 @@ if (payWithOpayButton) {
                 }
 
                 payWithOpayButton.disabled = false;
+
+            }
+
+        }
+    );
+
+}
+
+
+// ========================================
+// PAY WITH PAYSTACK
+// ========================================
+
+const payWithPaystackButton =
+    document.getElementById("payWithPaystackButton");
+
+if (payWithPaystackButton) {
+
+    payWithPaystackButton.addEventListener(
+        "click",
+        async function () {
+
+            const choiceStatus =
+                document.getElementById("sellerPaymentChoiceStatus");
+
+            if (!currentSellerPaymentReference) {
+                return;
+            }
+
+            payWithPaystackButton.disabled = true;
+
+            if (choiceStatus) {
+                choiceStatus.textContent = "Redirecting to Paystack...";
+            }
+
+            try {
+
+                const returnUrl =
+                    window.location.origin + "/#sell";
+
+                const response =
+                    await fetch(
+                        API_URL + "/api/sellers/apply/pay/paystack",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                paymentReference: currentSellerPaymentReference,
+                                returnUrl: returnUrl
+                            })
+                        }
+                    );
+
+                const data = await response.json();
+
+                if (!data.success || !data.authorizationUrl) {
+
+                    if (choiceStatus) {
+
+                        choiceStatus.textContent =
+                            data.message || "Could not start Paystack checkout.";
+
+                    }
+
+                    payWithPaystackButton.disabled = false;
+
+                    return;
+
+                }
+
+                // Reuse the same pending-ref key as OPay — the
+                // resume-on-return check is already gateway-agnostic.
+
+                localStorage.setItem(
+                    "kuriosPendingOpaySellerRef",
+                    currentSellerPaymentReference
+                );
+
+                window.location.href = data.authorizationUrl;
+
+            } catch (error) {
+
+                console.error(
+                    "Paystack checkout error:",
+                    error
+                );
+
+                if (choiceStatus) {
+
+                    choiceStatus.textContent =
+                        "Unable to connect to Kurios Stores server.";
+
+                }
+
+                payWithPaystackButton.disabled = false;
 
             }
 
