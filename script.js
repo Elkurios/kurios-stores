@@ -339,6 +339,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
+    window.clearKuriosCartAfterPayment = function () {
+
+        cart = [];
+        saveCart();
+        updateCart();
+
+    };
+
 
 
     /* =====================================================
@@ -5688,6 +5696,18 @@ showOtpVerificationScreen(
 
                     if (choiceEl) {
                         choiceEl.style.display = "block";
+                    }
+
+                    const student =
+                        getStoredStudent();
+
+                    if (student && typeof checkWalletBalanceForCheckout === "function") {
+
+                        checkWalletBalanceForCheckout(
+                            student.id,
+                            initiateData.amount
+                        );
+
                     }
 
                 } catch (error) {
@@ -12161,6 +12181,10 @@ async function loadWalletPage() {
         return;
     }
 
+    if (typeof loadStudentWalletSection === "function") {
+        loadStudentWalletSection(student.id);
+    }
+
     try {
 
         const response =
@@ -12272,7 +12296,7 @@ async function loadDashboardWalletBalance(studentId) {
 
         const response =
             await fetch(
-                API_URL + "/api/sellers/wallet?studentId=" + studentId
+                API_URL + "/api/students/wallet?studentId=" + studentId
             );
 
         const data = await response.json();
@@ -15347,6 +15371,489 @@ if (receiptPrintBtn) {
 
     receiptPrintBtn.addEventListener("click", function () {
         window.print();
+    });
+
+}
+
+
+// =========================================================
+// STUDENT'S OWN WALLET (top-up + balance)
+// =========================================================
+
+let __kuriosTopUpReference = null;
+let __kuriosTopUpAmount = 0;
+
+async function loadStudentWalletSection(studentId) {
+
+    const balanceEl =
+        document.getElementById("studentWalletBalance");
+
+    const txnEl =
+        document.getElementById("studentWalletTransactions");
+
+    if (!balanceEl) return;
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/students/wallet?studentId=" + studentId);
+
+        const data = await response.json();
+
+        if (!data.success) return;
+
+        balanceEl.textContent =
+            typeof formatMoney === "function" ? formatMoney(data.balance) : "₦" + data.balance;
+
+        if (txnEl) {
+
+            const paidTopups =
+                (data.topups || []).filter(function (t) { return t.status === "paid"; });
+
+            if (paidTopups.length === 0) {
+
+                txnEl.innerHTML = `<p style="text-align:center; color:#9ca3af; font-size:12px; padding:10px 0;">No top-ups yet.</p>`;
+
+            } else {
+
+                txnEl.innerHTML =
+                    paidTopups.slice(0, 10).map(function (t) {
+
+                        return `
+                            <div class="wallet-transaction-row">
+                                <span>Wallet top-up</span>
+                                <strong style="color:#059669;">+${typeof formatMoney === "function" ? formatMoney(t.amount) : "₦" + t.amount}</strong>
+                            </div>
+                        `;
+
+                    }).join("");
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.error("Load student wallet error:", error);
+
+    }
+
+}
+
+function resetTopUpModal() {
+
+    document.getElementById("topUpAmountStep").style.display = "block";
+    document.getElementById("topUpGatewayStep").style.display = "none";
+    document.getElementById("topUpAmountInput").value = "";
+
+    const statusEl = document.getElementById("topUpAmountStatus");
+    if (statusEl) statusEl.textContent = "";
+
+}
+
+const openTopUpButton =
+    document.getElementById("openTopUpButton");
+
+if (openTopUpButton) {
+
+    openTopUpButton.addEventListener("click", function () {
+
+        resetTopUpModal();
+
+        const modal = document.getElementById("topUpModal");
+        if (modal) modal.classList.add("open");
+
+    });
+
+}
+
+const topUpCancelBtn =
+    document.getElementById("topUpCancelBtn");
+
+if (topUpCancelBtn) {
+
+    topUpCancelBtn.addEventListener("click", function () {
+
+        const modal = document.getElementById("topUpModal");
+        if (modal) modal.classList.remove("open");
+
+    });
+
+}
+
+const topUpContinueBtn =
+    document.getElementById("topUpContinueBtn");
+
+if (topUpContinueBtn) {
+
+    topUpContinueBtn.addEventListener("click", async function () {
+
+        const statusEl =
+            document.getElementById("topUpAmountStatus");
+
+        const amountInput =
+            document.getElementById("topUpAmountInput");
+
+        const amount =
+            Number(amountInput.value);
+
+        if (!amount || amount < 100) {
+
+            if (statusEl) statusEl.textContent = "Please enter at least ₦100.";
+            return;
+
+        }
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        topUpContinueBtn.disabled = true;
+
+        if (statusEl) statusEl.textContent = "";
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/wallet/topup/initiate",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ studentId: student.id, amount: amount })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (statusEl) statusEl.textContent = data.message || "Could not start top-up.";
+                topUpContinueBtn.disabled = false;
+                return;
+
+            }
+
+            __kuriosTopUpReference = data.paymentReference;
+            __kuriosTopUpAmount = data.amount;
+
+            document.getElementById("topUpAmountStep").style.display = "none";
+            document.getElementById("topUpGatewayStep").style.display = "block";
+
+        } catch (error) {
+
+            console.error("Top-up initiate error:", error);
+
+            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+        } finally {
+
+            topUpContinueBtn.disabled = false;
+
+        }
+
+    });
+
+}
+
+async function payTopUpWith(gateway) {
+
+    const statusEl =
+        document.getElementById("topUpGatewayStatus");
+
+    if (!__kuriosTopUpReference) return;
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    if (statusEl) statusEl.textContent = "Redirecting to " + gateway + "...";
+
+    const returnUrl =
+        window.location.origin + "/#wallet";
+
+    try {
+
+        if (gateway === "monnify") {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/wallet/topup/pay/monnify",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ paymentReference: __kuriosTopUpReference })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success || typeof MonnifySDK === "undefined" || !data.apiKey) {
+
+                if (statusEl) {
+                    statusEl.textContent =
+                        (!data.success && data.message) ||
+                        "Monnify is not fully configured yet. Try OPay or Paystack instead.";
+                }
+
+                return;
+
+            }
+
+            const modal = document.getElementById("topUpModal");
+            if (modal) modal.classList.remove("open");
+
+            MonnifySDK.initialize({
+
+                amount: data.amount,
+                currency: "NGN",
+                reference: __kuriosTopUpReference,
+                customerFullName: `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                customerEmail: student.email,
+                apiKey: data.apiKey,
+                contractCode: data.contractCode,
+                paymentDescription: "Kurios Stores wallet top-up",
+
+                onComplete: async function () {
+
+                    await fetch(
+                        API_URL + "/api/wallet/topup/verify",
+                        {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ paymentReference: __kuriosTopUpReference })
+                        }
+                    );
+
+                    loadStudentWalletSection(student.id);
+
+                },
+
+                onClose: function () {}
+
+            });
+
+            return;
+
+        }
+
+        const endpoint =
+            gateway === "opay" ? "/api/wallet/topup/pay/opay" : "/api/wallet/topup/pay/paystack";
+
+        const response =
+            await fetch(
+                API_URL + endpoint,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        paymentReference: __kuriosTopUpReference,
+                        returnUrl: returnUrl,
+                        customerName: `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                        customerEmail: student.email
+                    })
+                }
+            );
+
+        const data = await response.json();
+
+        const redirectUrl =
+            data.cashierUrl || data.authorizationUrl;
+
+        if (!data.success || !redirectUrl) {
+
+            if (statusEl) {
+                statusEl.textContent = data.message || ("Could not start " + gateway + " checkout.");
+            }
+
+            return;
+
+        }
+
+        localStorage.setItem("kuriosPendingTopUpRef", __kuriosTopUpReference);
+
+        window.location.href = redirectUrl;
+
+    } catch (error) {
+
+        console.error("Top-up payment error:", error);
+
+        if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+    }
+
+}
+
+["topUpMonnifyBtn", "topUpOpayBtn", "topUpPaystackBtn"].forEach(function (id) {
+
+    const btn = document.getElementById(id);
+
+    if (btn) {
+
+        btn.addEventListener("click", function () {
+
+            const gateway =
+                id === "topUpMonnifyBtn" ? "monnify" :
+                (id === "topUpOpayBtn" ? "opay" : "paystack");
+
+            payTopUpWith(gateway);
+
+        });
+
+    }
+
+});
+
+// Resume a top-up verification if we're returning
+// from OPay/Paystack's hosted checkout page.
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const pendingTopUpRef =
+        localStorage.getItem("kuriosPendingTopUpRef");
+
+    if (pendingTopUpRef) {
+
+        localStorage.removeItem("kuriosPendingTopUpRef");
+
+        fetch(
+            API_URL + "/api/wallet/topup/verify",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ paymentReference: pendingTopUpRef })
+            }
+        ).then(function () {
+
+            const student = getStoredStudent();
+
+            if (student && typeof loadStudentWalletSection === "function") {
+                loadStudentWalletSection(student.id);
+            }
+
+        }).catch(function (error) {
+            console.error("Resume top-up verify error:", error);
+        });
+
+    }
+
+});
+
+
+// =========================================================
+// PAY WITH WALLET (cart checkout)
+// =========================================================
+
+async function checkWalletBalanceForCheckout(studentId, orderAmount) {
+
+    const walletBtn =
+        document.getElementById("payOrderWithWalletButton");
+
+    if (!walletBtn) return;
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/students/wallet?studentId=" + studentId);
+
+        const data = await response.json();
+
+        if (data.success && data.balance >= orderAmount) {
+
+            walletBtn.style.display = "flex";
+
+            const labelEl =
+                document.getElementById("payOrderWalletBalanceLabel");
+
+            if (labelEl) {
+                labelEl.textContent =
+                    typeof formatMoney === "function" ? formatMoney(data.balance) : "₦" + data.balance;
+            }
+
+        } else {
+
+            walletBtn.style.display = "none";
+
+        }
+
+    } catch (error) {
+
+        console.error("Check wallet balance error:", error);
+
+    }
+
+}
+
+const payOrderWithWalletButton =
+    document.getElementById("payOrderWithWalletButton");
+
+if (payOrderWithWalletButton) {
+
+    payOrderWithWalletButton.addEventListener("click", async function () {
+
+        const statusEl =
+            document.getElementById("orderPaymentStatus");
+
+        if (!currentOrderPaymentReference) return;
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        payOrderWithWalletButton.disabled = true;
+
+        if (statusEl) statusEl.textContent = "Paying from your wallet...";
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/orders/pay/wallet",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            paymentReference: currentOrderPaymentReference,
+                            studentId: student.id
+                        })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (statusEl) statusEl.textContent = data.message || "Payment failed.";
+                payOrderWithWalletButton.disabled = false;
+                return;
+
+            }
+
+            if (statusEl) statusEl.textContent = "Payment successful!";
+
+            if (typeof window.clearKuriosCartAfterPayment === "function") {
+                window.clearKuriosCartAfterPayment();
+            }
+
+            setTimeout(function () {
+
+                if (typeof closeCartPanel === "function") closeCartPanel();
+                window.location.hash = "orders";
+
+            }, 1200);
+
+        } catch (error) {
+
+            console.error("Pay with wallet error:", error);
+
+            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+            payOrderWithWalletButton.disabled = false;
+
+        }
+
     });
 
 }
