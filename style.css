@@ -2435,7 +2435,7 @@ img {
 
     inset: 0;
 
-    z-index: 2000;
+    z-index: 3500;
 
     background: rgba(0, 0, 0, 0.45);
 
@@ -6100,6 +6100,48 @@ img {
     font-weight: 800;
 }
 
+.student-wallet-card {
+    background: linear-gradient(135deg, #059669, #047857);
+    position: relative;
+}
+
+.wallet-topup-btn {
+    margin-top: 14px;
+    border: none;
+    background: white;
+    color: #047857;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.wallet-topup-btn:hover {
+    background: #ecfdf5;
+}
+
+.wallet-note {
+    text-align: center;
+    font-size: 11px;
+    color: #9ca3af;
+    margin: -12px 0 20px;
+}
+
+.wallet-section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+}
+
+.wallet-pay-button {
+    background: #059669;
+}
+
+.wallet-pay-button:hover {
+    background: #047857;
+}
+
 .wallet-transaction-row {
     display: flex;
     align-items: center;
@@ -8821,16 +8863,44 @@ img {
         visibility: visible;
     }
 
+    /* Release every ancestor's fixed positioning, height
+       cap, and overflow clipping — those are only needed
+       for the on-screen modal, and fighting them during
+       print is exactly what fragments the receipt across
+       several pages instead of fitting on one. */
+
+    #receiptModal,
+    .receipt-modal-wrapper,
     #receiptSheet {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        box-shadow: none;
+        position: static !important;
+        inset: auto !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: auto !important;
+        height: auto !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        background: white !important;
+    }
+
+    #receiptSheet {
+        box-shadow: none !important;
+        padding: 10mm !important;
+        border-radius: 0 !important;
     }
 
     .receipt-modal-actions {
-        display: none;
+        display: none !important;
+    }
+
+    @page {
+        size: A4;
+        margin: 10mm;
     }
 
 }
