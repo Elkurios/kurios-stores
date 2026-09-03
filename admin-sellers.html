@@ -545,6 +545,80 @@
         color: var(--muted);
     }
 
+    .payout-filter-pills {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .payout-filter-pill {
+        border: 1px solid var(--border);
+        background: var(--white);
+        color: var(--text);
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .payout-filter-pill.active {
+        background: var(--purple);
+        color: white;
+        border-color: var(--purple);
+    }
+
+    .payout-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+
+    .payout-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
+
+    .payout-card-top h4 {
+        margin: 0 0 2px;
+        font-size: 14px;
+    }
+
+    .payout-card-top p {
+        margin: 0;
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    .payout-card-amount {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--purple-dark, var(--purple));
+    }
+
+    .payout-card-bank {
+        font-size: 12px;
+        color: var(--text);
+        background: var(--bg);
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+    }
+
+    .payout-card-bank strong {
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .payout-card-actions {
+        display: flex;
+        gap: 8px;
+    }
+
 </style>
 </head>
 <body>
@@ -585,6 +659,7 @@
         <div class="page-tabs">
             <button class="page-tab active" data-page="sellers">Sellers</button>
             <button class="page-tab" data-page="students">Students</button>
+            <button class="page-tab" data-page="payouts">Payouts</button>
             <button class="page-tab" data-page="announcements">Announcements</button>
         </div>
 
@@ -659,6 +734,24 @@
             <div id="studentsLoadingState">Loading students...</div>
             <div id="studentsEmptyState" style="display: none;">No students found.</div>
             <div id="studentList"></div>
+
+        </div>
+
+
+        <!-- PAYOUTS PAGE -->
+
+        <div id="payoutsPage" class="admin-page" style="display: none;">
+
+            <div class="payout-filter-pills">
+                <button type="button" class="payout-filter-pill active" data-payout-status="pending">Pending</button>
+                <button type="button" class="payout-filter-pill" data-payout-status="approved">Approved</button>
+                <button type="button" class="payout-filter-pill" data-payout-status="paid">Paid</button>
+                <button type="button" class="payout-filter-pill" data-payout-status="rejected">Rejected</button>
+            </div>
+
+            <div id="payoutsLoadingState">Loading payout requests...</div>
+            <div id="payoutsEmptyState" style="display: none;">No payout requests here.</div>
+            <div id="adminPayoutList"></div>
 
         </div>
 
@@ -1058,6 +1151,8 @@
                 loadStudents();
             } else if (targetPage === "announcements") {
                 loadAnnouncements();
+            } else if (targetPage === "payouts") {
+                loadAdminPayouts("pending");
             }
 
         });
@@ -1666,6 +1761,206 @@
         });
 
     }
+
+
+    // =========================================================
+    // PAYOUTS PAGE
+    // =========================================================
+
+    async function loadAdminPayouts(status) {
+
+        const loadingEl = document.getElementById("payoutsLoadingState");
+        const emptyEl = document.getElementById("payoutsEmptyState");
+        const listEl = document.getElementById("adminPayoutList");
+
+        if (loadingEl) loadingEl.style.display = "block";
+        if (emptyEl) emptyEl.style.display = "none";
+        if (listEl) listEl.innerHTML = "";
+
+        try {
+
+            const response = await fetch(
+                API_URL + "/api/admin/payouts?status=" + status,
+                {
+                    headers: {
+                        "Authorization": "Bearer " + getAdminToken()
+                    }
+                }
+            );
+
+            const data = await response.json();
+
+            if (loadingEl) loadingEl.style.display = "none";
+
+            if (!data.success || data.payouts.length === 0) {
+
+                if (emptyEl) emptyEl.style.display = "block";
+                return;
+
+            }
+
+            renderAdminPayouts(data.payouts, status);
+
+        } catch (error) {
+
+            console.error("Load admin payouts error:", error);
+            if (loadingEl) loadingEl.style.display = "none";
+            if (emptyEl) emptyEl.style.display = "block";
+
+        }
+
+    }
+
+    function renderAdminPayouts(payouts, status) {
+
+        const listEl = document.getElementById("adminPayoutList");
+        if (!listEl) return;
+
+        listEl.innerHTML = "";
+
+        payouts.forEach(function (payout) {
+
+            const card = document.createElement("div");
+            card.className = "payout-card";
+
+            const fullName =
+                (payout.first_name + " " + payout.last_name).trim();
+
+            const requestedDate =
+                new Date(payout.requested_at).toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" });
+
+            card.innerHTML = `
+                <div class="payout-card-top">
+                    <div>
+                        <h4>${escapeHtml(payout.store_name || fullName)}</h4>
+                        <p>${escapeHtml(fullName)} · ${escapeHtml(payout.email || "")} · ${requestedDate}</p>
+                    </div>
+                    <div class="payout-card-amount">₦${Number(payout.amount).toLocaleString()}</div>
+                </div>
+                <div class="payout-card-bank">
+                    <strong>${escapeHtml(payout.bank_account_name)}</strong>
+                    ${escapeHtml(payout.bank_name)} — ${escapeHtml(payout.bank_account_number)}
+                </div>
+                <div class="payout-card-actions"></div>
+            `;
+
+            const actions = card.querySelector(".payout-card-actions");
+
+            if (status === "pending") {
+
+                const approveBtn = document.createElement("button");
+                approveBtn.className = "btn-approve";
+                approveBtn.textContent = "Approve";
+                approveBtn.addEventListener("click", function () {
+                    updatePayoutStatus(payout.id, "approve");
+                });
+
+                const rejectBtn = document.createElement("button");
+                rejectBtn.className = "btn-reject";
+                rejectBtn.textContent = "Reject";
+                rejectBtn.addEventListener("click", function () {
+
+                    const note = prompt("Reason for rejecting this payout (the seller's balance will be refunded):");
+                    if (note === null) return;
+
+                    updatePayoutStatus(payout.id, "reject", { adminNote: note });
+
+                });
+
+                actions.appendChild(approveBtn);
+                actions.appendChild(rejectBtn);
+
+            } else if (status === "approved") {
+
+                const paidBtn = document.createElement("button");
+                paidBtn.className = "btn-approve";
+                paidBtn.textContent = "Mark as Paid";
+                paidBtn.addEventListener("click", function () {
+
+                    const ref = prompt("Transaction reference for this transfer (optional):") || "";
+                    updatePayoutStatus(payout.id, "mark-paid", { payoutReference: ref });
+
+                });
+
+                const rejectBtn = document.createElement("button");
+                rejectBtn.className = "btn-reject";
+                rejectBtn.textContent = "Reject";
+                rejectBtn.addEventListener("click", function () {
+
+                    const note = prompt("Reason for rejecting this payout (the seller's balance will be refunded):");
+                    if (note === null) return;
+
+                    updatePayoutStatus(payout.id, "reject", { adminNote: note });
+
+                });
+
+                actions.appendChild(paidBtn);
+                actions.appendChild(rejectBtn);
+
+            } else {
+
+                actions.remove();
+
+            }
+
+            listEl.appendChild(card);
+
+        });
+
+    }
+
+    async function updatePayoutStatus(payoutId, action, body) {
+
+        try {
+
+            const response = await fetch(
+                API_URL + "/api/admin/payouts/" + payoutId + "/" + action,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + getAdminToken()
+                    },
+                    body: JSON.stringify(body || {})
+                }
+            );
+
+            const data = await response.json();
+
+            if (!data.success) {
+                alert(data.message || "Could not update this payout.");
+                return;
+            }
+
+            const activePill = document.querySelector(".payout-filter-pill.active");
+            loadAdminPayouts(activePill ? activePill.dataset.payoutStatus : "pending");
+
+        } catch (error) {
+
+            console.error("Update payout status error:", error);
+            alert("Unable to connect to Kurios Stores server.");
+
+        }
+
+    }
+
+    const payoutFilterPills = document.querySelectorAll(".payout-filter-pill");
+
+    payoutFilterPills.forEach(function (pill) {
+
+        pill.addEventListener("click", function () {
+
+            payoutFilterPills.forEach(function (p) {
+                p.classList.remove("active");
+            });
+
+            pill.classList.add("active");
+
+            loadAdminPayouts(pill.dataset.payoutStatus);
+
+        });
+
+    });
 
 </script>
 
