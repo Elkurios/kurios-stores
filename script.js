@@ -5046,6 +5046,8 @@ showOtpVerificationScreen(
 
     }
 
+    window.openChatWith = openChatWith;
+
 
     /*
         Send a message.
