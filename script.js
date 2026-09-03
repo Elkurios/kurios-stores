@@ -4310,6 +4310,7 @@ showOtpVerificationScreen(
 
     let activeChatPartnerId = null;
     let activeConversationId = null;
+    let activeChatIsSupport = false;
     let chatPollInterval = null;
     let conversationsPollInterval = null;
     let cachedConversations = [];
@@ -4357,13 +4358,15 @@ showOtpVerificationScreen(
             document.getElementById("activeChatStatusDot");
 
         if (dot) {
-            dot.classList.toggle("online", isOnline);
+            dot.classList.toggle("online", isOnline && !activeChatIsSupport);
         }
 
         if (activeChatStatus) {
 
             activeChatStatus.textContent =
-                isOnline ? "Online" : "Kurios Stores student";
+                activeChatIsSupport ?
+                    "KSupport" :
+                    (isOnline ? "Online" : "Kurios Stores student");
 
         }
 
@@ -4820,6 +4823,7 @@ showOtpVerificationScreen(
 
         activeChatPartnerId = partnerId;
         activeConversationId = conversationId || null;
+        activeChatIsSupport = productContext === "__SUPPORT__";
 
         window.activeChatPartnerId = activeChatPartnerId;
         window.activeConversationId = activeConversationId;
@@ -4878,6 +4882,18 @@ showOtpVerificationScreen(
 
             if (profileName) {
                 profileName.textContent = partnerName || "Kurios Student";
+            }
+
+            const profileBadge =
+                document.querySelector(".chat-profile-badge");
+
+            if (profileBadge) {
+
+                profileBadge.innerHTML =
+                    activeChatIsSupport ?
+                        `<i class="fa-solid fa-headset"></i> KSupport` :
+                        `<i class="fa-solid fa-graduation-cap"></i> Student`;
+
             }
 
             const profileUniversity =
@@ -5071,7 +5087,7 @@ showOtpVerificationScreen(
 
                 }
 
-                if (!activeChatPartnerId) {
+                if (!activeChatPartnerId && !activeConversationId) {
 
                     showMessage("Select or start a conversation first.");
                     return;
