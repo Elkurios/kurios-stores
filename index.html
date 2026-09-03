@@ -3333,7 +3333,18 @@
                     <div class="wallet-balance-card">
                         <span>Available Balance</span>
                         <strong id="walletBalance">₦0</strong>
+                        <button type="button" id="openPayoutButton" class="wallet-topup-btn">
+                            <i class="fa-solid fa-money-bill-transfer"></i> Withdraw
+                        </button>
                     </div>
+
+                    <div class="form-section-label">Payout History</div>
+
+                    <p id="payoutHistoryEmpty" class="reset-passcode-intro" style="display: none;">
+                        No withdrawal requests yet.
+                    </p>
+
+                    <div id="payoutHistoryList"></div>
 
                     <div class="form-section-label">Transaction History</div>
 
@@ -3420,6 +3431,54 @@
 
     </div>
 
+
+
+
+    <!-- =====================================================
+         SELLER PAYOUT REQUEST MODAL
+    ====================================================== -->
+
+    <div class="modal-overlay" id="payoutModal">
+
+        <div class="auth-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-money-bill-transfer"></i>
+            </div>
+
+            <h2>Withdraw to Bank</h2>
+
+            <div id="payoutStatus" class="otp-status-message"></div>
+
+            <div class="form-group">
+                <label for="payoutAmountInput">Amount (₦)</label>
+                <input type="number" id="payoutAmountInput" min="100" step="50" placeholder="e.g. 5000">
+            </div>
+
+            <div class="form-group">
+                <label for="payoutBankNameInput">Bank Name</label>
+                <input type="text" id="payoutBankNameInput" placeholder="e.g. GTBank">
+            </div>
+
+            <div class="form-group">
+                <label for="payoutAccountNumberInput">Account Number</label>
+                <input type="text" id="payoutAccountNumberInput" placeholder="10-digit account number">
+            </div>
+
+            <div class="form-group">
+                <label for="payoutAccountNameInput">Account Name</label>
+                <input type="text" id="payoutAccountNameInput" placeholder="Name on the account">
+            </div>
+
+            <button type="button" class="auth-button" id="payoutSubmitBtn">
+                Submit Withdrawal Request
+            </button>
+
+            <button type="button" class="modal-close-text-btn" id="payoutCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
 
 
 
