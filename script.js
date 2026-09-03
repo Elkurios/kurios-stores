@@ -12258,6 +12258,10 @@ async function loadWalletPage() {
 
         if (sellerStateEl) sellerStateEl.style.display = "block";
 
+        if (typeof loadPayoutHistory === "function") {
+            loadPayoutHistory(student.id);
+        }
+
         const balanceEl =
             document.getElementById("walletBalance");
 
@@ -16350,3 +16354,204 @@ if (transferTicketBtn) {
 document.addEventListener("DOMContentLoaded", function () {
     initSupportPoolNav();
 });
+
+
+// =========================================================
+// SELLER PAYOUTS
+// =========================================================
+
+async function loadPayoutHistory(studentId) {
+
+    const listEl =
+        document.getElementById("payoutHistoryList");
+
+    const emptyEl =
+        document.getElementById("payoutHistoryEmpty");
+
+    if (!listEl) return;
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/sellers/payouts?studentId=" + studentId);
+
+        const data = await response.json();
+
+        if (!data.success) return;
+
+        if (data.payouts.length === 0) {
+
+            listEl.innerHTML = "";
+            if (emptyEl) emptyEl.style.display = "block";
+            return;
+
+        }
+
+        if (emptyEl) emptyEl.style.display = "none";
+
+        listEl.innerHTML =
+            data.payouts.map(function (p) {
+
+                const amountLabel =
+                    typeof formatMoney === "function" ? formatMoney(p.amount) : "₦" + p.amount;
+
+                const dateLabel =
+                    new Date(p.requested_at).toLocaleDateString(
+                        [],
+                        { day: "numeric", month: "short", year: "numeric" }
+                    );
+
+                return `
+                    <div class="payout-row">
+                        <div class="payout-row-info">
+                            <strong>${amountLabel}</strong>
+                            <span>${p.bank_name} •••• ${(p.bank_account_number || "").slice(-4)} — ${dateLabel}</span>
+                        </div>
+                        <span class="payout-status-pill ${p.status}">${p.status}</span>
+                    </div>
+                `;
+
+            }).join("");
+
+    } catch (error) {
+
+        console.error("Load payout history error:", error);
+
+    }
+
+}
+
+function openPayoutModal() {
+
+    const statusEl =
+        document.getElementById("payoutStatus");
+
+    if (statusEl) statusEl.textContent = "";
+
+    ["payoutAmountInput", "payoutBankNameInput", "payoutAccountNumberInput", "payoutAccountNameInput"].forEach(function (id) {
+
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+
+    });
+
+    const modal =
+        document.getElementById("payoutModal");
+
+    if (modal) modal.classList.add("open");
+
+}
+
+function closePayoutModal() {
+
+    const modal =
+        document.getElementById("payoutModal");
+
+    if (modal) modal.classList.remove("open");
+
+}
+
+const openPayoutButton =
+    document.getElementById("openPayoutButton");
+
+if (openPayoutButton) {
+    openPayoutButton.addEventListener("click", openPayoutModal);
+}
+
+const payoutCancelBtn =
+    document.getElementById("payoutCancelBtn");
+
+if (payoutCancelBtn) {
+    payoutCancelBtn.addEventListener("click", closePayoutModal);
+}
+
+const payoutSubmitBtn =
+    document.getElementById("payoutSubmitBtn");
+
+if (payoutSubmitBtn) {
+
+    payoutSubmitBtn.addEventListener("click", async function () {
+
+        const statusEl =
+            document.getElementById("payoutStatus");
+
+        const amount =
+            Number(document.getElementById("payoutAmountInput").value);
+
+        const bankName =
+            document.getElementById("payoutBankNameInput").value.trim();
+
+        const accountNumber =
+            document.getElementById("payoutAccountNumberInput").value.trim();
+
+        const accountName =
+            document.getElementById("payoutAccountNameInput").value.trim();
+
+        if (!amount || amount < 100) {
+            if (statusEl) statusEl.textContent = "Please enter at least ₦100.";
+            return;
+        }
+
+        if (!bankName || !accountNumber || !accountName) {
+            if (statusEl) statusEl.textContent = "Please fill in all your bank details.";
+            return;
+        }
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        payoutSubmitBtn.disabled = true;
+
+        if (statusEl) statusEl.textContent = "";
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/sellers/payout/request",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            studentId: student.id,
+                            amount: amount,
+                            bankName: bankName,
+                            bankAccountNumber: accountNumber,
+                            bankAccountName: accountName
+                        })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (statusEl) statusEl.textContent = data.message || "Could not submit your request.";
+                payoutSubmitBtn.disabled = false;
+                return;
+
+            }
+
+            closePayoutModal();
+
+            if (typeof loadWalletPage === "function") {
+                loadWalletPage();
+            }
+
+        } catch (error) {
+
+            console.error("Submit payout error:", error);
+
+            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+        } finally {
+
+            payoutSubmitBtn.disabled = false;
+
+        }
+
+    });
+
+}
