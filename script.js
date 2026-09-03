@@ -1139,45 +1139,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 "click",
                 function () {
 
-
                     const category =
                         card.dataset.category;
 
+                    window.__kuriosPendingShopFilter = category;
 
-                    /*
-                        Find matching shop filter.
-                    */
-
-                    const filter =
-                        document.querySelector(
-                            `.filter-button[data-filter="${category}"]`
-                        );
-
-
-                    if (filter) {
-
-                        filter.click();
-
-                    }
-
-
-                    /*
-                        Scroll to shop.
-                    */
-
-                    const shop =
-                        document.getElementById(
-                            "shop"
-                        );
-
-
-                    if (shop) {
-
-                        shop.scrollIntoView({
-                            behavior: "smooth"
-                        });
-
-                    }
+                    window.location.hash = "shop";
 
                 }
             );
@@ -6405,7 +6372,7 @@ showOtpVerificationScreen(
 
     function hideAllFullPages() {
 
-        ["sellerPage", "storefrontPage", "wishlistPage", "walletPage", "chatPage"]
+        ["sellerPage", "storefrontPage", "wishlistPage", "walletPage", "chatPage", "shopPage"]
             .forEach(function (id) {
 
                 const el = document.getElementById(id);
@@ -6642,6 +6609,43 @@ showOtpVerificationScreen(
 
         }
 
+        if (hash === "#shop") {
+
+            showSimplePage("shopPage");
+
+            if (typeof loadProducts === "function") {
+                loadProducts();
+            }
+
+            if (window.__kuriosPendingShopFilter) {
+
+                const pendingCategory =
+                    window.__kuriosPendingShopFilter;
+
+                window.__kuriosPendingShopFilter = null;
+
+                setTimeout(
+                    function () {
+
+                        const filterBtn =
+                            document.querySelector(
+                                '.filter-button[data-filter="' + pendingCategory + '"]'
+                            );
+
+                        if (filterBtn) {
+                            filterBtn.click();
+                        }
+
+                    },
+                    100
+                );
+
+            }
+
+            return;
+
+        }
+
         if (hash === "#chat") {
 
             const student =
@@ -6677,9 +6681,9 @@ showOtpVerificationScreen(
 
         // No matching hash — show the homepage.
         // (This also covers plain section anchors like
-        // #shop, #categories, #rewards — the browser's
-        // native scroll-to-anchor can silently fail if
-        // that section was hidden at the moment the hash
+        // #categories, #rewards — the browser's native
+        // scroll-to-anchor can silently fail if that
+        // section was hidden at the moment the hash
         // changed, e.g. coming back from another page, so
         // we scroll to it manually here instead.)
 
