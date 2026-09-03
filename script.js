@@ -127,6 +127,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
+    window.formatMoney = formatMoney;
+
 
 
     /* =====================================================
@@ -437,6 +439,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
+    window.addToCart = addToCart;
+
 
 
     /* =====================================================
@@ -484,6 +488,8 @@ document.addEventListener("DOMContentLoaded", function () {
         document.body.classList.remove("cart-open");
 
     }
+
+    window.closeCartPanel = closeCartPanel;
 
 
 
@@ -658,6 +664,36 @@ document.addEventListener("DOMContentLoaded", function () {
             const products =
                 await response.json();
 
+            const loggedInStudentForWishlist =
+                typeof getLoggedInStudent === "function" ? getLoggedInStudent() : null;
+
+            window.__kuriosWishlistIds = new Set();
+
+            if (loggedInStudentForWishlist) {
+
+                try {
+
+                    const wishlistResponse =
+                        await fetch(API_URL + "/api/wishlist/ids?studentId=" + loggedInStudentForWishlist.id);
+
+                    const wishlistData =
+                        await wishlistResponse.json();
+
+                    if (wishlistData.success) {
+
+                        window.__kuriosWishlistIds =
+                            new Set(wishlistData.productIds);
+
+                    }
+
+                } catch (wishlistError) {
+
+                    console.error("Fetch wishlist ids error:", wishlistError);
+
+                }
+
+            }
+
 
 
             console.log(
@@ -734,6 +770,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
     }
+
+    window.loadProducts = loadProducts;
 
 
 
@@ -900,6 +938,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
                         <div style="display:flex; gap:6px;">
 
+                            <button
+                                class="wishlist-toggle-btn"
+                                data-product-id="${product.id}"
+                                title="Save to wishlist"
+                            >
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+
                             ${product.seller_id ? `
                                 <button
                                     class="contact-seller-btn"
@@ -985,6 +1031,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
                         if (typeof contactSellerAboutProduct === "function") {
                             contactSellerAboutProduct(product.id);
+                        }
+
+                    }
+                );
+
+            }
+
+
+            /*
+                Wishlist heart button.
+            */
+
+            const wishlistBtn =
+                productCard.querySelector(
+                    ".wishlist-toggle-btn"
+                );
+
+            if (wishlistBtn) {
+
+                if (window.__kuriosWishlistIds && window.__kuriosWishlistIds.has(product.id)) {
+
+                    wishlistBtn.classList.add("active");
+                    wishlistBtn.querySelector("i").className = "fa-solid fa-heart";
+
+                }
+
+                wishlistBtn.addEventListener(
+                    "click",
+                    function () {
+
+                        if (typeof toggleWishlist === "function") {
+                            toggleWishlist(product.id, wishlistBtn);
                         }
 
                     }
@@ -1382,6 +1460,10 @@ function updateLoginState() {
 
     if (typeof loadDashboardWalletBalance === "function") {
         loadDashboardWalletBalance(student.id);
+    }
+
+    if (typeof loadDashboardWishlistCount === "function") {
+        loadDashboardWishlistCount(student.id);
     }
 
     if (typeof updateSellerMenuLabel === "function") {
@@ -4576,6 +4658,8 @@ showOtpVerificationScreen(
 
     }
 
+    window.loadConversations = loadConversations;
+
 
     function renderMessages(messageRows, myId) {
 
@@ -6209,6 +6293,8 @@ showOtpVerificationScreen(
 
     }
 
+    window.verifyOrderPayment = verifyOrderPayment;
+
 
     // ========================================
     // RESUME AN OPAY ORDER PAYMENT IF WE'RE
@@ -6472,6 +6558,8 @@ showOtpVerificationScreen(
 
     }
 
+    window.showMessage = showMessage;
+
 
 
     /* =====================================================
@@ -6598,6 +6686,8 @@ showOtpVerificationScreen(
         }
 
     }
+
+    window.hideAllFullPages = hideAllFullPages;
 
     function goHome() {
 
@@ -6799,6 +6889,11 @@ showOtpVerificationScreen(
         if (hash === "#wishlist") {
 
             showSimplePage("wishlistPage");
+
+            if (typeof loadWishlistPage === "function") {
+                loadWishlistPage();
+            }
+
             return;
 
         }
@@ -16553,5 +16648,256 @@ if (payoutSubmitBtn) {
         }
 
     });
+
+}
+
+
+// =========================================================
+// WISHLIST
+// =========================================================
+
+async function toggleWishlist(productId, buttonEl) {
+
+    const student =
+        typeof getLoggedInStudent === "function" ? getLoggedInStudent() : null;
+
+    if (!student) {
+
+        if (typeof openSignInModalStandalone === "function") {
+            openSignInModalStandalone();
+        }
+
+        return;
+
+    }
+
+    if (buttonEl) {
+        buttonEl.disabled = true;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/wishlist/toggle",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId: student.id, productId: productId })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            if (typeof showMessage === "function") {
+                showMessage(data.message || "Could not update your wishlist.", "error");
+            }
+
+            return;
+
+        }
+
+        if (!window.__kuriosWishlistIds) {
+            window.__kuriosWishlistIds = new Set();
+        }
+
+        if (data.inWishlist) {
+            window.__kuriosWishlistIds.add(productId);
+        } else {
+            window.__kuriosWishlistIds.delete(productId);
+        }
+
+        if (buttonEl) {
+
+            const icon = buttonEl.querySelector("i");
+
+            if (data.inWishlist) {
+
+                buttonEl.classList.add("active");
+                if (icon) icon.className = "fa-solid fa-heart";
+
+            } else {
+
+                buttonEl.classList.remove("active");
+                if (icon) icon.className = "fa-regular fa-heart";
+
+            }
+
+        }
+
+        if (typeof showMessage === "function") {
+
+            showMessage(
+                data.inWishlist ? "Saved to your wishlist." : "Removed from your wishlist."
+            );
+
+        }
+
+        if (window.location.hash === "#wishlist" && typeof loadWishlistPage === "function") {
+            loadWishlistPage();
+        }
+
+    } catch (error) {
+
+        console.error("Toggle wishlist error:", error);
+
+        if (typeof showMessage === "function") {
+            showMessage("Unable to connect to Kurios Stores server.", "error");
+        }
+
+    } finally {
+
+        if (buttonEl) {
+            buttonEl.disabled = false;
+        }
+
+    }
+
+}
+
+async function loadWishlistPage() {
+
+    const student =
+        typeof getLoggedInStudent === "function" ? getLoggedInStudent() : null;
+
+    const panel =
+        document.getElementById("wishlistPagePanel");
+
+    if (!panel) return;
+
+    if (!student) {
+
+        panel.innerHTML = `
+            <div class="coming-soon-panel">
+                <i class="fa-regular fa-heart"></i>
+                <h2>Sign in to see your wishlist</h2>
+                <p>Save products you love and find them here anytime.</p>
+            </div>
+        `;
+
+        return;
+
+    }
+
+    panel.innerHTML = `<p class="reset-passcode-intro">Loading your wishlist...</p>`;
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/wishlist?studentId=" + student.id);
+
+        const data = await response.json();
+
+        if (!data.success || data.items.length === 0) {
+
+            panel.innerHTML = `
+                <div class="coming-soon-panel">
+                    <i class="fa-regular fa-heart"></i>
+                    <h2>Your wishlist is empty</h2>
+                    <p>Tap the heart on any product to save it for later.</p>
+                </div>
+            `;
+
+            return;
+
+        }
+
+        panel.innerHTML = `<div class="wishlist-grid" id="wishlistGrid"></div>`;
+
+        const grid =
+            document.getElementById("wishlistGrid");
+
+        data.items.forEach(function (product) {
+
+            const card = document.createElement("article");
+            card.className = "product-card";
+
+            const imageMarkup =
+                product.image_url ?
+                    `<img src="${API_URL + product.image_url}" alt="${product.name}">` :
+                    `<i class="fa-solid fa-box"></i>`;
+
+            const soldByMarkup =
+                product.seller_id ?
+                    `<span class="product-sold-by">Sold by ${product.seller_store_name || "a Kurios seller"}</span>` :
+                    `<p>Available at Kurios Stores.</p>`;
+
+            card.innerHTML = `
+                <div class="product-image">${imageMarkup}</div>
+                <div class="product-info">
+                    <span class="product-category">${product.category || "General"}</span>
+                    <h3>${product.name}</h3>
+                    ${soldByMarkup}
+                    <div class="product-bottom">
+                        <strong>${typeof formatMoney === "function" ? formatMoney(product.price) : "₦" + product.price}</strong>
+                        <div style="display:flex; gap:6px;">
+                            <button class="wishlist-toggle-btn active" data-product-id="${product.id}" title="Remove from wishlist">
+                                <i class="fa-solid fa-heart"></i>
+                            </button>
+                            <button class="add-to-cart" data-product-id="${product.id}">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const removeBtn =
+                card.querySelector(".wishlist-toggle-btn");
+
+            removeBtn.addEventListener("click", function () {
+                toggleWishlist(product.id, removeBtn);
+            });
+
+            const addBtn =
+                card.querySelector(".add-to-cart");
+
+            addBtn.addEventListener("click", function () {
+
+                if (typeof addToCart === "function") {
+                    addToCart(product);
+                }
+
+            });
+
+            grid.appendChild(card);
+
+        });
+
+    } catch (error) {
+
+        console.error("Load wishlist page error:", error);
+
+        panel.innerHTML = `<p class="reset-passcode-intro">Could not load your wishlist. Please try again.</p>`;
+
+    }
+
+}
+
+async function loadDashboardWishlistCount(studentId) {
+
+    const countEl =
+        document.getElementById("dashboardWishlistCount");
+
+    if (!countEl) return;
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/wishlist/ids?studentId=" + studentId);
+
+        const data = await response.json();
+
+        if (data.success) {
+            countEl.textContent = data.productIds.length;
+        }
+
+    } catch (error) {
+
+        console.error("Load dashboard wishlist count error:", error);
+
+    }
 
 }
