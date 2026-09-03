@@ -5194,6 +5194,18 @@ img {
     padding: 32px 24px 80px;
 }
 
+#shopPage.full-page-section {
+    max-width: none;
+    width: 100%;
+    padding-left: 4%;
+    padding-right: 4%;
+    background: var(--light-background);
+}
+
+#shopPage .full-page-back-row {
+    padding-top: 20px;
+}
+
 .full-page-back-row {
     margin-bottom: 20px;
 }
