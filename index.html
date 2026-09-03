@@ -1681,6 +1681,16 @@
                         Pay with Paystack
                     </button>
 
+                    <button
+                        type="button"
+                        id="payOrderWithWalletButton"
+                        class="auth-button wallet-pay-button"
+                        style="margin-top: 10px; display: none;"
+                    >
+                        <i class="fa-solid fa-wallet"></i>
+                        Pay with Wallet (<span id="payOrderWalletBalanceLabel">₦0</span>)
+                    </button>
+
                 </div>
 
             </div>
@@ -3227,11 +3237,35 @@
             <div class="profile-panel-header">
                 <div>
                     <h2>Wallet</h2>
-                    <p>Your Kurios Stores earnings</p>
+                    <p>Your Kurios Stores wallet</p>
                 </div>
             </div>
 
             <div class="profile-panel-body">
+
+                <!-- STUDENT'S OWN WALLET (always shown) -->
+
+                <div id="studentWalletSection">
+
+                    <div class="wallet-balance-card student-wallet-card">
+                        <span>Your Wallet Balance</span>
+                        <strong id="studentWalletBalance">₦0</strong>
+                        <button type="button" id="openTopUpButton" class="wallet-topup-btn">
+                            <i class="fa-solid fa-plus"></i> Top Up
+                        </button>
+                    </div>
+
+                    <p class="wallet-note">
+                        This balance only changes when you top up, or when you pay for an order using it.
+                    </p>
+
+                    <div id="studentWalletTransactions"></div>
+
+                </div>
+
+
+                <div class="wallet-section-divider"></div>
+
 
                 <p id="walletLoading" class="reset-passcode-intro">
                     Loading your wallet...
@@ -3241,17 +3275,24 @@
 
                 <div id="walletNotSellerState" style="display: none;" class="coming-soon-panel">
                     <i class="fa-regular fa-credit-card"></i>
-                    <h2>No wallet yet</h2>
+                    <h2>No store earnings yet</h2>
                     <p>
-                        Wallets are earned by selling on Kurios.
+                        Store earnings are separate from your wallet above, and are earned by selling on Kurios.
                         <a href="#sell" style="color: var(--purple); font-weight: 700;">Become a seller</a>
-                        to start building a balance.
+                        to start building store earnings.
                     </p>
                 </div>
 
                 <!-- SELLER WALLET -->
 
                 <div id="walletSellerState" style="display: none;">
+
+                    <div class="profile-panel-header" style="margin-top: 20px;">
+                        <div>
+                            <h2 style="font-size: 16px;">Store Earnings</h2>
+                            <p>From selling on Kurios Stores</p>
+                        </div>
+                    </div>
 
                     <div class="wallet-balance-card">
                         <span>Available Balance</span>
@@ -3343,6 +3384,68 @@
 
     </div>
 
+
+
+
+    <!-- =====================================================
+         WALLET TOP-UP MODAL
+    ====================================================== -->
+
+    <div class="modal-overlay" id="topUpModal">
+
+        <div class="auth-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+
+            <h2>Top Up Wallet</h2>
+
+            <div id="topUpAmountStep">
+
+                <div class="form-group">
+                    <label for="topUpAmountInput">Amount (₦)</label>
+                    <input type="number" id="topUpAmountInput" min="100" step="50" placeholder="e.g. 2000">
+                </div>
+
+                <div id="topUpAmountStatus" class="otp-status-message"></div>
+
+                <button type="button" class="auth-button" id="topUpContinueBtn">
+                    Continue
+                </button>
+
+            </div>
+
+            <div id="topUpGatewayStep" style="display: none;">
+
+                <p style="text-align:center; color:#6b7280; font-size:13px; margin-bottom:16px;">
+                    Choose how you'd like to pay.
+                </p>
+
+                <div id="topUpGatewayStatus" class="otp-status-message"></div>
+
+                <button type="button" id="topUpMonnifyBtn" class="auth-button" style="margin-bottom: 10px;">
+                    <i class="fa-solid fa-credit-card"></i>
+                    Pay with Monnify
+                </button>
+
+                <button type="button" id="topUpOpayBtn" class="auth-button opay-button" style="margin-bottom: 10px;">
+                    <i class="fa-solid fa-wallet"></i>
+                    Pay with OPay
+                </button>
+
+                <button type="button" id="topUpPaystackBtn" class="auth-button paystack-button">
+                    <i class="fa-solid fa-credit-card"></i>
+                    Pay with Paystack
+                </button>
+
+            </div>
+
+            <button type="button" class="modal-close-text-btn" id="topUpCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
 
 
 
