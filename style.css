@@ -9024,3 +9024,15 @@ img {
     background: #15803d;
     color: white;
 }
+
+.end-session-btn.close-ticket-btn {
+    border-color: var(--border);
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.end-session-btn.close-ticket-btn:hover {
+    background: #4b5563;
+    color: white;
+    border-color: #4b5563;
+}
