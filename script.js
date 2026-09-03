@@ -5482,6 +5482,148 @@ showOtpVerificationScreen(
     }
 
 
+    let newChatSearchDebounce = null;
+
+    if (newChatPhoneInput) {
+
+        newChatPhoneInput.addEventListener("input", function () {
+
+            const query =
+                newChatPhoneInput.value.trim();
+
+            const resultsEl =
+                document.getElementById("newChatSearchResults");
+
+            if (!resultsEl) return;
+
+            if (newChatSearchDebounce) {
+                clearTimeout(newChatSearchDebounce);
+            }
+
+            // A mostly-numeric query is someone typing a
+            // phone number, not a name — leave that to the
+            // explicit Find button instead of live-searching.
+
+            const isPhoneLike =
+                query.replace(/\D/g, "").length >= query.length - 2 && query.length > 0;
+
+            if (query.length < 2 || isPhoneLike) {
+
+                resultsEl.innerHTML = "";
+                return;
+
+            }
+
+            newChatSearchDebounce = setTimeout(function () {
+                searchStudentsByName(query);
+            }, 350);
+
+        });
+
+    }
+
+    async function searchStudentsByName(query) {
+
+        const student =
+            getLoggedInStudent();
+
+        if (!student) return;
+
+        const resultsEl =
+            document.getElementById("newChatSearchResults");
+
+        if (!resultsEl) return;
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/chat/search-students?studentId=" + student.id + "&query=" + encodeURIComponent(query)
+                );
+
+            const data = await response.json();
+
+            if (!data.success || data.students.length === 0) {
+
+                resultsEl.innerHTML =
+                    `<p class="new-chat-status">No students found.</p>`;
+
+                return;
+
+            }
+
+            resultsEl.innerHTML =
+                data.students.map(function (s) {
+
+                    const fullName =
+                        `${s.first_name || ""} ${s.last_name || ""}`.trim();
+
+                    const initial =
+                        (s.first_name || "?").charAt(0).toUpperCase();
+
+                    const avatarMarkup =
+                        s.profile_picture ?
+                            `<img src="${API_URL + s.profile_picture}" alt="${fullName}">` :
+                            initial;
+
+                    return `
+                        <div class="new-chat-search-result-row" data-search-student-id="${s.id}" data-search-student-name="${fullName}">
+                            <div class="new-chat-search-result-avatar">${avatarMarkup}</div>
+                            <div class="new-chat-search-result-info">
+                                <strong>${fullName}</strong>
+                                <span>${s.university || ""}</span>
+                            </div>
+                        </div>
+                    `;
+
+                }).join("");
+
+        } catch (error) {
+
+            console.error("Search students error:", error);
+
+        }
+
+    }
+
+    const newChatSearchResultsEl =
+        document.getElementById("newChatSearchResults");
+
+    if (newChatSearchResultsEl) {
+
+        newChatSearchResultsEl.addEventListener("click", function (event) {
+
+            const row =
+                event.target.closest("[data-search-student-id]");
+
+            if (!row) return;
+
+            const partnerId =
+                parseInt(row.dataset.searchStudentId, 10);
+
+            const partnerName =
+                row.dataset.searchStudentName;
+
+            if (newChatPhoneInput) {
+                newChatPhoneInput.value = "";
+            }
+
+            const resultsEl =
+                document.getElementById("newChatSearchResults");
+
+            if (resultsEl) resultsEl.innerHTML = "";
+
+            if (newChatForm) {
+                newChatForm.style.display = "none";
+            }
+
+            openChatWith(partnerId, partnerName, null, null);
+
+        });
+
+    }
+
+
     // Load the conversation list once, and keep it
     // fresh while the student is on the site. (Now
     // that Socket.IO delivers messages instantly,
