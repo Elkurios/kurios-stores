@@ -9056,3 +9056,56 @@ img {
 .support-pool-claim-btn.continue:hover {
     background: #92400e;
 }
+
+
+/* =========================================================
+   SELLER PAYOUTS
+   ========================================================= */
+
+.payout-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+}
+
+.payout-row-info strong {
+    display: block;
+    font-size: 13px;
+}
+
+.payout-row-info span {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.payout-status-pill {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.payout-status-pill.pending {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.payout-status-pill.approved {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.payout-status-pill.paid {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.payout-status-pill.rejected {
+    background: #fee2e2;
+    color: #dc2626;
+}
