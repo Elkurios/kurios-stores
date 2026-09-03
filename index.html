@@ -1571,13 +1571,11 @@
                             <i class="fa-regular fa-bell-slash"></i> Mute notifications
                             <span class="soon-pill">Soon</span>
                         </button>
-                        <button type="button" class="chat-profile-list-item soon danger" data-chat-action="soon">
+                        <button type="button" class="chat-profile-list-item danger" id="blockStudentBtn">
                             <i class="fa-solid fa-ban"></i> Block student
-                            <span class="soon-pill">Soon</span>
                         </button>
-                        <button type="button" class="chat-profile-list-item soon danger" data-chat-action="soon">
+                        <button type="button" class="chat-profile-list-item danger" id="reportStudentBtn">
                             <i class="fa-solid fa-flag"></i> Report student
-                            <span class="soon-pill">Soon</span>
                         </button>
                     </div>
 
@@ -3442,6 +3440,51 @@
     <!-- =====================================================
          SELLER PAYOUT REQUEST MODAL
     ====================================================== -->
+
+    <!-- =====================================================
+         REPORT STUDENT MODAL
+    ====================================================== -->
+
+    <div class="modal-overlay" id="reportStudentModal">
+
+        <div class="auth-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-flag"></i>
+            </div>
+
+            <h2>Report Student</h2>
+
+            <div id="reportStatus" class="otp-status-message"></div>
+
+            <div class="form-group">
+                <label for="reportReasonSelect">Reason</label>
+                <select id="reportReasonSelect">
+                    <option value="">Select a reason</option>
+                    <option value="Harassment or bullying">Harassment or bullying</option>
+                    <option value="Spam">Spam</option>
+                    <option value="Scam or fraud">Scam or fraud</option>
+                    <option value="Inappropriate content">Inappropriate content</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="reportDetailsInput">Additional details (optional)</label>
+                <textarea id="reportDetailsInput" rows="3" placeholder="Anything else we should know?"></textarea>
+            </div>
+
+            <button type="button" class="auth-button" id="reportSubmitBtn">
+                Submit Report
+            </button>
+
+            <button type="button" class="modal-close-text-btn" id="reportCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
+
+
 
     <div class="modal-overlay" id="payoutModal">
 
