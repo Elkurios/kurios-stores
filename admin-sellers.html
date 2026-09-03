@@ -660,6 +660,7 @@
             <button class="page-tab active" data-page="sellers">Sellers</button>
             <button class="page-tab" data-page="students">Students</button>
             <button class="page-tab" data-page="payouts">Payouts</button>
+            <button class="page-tab" data-page="reports">Reports</button>
             <button class="page-tab" data-page="announcements">Announcements</button>
         </div>
 
@@ -752,6 +753,22 @@
             <div id="payoutsLoadingState">Loading payout requests...</div>
             <div id="payoutsEmptyState" style="display: none;">No payout requests here.</div>
             <div id="adminPayoutList"></div>
+
+        </div>
+
+
+        <!-- REPORTS PAGE -->
+
+        <div id="reportsPage" class="admin-page" style="display: none;">
+
+            <div class="payout-filter-pills">
+                <button type="button" class="report-filter-pill active" data-report-status="pending">Pending</button>
+                <button type="button" class="report-filter-pill" data-report-status="reviewed">Reviewed</button>
+            </div>
+
+            <div id="reportsLoadingState">Loading reports...</div>
+            <div id="reportsEmptyState" style="display: none;">No reports here.</div>
+            <div id="adminReportList"></div>
 
         </div>
 
@@ -1153,6 +1170,8 @@
                 loadAnnouncements();
             } else if (targetPage === "payouts") {
                 loadAdminPayouts("pending");
+            } else if (targetPage === "reports") {
+                loadAdminReports("pending");
             }
 
         });
@@ -1957,6 +1976,166 @@
             pill.classList.add("active");
 
             loadAdminPayouts(pill.dataset.payoutStatus);
+
+        });
+
+    });
+
+
+    // =========================================================
+    // REPORTS PAGE
+    // =========================================================
+
+    async function loadAdminReports(status) {
+
+        const loadingEl = document.getElementById("reportsLoadingState");
+        const emptyEl = document.getElementById("reportsEmptyState");
+        const listEl = document.getElementById("adminReportList");
+
+        if (loadingEl) loadingEl.style.display = "block";
+        if (emptyEl) emptyEl.style.display = "none";
+        if (listEl) listEl.innerHTML = "";
+
+        try {
+
+            const response = await fetch(
+                API_URL + "/api/admin/reports?status=" + status,
+                {
+                    headers: {
+                        "Authorization": "Bearer " + getAdminToken()
+                    }
+                }
+            );
+
+            const data = await response.json();
+
+            if (loadingEl) loadingEl.style.display = "none";
+
+            if (!data.success || data.reports.length === 0) {
+
+                if (emptyEl) emptyEl.style.display = "block";
+                return;
+
+            }
+
+            renderAdminReports(data.reports, status);
+
+        } catch (error) {
+
+            console.error("Load admin reports error:", error);
+            if (loadingEl) loadingEl.style.display = "none";
+            if (emptyEl) emptyEl.style.display = "block";
+
+        }
+
+    }
+
+    function renderAdminReports(reports, status) {
+
+        const listEl = document.getElementById("adminReportList");
+        if (!listEl) return;
+
+        listEl.innerHTML = "";
+
+        reports.forEach(function (report) {
+
+            const reporterName =
+                (report.reporter_first_name + " " + report.reporter_last_name).trim();
+
+            const reportedName =
+                (report.reported_first_name + " " + report.reported_last_name).trim();
+
+            const reportedDate =
+                new Date(report.created_at).toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" });
+
+            const card = document.createElement("div");
+            card.className = "payout-card";
+
+            card.innerHTML = `
+                <div class="payout-card-top">
+                    <div>
+                        <h4>${escapeHtml(reportedName)} reported</h4>
+                        <p>By ${escapeHtml(reporterName)} · ${reportedDate}</p>
+                    </div>
+                </div>
+                <div class="payout-card-bank">
+                    <strong>${escapeHtml(report.reason)}</strong>
+                    ${report.details ? escapeHtml(report.details) : "No additional details provided."}
+                </div>
+                <div class="payout-card-actions"></div>
+            `;
+
+            const actions = card.querySelector(".payout-card-actions");
+
+            if (status === "pending") {
+
+                const resolveBtn = document.createElement("button");
+                resolveBtn.className = "btn-approve";
+                resolveBtn.textContent = "Mark Reviewed";
+                resolveBtn.addEventListener("click", function () {
+                    resolveReport(report.id);
+                });
+
+                actions.appendChild(resolveBtn);
+
+            } else {
+
+                actions.remove();
+
+            }
+
+            listEl.appendChild(card);
+
+        });
+
+    }
+
+    async function resolveReport(reportId) {
+
+        try {
+
+            const response = await fetch(
+                API_URL + "/api/admin/reports/" + reportId + "/resolve",
+                {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + getAdminToken()
+                    }
+                }
+            );
+
+            const data = await response.json();
+
+            if (!data.success) {
+                alert(data.message || "Could not update this report.");
+                return;
+            }
+
+            const activePill = document.querySelector(".report-filter-pill.active");
+            loadAdminReports(activePill ? activePill.dataset.reportStatus : "pending");
+
+        } catch (error) {
+
+            console.error("Resolve report error:", error);
+            alert("Unable to connect to Kurios Stores server.");
+
+        }
+
+    }
+
+    const reportFilterPills = document.querySelectorAll(".report-filter-pill");
+
+    reportFilterPills.forEach(function (pill) {
+
+        pill.addEventListener("click", function () {
+
+            reportFilterPills.forEach(function (p) {
+                p.classList.remove("active");
+            });
+
+            pill.classList.add("active");
+
+            loadAdminReports(pill.dataset.reportStatus);
 
         });
 
