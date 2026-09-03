@@ -4912,6 +4912,20 @@ showOtpVerificationScreen(
         window.activeChatPartnerId = activeChatPartnerId;
         window.activeConversationId = activeConversationId;
 
+        const blockBtnEl =
+            document.getElementById("blockStudentBtn");
+
+        const reportBtnEl =
+            document.getElementById("reportStudentBtn");
+
+        if (blockBtnEl) {
+            blockBtnEl.style.display = activeChatIsSupport ? "none" : "flex";
+        }
+
+        if (reportBtnEl) {
+            reportBtnEl.style.display = activeChatIsSupport ? "none" : "flex";
+        }
+
         const nameTextEl =
             document.getElementById("activeChatNameText");
 
@@ -16899,5 +16913,217 @@ async function loadDashboardWishlistCount(studentId) {
         console.error("Load dashboard wishlist count error:", error);
 
     }
+
+}
+
+
+// =========================================================
+// BLOCK / REPORT
+// =========================================================
+
+const blockStudentBtn =
+    document.getElementById("blockStudentBtn");
+
+if (blockStudentBtn) {
+
+    blockStudentBtn.addEventListener("click", async function () {
+
+        if (!window.activeChatPartnerId) return;
+
+        if (!confirm("Block this student? They won't be able to message you, and you won't be able to message them.")) {
+            return;
+        }
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/students/block",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            studentId: student.id,
+                            blockedId: window.activeChatPartnerId
+                        })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (typeof showMessage === "function") {
+                    showMessage(data.message || "Could not block this student.", "error");
+                }
+
+                return;
+
+            }
+
+            if (typeof showMessage === "function") {
+                showMessage("Student blocked.");
+            }
+
+            if (typeof goBack === "function") {
+                goBack();
+            }
+
+            if (typeof loadConversations === "function") {
+                loadConversations();
+            }
+
+        } catch (error) {
+
+            console.error("Block student error:", error);
+
+            if (typeof showMessage === "function") {
+                showMessage("Unable to connect to Kurios Stores server.", "error");
+            }
+
+        }
+
+    });
+
+}
+
+let __kuriosReportTargetId = null;
+
+const reportStudentBtn =
+    document.getElementById("reportStudentBtn");
+
+if (reportStudentBtn) {
+
+    reportStudentBtn.addEventListener("click", function () {
+
+        if (!window.activeChatPartnerId) return;
+
+        __kuriosReportTargetId = window.activeChatPartnerId;
+
+        document.getElementById("reportReasonSelect").value = "";
+        document.getElementById("reportDetailsInput").value = "";
+
+        const statusEl =
+            document.getElementById("reportStatus");
+
+        if (statusEl) statusEl.textContent = "";
+
+        const modal =
+            document.getElementById("reportStudentModal");
+
+        if (modal) modal.classList.add("open");
+
+    });
+
+}
+
+const reportCancelBtn =
+    document.getElementById("reportCancelBtn");
+
+if (reportCancelBtn) {
+
+    reportCancelBtn.addEventListener("click", function () {
+
+        const modal =
+            document.getElementById("reportStudentModal");
+
+        if (modal) modal.classList.remove("open");
+
+        __kuriosReportTargetId = null;
+
+    });
+
+}
+
+const reportSubmitBtn =
+    document.getElementById("reportSubmitBtn");
+
+if (reportSubmitBtn) {
+
+    reportSubmitBtn.addEventListener("click", async function () {
+
+        const statusEl =
+            document.getElementById("reportStatus");
+
+        const reason =
+            document.getElementById("reportReasonSelect").value;
+
+        const details =
+            document.getElementById("reportDetailsInput").value.trim();
+
+        if (!reason) {
+
+            if (statusEl) statusEl.textContent = "Please select a reason.";
+            return;
+
+        }
+
+        if (!__kuriosReportTargetId) return;
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        reportSubmitBtn.disabled = true;
+
+        if (statusEl) statusEl.textContent = "";
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/students/report",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            studentId: student.id,
+                            reportedId: __kuriosReportTargetId,
+                            reason: reason,
+                            details: details
+                        })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (statusEl) statusEl.textContent = data.message || "Could not submit your report.";
+                reportSubmitBtn.disabled = false;
+                return;
+
+            }
+
+            const modal =
+                document.getElementById("reportStudentModal");
+
+            if (modal) modal.classList.remove("open");
+
+            __kuriosReportTargetId = null;
+
+            if (typeof showMessage === "function") {
+                showMessage("Report submitted. Thank you for letting us know.");
+            }
+
+        } catch (error) {
+
+            console.error("Submit report error:", error);
+
+            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+        } finally {
+
+            reportSubmitBtn.disabled = false;
+
+        }
+
+    });
 
 }
