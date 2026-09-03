@@ -9036,3 +9036,23 @@ img {
     color: white;
     border-color: #4b5563;
 }
+
+.end-session-btn.transfer-ticket-btn {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.end-session-btn.transfer-ticket-btn:hover {
+    background: #1d4ed8;
+    color: white;
+    border-color: #1d4ed8;
+}
+
+.support-pool-claim-btn.continue {
+    background: #b45309;
+}
+
+.support-pool-claim-btn.continue:hover {
+    background: #92400e;
+}
