@@ -4988,21 +4988,26 @@ showOtpVerificationScreen(
 
         }
 
-        const endSessionBtn =
-            document.getElementById("endSupportSessionBtn");
+        const resolveTicketBtn =
+            document.getElementById("resolveTicketBtn");
 
-        if (endSessionBtn) {
+        const closeTicketBtn =
+            document.getElementById("closeTicketBtn");
 
-            const currentStudent =
-                getLoggedInStudent();
+        const currentStudent =
+            getLoggedInStudent();
 
-            const showEndSession =
-                productContext === "__SUPPORT__" &&
-                currentStudent &&
-                currentStudent.is_support;
+        const showTicketActions =
+            productContext === "__SUPPORT__" &&
+            currentStudent &&
+            currentStudent.is_support;
 
-            endSessionBtn.style.display = showEndSession ? "flex" : "none";
+        if (resolveTicketBtn) {
+            resolveTicketBtn.style.display = showTicketActions ? "flex" : "none";
+        }
 
+        if (closeTicketBtn) {
+            closeTicketBtn.style.display = showTicketActions ? "flex" : "none";
         }
 
         const chatApp =
@@ -15975,6 +15980,13 @@ async function loadSupportPool() {
 
         if (emptyEl) emptyEl.style.display = "none";
 
+        const statusMeta = {
+            open: { label: "Unclaimed", color: "#dc2626", bg: "#fee2e2" },
+            claimed: { label: "In Progress", color: "#b45309", bg: "#fef3c7" },
+            resolved: { label: "Resolved", color: "#15803d", bg: "#dcfce7" },
+            closed: { label: "Closed", color: "#6b7280", bg: "#f3f4f6" }
+        };
+
         listEl.innerHTML =
             data.pool.map(function (item) {
 
@@ -15984,15 +15996,33 @@ async function loadSupportPool() {
                 const preview =
                     item.last_message ? item.last_message.slice(0, 60) : "New support request";
 
+                const meta =
+                    statusMeta[item.support_status] || statusMeta.open;
+
+                const claimedByLine =
+                    item.claimed_by_id ?
+                        `<span class="support-pool-claimed-by">Picked up by ${item.claimed_by_first_name || "a staffer"} ${item.claimed_by_last_name || ""}</span>` :
+                        "";
+
+                const actionButton =
+                    item.support_status === "open" ?
+                        `<button type="button" class="support-pool-claim-btn" data-claim-id="${item.conversation_id}" data-claim-name="${fullName}" data-claim-student-id="${item.student_id}">Pick Up</button>` :
+                        ((item.support_status === "closed" || item.support_status === "resolved") ?
+                            `<button type="button" class="support-pool-claim-btn reopen" data-reopen-id="${item.conversation_id}" data-claim-name="${fullName}" data-claim-student-id="${item.student_id}">Reopen</button>` :
+                            "");
+
                 return `
                     <div class="support-pool-card">
                         <div class="support-pool-card-info">
-                            <strong>${fullName}</strong>
+                            <div class="support-pool-card-top">
+                                <strong>${fullName}</strong>
+                                <span class="support-pool-ticket-badge" style="background:${meta.bg}; color:${meta.color};">${meta.label}</span>
+                            </div>
+                            <span class="support-pool-ticket-number">Ticket ${item.ticket_number || "—"}</span>
                             <span>${preview}</span>
+                            ${claimedByLine}
                         </div>
-                        <button type="button" class="support-pool-claim-btn" data-claim-id="${item.conversation_id}" data-claim-name="${fullName}" data-claim-student-id="${item.student_id}">
-                            Pick Up
-                        </button>
+                        ${actionButton}
                     </div>
                 `;
 
@@ -16059,24 +16089,39 @@ if (supportPoolListEl) {
 
     supportPoolListEl.addEventListener("click", async function (event) {
 
-        const btn =
+        const claimBtn =
             event.target.closest("[data-claim-id]");
 
+        const reopenBtn =
+            event.target.closest("[data-reopen-id]");
+
+        const btn = claimBtn || reopenBtn;
+
         if (!btn) return;
+
+        const isReopen = !!reopenBtn;
 
         const student =
             getStoredStudent();
 
         if (!student) return;
 
+        const targetId =
+            isReopen ? btn.dataset.reopenId : btn.dataset.claimId;
+
+        const endpoint =
+            isReopen ?
+                "/api/support/" + targetId + "/reopen" :
+                "/api/support/pool/" + targetId + "/claim";
+
         btn.disabled = true;
-        btn.textContent = "Picking up...";
+        btn.textContent = isReopen ? "Reopening..." : "Picking up...";
 
         try {
 
             const response =
                 await fetch(
-                    API_URL + "/api/support/pool/" + btn.dataset.claimId + "/claim",
+                    API_URL + endpoint,
                     {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -16088,9 +16133,9 @@ if (supportPoolListEl) {
 
             if (!data.success) {
 
-                alert(data.message || "Could not claim this conversation.");
+                alert(data.message || "Could not update this ticket.");
                 btn.disabled = false;
-                btn.textContent = "Pick Up";
+                btn.textContent = isReopen ? "Reopen" : "Pick Up";
                 loadSupportPool();
                 return;
 
@@ -16108,7 +16153,7 @@ if (supportPoolListEl) {
                     parseInt(btn.dataset.claimStudentId, 10),
                     btn.dataset.claimName,
                     data.conversationId,
-                    null
+                    "__SUPPORT__"
                 );
 
             }
@@ -16117,10 +16162,10 @@ if (supportPoolListEl) {
 
         } catch (error) {
 
-            console.error("Claim conversation error:", error);
+            console.error("Ticket pool action error:", error);
             alert("Unable to connect to Kurios Stores server.");
             btn.disabled = false;
-            btn.textContent = "Pick Up";
+            btn.textContent = isReopen ? "Reopen" : "Pick Up";
 
         }
 
@@ -16128,57 +16173,90 @@ if (supportPoolListEl) {
 
 }
 
-const endSupportSessionBtn =
-    document.getElementById("endSupportSessionBtn");
+async function handleTicketAction(action, confirmMessage) {
 
-if (endSupportSessionBtn) {
+    if (!window.activeConversationId) return;
 
-    endSupportSessionBtn.addEventListener("click", async function () {
+    if (!confirm(confirmMessage)) {
+        return;
+    }
 
-        if (!window.activeConversationId) return;
+    const student =
+        getStoredStudent();
 
-        if (!confirm("End this support session? The student can start a new request later if they need to.")) {
+    if (!student) return;
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/support/" + window.activeConversationId + "/" + action,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId: student.id })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            alert(data.message || "Could not update this ticket.");
             return;
-        }
-
-        const student =
-            getStoredStudent();
-
-        if (!student) return;
-
-        try {
-
-            const response =
-                await fetch(
-                    API_URL + "/api/support/" + window.activeConversationId + "/end-session",
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ studentId: student.id })
-                    }
-                );
-
-            const data = await response.json();
-
-            if (!data.success) {
-
-                alert(data.message || "Could not end this session.");
-                return;
-
-            }
-
-            endSupportSessionBtn.style.display = "none";
-
-            if (typeof loadConversations === "function") {
-                loadConversations();
-            }
-
-        } catch (error) {
-
-            console.error("End session error:", error);
-            alert("Unable to connect to Kurios Stores server.");
 
         }
+
+        if (action === "close") {
+
+            const resolveBtn = document.getElementById("resolveTicketBtn");
+            const closeBtn = document.getElementById("closeTicketBtn");
+
+            if (resolveBtn) resolveBtn.style.display = "none";
+            if (closeBtn) closeBtn.style.display = "none";
+
+        }
+
+        if (typeof loadConversations === "function") {
+            loadConversations();
+        }
+
+    } catch (error) {
+
+        console.error("Ticket action error:", error);
+        alert("Unable to connect to Kurios Stores server.");
+
+    }
+
+}
+
+const resolveTicketBtn =
+    document.getElementById("resolveTicketBtn");
+
+if (resolveTicketBtn) {
+
+    resolveTicketBtn.addEventListener("click", function () {
+
+        handleTicketAction(
+            "resolve",
+            "Mark this ticket as resolved? The student will be notified."
+        );
+
+    });
+
+}
+
+const closeTicketBtn =
+    document.getElementById("closeTicketBtn");
+
+if (closeTicketBtn) {
+
+    closeTicketBtn.addEventListener("click", function () {
+
+        handleTicketAction(
+            "close",
+            "Close this ticket? The student can always start a new request later."
+        );
 
     });
 
