@@ -2686,8 +2686,48 @@ function renderOrderCard(order) {
 
         }).join("");
 
+    let actionsHtml = "";
+
+    if (order.status === "pending") {
+
+        actionsHtml = `
+            <div class="order-card-actions">
+                <button type="button" class="order-action-btn secondary" data-order-action="edit" data-order-id="${order.id}">
+                    <i class="fa-solid fa-pen"></i> Edit
+                </button>
+                <button type="button" class="order-action-btn primary" data-order-action="checkout" data-order-id="${order.id}" data-order-ref="${order.payment_reference}">
+                    <i class="fa-solid fa-credit-card"></i> Checkout
+                </button>
+            </div>
+        `;
+
+    } else if (order.status === "failed") {
+
+        actionsHtml = `
+            <div class="order-card-actions">
+                <button type="button" class="order-action-btn danger" data-order-action="delete" data-order-id="${order.id}">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+                <button type="button" class="order-action-btn primary" data-order-action="checkout" data-order-id="${order.id}" data-order-ref="${order.payment_reference}">
+                    <i class="fa-solid fa-rotate-right"></i> Retry Payment
+                </button>
+            </div>
+        `;
+
+    } else if (order.status === "paid") {
+
+        actionsHtml = `
+            <div class="order-card-actions">
+                <button type="button" class="order-action-btn secondary" data-order-action="print" data-order-id="${order.id}">
+                    <i class="fa-solid fa-print"></i> Print Receipt
+                </button>
+            </div>
+        `;
+
+    }
+
     return `
-        <div class="order-card">
+        <div class="order-card" data-order-json='${JSON.stringify(order).replace(/'/g, "&apos;")}'>
 
             <div class="order-card-top">
 
@@ -2714,6 +2754,8 @@ function renderOrderCard(order) {
                 <span>Total</span>
                 <strong>${formatMoney(order.amount)}</strong>
             </div>
+
+            ${actionsHtml}
 
         </div>
     `;
@@ -14664,3 +14706,647 @@ document.addEventListener(
     },
     { once: false }
 );
+
+
+// =========================================================
+// MY ORDERS — ACTION BUTTONS (Edit / Checkout / Retry /
+// Delete / Print Receipt)
+// =========================================================
+
+let __kuriosOrdersCheckoutRef = null;
+let __kuriosEditingOrder = null;
+let __kuriosEditingItems = [];
+
+const ordersPanelBodyEl =
+    document.getElementById("ordersPanelBody");
+
+if (ordersPanelBodyEl) {
+
+    ordersPanelBodyEl.addEventListener("click", function (event) {
+
+        const btn =
+            event.target.closest("[data-order-action]");
+
+        if (!btn) {
+            return;
+        }
+
+        const action =
+            btn.dataset.orderAction;
+
+        const orderCard =
+            btn.closest(".order-card");
+
+        const orderData =
+            orderCard ?
+                JSON.parse(orderCard.dataset.orderJson.replace(/&apos;/g, "'")) :
+                null;
+
+        if (action === "delete") {
+            deleteOrder(btn.dataset.orderId);
+        } else if (action === "checkout") {
+            openOrderCheckoutModal(btn.dataset.orderRef);
+        } else if (action === "edit") {
+            openEditOrderModal(orderData);
+        } else if (action === "print") {
+            openReceiptModal(orderData);
+        }
+
+    });
+
+}
+
+
+// ========================================
+// DELETE (failed orders only)
+// ========================================
+
+async function deleteOrder(orderId) {
+
+    if (!confirm("Delete this order? This can't be undone.")) {
+        return;
+    }
+
+    const student =
+        getStoredStudent();
+
+    if (!student) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/orders/" + orderId,
+                {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId: student.id })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+            alert(data.message || "Could not delete this order.");
+            return;
+        }
+
+        if (typeof loadOrdersIntoPanel === "function") {
+            loadOrdersIntoPanel(student.id);
+        }
+
+    } catch (error) {
+
+        console.error("Delete order error:", error);
+        alert("Unable to connect to Kurios Stores server.");
+
+    }
+
+}
+
+
+// ========================================
+// CHECKOUT / RETRY PAYMENT MODAL
+// ========================================
+
+function openOrderCheckoutModal(paymentReference) {
+
+    __kuriosOrdersCheckoutRef = paymentReference;
+
+    const modal =
+        document.getElementById("orderCheckoutModal");
+
+    const statusEl =
+        document.getElementById("orderCheckoutStatus");
+
+    if (statusEl) statusEl.textContent = "";
+
+    if (modal) {
+        modal.classList.add("open");
+    }
+
+}
+
+function closeOrderCheckoutModal() {
+
+    const modal =
+        document.getElementById("orderCheckoutModal");
+
+    if (modal) {
+        modal.classList.remove("open");
+    }
+
+    __kuriosOrdersCheckoutRef = null;
+
+}
+
+const orderCheckoutCancelBtn =
+    document.getElementById("orderCheckoutCancelBtn");
+
+if (orderCheckoutCancelBtn) {
+    orderCheckoutCancelBtn.addEventListener("click", closeOrderCheckoutModal);
+}
+
+async function payPendingOrderWith(gateway) {
+
+    const statusEl =
+        document.getElementById("orderCheckoutStatus");
+
+    if (!__kuriosOrdersCheckoutRef) {
+        return;
+    }
+
+    const student =
+        getStoredStudent();
+
+    if (!student) {
+        return;
+    }
+
+    if (statusEl) statusEl.textContent = "Redirecting to " + gateway + "...";
+
+    const returnUrl =
+        window.location.origin + "/#orders";
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/orders/pay/" + gateway,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        paymentReference: __kuriosOrdersCheckoutRef,
+                        returnUrl: returnUrl,
+                        customerName:
+                            `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                        customerEmail: student.email
+                    })
+                }
+            );
+
+        const data = await response.json();
+
+        const redirectUrl =
+            data.cashierUrl || data.authorizationUrl;
+
+        if (!data.success || (gateway !== "monnify" && !redirectUrl)) {
+
+            if (statusEl) {
+                statusEl.textContent =
+                    data.message || ("Could not start " + gateway + " checkout.");
+            }
+
+            return;
+
+        }
+
+        if (gateway === "monnify") {
+
+            if (typeof MonnifySDK === "undefined") {
+
+                if (statusEl) {
+                    statusEl.textContent =
+                        "Payment could not load. Please refresh and try again.";
+                }
+
+                return;
+
+            }
+
+            if (!data.apiKey || !data.contractCode) {
+
+                if (statusEl) {
+                    statusEl.textContent =
+                        "Monnify is not fully configured yet. Try OPay or Paystack instead.";
+                }
+
+                return;
+
+            }
+
+            closeOrderCheckoutModal();
+
+            MonnifySDK.initialize({
+
+                amount: data.amount,
+                currency: "NGN",
+                reference: __kuriosOrdersCheckoutRef,
+                customerFullName:
+                    `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                customerEmail: student.email,
+                apiKey: data.apiKey,
+                contractCode: data.contractCode,
+                paymentDescription: "Kurios Stores order",
+
+                onComplete: async function () {
+
+                    if (typeof verifyOrderPayment === "function") {
+                        await verifyOrderPayment(__kuriosOrdersCheckoutRef);
+                    }
+
+                    if (typeof loadOrdersIntoPanel === "function") {
+                        loadOrdersIntoPanel(student.id);
+                    }
+
+                },
+
+                onClose: function () {}
+
+            });
+
+            return;
+
+        }
+
+        localStorage.setItem(
+            "kuriosPendingOpayOrderRef",
+            __kuriosOrdersCheckoutRef
+        );
+
+        window.location.href = redirectUrl;
+
+    } catch (error) {
+
+        console.error("Order checkout error:", error);
+
+        if (statusEl) {
+            statusEl.textContent = "Unable to connect to Kurios Stores server.";
+        }
+
+    }
+
+}
+
+const orderCheckoutMonnifyBtn =
+    document.getElementById("orderCheckoutMonnifyBtn");
+
+if (orderCheckoutMonnifyBtn) {
+
+    orderCheckoutMonnifyBtn.addEventListener("click", function () {
+        payPendingOrderWith("monnify");
+    });
+
+}
+
+const orderCheckoutOpayBtn =
+    document.getElementById("orderCheckoutOpayBtn");
+
+if (orderCheckoutOpayBtn) {
+
+    orderCheckoutOpayBtn.addEventListener("click", function () {
+        payPendingOrderWith("opay");
+    });
+
+}
+
+const orderCheckoutPaystackBtn =
+    document.getElementById("orderCheckoutPaystackBtn");
+
+if (orderCheckoutPaystackBtn) {
+
+    orderCheckoutPaystackBtn.addEventListener("click", function () {
+        payPendingOrderWith("paystack");
+    });
+
+}
+
+
+// =========================================================
+// EDIT ORDER MODAL
+// =========================================================
+
+function openEditOrderModal(order) {
+
+    if (!order || order.status !== "pending") {
+        return;
+    }
+
+    __kuriosEditingOrder = order;
+    __kuriosEditingItems = JSON.parse(JSON.stringify(order.items));
+
+    renderEditOrderItems();
+
+    const statusEl =
+        document.getElementById("editOrderStatus");
+
+    if (statusEl) statusEl.textContent = "";
+
+    const modal =
+        document.getElementById("editOrderModal");
+
+    if (modal) {
+        modal.classList.add("open");
+    }
+
+}
+
+function closeEditOrderModal() {
+
+    const modal =
+        document.getElementById("editOrderModal");
+
+    if (modal) {
+        modal.classList.remove("open");
+    }
+
+    __kuriosEditingOrder = null;
+    __kuriosEditingItems = [];
+
+}
+
+function renderEditOrderItems() {
+
+    const list =
+        document.getElementById("editOrderItemsList");
+
+    if (!list) return;
+
+    if (__kuriosEditingItems.length === 0) {
+
+        list.innerHTML = `<p style="text-align:center; color:#9ca3af; font-size:12px; padding:20px 0;">All items removed — add something to your cart to place a new order instead.</p>`;
+
+    } else {
+
+        list.innerHTML =
+            __kuriosEditingItems.map(function (item, index) {
+
+                return `
+                    <div class="edit-order-item-row">
+                        <div class="edit-order-item-info">
+                            <strong>${item.name}</strong>
+                            <span>${typeof formatMoney === "function" ? formatMoney(item.price) : "₦" + item.price} each</span>
+                        </div>
+                        <div class="edit-order-qty-controls">
+                            <button type="button" data-qty-action="decrease" data-index="${index}">−</button>
+                            <span>${item.quantity}</span>
+                            <button type="button" data-qty-action="increase" data-index="${index}">+</button>
+                            <button type="button" class="edit-order-remove-btn" data-qty-action="remove" data-index="${index}"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+
+            }).join("");
+
+    }
+
+    const newTotal =
+        __kuriosEditingItems.reduce(function (sum, item) {
+            return sum + (item.price * item.quantity);
+        }, 0);
+
+    const totalEl =
+        document.getElementById("editOrderNewTotal");
+
+    if (totalEl) {
+
+        totalEl.textContent =
+            typeof formatMoney === "function" ? formatMoney(newTotal) : "₦" + newTotal;
+
+    }
+
+}
+
+const editOrderItemsListEl =
+    document.getElementById("editOrderItemsList");
+
+if (editOrderItemsListEl) {
+
+    editOrderItemsListEl.addEventListener("click", function (event) {
+
+        const btn =
+            event.target.closest("[data-qty-action]");
+
+        if (!btn) return;
+
+        const index =
+            parseInt(btn.dataset.index, 10);
+
+        const action =
+            btn.dataset.qtyAction;
+
+        if (action === "increase") {
+
+            __kuriosEditingItems[index].quantity += 1;
+
+        } else if (action === "decrease") {
+
+            if (__kuriosEditingItems[index].quantity > 1) {
+                __kuriosEditingItems[index].quantity -= 1;
+            }
+
+        } else if (action === "remove") {
+
+            __kuriosEditingItems.splice(index, 1);
+
+        }
+
+        renderEditOrderItems();
+
+    });
+
+}
+
+const editOrderCancelBtn =
+    document.getElementById("editOrderCancelBtn");
+
+if (editOrderCancelBtn) {
+    editOrderCancelBtn.addEventListener("click", closeEditOrderModal);
+}
+
+const editOrderSaveBtn =
+    document.getElementById("editOrderSaveBtn");
+
+if (editOrderSaveBtn) {
+
+    editOrderSaveBtn.addEventListener("click", async function () {
+
+        const statusEl =
+            document.getElementById("editOrderStatus");
+
+        if (!__kuriosEditingOrder) return;
+
+        if (__kuriosEditingItems.length === 0) {
+
+            if (statusEl) {
+                statusEl.textContent = "Your order needs at least one item.";
+            }
+
+            return;
+
+        }
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        editOrderSaveBtn.disabled = true;
+
+        if (statusEl) statusEl.textContent = "Saving changes...";
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/orders/" + __kuriosEditingOrder.id,
+                    {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            studentId: student.id,
+                            items: __kuriosEditingItems.map(function (item) {
+                                return { id: item.id, quantity: item.quantity };
+                            })
+                        })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (statusEl) {
+                    statusEl.textContent = data.message || "Could not update this order.";
+                }
+
+                editOrderSaveBtn.disabled = false;
+                return;
+
+            }
+
+            closeEditOrderModal();
+
+            if (typeof loadOrdersIntoPanel === "function") {
+                loadOrdersIntoPanel(student.id);
+            }
+
+        } catch (error) {
+
+            console.error("Edit order save error:", error);
+
+            if (statusEl) {
+                statusEl.textContent = "Unable to connect to Kurios Stores server.";
+            }
+
+        } finally {
+
+            editOrderSaveBtn.disabled = false;
+
+        }
+
+    });
+
+}
+
+
+// =========================================================
+// PRINT RECEIPT
+// =========================================================
+
+function openReceiptModal(order) {
+
+    if (!order) return;
+
+    const student =
+        getStoredStudent();
+
+    document.getElementById("receiptOrderId").textContent =
+        order.payment_reference;
+
+    document.getElementById("receiptDate").textContent =
+        typeof formatOrderDate === "function" ? formatOrderDate(order.created_at) : order.created_at;
+
+    const statusPill =
+        document.getElementById("receiptPaymentStatus");
+
+    if (statusPill) {
+
+        statusPill.textContent =
+            order.status.charAt(0).toUpperCase() + order.status.slice(1);
+
+        statusPill.style.background =
+            order.status === "paid" ? "#15803d" :
+            (order.status === "failed" ? "#dc2626" : "#b45309");
+
+    }
+
+    document.getElementById("receiptCustomerName").textContent =
+        student ? `${student.first_name || ""} ${student.last_name || ""}`.trim() : "—";
+
+    document.getElementById("receiptCustomerPhone").textContent =
+        student && student.phone ? student.phone : "—";
+
+    document.getElementById("receiptCustomerEmail").textContent =
+        student && student.email ? student.email : "—";
+
+    const itemsBody =
+        document.getElementById("receiptItemsBody");
+
+    if (itemsBody) {
+
+        itemsBody.innerHTML =
+            order.items.map(function (item) {
+
+                return `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.quantity}</td>
+                        <td>${typeof formatMoney === "function" ? formatMoney(item.price) : "₦" + item.price}</td>
+                        <td>${typeof formatMoney === "function" ? formatMoney(item.price * item.quantity) : "₦" + (item.price * item.quantity)}</td>
+                    </tr>
+                `;
+
+            }).join("");
+
+    }
+
+    document.getElementById("receiptGateway").textContent =
+        order.payment_gateway ?
+            (order.payment_gateway.charAt(0).toUpperCase() + order.payment_gateway.slice(1)) :
+            "—";
+
+    document.getElementById("receiptTransactionId").textContent =
+        order.transaction_reference || order.payment_reference;
+
+    document.getElementById("receiptTotal").textContent =
+        typeof formatMoney === "function" ? formatMoney(order.amount) : "₦" + order.amount;
+
+    const modal =
+        document.getElementById("receiptModal");
+
+    if (modal) {
+        modal.classList.add("open");
+    }
+
+}
+
+const receiptCloseBtn =
+    document.getElementById("receiptCloseBtn");
+
+if (receiptCloseBtn) {
+
+    receiptCloseBtn.addEventListener("click", function () {
+
+        const modal =
+            document.getElementById("receiptModal");
+
+        if (modal) modal.classList.remove("open");
+
+    });
+
+}
+
+const receiptPrintBtn =
+    document.getElementById("receiptPrintBtn");
+
+if (receiptPrintBtn) {
+
+    receiptPrintBtn.addEventListener("click", function () {
+        window.print();
+    });
+
+}
