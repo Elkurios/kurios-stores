@@ -1160,9 +1160,15 @@
 
                     <nav class="chat-app-nav">
 
-                        <button type="button" class="chat-app-nav-item active">
+                        <button type="button" class="chat-app-nav-item" id="chatNavKChat">
                             <i class="fa-regular fa-comments"></i>
                             KChat
+                        </button>
+
+                        <button type="button" class="chat-app-nav-item" id="chatNavSupportPool" style="display: none;">
+                            <i class="fa-solid fa-headset"></i>
+                            Support Pool
+                            <span class="support-pool-badge" id="supportPoolBadge" style="display: none;">0</span>
                         </button>
 
                         <button type="button" class="chat-app-nav-item" data-chat-sidebar-action="notifications">
@@ -1328,6 +1334,24 @@
                 </div>
 
 
+                <!-- SUPPORT POOL -->
+
+                <div class="support-pool-panel" id="supportPoolPanel" style="display: none;">
+
+                    <div class="support-pool-header">
+                        <h3><i class="fa-solid fa-headset"></i> Support Pool</h3>
+                        <p>Unclaimed conversations — pick one up to start responding.</p>
+                    </div>
+
+                    <p id="supportPoolEmpty" class="chat-contacts-status" style="display: none;">
+                        No unclaimed support requests right now.
+                    </p>
+
+                    <div id="supportPoolList"></div>
+
+                </div>
+
+
 
                 <!-- CHAT WINDOW -->
 
@@ -1372,6 +1396,10 @@
 
 
                         <div class="chat-header-actions">
+
+                            <button type="button" class="end-session-btn" id="endSupportSessionBtn" style="display: none;">
+                                <i class="fa-solid fa-circle-check"></i> End Session
+                            </button>
 
                             <button type="button" class="chat-header-icon-btn soon" title="Voice calling — coming soon" data-chat-action="soon">
                                 <i class="fa-solid fa-phone"></i>
