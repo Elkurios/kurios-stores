@@ -5299,6 +5299,14 @@ img {
     background: #147d49;
 }
 
+.paystack-button {
+    background: #00c3f7;
+}
+
+.paystack-button:hover {
+    background: #00a8d6;
+}
+
 
 /* DASHBOARD CHOICE MODAL */
 
