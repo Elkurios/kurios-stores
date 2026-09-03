@@ -4440,10 +4440,10 @@ showOtpVerificationScreen(
                 conversation.type === "PRODUCT" && conversation.product_name;
 
             const sellerTag =
-                conversation.partner_store_name ?
-                    `<span class="chat-contact-seller-tag">Seller</span>` :
-                    (conversation.type === "SUPPORT" ?
-                        `<span class="chat-contact-seller-tag support">Support</span>` :
+                conversation.type === "SUPPORT" ?
+                    `<span class="chat-contact-seller-tag support">Support</span>` :
+                    (conversation.partner_store_name ?
+                        `<span class="chat-contact-seller-tag">Seller</span>` :
                         "");
 
             const previewLine =
@@ -4464,11 +4464,16 @@ showOtpVerificationScreen(
                 "click",
                 function () {
 
+                    const contextMarker =
+                        conversation.type === "SUPPORT" ?
+                            "__SUPPORT__" :
+                            (isProduct ? conversation.product_name : null);
+
                     openChatWith(
                         conversation.id,
                         fullName,
                         conversation.conversation_id,
-                        isProduct ? conversation.product_name : null
+                        contextMarker
                     );
 
                 }
@@ -4980,6 +4985,23 @@ showOtpVerificationScreen(
                 }
 
             }
+
+        }
+
+        const endSessionBtn =
+            document.getElementById("endSupportSessionBtn");
+
+        if (endSessionBtn) {
+
+            const currentStudent =
+                getLoggedInStudent();
+
+            const showEndSession =
+                productContext === "__SUPPORT__" &&
+                currentStudent &&
+                currentStudent.is_support;
+
+            endSessionBtn.style.display = showEndSession ? "flex" : "none";
 
         }
 
@@ -15857,3 +15879,311 @@ if (payOrderWithWalletButton) {
     });
 
 }
+
+
+// =========================================================
+// SUPPORT POOL (KSupport staff only)
+// =========================================================
+
+function initSupportPoolNav() {
+
+    const student =
+        getStoredStudent();
+
+    const navItem =
+        document.getElementById("chatNavSupportPool");
+
+    if (!student || !navItem) return;
+
+    if (student.is_support) {
+
+        navItem.style.display = "flex";
+        refreshSupportPoolBadge(student.id);
+
+        setInterval(function () {
+            refreshSupportPoolBadge(student.id);
+        }, 20000);
+
+    }
+
+}
+
+async function refreshSupportPoolBadge(studentId) {
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/support/pool?studentId=" + studentId);
+
+        const data = await response.json();
+
+        const badge =
+            document.getElementById("supportPoolBadge");
+
+        if (badge && data.success) {
+
+            if (data.pool.length > 0) {
+
+                badge.textContent = data.pool.length;
+                badge.style.display = "inline-block";
+
+            } else {
+
+                badge.style.display = "none";
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.error("Refresh support pool badge error:", error);
+
+    }
+
+}
+
+async function loadSupportPool() {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    const listEl =
+        document.getElementById("supportPoolList");
+
+    const emptyEl =
+        document.getElementById("supportPoolEmpty");
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/support/pool?studentId=" + student.id);
+
+        const data = await response.json();
+
+        if (!data.success || !listEl) return;
+
+        if (data.pool.length === 0) {
+
+            listEl.innerHTML = "";
+            if (emptyEl) emptyEl.style.display = "block";
+            return;
+
+        }
+
+        if (emptyEl) emptyEl.style.display = "none";
+
+        listEl.innerHTML =
+            data.pool.map(function (item) {
+
+                const fullName =
+                    `${item.first_name || ""} ${item.last_name || ""}`.trim() || "Kurios Student";
+
+                const preview =
+                    item.last_message ? item.last_message.slice(0, 60) : "New support request";
+
+                return `
+                    <div class="support-pool-card">
+                        <div class="support-pool-card-info">
+                            <strong>${fullName}</strong>
+                            <span>${preview}</span>
+                        </div>
+                        <button type="button" class="support-pool-claim-btn" data-claim-id="${item.conversation_id}" data-claim-name="${fullName}" data-claim-student-id="${item.student_id}">
+                            Pick Up
+                        </button>
+                    </div>
+                `;
+
+            }).join("");
+
+    } catch (error) {
+
+        console.error("Load support pool error:", error);
+
+    }
+
+}
+
+function switchToKChatView() {
+
+    document.getElementById("chatSidebar")?.classList.remove("hidden-by-pool");
+
+    const poolPanel = document.getElementById("supportPoolPanel");
+    if (poolPanel) poolPanel.style.display = "none";
+
+    document.querySelectorAll(".chat-sidebar, .chat-window").forEach(function (el) {
+        el.style.display = "";
+    });
+
+    document.getElementById("chatNavKChat")?.classList.add("active");
+    document.getElementById("chatNavSupportPool")?.classList.remove("active");
+
+}
+
+function switchToSupportPoolView() {
+
+    document.querySelectorAll(".chat-sidebar, .chat-window").forEach(function (el) {
+        el.style.display = "none";
+    });
+
+    const poolPanel = document.getElementById("supportPoolPanel");
+    if (poolPanel) poolPanel.style.display = "block";
+
+    document.getElementById("chatNavKChat")?.classList.remove("active");
+    document.getElementById("chatNavSupportPool")?.classList.add("active");
+
+    loadSupportPool();
+
+}
+
+const chatNavKChat =
+    document.getElementById("chatNavKChat");
+
+if (chatNavKChat) {
+    chatNavKChat.addEventListener("click", switchToKChatView);
+}
+
+const chatNavSupportPool =
+    document.getElementById("chatNavSupportPool");
+
+if (chatNavSupportPool) {
+    chatNavSupportPool.addEventListener("click", switchToSupportPoolView);
+}
+
+const supportPoolListEl =
+    document.getElementById("supportPoolList");
+
+if (supportPoolListEl) {
+
+    supportPoolListEl.addEventListener("click", async function (event) {
+
+        const btn =
+            event.target.closest("[data-claim-id]");
+
+        if (!btn) return;
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        btn.disabled = true;
+        btn.textContent = "Picking up...";
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/support/pool/" + btn.dataset.claimId + "/claim",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ studentId: student.id })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                alert(data.message || "Could not claim this conversation.");
+                btn.disabled = false;
+                btn.textContent = "Pick Up";
+                loadSupportPool();
+                return;
+
+            }
+
+            switchToKChatView();
+
+            if (typeof loadConversations === "function") {
+                loadConversations();
+            }
+
+            if (typeof openChatWith === "function") {
+
+                openChatWith(
+                    parseInt(btn.dataset.claimStudentId, 10),
+                    btn.dataset.claimName,
+                    data.conversationId,
+                    null
+                );
+
+            }
+
+            refreshSupportPoolBadge(student.id);
+
+        } catch (error) {
+
+            console.error("Claim conversation error:", error);
+            alert("Unable to connect to Kurios Stores server.");
+            btn.disabled = false;
+            btn.textContent = "Pick Up";
+
+        }
+
+    });
+
+}
+
+const endSupportSessionBtn =
+    document.getElementById("endSupportSessionBtn");
+
+if (endSupportSessionBtn) {
+
+    endSupportSessionBtn.addEventListener("click", async function () {
+
+        if (!window.activeConversationId) return;
+
+        if (!confirm("End this support session? The student can start a new request later if they need to.")) {
+            return;
+        }
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/support/" + window.activeConversationId + "/end-session",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ studentId: student.id })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                alert(data.message || "Could not end this session.");
+                return;
+
+            }
+
+            endSupportSessionBtn.style.display = "none";
+
+            if (typeof loadConversations === "function") {
+                loadConversations();
+            }
+
+        } catch (error) {
+
+            console.error("End session error:", error);
+            alert("Unable to connect to Kurios Stores server.");
+
+        }
+
+    });
+
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    initSupportPoolNav();
+});
