@@ -1152,6 +1152,38 @@ img {
     transition: var(--transition);
 }
 
+.wishlist-toggle-btn {
+    border: 1px solid var(--border);
+    background: white;
+    color: #6b7280;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.wishlist-toggle-btn:hover {
+    border-color: #f43f5e;
+    color: #f43f5e;
+}
+
+.wishlist-toggle-btn.active {
+    background: #fff1f2;
+    border-color: #f43f5e;
+    color: #f43f5e;
+}
+
+.wishlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
 .contact-seller-btn:hover {
 
     border-color: var(--purple);
