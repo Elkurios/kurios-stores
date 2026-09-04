@@ -17377,12 +17377,50 @@ async function loadErrandsPage() {
         const data = await response.json();
 
         if (data.success) {
+
             updateErrandModeUI(data.available);
+
+            const registerBanner =
+                document.getElementById("errandAgentRegisterBanner");
+
+            const modeCard =
+                document.getElementById("errandModeCard");
+
+            if (registerBanner) {
+                registerBanner.style.display = data.isRegistered ? "none" : "flex";
+            }
+
+            if (modeCard) {
+                modeCard.style.display = data.isRegistered ? "flex" : "none";
+            }
+
         }
 
     } catch (error) {
 
         console.error("Load errand mode status error:", error);
+
+    }
+
+    try {
+
+        const craftResponse =
+            await fetch(API_URL + "/api/craft-providers/status?studentId=" + student.id);
+
+        const craftData = await craftResponse.json();
+
+        const craftBanner =
+            document.getElementById("craftRegisterBanner");
+
+        if (craftBanner && craftData.success) {
+
+            craftBanner.style.display = craftData.isRegistered ? "none" : "flex";
+
+        }
+
+    } catch (error) {
+
+        console.error("Load craft provider status error:", error);
 
     }
 
@@ -18734,6 +18772,733 @@ document.addEventListener("DOMContentLoaded", function () {
 
         }).catch(function (error) {
             console.error("Resume errand item cost verify error:", error);
+        });
+
+    }
+
+});
+
+
+// =========================================================
+// ERRAND AGENT REGISTRATION
+// =========================================================
+
+let __kuriosErrandAgentPaymentReference = null;
+
+const openErrandAgentRegisterButton =
+    document.getElementById("openErrandAgentRegisterButton");
+
+if (openErrandAgentRegisterButton) {
+
+    openErrandAgentRegisterButton.addEventListener("click", function () {
+
+        document.getElementById("errandAgentPhoneStep").style.display = "block";
+        document.getElementById("errandAgentOtpStep").style.display = "none";
+        document.getElementById("errandAgentPayStep").style.display = "none";
+
+        document.getElementById("errandAgentPhoneInput").value = "";
+        document.getElementById("errandAgentAreaInput").value = "";
+        document.getElementById("errandAgentOtpInput").value = "";
+
+        const modal = document.getElementById("errandAgentRegisterModal");
+        if (modal) modal.classList.add("open");
+
+    });
+
+}
+
+const errandAgentRegisterCancelBtn =
+    document.getElementById("errandAgentRegisterCancelBtn");
+
+if (errandAgentRegisterCancelBtn) {
+
+    errandAgentRegisterCancelBtn.addEventListener("click", function () {
+
+        const modal = document.getElementById("errandAgentRegisterModal");
+        if (modal) modal.classList.remove("open");
+
+    });
+
+}
+
+let __kuriosErrandAgentPhone = null;
+let __kuriosErrandAgentArea = null;
+
+const errandAgentSendCodeBtn =
+    document.getElementById("errandAgentSendCodeBtn");
+
+if (errandAgentSendCodeBtn) {
+
+    errandAgentSendCodeBtn.addEventListener("click", async function () {
+
+        const statusEl =
+            document.getElementById("errandAgentPhoneStatus");
+
+        const phone =
+            document.getElementById("errandAgentPhoneInput").value.trim();
+
+        if (!phone || phone.replace(/\D/g, "").length < 10) {
+
+            if (statusEl) statusEl.textContent = "Please enter a valid phone number.";
+            return;
+
+        }
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        __kuriosErrandAgentPhone = phone;
+        __kuriosErrandAgentArea = document.getElementById("errandAgentAreaInput").value.trim();
+
+        errandAgentSendCodeBtn.disabled = true;
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/students/phone-verify/send",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ studentId: student.id, phone: phone })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (statusEl) statusEl.textContent = data.message || "Could not send a verification code.";
+                errandAgentSendCodeBtn.disabled = false;
+                return;
+
+            }
+
+            document.getElementById("errandAgentPhoneStep").style.display = "none";
+            document.getElementById("errandAgentOtpStep").style.display = "block";
+
+        } catch (error) {
+
+            console.error("Send phone verification error:", error);
+
+            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+        } finally {
+
+            errandAgentSendCodeBtn.disabled = false;
+
+        }
+
+    });
+
+}
+
+const errandAgentVerifyCodeBtn =
+    document.getElementById("errandAgentVerifyCodeBtn");
+
+if (errandAgentVerifyCodeBtn) {
+
+    errandAgentVerifyCodeBtn.addEventListener("click", async function () {
+
+        const statusEl =
+            document.getElementById("errandAgentOtpStatus");
+
+        const code =
+            document.getElementById("errandAgentOtpInput").value.trim();
+
+        if (!code || code.length !== 6) {
+
+            if (statusEl) statusEl.textContent = "Please enter the 6-digit code.";
+            return;
+
+        }
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        errandAgentVerifyCodeBtn.disabled = true;
+
+        try {
+
+            const verifyResponse =
+                await fetch(
+                    API_URL + "/api/students/phone-verify/confirm",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ studentId: student.id, code: code })
+                    }
+                );
+
+            const verifyData = await verifyResponse.json();
+
+            if (!verifyData.success) {
+
+                if (statusEl) statusEl.textContent = verifyData.message || "That code is invalid.";
+                errandAgentVerifyCodeBtn.disabled = false;
+                return;
+
+            }
+
+            const registerResponse =
+                await fetch(
+                    API_URL + "/api/errand-agent/register",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            studentId: student.id,
+                            phone: __kuriosErrandAgentPhone,
+                            serviceArea: __kuriosErrandAgentArea
+                        })
+                    }
+                );
+
+            const registerData = await registerResponse.json();
+
+            if (!registerData.success) {
+
+                if (statusEl) statusEl.textContent = registerData.message || "Could not start registration.";
+                errandAgentVerifyCodeBtn.disabled = false;
+                return;
+
+            }
+
+            __kuriosErrandAgentPaymentReference = registerData.paymentReference;
+
+            document.getElementById("errandAgentOtpStep").style.display = "none";
+            document.getElementById("errandAgentPayStep").style.display = "block";
+
+        } catch (error) {
+
+            console.error("Verify phone / start registration error:", error);
+
+            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+        } finally {
+
+            errandAgentVerifyCodeBtn.disabled = false;
+
+        }
+
+    });
+
+}
+
+async function payErrandAgentRegistrationWith(gateway) {
+
+    const statusEl =
+        document.getElementById("errandAgentPayStatus");
+
+    if (!__kuriosErrandAgentPaymentReference) return;
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    if (statusEl) statusEl.textContent = "Redirecting to " + gateway + "...";
+
+    const returnUrl =
+        window.location.origin + "/#errands";
+
+    try {
+
+        if (gateway === "monnify") {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/errand-agent/pay/monnify",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ paymentReference: __kuriosErrandAgentPaymentReference })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success || typeof MonnifySDK === "undefined" || !data.apiKey) {
+
+                if (statusEl) {
+
+                    statusEl.textContent =
+                        (!data.success && data.message) ||
+                        "Monnify is not fully configured yet. Try OPay or Paystack instead.";
+
+                }
+
+                return;
+
+            }
+
+            const modal = document.getElementById("errandAgentRegisterModal");
+            if (modal) modal.classList.remove("open");
+
+            MonnifySDK.initialize({
+
+                amount: data.amount,
+                currency: "NGN",
+                reference: __kuriosErrandAgentPaymentReference,
+                customerFullName: `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                customerEmail: student.email,
+                apiKey: data.apiKey,
+                contractCode: data.contractCode,
+                paymentDescription: "Kurios Stores Errand Agent registration",
+
+                onComplete: async function () {
+
+                    await fetch(
+                        API_URL + "/api/errand-agent/verify",
+                        {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ paymentReference: __kuriosErrandAgentPaymentReference })
+                        }
+                    );
+
+                    if (typeof showMessage === "function") {
+                        showMessage("You're now a registered Errand Agent!");
+                    }
+
+                    loadErrandsPage();
+
+                },
+
+                onClose: function () {}
+
+            });
+
+            return;
+
+        }
+
+        const endpoint =
+            gateway === "opay" ? "/api/errand-agent/pay/opay" : "/api/errand-agent/pay/paystack";
+
+        const response =
+            await fetch(
+                API_URL + endpoint,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        paymentReference: __kuriosErrandAgentPaymentReference,
+                        returnUrl: returnUrl,
+                        customerName: `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                        customerEmail: student.email
+                    })
+                }
+            );
+
+        const data = await response.json();
+
+        const redirectUrl =
+            data.cashierUrl || data.authorizationUrl;
+
+        if (!data.success || !redirectUrl) {
+
+            if (statusEl) statusEl.textContent = data.message || ("Could not start " + gateway + " checkout.");
+            return;
+
+        }
+
+        localStorage.setItem("kuriosPendingErrandAgentRef", __kuriosErrandAgentPaymentReference);
+
+        window.location.href = redirectUrl;
+
+    } catch (error) {
+
+        console.error("Errand agent registration payment error:", error);
+
+        if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+    }
+
+}
+
+["errandAgentPayMonnifyBtn", "errandAgentPayOpayBtn", "errandAgentPayPaystackBtn"].forEach(function (id) {
+
+    const btn = document.getElementById(id);
+
+    if (btn) {
+
+        btn.addEventListener("click", function () {
+
+            const gateway =
+                id === "errandAgentPayMonnifyBtn" ? "monnify" :
+                (id === "errandAgentPayOpayBtn" ? "opay" : "paystack");
+
+            payErrandAgentRegistrationWith(gateway);
+
+        });
+
+    }
+
+});
+
+
+// =========================================================
+// CRAFT PROVIDER REGISTRATION
+// =========================================================
+
+let __kuriosCraftPaymentReference = null;
+
+const openCraftRegisterButton =
+    document.getElementById("openCraftRegisterButton");
+
+if (openCraftRegisterButton) {
+
+    openCraftRegisterButton.addEventListener("click", function () {
+
+        document.getElementById("craftRegisterStep").style.display = "block";
+        document.getElementById("craftPayStep").style.display = "none";
+
+        document.querySelectorAll("#craftRegisterModal .craft-skill-checkbox input").forEach(function (cb) {
+            cb.checked = false;
+        });
+
+        document.getElementById("craftBioInput").value = "";
+
+        const statusEl = document.getElementById("craftRegisterStatus");
+        if (statusEl) statusEl.textContent = "";
+
+        const modal = document.getElementById("craftRegisterModal");
+        if (modal) modal.classList.add("open");
+
+    });
+
+}
+
+const craftRegisterCancelBtn =
+    document.getElementById("craftRegisterCancelBtn");
+
+if (craftRegisterCancelBtn) {
+
+    craftRegisterCancelBtn.addEventListener("click", function () {
+
+        const modal = document.getElementById("craftRegisterModal");
+        if (modal) modal.classList.remove("open");
+
+    });
+
+}
+
+const craftRegisterContinueBtn =
+    document.getElementById("craftRegisterContinueBtn");
+
+if (craftRegisterContinueBtn) {
+
+    craftRegisterContinueBtn.addEventListener("click", async function () {
+
+        const statusEl =
+            document.getElementById("craftRegisterStatus");
+
+        const selectedSkills =
+            Array.from(document.querySelectorAll("#craftRegisterModal .craft-skill-checkbox input:checked"))
+                .map(function (cb) { return cb.value; });
+
+        if (selectedSkills.length === 0) {
+
+            if (statusEl) statusEl.textContent = "Please select at least one skill.";
+            return;
+
+        }
+
+        const bio =
+            document.getElementById("craftBioInput").value.trim();
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        craftRegisterContinueBtn.disabled = true;
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/craft-providers/register",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            studentId: student.id,
+                            skills: selectedSkills,
+                            bio: bio
+                        })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (statusEl) statusEl.textContent = data.message || "Could not start registration.";
+                craftRegisterContinueBtn.disabled = false;
+                return;
+
+            }
+
+            __kuriosCraftPaymentReference = data.paymentReference;
+
+            document.getElementById("craftRegisterStep").style.display = "none";
+            document.getElementById("craftPayStep").style.display = "block";
+
+        } catch (error) {
+
+            console.error("Craft provider registration error:", error);
+
+            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+        } finally {
+
+            craftRegisterContinueBtn.disabled = false;
+
+        }
+
+    });
+
+}
+
+async function payCraftRegistrationWith(gateway) {
+
+    const statusEl =
+        document.getElementById("craftPayStatus");
+
+    if (!__kuriosCraftPaymentReference) return;
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    if (statusEl) statusEl.textContent = "Redirecting to " + gateway + "...";
+
+    const returnUrl =
+        window.location.origin + "/#errands";
+
+    try {
+
+        if (gateway === "monnify") {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/craft-providers/pay/monnify",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ paymentReference: __kuriosCraftPaymentReference })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success || typeof MonnifySDK === "undefined" || !data.apiKey) {
+
+                if (statusEl) {
+
+                    statusEl.textContent =
+                        (!data.success && data.message) ||
+                        "Monnify is not fully configured yet. Try OPay or Paystack instead.";
+
+                }
+
+                return;
+
+            }
+
+            const modal = document.getElementById("craftRegisterModal");
+            if (modal) modal.classList.remove("open");
+
+            MonnifySDK.initialize({
+
+                amount: data.amount,
+                currency: "NGN",
+                reference: __kuriosCraftPaymentReference,
+                customerFullName: `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                customerEmail: student.email,
+                apiKey: data.apiKey,
+                contractCode: data.contractCode,
+                paymentDescription: "Kurios Stores Craft Errand registration",
+
+                onComplete: async function () {
+
+                    await fetch(
+                        API_URL + "/api/craft-providers/verify",
+                        {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ paymentReference: __kuriosCraftPaymentReference })
+                        }
+                    );
+
+                    if (typeof showMessage === "function") {
+                        showMessage("You're now a registered Craft provider!");
+                    }
+
+                    loadErrandsPage();
+
+                },
+
+                onClose: function () {}
+
+            });
+
+            return;
+
+        }
+
+        const endpoint =
+            gateway === "opay" ? "/api/craft-providers/pay/opay" : "/api/craft-providers/pay/paystack";
+
+        const response =
+            await fetch(
+                API_URL + endpoint,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        paymentReference: __kuriosCraftPaymentReference,
+                        returnUrl: returnUrl,
+                        customerName: `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                        customerEmail: student.email
+                    })
+                }
+            );
+
+        const data = await response.json();
+
+        const redirectUrl =
+            data.cashierUrl || data.authorizationUrl;
+
+        if (!data.success || !redirectUrl) {
+
+            if (statusEl) statusEl.textContent = data.message || ("Could not start " + gateway + " checkout.");
+            return;
+
+        }
+
+        localStorage.setItem("kuriosPendingCraftRef", __kuriosCraftPaymentReference);
+
+        window.location.href = redirectUrl;
+
+    } catch (error) {
+
+        console.error("Craft provider registration payment error:", error);
+
+        if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+    }
+
+}
+
+["craftPayMonnifyBtn", "craftPayOpayBtn", "craftPayPaystackBtn"].forEach(function (id) {
+
+    const btn = document.getElementById(id);
+
+    if (btn) {
+
+        btn.addEventListener("click", function () {
+
+            const gateway =
+                id === "craftPayMonnifyBtn" ? "monnify" :
+                (id === "craftPayOpayBtn" ? "opay" : "paystack");
+
+            payCraftRegistrationWith(gateway);
+
+        });
+
+    }
+
+});
+
+// Resume verification for both flows if returning from
+// OPay/Paystack's hosted checkout page.
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const pendingErrandAgentRef =
+        localStorage.getItem("kuriosPendingErrandAgentRef");
+
+    if (pendingErrandAgentRef) {
+
+        localStorage.removeItem("kuriosPendingErrandAgentRef");
+
+        fetch(
+            API_URL + "/api/errand-agent/verify",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ paymentReference: pendingErrandAgentRef })
+            }
+        ).then(function (response) {
+
+            return response.json();
+
+        }).then(function (data) {
+
+            if (typeof showMessage === "function") {
+
+                showMessage(
+                    data.success ?
+                        "You're now a registered Errand Agent!" :
+                        (data.message || "We couldn't confirm that payment yet.")
+                );
+
+            }
+
+            if (typeof loadErrandsPage === "function") {
+                loadErrandsPage();
+            }
+
+        }).catch(function (error) {
+            console.error("Resume errand agent verify error:", error);
+        });
+
+    }
+
+    const pendingCraftRef =
+        localStorage.getItem("kuriosPendingCraftRef");
+
+    if (pendingCraftRef) {
+
+        localStorage.removeItem("kuriosPendingCraftRef");
+
+        fetch(
+            API_URL + "/api/craft-providers/verify",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ paymentReference: pendingCraftRef })
+            }
+        ).then(function (response) {
+
+            return response.json();
+
+        }).then(function (data) {
+
+            if (typeof showMessage === "function") {
+
+                showMessage(
+                    data.success ?
+                        "You're now a registered Craft provider!" :
+                        (data.message || "We couldn't confirm that payment yet.")
+                );
+
+            }
+
+            if (typeof loadErrandsPage === "function") {
+                loadErrandsPage();
+            }
+
+        }).catch(function (error) {
+            console.error("Resume craft provider verify error:", error);
         });
 
     }
