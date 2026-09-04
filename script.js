@@ -17445,6 +17445,10 @@ async function loadErrandsPage() {
 
             updateErrandModeUI(data.available);
 
+            if (data.available && typeof startErrandLocationPing === "function") {
+                startErrandLocationPing();
+            }
+
             const registerBanner =
                 document.getElementById("errandAgentRegisterBanner");
 
@@ -17592,6 +17596,80 @@ document.querySelectorAll(".errand-duration-btn").forEach(function (btn) {
 
 });
 
+function getCurrentGeolocation() {
+
+    return new Promise(function (resolve) {
+
+        if (!navigator.geolocation) {
+            resolve(null);
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+
+                resolve({
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                });
+
+            },
+            function () {
+                resolve(null);
+            },
+            { timeout: 8000, maximumAge: 60000 }
+        );
+
+    });
+
+}
+
+let __kuriosLocationPingInterval = null;
+
+function startErrandLocationPing() {
+
+    stopErrandLocationPing();
+
+    __kuriosLocationPingInterval = setInterval(async function () {
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        const position =
+            await getCurrentGeolocation();
+
+        if (!position) return;
+
+        fetch(
+            API_URL + "/api/students/location",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    studentId: student.id,
+                    lat: position.lat,
+                    lng: position.lng
+                })
+            }
+        ).catch(function (error) {
+            console.error("Location ping error:", error);
+        });
+
+    }, 30000);
+
+}
+
+function stopErrandLocationPing() {
+
+    if (__kuriosLocationPingInterval) {
+        clearInterval(__kuriosLocationPingInterval);
+        __kuriosLocationPingInterval = null;
+    }
+
+}
+
 async function setErrandMode(available, durationMinutes) {
 
     const student =
@@ -17600,6 +17678,9 @@ async function setErrandMode(available, durationMinutes) {
     if (!student) return;
 
     try {
+
+        const position =
+            available ? await getCurrentGeolocation() : null;
 
         const response =
             await fetch(
@@ -17610,7 +17691,9 @@ async function setErrandMode(available, durationMinutes) {
                     body: JSON.stringify({
                         studentId: student.id,
                         available: available,
-                        durationMinutes: durationMinutes
+                        durationMinutes: durationMinutes,
+                        lat: position ? position.lat : null,
+                        lng: position ? position.lng : null
                     })
                 }
             );
@@ -17630,7 +17713,14 @@ async function setErrandMode(available, durationMinutes) {
         updateErrandModeUI(available);
 
         if (available) {
+
             loadErrandPool();
+            startErrandLocationPing();
+
+        } else {
+
+            stopErrandLocationPing();
+
         }
 
     } catch (error) {
@@ -17680,6 +17770,11 @@ async function loadErrandPool(sort) {
         listEl.innerHTML =
             data.errands.map(function (errand) {
 
+                const distanceMarkup =
+                    errand.distance_km !== undefined && errand.distance_km !== null ?
+                        `<span class="errand-distance-pill"><i class="fa-solid fa-location-crosshairs"></i> ${errand.distance_km.toFixed(1)} km away</span>` :
+                        "";
+
                 return `
                     <div class="errand-card">
                         <div class="errand-card-top">
@@ -17693,6 +17788,7 @@ async function loadErrandPool(sort) {
                             <div><i class="fa-solid fa-location-dot"></i> ${escapeChatTextGlobal(errand.pickup_location)}</div>
                             <div><i class="fa-solid fa-flag-checkered"></i> ${escapeChatTextGlobal(errand.destination)}</div>
                         </div>
+                        ${distanceMarkup}
                         <button type="button" class="errand-accept-btn" data-errand-id="${errand.id}">Accept Errand</button>
                     </div>
                 `;
@@ -17853,6 +17949,11 @@ async function loadMyErrands() {
                         `<button type="button" class="errand-accept-btn" data-rate-errand-id="${errand.id}">Rate Your Agent</button>` :
                         "";
 
+                const trackMarkup =
+                    ["in_progress", "picked_up", "on_way", "arrived"].includes(errand.status) ?
+                        `<button type="button" class="errand-accept-btn secondary" data-track-errand-id="${errand.id}"><i class="fa-solid fa-location-crosshairs"></i> Track Agent</button>` :
+                        "";
+
                 return `
                     <div class="errand-card">
                         <div class="errand-card-top">
@@ -17868,6 +17969,7 @@ async function loadMyErrands() {
                         </div>
                         ${otpMarkup}
                         ${payItemCostMarkup}
+                        ${trackMarkup}
                         ${rateMarkup}
                         ${cancelMarkup}
                     </div>
@@ -18690,6 +18792,14 @@ if (myErrandsListEl) {
 
         if (rateBtn) {
             openRatingModal(rateBtn.dataset.rateErrandId, "errand");
+            return;
+        }
+
+        const trackBtn =
+            event.target.closest("[data-track-errand-id]");
+
+        if (trackBtn) {
+            openErrandTrackingModal(trackBtn.dataset.trackErrandId);
             return;
         }
 
@@ -21328,13 +21438,39 @@ if (errandRatingSubmitBtn) {
 
 document.querySelectorAll("[data-pool-sort]").forEach(function (pill) {
 
-    pill.addEventListener("click", function () {
+    pill.addEventListener("click", async function () {
 
         document.querySelectorAll("[data-pool-sort]").forEach(function (p) {
             p.classList.remove("active");
         });
 
         pill.classList.add("active");
+
+        if (pill.dataset.poolSort === "near") {
+
+            const student = getStoredStudent();
+            const position = await getCurrentGeolocation();
+
+            if (student && position) {
+
+                await fetch(
+                    API_URL + "/api/students/location",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            studentId: student.id,
+                            lat: position.lat,
+                            lng: position.lng
+                        })
+                    }
+                ).catch(function (error) {
+                    console.error("Location update before sort error:", error);
+                });
+
+            }
+
+        }
 
         loadErrandPool(pill.dataset.poolSort);
 
@@ -21357,3 +21493,189 @@ document.querySelectorAll("[data-craft-sort]").forEach(function (pill) {
     });
 
 });
+
+
+// =========================================================
+// LIVE GPS TRACKING (student watches their agent's
+// live position on a real map — Leaflet + OpenStreetMap,
+// no API key needed)
+// =========================================================
+
+let __kuriosTrackingMap = null;
+let __kuriosTrackingMarker = null;
+let __kuriosTrackingDestMarker = null;
+let __kuriosTrackingInterval = null;
+let __kuriosTrackingErrandId = null;
+
+function openErrandTrackingModal(errandId) {
+
+    __kuriosTrackingErrandId = errandId;
+
+    const statusEl =
+        document.getElementById("errandTrackingStatus");
+
+    if (statusEl) statusEl.textContent = "Loading your agent's location...";
+
+    const modal = document.getElementById("errandTrackingModal");
+    if (modal) modal.classList.add("open");
+
+    // Leaflet needs the map container to actually be
+    // visible before it can size itself correctly, so
+    // initialize on the next tick after the modal opens.
+
+    setTimeout(function () {
+
+        initErrandTrackingMap();
+        fetchAgentLocation();
+
+        stopErrandTracking();
+
+        __kuriosTrackingInterval = setInterval(fetchAgentLocation, 10000);
+
+    }, 100);
+
+}
+
+function initErrandTrackingMap() {
+
+    const mapEl =
+        document.getElementById("errandTrackingMap");
+
+    if (!mapEl || typeof L === "undefined") return;
+
+    if (__kuriosTrackingMap) {
+
+        __kuriosTrackingMap.remove();
+        __kuriosTrackingMap = null;
+        __kuriosTrackingMarker = null;
+        __kuriosTrackingDestMarker = null;
+
+    }
+
+    __kuriosTrackingMap =
+        L.map("errandTrackingMap").setView([0, 0], 15);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+        maxZoom: 19
+    }).addTo(__kuriosTrackingMap);
+
+}
+
+async function fetchAgentLocation() {
+
+    const student =
+        getStoredStudent();
+
+    const statusEl =
+        document.getElementById("errandTrackingStatus");
+
+    if (!student || !__kuriosTrackingErrandId) return;
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/errands/" + __kuriosTrackingErrandId + "/agent-location?studentId=" + student.id
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            if (statusEl) statusEl.textContent = data.message || "Could not load your agent's location.";
+            return;
+
+        }
+
+        if (data.lat === null || data.lng === null) {
+
+            if (statusEl) statusEl.textContent = "Your agent hasn't shared their location yet.";
+            return;
+
+        }
+
+        if (statusEl) {
+
+            const updatedSecondsAgo =
+                data.updatedAt ? Math.round((Date.now() - new Date(data.updatedAt).getTime()) / 1000) : null;
+
+            statusEl.textContent =
+                updatedSecondsAgo !== null ?
+                    "Updated " + (updatedSecondsAgo < 60 ? updatedSecondsAgo + "s" : Math.round(updatedSecondsAgo / 60) + "m") + " ago" :
+                    "Live";
+
+        }
+
+        if (!__kuriosTrackingMap) return;
+
+        const agentLatLng =
+            [Number(data.lat), Number(data.lng)];
+
+        if (!__kuriosTrackingMarker) {
+
+            const agentIcon =
+                L.divIcon({ className: "leaflet-marker-agent", iconSize: [16, 16] });
+
+            __kuriosTrackingMarker =
+                L.marker(agentLatLng, { icon: agentIcon }).addTo(__kuriosTrackingMap);
+
+            __kuriosTrackingMap.setView(agentLatLng, 15);
+
+        } else {
+
+            __kuriosTrackingMarker.setLatLng(agentLatLng);
+
+        }
+
+        if (data.destinationLat && data.destinationLng && !__kuriosTrackingDestMarker) {
+
+            const destIcon =
+                L.divIcon({
+                    className: "leaflet-marker-destination",
+                    html: '<i class="fa-solid fa-flag-checkered"></i>',
+                    iconSize: [22, 22]
+                });
+
+            __kuriosTrackingDestMarker =
+                L.marker([Number(data.destinationLat), Number(data.destinationLng)], { icon: destIcon })
+                    .addTo(__kuriosTrackingMap);
+
+        }
+
+    } catch (error) {
+
+        console.error("Fetch agent location error:", error);
+
+        if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+    }
+
+}
+
+function stopErrandTracking() {
+
+    if (__kuriosTrackingInterval) {
+        clearInterval(__kuriosTrackingInterval);
+        __kuriosTrackingInterval = null;
+    }
+
+}
+
+const errandTrackingCloseBtn =
+    document.getElementById("errandTrackingCloseBtn");
+
+if (errandTrackingCloseBtn) {
+
+    errandTrackingCloseBtn.addEventListener("click", function () {
+
+        const modal = document.getElementById("errandTrackingModal");
+        if (modal) modal.classList.remove("open");
+
+        stopErrandTracking();
+
+        __kuriosTrackingErrandId = null;
+
+    });
+
+}
