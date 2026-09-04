@@ -17412,9 +17412,22 @@ async function loadErrandsPage() {
         const craftBanner =
             document.getElementById("craftRegisterBanner");
 
+        const dashboardSection =
+            document.getElementById("craftDashboardSection");
+
         if (craftBanner && craftData.success) {
 
             craftBanner.style.display = craftData.isRegistered ? "none" : "flex";
+
+        }
+
+        if (dashboardSection) {
+
+            dashboardSection.style.display = craftData.success && craftData.isRegistered ? "block" : "none";
+
+            if (craftData.success && craftData.isRegistered) {
+                loadCraftDashboard();
+            }
 
         }
 
@@ -17426,6 +17439,7 @@ async function loadErrandsPage() {
 
     loadMyErrands();
     loadMyErrandTasks();
+    loadMyCraftRequests();
 
 }
 
@@ -19504,3 +19518,664 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 });
+
+
+// =========================================================
+// CRAFT ERRANDS — REQUEST A SERVICE (student)
+// =========================================================
+
+const openCraftRequestButton =
+    document.getElementById("openCraftRequestButton");
+
+if (openCraftRequestButton) {
+
+    openCraftRequestButton.addEventListener("click", function () {
+
+        document.getElementById("craftRequestSkillSelect").value = "";
+        document.getElementById("craftRequestLocationInput").value = "";
+        document.getElementById("craftRequestDescriptionInput").value = "";
+        document.getElementById("craftRequestPriceInput").value = "";
+
+        const statusEl = document.getElementById("craftRequestStatus");
+        if (statusEl) statusEl.textContent = "";
+
+        const modal = document.getElementById("craftRequestModal");
+        if (modal) modal.classList.add("open");
+
+    });
+
+}
+
+const craftRequestCancelBtn =
+    document.getElementById("craftRequestCancelBtn");
+
+if (craftRequestCancelBtn) {
+
+    craftRequestCancelBtn.addEventListener("click", function () {
+
+        const modal = document.getElementById("craftRequestModal");
+        if (modal) modal.classList.remove("open");
+
+    });
+
+}
+
+const craftRequestSubmitBtn =
+    document.getElementById("craftRequestSubmitBtn");
+
+if (craftRequestSubmitBtn) {
+
+    craftRequestSubmitBtn.addEventListener("click", async function () {
+
+        const statusEl =
+            document.getElementById("craftRequestStatus");
+
+        const skill =
+            document.getElementById("craftRequestSkillSelect").value;
+
+        const location =
+            document.getElementById("craftRequestLocationInput").value.trim();
+
+        const description =
+            document.getElementById("craftRequestDescriptionInput").value.trim();
+
+        const proposedPrice =
+            document.getElementById("craftRequestPriceInput").value;
+
+        if (!skill || !location || !proposedPrice) {
+
+            if (statusEl) statusEl.textContent = "Please fill in the skill, location, and your proposed price.";
+            return;
+
+        }
+
+        if (Number(proposedPrice) < 100) {
+
+            if (statusEl) statusEl.textContent = "Proposed price must be at least ₦100.";
+            return;
+
+        }
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        craftRequestSubmitBtn.disabled = true;
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/craft-requests/create",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            studentId: student.id,
+                            skill: skill,
+                            location: location,
+                            description: description,
+                            proposedPrice: proposedPrice
+                        })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (statusEl) statusEl.textContent = data.message || "Could not create your request.";
+                craftRequestSubmitBtn.disabled = false;
+                return;
+
+            }
+
+            const modal = document.getElementById("craftRequestModal");
+            if (modal) modal.classList.remove("open");
+
+            if (typeof showMessage === "function") {
+                showMessage("Your craft request has been sent out to providers.");
+            }
+
+            loadMyCraftRequests();
+
+        } catch (error) {
+
+            console.error("Create craft request error:", error);
+
+            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+        } finally {
+
+            craftRequestSubmitBtn.disabled = false;
+
+        }
+
+    });
+
+}
+
+
+// =========================================================
+// CRAFT ERRANDS — PROVIDER DASHBOARD
+// =========================================================
+
+async function loadCraftDashboard() {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    const listEl = document.getElementById("craftDashboardList");
+    const emptyEl = document.getElementById("craftDashboardEmpty");
+
+    if (!listEl) return;
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/craft-requests/dashboard?studentId=" + student.id);
+
+        const data = await response.json();
+
+        if (!data.success || data.requests.length === 0) {
+
+            listEl.innerHTML = "";
+            if (emptyEl) emptyEl.style.display = "block";
+            return;
+
+        }
+
+        if (emptyEl) emptyEl.style.display = "none";
+
+        listEl.innerHTML =
+            data.requests.map(function (request) {
+
+                const priceLabel =
+                    typeof formatMoney === "function" ? formatMoney(request.proposed_price) : "₦" + request.proposed_price;
+
+                const myOfferNote =
+                    request.my_offer_status === "pending" ?
+                        `<p class="errand-waiting-note">You offered ₦${Number(request.my_offer_price).toLocaleString()} — waiting on the student.</p>` :
+                        "";
+
+                return `
+                    <div class="errand-card">
+                        <div class="errand-card-top">
+                            <div>
+                                <h4>${escapeChatTextGlobal(request.skill)}</h4>
+                                <span>${request.request_code}</span>
+                            </div>
+                            <div class="errand-card-fee">${priceLabel}</div>
+                        </div>
+                        <div class="errand-card-route">
+                            <div><i class="fa-solid fa-location-dot"></i> ${escapeChatTextGlobal(request.location)}</div>
+                            ${request.description ? `<div><i class="fa-solid fa-note-sticky"></i> ${escapeChatTextGlobal(request.description)}</div>` : ""}
+                        </div>
+                        ${myOfferNote}
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="errand-accept-btn" data-craft-accept-id="${request.id}" data-craft-accept-price="${request.proposed_price}">Accept ₦${Number(request.proposed_price).toLocaleString()}</button>
+                            <button type="button" class="errand-accept-btn secondary" data-craft-counter-id="${request.id}" data-craft-counter-price="${request.proposed_price}">Counter</button>
+                        </div>
+                    </div>
+                `;
+
+            }).join("");
+
+    } catch (error) {
+
+        console.error("Load craft dashboard error:", error);
+
+    }
+
+}
+
+const craftDashboardListEl =
+    document.getElementById("craftDashboardList");
+
+if (craftDashboardListEl) {
+
+    craftDashboardListEl.addEventListener("click", function (event) {
+
+        const acceptBtn = event.target.closest("[data-craft-accept-id]");
+        const counterBtn = event.target.closest("[data-craft-counter-id]");
+
+        if (acceptBtn) {
+
+            submitCraftOffer(acceptBtn.dataset.craftAcceptId, acceptBtn.dataset.craftAcceptPrice, acceptBtn);
+            return;
+
+        }
+
+        if (counterBtn) {
+
+            openCraftOfferModal(counterBtn.dataset.craftCounterId, counterBtn.dataset.craftCounterPrice);
+            return;
+
+        }
+
+    });
+
+}
+
+async function submitCraftOffer(requestId, price, btn) {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Submitting...";
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/craft-requests/" + requestId + "/offer",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId: student.id, offeredPrice: price })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            if (typeof showMessage === "function") {
+                showMessage(data.message || "Could not submit your offer.", "error");
+            }
+
+            loadCraftDashboard();
+            return;
+
+        }
+
+        if (data.assigned) {
+
+            if (typeof showMessage === "function") {
+                showMessage("You've been assigned this job! Opening chat with the student.");
+            }
+
+            window.location.hash = "chat";
+
+            setTimeout(function () {
+
+                if (typeof openChatWith === "function") {
+
+                    openChatWith(
+                        data.request.student_id,
+                        "Craft Errand requester",
+                        data.request.conversation_id,
+                        null
+                    );
+
+                }
+
+            }, 400);
+
+        } else {
+
+            if (typeof showMessage === "function") {
+                showMessage(data.message || "Offer submitted.");
+            }
+
+        }
+
+        loadCraftDashboard();
+
+    } catch (error) {
+
+        console.error("Submit craft offer error:", error);
+
+        if (typeof showMessage === "function") {
+            showMessage("Unable to connect to Kurios Stores server.", "error");
+        }
+
+    }
+
+}
+
+let __kuriosCraftOfferRequestId = null;
+
+function openCraftOfferModal(requestId, proposedPrice) {
+
+    __kuriosCraftOfferRequestId = requestId;
+
+    document.getElementById("craftOfferProposedPrice").textContent =
+        "Student proposed ₦" + Number(proposedPrice).toLocaleString();
+
+    document.getElementById("craftOfferPriceInput").value = "";
+
+    const statusEl = document.getElementById("craftOfferStatus");
+    if (statusEl) statusEl.textContent = "";
+
+    const modal = document.getElementById("craftOfferModal");
+    if (modal) modal.classList.add("open");
+
+}
+
+const craftOfferCancelBtn =
+    document.getElementById("craftOfferCancelBtn");
+
+if (craftOfferCancelBtn) {
+
+    craftOfferCancelBtn.addEventListener("click", function () {
+
+        const modal = document.getElementById("craftOfferModal");
+        if (modal) modal.classList.remove("open");
+
+        __kuriosCraftOfferRequestId = null;
+
+    });
+
+}
+
+const craftOfferSubmitBtn =
+    document.getElementById("craftOfferSubmitBtn");
+
+if (craftOfferSubmitBtn) {
+
+    craftOfferSubmitBtn.addEventListener("click", async function () {
+
+        const statusEl =
+            document.getElementById("craftOfferStatus");
+
+        const price =
+            document.getElementById("craftOfferPriceInput").value;
+
+        if (!price || Number(price) < 100) {
+
+            if (statusEl) statusEl.textContent = "Please enter a valid price.";
+            return;
+
+        }
+
+        if (!__kuriosCraftOfferRequestId) return;
+
+        craftOfferSubmitBtn.disabled = true;
+
+        const modal = document.getElementById("craftOfferModal");
+        if (modal) modal.classList.remove("open");
+
+        await submitCraftOffer(__kuriosCraftOfferRequestId, price, null);
+
+        __kuriosCraftOfferRequestId = null;
+        craftOfferSubmitBtn.disabled = false;
+
+    });
+
+}
+
+
+// =========================================================
+// CRAFT ERRANDS — MY REQUESTS (student)
+// =========================================================
+
+async function loadMyCraftRequests() {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    const listEl = document.getElementById("myCraftRequestsList");
+    const emptyEl = document.getElementById("myCraftRequestsEmpty");
+
+    if (!listEl) return;
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/craft-requests/my?studentId=" + student.id);
+
+        const data = await response.json();
+
+        if (!data.success || data.requests.length === 0) {
+
+            listEl.innerHTML = "";
+            if (emptyEl) emptyEl.style.display = "block";
+            return;
+
+        }
+
+        if (emptyEl) emptyEl.style.display = "none";
+
+        listEl.innerHTML =
+            data.requests.map(function (request) {
+
+                const priceLabel =
+                    typeof formatMoney === "function" ?
+                        formatMoney(request.agreed_price || request.proposed_price) :
+                        "₦" + (request.agreed_price || request.proposed_price);
+
+                const offersButton =
+                    request.status === "open" && request.pending_offer_count > 0 ?
+                        `<button type="button" class="errand-accept-btn" data-view-offers-id="${request.id}">
+                            View ${request.pending_offer_count} Offer${request.pending_offer_count > 1 ? "s" : ""}
+                        </button>` :
+                        "";
+
+                return `
+                    <div class="errand-card">
+                        <div class="errand-card-top">
+                            <div>
+                                <h4>${escapeChatTextGlobal(request.skill)}</h4>
+                                <span>${request.request_code}</span>
+                            </div>
+                            <span class="errand-status-pill ${request.status}">${request.status.replace(/_/g, " ")}</span>
+                        </div>
+                        <div class="errand-card-route">
+                            <div><i class="fa-solid fa-location-dot"></i> ${escapeChatTextGlobal(request.location)}</div>
+                        </div>
+                        <div class="errand-card-fee" style="margin-bottom:10px;">${priceLabel}</div>
+                        ${offersButton}
+                    </div>
+                `;
+
+            }).join("");
+
+    } catch (error) {
+
+        console.error("Load my craft requests error:", error);
+
+    }
+
+}
+
+const myCraftRequestsListEl =
+    document.getElementById("myCraftRequestsList");
+
+if (myCraftRequestsListEl) {
+
+    myCraftRequestsListEl.addEventListener("click", function (event) {
+
+        const btn =
+            event.target.closest("[data-view-offers-id]");
+
+        if (!btn) return;
+
+        openCraftOffersModal(btn.dataset.viewOffersId);
+
+    });
+
+}
+
+let __kuriosCraftOffersRequestId = null;
+
+async function openCraftOffersModal(requestId) {
+
+    __kuriosCraftOffersRequestId = requestId;
+
+    const listEl = document.getElementById("craftOffersList");
+    const statusEl = document.getElementById("craftOffersStatus");
+
+    if (listEl) listEl.innerHTML = "Loading...";
+    if (statusEl) statusEl.textContent = "";
+
+    const modal = document.getElementById("craftOffersModal");
+    if (modal) modal.classList.add("open");
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/craft-requests/" + requestId + "/offers?studentId=" + student.id);
+
+        const data = await response.json();
+
+        if (!data.success || data.offers.length === 0) {
+
+            if (listEl) listEl.innerHTML = `<p class="reset-passcode-intro">No offers yet.</p>`;
+            return;
+
+        }
+
+        if (listEl) {
+
+            listEl.innerHTML =
+                data.offers.map(function (offer) {
+
+                    const fullName =
+                        `${offer.first_name || ""} ${offer.last_name || ""}`.trim();
+
+                    return `
+                        <div class="craft-offer-row">
+                            <div class="craft-offer-row-info">
+                                <strong>${escapeChatTextGlobal(fullName)}</strong>
+                                <span>₦${Number(offer.offered_price).toLocaleString()}</span>
+                            </div>
+                            <button type="button" class="craft-offer-approve-btn" data-approve-offer-id="${offer.id}">Approve</button>
+                        </div>
+                    `;
+
+                }).join("");
+
+        }
+
+    } catch (error) {
+
+        console.error("Load craft offers error:", error);
+
+        if (listEl) listEl.innerHTML = `<p class="reset-passcode-intro">Could not load offers.</p>`;
+
+    }
+
+}
+
+const craftOffersCloseBtn =
+    document.getElementById("craftOffersCloseBtn");
+
+if (craftOffersCloseBtn) {
+
+    craftOffersCloseBtn.addEventListener("click", function () {
+
+        const modal = document.getElementById("craftOffersModal");
+        if (modal) modal.classList.remove("open");
+
+        __kuriosCraftOffersRequestId = null;
+
+    });
+
+}
+
+const craftOffersListEl =
+    document.getElementById("craftOffersList");
+
+if (craftOffersListEl) {
+
+    craftOffersListEl.addEventListener("click", async function (event) {
+
+        const btn =
+            event.target.closest("[data-approve-offer-id]");
+
+        if (!btn) return;
+
+        const student =
+            getStoredStudent();
+
+        if (!student || !__kuriosCraftOffersRequestId) return;
+
+        btn.disabled = true;
+        btn.textContent = "Approving...";
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/craft-requests/" + __kuriosCraftOffersRequestId + "/offers/" + btn.dataset.approveOfferId + "/approve",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ studentId: student.id })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (typeof showMessage === "function") {
+                    showMessage(data.message || "Could not approve this offer.", "error");
+                }
+
+                btn.disabled = false;
+                btn.textContent = "Approve";
+                return;
+
+            }
+
+            const modal = document.getElementById("craftOffersModal");
+            if (modal) modal.classList.remove("open");
+
+            __kuriosCraftOffersRequestId = null;
+
+            if (typeof showMessage === "function") {
+                showMessage("Offer approved! Opening chat with your provider.");
+            }
+
+            loadMyCraftRequests();
+
+            window.location.hash = "chat";
+
+            setTimeout(function () {
+
+                if (typeof openChatWith === "function") {
+
+                    openChatWith(
+                        data.request.assigned_provider_id,
+                        "Craft provider",
+                        data.request.conversation_id,
+                        null
+                    );
+
+                }
+
+            }, 400);
+
+        } catch (error) {
+
+            console.error("Approve craft offer error:", error);
+
+            if (typeof showMessage === "function") {
+                showMessage("Unable to connect to Kurios Stores server.", "error");
+            }
+
+            btn.disabled = false;
+            btn.textContent = "Approve";
+
+        }
+
+    });
+
+}
