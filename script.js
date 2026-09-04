@@ -2713,6 +2713,26 @@ if (accountWallet) {
 
 }
 
+const accountErrands =
+    document.getElementById("accountErrands");
+
+if (accountErrands) {
+
+    accountErrands.addEventListener(
+        "click",
+        function () {
+
+            if (studentAccountMenu) {
+                studentAccountMenu.classList.remove("open");
+            }
+
+            window.location.hash = "errands";
+
+        }
+    );
+
+}
+
 
 // ========================================
 // MY ORDERS PANEL
@@ -2819,6 +2839,9 @@ function renderOrderCard(order) {
             <div class="order-card-actions">
                 <button type="button" class="order-action-btn secondary" data-order-action="print" data-order-id="${order.id}">
                     <i class="fa-solid fa-print"></i> Print Receipt
+                </button>
+                <button type="button" class="order-action-btn secondary" data-order-action="message-seller" data-order-id="${order.id}">
+                    <i class="fa-solid fa-comment"></i> Message Seller
                 </button>
             </div>
         `;
@@ -4488,9 +4511,14 @@ showOtpVerificationScreen(
         const visibleConversations =
             activeFilter === "all" ?
                 cachedConversations :
-                cachedConversations.filter(function (c) {
-                    return c.type === activeFilter;
-                });
+                (activeFilter === "ERRAND" ?
+                    cachedConversations.filter(function (c) {
+                        return c.type === "ERRAND" || c.type === "CRAFT";
+                    }) :
+                    cachedConversations.filter(function (c) {
+                        return c.type === activeFilter;
+                    })
+                );
 
         if (visibleConversations.length === 0) {
 
@@ -4535,7 +4563,7 @@ showOtpVerificationScreen(
 
             const sellerTag =
                 conversation.type === "SUPPORT" ?
-                    `<span class="chat-contact-seller-tag support">Support</span>` :
+                    `<span class="chat-contact-seller-tag support">KSupport</span>` :
                     (conversation.partner_store_name ?
                         `<span class="chat-contact-seller-tag">Seller</span>` :
                         "");
@@ -13941,6 +13969,10 @@ document.addEventListener("click", function (event) {
 
         window.location.hash = "errands";
 
+    } else if (action === "favorites") {
+
+        window.location.hash = "wishlist";
+
     } else if (action === "rewards") {
 
         window.location.hash = "rewards";
@@ -15165,6 +15197,8 @@ if (ordersPanelBodyEl) {
             openEditOrderModal(orderData);
         } else if (action === "print") {
             openReceiptModal(orderData);
+        } else if (action === "message-seller") {
+            messageSellerAboutOrder(btn.dataset.orderId);
         }
 
     });
@@ -20177,5 +20211,107 @@ if (craftOffersListEl) {
         }
 
     });
+
+}
+
+
+// =========================================================
+// MESSAGE SELLER ABOUT AN ORDER
+// (an order can technically span more than one seller,
+// since checkout doesn't restrict the cart to one store —
+// this handles that honestly rather than guessing)
+// =========================================================
+
+async function messageSellerAboutOrder(orderId) {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    try {
+
+        const sellersResponse =
+            await fetch(API_URL + "/api/orders/" + orderId + "/sellers?studentId=" + student.id);
+
+        const sellersData = await sellersResponse.json();
+
+        if (!sellersData.success || sellersData.sellers.length === 0) {
+
+            if (typeof showMessage === "function") {
+                showMessage("There's no individual seller to message for this order.", "error");
+            }
+
+            return;
+
+        }
+
+        if (sellersData.sellers.length > 1) {
+
+            if (typeof showMessage === "function") {
+
+                showMessage(
+                    "This order has items from " + sellersData.sellers.length + " different sellers — opening a chat with " + sellersData.sellers[0].store_name + " first."
+                );
+
+            }
+
+        }
+
+        const seller =
+            sellersData.sellers[0];
+
+        const conversationResponse =
+            await fetch(
+                API_URL + "/api/chat/contact-seller-about-order",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        studentId: student.id,
+                        orderId: orderId,
+                        sellerStudentId: seller.seller_student_id
+                    })
+                }
+            );
+
+        const conversationData = await conversationResponse.json();
+
+        if (!conversationData.success) {
+
+            if (typeof showMessage === "function") {
+                showMessage(conversationData.message || "Could not start a conversation about this order.", "error");
+            }
+
+            return;
+
+        }
+
+        window.location.hash = "chat";
+
+        setTimeout(function () {
+
+            if (typeof openChatWith === "function") {
+
+                openChatWith(
+                    seller.seller_student_id,
+                    seller.store_name || "Seller",
+                    conversationData.conversationId,
+                    "Order #" + orderId
+                );
+
+            }
+
+        }, 400);
+
+    } catch (error) {
+
+        console.error("Message seller about order error:", error);
+
+        if (typeof showMessage === "function") {
+            showMessage("Unable to connect to Kurios Stores server.", "error");
+        }
+
+    }
 
 }
