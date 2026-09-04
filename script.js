@@ -17806,6 +17806,19 @@ async function loadMyErrands() {
                         </button>` :
                         "";
 
+                const cancellableStatuses =
+                    ["pending", "available", "accepted", "in_progress", "picked_up"];
+
+                const cancelMarkup =
+                    cancellableStatuses.includes(errand.status) ?
+                        `<button type="button" class="errand-accept-btn secondary" data-cancel-errand-id="${errand.id}">Cancel Errand</button>` :
+                        "";
+
+                const rateMarkup =
+                    errand.status === "completed" && !errand.rating ?
+                        `<button type="button" class="errand-accept-btn" data-rate-errand-id="${errand.id}">Rate Your Agent</button>` :
+                        "";
+
                 return `
                     <div class="errand-card">
                         <div class="errand-card-top">
@@ -17821,6 +17834,8 @@ async function loadMyErrands() {
                         </div>
                         ${otpMarkup}
                         ${payItemCostMarkup}
+                        ${rateMarkup}
+                        ${cancelMarkup}
                     </div>
                 `;
 
@@ -18244,6 +18259,11 @@ async function loadMyErrandTasks() {
                             `<button type="button" class="errand-accept-btn" data-transition-id="${errand.id}" data-transition-action="${nextAction.action}">${nextAction.label}</button>` :
                             "");
 
+                const backOutButton =
+                    ["accepted", "in_progress", "picked_up"].includes(errand.status) ?
+                        `<button type="button" class="errand-accept-btn secondary" data-agent-cancel-id="${errand.id}">Back Out</button>` :
+                        "";
+
                 return `
                     <div class="errand-card">
                         <div class="errand-card-top">
@@ -18260,6 +18280,7 @@ async function loadMyErrandTasks() {
                         <div class="errand-card-fee" style="margin-bottom:10px;">Your earnings: ${feeLabel}</div>
                         ${itemCostButton}
                         ${actionButton}
+                        ${backOutButton}
                     </div>
                 `;
 
@@ -18283,6 +18304,7 @@ if (myErrandTasksListEl) {
         const transitionBtn = event.target.closest("[data-transition-id]");
         const reportCostBtn = event.target.closest("[data-report-cost-id]");
         const confirmBtn = event.target.closest("[data-confirm-delivery-id]");
+        const backOutBtn = event.target.closest("[data-agent-cancel-id]");
 
         if (transitionBtn) {
             runErrandTransition(transitionBtn.dataset.transitionId, transitionBtn.dataset.transitionAction, transitionBtn);
@@ -18296,6 +18318,11 @@ if (myErrandTasksListEl) {
 
         if (confirmBtn) {
             openErrandOtpModal(confirmBtn.dataset.confirmDeliveryId);
+            return;
+        }
+
+        if (backOutBtn) {
+            agentCancelErrand(backOutBtn.dataset.agentCancelId);
             return;
         }
 
@@ -18587,30 +18614,50 @@ if (myErrandsListEl) {
 
     myErrandsListEl.addEventListener("click", function (event) {
 
-        const btn =
+        const payBtn =
             event.target.closest("[data-pay-item-cost-id]");
 
-        if (!btn) return;
+        if (payBtn) {
 
-        __kuriosPayItemCostErrandId = btn.dataset.payItemCostId;
+            __kuriosPayItemCostErrandId = payBtn.dataset.payItemCostId;
 
-        const amountEl =
-            document.getElementById("errandPayItemCostAmount");
+            const amountEl =
+                document.getElementById("errandPayItemCostAmount");
 
-        if (amountEl) {
+            if (amountEl) {
 
-            amountEl.textContent =
-                typeof formatMoney === "function" ?
-                    formatMoney(btn.dataset.payItemCostAmount) :
-                    "₦" + btn.dataset.payItemCostAmount;
+                amountEl.textContent =
+                    typeof formatMoney === "function" ?
+                        formatMoney(payBtn.dataset.payItemCostAmount) :
+                        "₦" + payBtn.dataset.payItemCostAmount;
+
+            }
+
+            const statusEl = document.getElementById("errandPayItemCostStatus");
+            if (statusEl) statusEl.textContent = "";
+
+            const modal = document.getElementById("errandPayItemCostModal");
+            if (modal) modal.classList.add("open");
+
+            return;
 
         }
 
-        const statusEl = document.getElementById("errandPayItemCostStatus");
-        if (statusEl) statusEl.textContent = "";
+        const cancelBtn =
+            event.target.closest("[data-cancel-errand-id]");
 
-        const modal = document.getElementById("errandPayItemCostModal");
-        if (modal) modal.classList.add("open");
+        if (cancelBtn) {
+            cancelErrandRequest(cancelBtn.dataset.cancelErrandId);
+            return;
+        }
+
+        const rateBtn =
+            event.target.closest("[data-rate-errand-id]");
+
+        if (rateBtn) {
+            openRatingModal(rateBtn.dataset.rateErrandId, "errand");
+            return;
+        }
 
     });
 
@@ -20013,6 +20060,19 @@ async function loadMyCraftRequests() {
                         </div>` :
                         "";
 
+                const cancellableCraftStatuses =
+                    ["open", "assigned"];
+
+                const cancelMarkup =
+                    cancellableCraftStatuses.includes(request.status) ?
+                        `<button type="button" class="errand-accept-btn secondary" data-cancel-craft-id="${request.id}">Cancel Request</button>` :
+                        "";
+
+                const rateMarkup =
+                    request.status === "completed" && !request.rating ?
+                        `<button type="button" class="errand-accept-btn" data-rate-craft-id="${request.id}">Rate Your Provider</button>` :
+                        "";
+
                 return `
                     <div class="errand-card">
                         <div class="errand-card-top">
@@ -20029,6 +20089,8 @@ async function loadMyCraftRequests() {
                         ${otpMarkup}
                         ${offersButton}
                         ${payButton}
+                        ${rateMarkup}
+                        ${cancelMarkup}
                     </div>
                 `;
 
@@ -20062,6 +20124,22 @@ if (myCraftRequestsListEl) {
 
         if (payBtn) {
             openCraftPayModal(payBtn.dataset.craftPayId, payBtn.dataset.craftPayAmount);
+            return;
+        }
+
+        const cancelBtn =
+            event.target.closest("[data-cancel-craft-id]");
+
+        if (cancelBtn) {
+            cancelCraftRequest(cancelBtn.dataset.cancelCraftId);
+            return;
+        }
+
+        const rateBtn =
+            event.target.closest("[data-rate-craft-id]");
+
+        if (rateBtn) {
+            openRatingModal(rateBtn.dataset.rateCraftId, "craft");
             return;
         }
 
@@ -20854,3 +20932,354 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 });
+
+
+// =========================================================
+// ERRAND CANCELLATION (student-side)
+// =========================================================
+
+async function cancelErrandRequest(errandId) {
+
+    if (!confirm("Cancel this errand? Any amount already paid will be refunded to your wallet.")) {
+        return;
+    }
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/errands/" + errandId + "/cancel",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId: student.id })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            if (typeof showMessage === "function") {
+                showMessage(data.message || "Could not cancel this errand.", "error");
+            }
+
+            return;
+
+        }
+
+        if (typeof showMessage === "function") {
+
+            showMessage(
+                data.refunded > 0 ?
+                    "Errand cancelled — ₦" + Number(data.refunded).toLocaleString() + " refunded to your wallet." :
+                    "Errand cancelled."
+            );
+
+        }
+
+        loadMyErrands();
+
+    } catch (error) {
+
+        console.error("Cancel errand error:", error);
+
+        if (typeof showMessage === "function") {
+            showMessage("Unable to connect to Kurios Stores server.", "error");
+        }
+
+    }
+
+}
+
+
+// =========================================================
+// AGENT "BACK OUT" (regular errand tasks)
+// =========================================================
+
+async function agentCancelErrand(errandId) {
+
+    if (!confirm("Back out of this errand? It'll go back to the pool for another agent, and this counts against your reliability record.")) {
+        return;
+    }
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/errands/" + errandId + "/agent-cancel",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId: student.id })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            if (typeof showMessage === "function") {
+                showMessage(data.message || "Could not back out of this errand.", "error");
+            }
+
+            return;
+
+        }
+
+        if (typeof showMessage === "function") {
+            showMessage("You've backed out — this errand is back in the pool.");
+        }
+
+        loadMyErrandTasks();
+
+    } catch (error) {
+
+        console.error("Agent cancel errand error:", error);
+
+        if (typeof showMessage === "function") {
+            showMessage("Unable to connect to Kurios Stores server.", "error");
+        }
+
+    }
+
+}
+
+
+// =========================================================
+// CRAFT REQUEST CANCELLATION (student-side)
+// =========================================================
+
+async function cancelCraftRequest(requestId) {
+
+    if (!confirm("Cancel this request? Any amount already paid will be refunded to your wallet.")) {
+        return;
+    }
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/craft-requests/" + requestId + "/cancel",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId: student.id })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            if (typeof showMessage === "function") {
+                showMessage(data.message || "Could not cancel this request.", "error");
+            }
+
+            return;
+
+        }
+
+        if (typeof showMessage === "function") {
+
+            showMessage(
+                data.refunded > 0 ?
+                    "Request cancelled — ₦" + Number(data.refunded).toLocaleString() + " refunded to your wallet." :
+                    "Request cancelled."
+            );
+
+        }
+
+        loadMyCraftRequests();
+
+    } catch (error) {
+
+        console.error("Cancel craft request error:", error);
+
+        if (typeof showMessage === "function") {
+            showMessage("Unable to connect to Kurios Stores server.", "error");
+        }
+
+    }
+
+}
+
+
+// =========================================================
+// SHARED RATING MODAL (errand + craft)
+// =========================================================
+
+let __kuriosRatingRequestId = null;
+let __kuriosRatingType = null;
+let __kuriosRatingValue = 0;
+
+function openRatingModal(requestId, type) {
+
+    __kuriosRatingRequestId = requestId;
+    __kuriosRatingType = type;
+    __kuriosRatingValue = 0;
+
+    const titleEl =
+        document.getElementById("errandRatingModalTitle");
+
+    if (titleEl) {
+        titleEl.textContent = type === "craft" ? "Rate Your Provider" : "Rate Your Agent";
+    }
+
+    document.getElementById("errandRatingComment").value = "";
+
+    document.querySelectorAll("#errandRatingStars .rating-star-btn").forEach(function (btn) {
+        btn.classList.remove("selected");
+    });
+
+    const statusEl = document.getElementById("errandRatingStatus");
+    if (statusEl) statusEl.textContent = "";
+
+    const modal = document.getElementById("errandRatingModal");
+    if (modal) modal.classList.add("open");
+
+}
+
+document.querySelectorAll("#errandRatingStars .rating-star-btn").forEach(function (btn) {
+
+    btn.addEventListener("click", function () {
+
+        __kuriosRatingValue =
+            parseInt(btn.dataset.ratingValue, 10);
+
+        document.querySelectorAll("#errandRatingStars .rating-star-btn").forEach(function (b) {
+
+            b.classList.toggle(
+                "selected",
+                parseInt(b.dataset.ratingValue, 10) <= __kuriosRatingValue
+            );
+
+        });
+
+    });
+
+});
+
+const errandRatingCancelBtn =
+    document.getElementById("errandRatingCancelBtn");
+
+if (errandRatingCancelBtn) {
+
+    errandRatingCancelBtn.addEventListener("click", function () {
+
+        const modal = document.getElementById("errandRatingModal");
+        if (modal) modal.classList.remove("open");
+
+        __kuriosRatingRequestId = null;
+        __kuriosRatingType = null;
+
+    });
+
+}
+
+const errandRatingSubmitBtn =
+    document.getElementById("errandRatingSubmitBtn");
+
+if (errandRatingSubmitBtn) {
+
+    errandRatingSubmitBtn.addEventListener("click", async function () {
+
+        const statusEl =
+            document.getElementById("errandRatingStatus");
+
+        if (!__kuriosRatingValue) {
+
+            if (statusEl) statusEl.textContent = "Please select a star rating.";
+            return;
+
+        }
+
+        const student =
+            getStoredStudent();
+
+        if (!student || !__kuriosRatingRequestId || !__kuriosRatingType) return;
+
+        const comment =
+            document.getElementById("errandRatingComment").value.trim();
+
+        const endpoint =
+            __kuriosRatingType === "craft" ?
+                "/api/craft-requests/" + __kuriosRatingRequestId + "/rate" :
+                "/api/errands/" + __kuriosRatingRequestId + "/rate";
+
+        errandRatingSubmitBtn.disabled = true;
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + endpoint,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            studentId: student.id,
+                            rating: __kuriosRatingValue,
+                            comment: comment
+                        })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (statusEl) statusEl.textContent = data.message || "Could not submit your rating.";
+                errandRatingSubmitBtn.disabled = false;
+                return;
+
+            }
+
+            const modal = document.getElementById("errandRatingModal");
+            if (modal) modal.classList.remove("open");
+
+            const ratedType = __kuriosRatingType;
+
+            __kuriosRatingRequestId = null;
+            __kuriosRatingType = null;
+
+            if (typeof showMessage === "function") {
+                showMessage("Thanks for your rating!");
+            }
+
+            if (ratedType === "craft" && typeof loadMyCraftRequests === "function") {
+                loadMyCraftRequests();
+            } else if (typeof loadMyErrands === "function") {
+                loadMyErrands();
+            }
+
+        } catch (error) {
+
+            console.error("Submit rating error:", error);
+
+            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+        } finally {
+
+            errandRatingSubmitBtn.disabled = false;
+
+        }
+
+    });
+
+}
