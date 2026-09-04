@@ -9431,3 +9431,62 @@ img {
     border-radius: 8px;
     margin: 0 0 8px;
 }
+
+
+/* Errand/Craft registration banners */
+
+.errand-register-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: linear-gradient(135deg, var(--purple-soft), #ffffff);
+    border: 1px dashed var(--purple-light);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+}
+
+.errand-register-banner.craft {
+    background: linear-gradient(135deg, #fce7f3, #ffffff);
+    border-color: #f9a8d4;
+}
+
+.errand-register-banner strong {
+    display: block;
+    font-size: 13px;
+}
+
+.errand-register-banner p {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.errand-mode-toggle-btn.craft {
+    background: #db2777;
+}
+
+.craft-skills-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.craft-skill-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.craft-skill-checkbox input {
+    width: 14px;
+    height: 14px;
+}
