@@ -3380,6 +3380,17 @@
         </div>
 
 
+        <!-- MY ACTIVE TASKS (as the agent) -->
+
+        <div id="myErrandTasksSection" style="display: none;">
+
+            <div class="form-section-label">My Active Errand Tasks</div>
+
+            <div id="myErrandTasksList"></div>
+
+        </div>
+
+
         <div class="wallet-section-divider"></div>
 
 
@@ -3589,6 +3600,123 @@
     <!-- =====================================================
          REQUEST AN ERRAND MODAL
     ====================================================== -->
+
+    <!-- =====================================================
+         REPORT ITEM COST MODAL (agent)
+    ====================================================== -->
+
+    <div class="modal-overlay" id="errandItemCostModal">
+
+        <div class="auth-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-receipt"></i>
+            </div>
+
+            <h2>Report Item Cost</h2>
+
+            <p style="text-align:center; color:#6b7280; font-size:13px; margin-bottom:16px;">
+                Enter the real cost so the student can pay you back through the app.
+            </p>
+
+            <div id="errandItemCostStatus" class="otp-status-message"></div>
+
+            <div class="form-group">
+                <label for="errandItemCostReportInput">Item cost (₦)</label>
+                <input type="number" id="errandItemCostReportInput" min="1" step="50" placeholder="e.g. 2500">
+            </div>
+
+            <button type="button" class="auth-button" id="errandItemCostSubmitBtn">
+                Send to Student
+            </button>
+
+            <button type="button" class="modal-close-text-btn" id="errandItemCostCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         PAY ITEM COST MODAL (student)
+    ====================================================== -->
+
+    <div class="modal-overlay" id="errandPayItemCostModal">
+
+        <div class="auth-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-receipt"></i>
+            </div>
+
+            <h2>Pay Item Cost</h2>
+
+            <p id="errandPayItemCostAmount" style="text-align:center; font-size:20px; font-weight:800; color: var(--purple-dark); margin-bottom:16px;">
+                ₦0
+            </p>
+
+            <div id="errandPayItemCostStatus" class="otp-status-message"></div>
+
+            <button type="button" id="errandPayItemMonnifyBtn" class="auth-button" style="margin-bottom: 10px;">
+                <i class="fa-solid fa-credit-card"></i>
+                Pay with Monnify
+            </button>
+
+            <button type="button" id="errandPayItemOpayBtn" class="auth-button opay-button" style="margin-bottom: 10px;">
+                <i class="fa-solid fa-wallet"></i>
+                Pay with OPay
+            </button>
+
+            <button type="button" id="errandPayItemPaystackBtn" class="auth-button paystack-button">
+                <i class="fa-solid fa-credit-card"></i>
+                Pay with Paystack
+            </button>
+
+            <button type="button" class="modal-close-text-btn" id="errandPayItemCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         CONFIRM DELIVERY MODAL (agent — enter OTP)
+    ====================================================== -->
+
+    <div class="modal-overlay" id="errandOtpModal">
+
+        <div class="auth-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-key"></i>
+            </div>
+
+            <h2>Confirm Delivery</h2>
+
+            <p style="text-align:center; color:#6b7280; font-size:13px; margin-bottom:16px;">
+                Ask the student for their 4-digit delivery code.
+            </p>
+
+            <div id="errandOtpStatus" class="otp-status-message"></div>
+
+            <div class="form-group">
+                <label for="errandOtpInput">Delivery Code</label>
+                <input type="text" id="errandOtpInput" maxlength="4" inputmode="numeric" placeholder="0000" style="text-align:center; font-size:22px; letter-spacing:8px;">
+            </div>
+
+            <button type="button" class="auth-button" id="errandOtpSubmitBtn">
+                Confirm Delivery
+            </button>
+
+            <button type="button" class="modal-close-text-btn" id="errandOtpCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
+
+
 
     <div class="modal-overlay" id="errandRequestModal">
 
