@@ -3328,6 +3328,29 @@
             </div>
         </div>
 
+        <!-- BECOME AN ERRAND AGENT (shown only if not yet registered) -->
+
+        <div class="errand-register-banner" id="errandAgentRegisterBanner" style="display: none;">
+            <div>
+                <strong>Want to run errands and earn?</strong>
+                <p>Register as an Errand Agent — ₦500, one-time.</p>
+            </div>
+            <button type="button" id="openErrandAgentRegisterButton" class="errand-mode-toggle-btn">
+                Register
+            </button>
+        </div>
+
+        <div class="errand-register-banner craft" id="craftRegisterBanner">
+            <div>
+                <strong>Have a craft skill?</strong>
+                <p>Braiding, barbing, manicure, and more — register as a Craft provider for ₦2,000.</p>
+            </div>
+            <button type="button" id="openCraftRegisterButton" class="errand-mode-toggle-btn craft">
+                Register
+            </button>
+        </div>
+
+
         <!-- ERRAND MODE -->
 
         <div class="errand-mode-card" id="errandModeCard">
@@ -3604,6 +3627,173 @@
     <!-- =====================================================
          REPORT ITEM COST MODAL (agent)
     ====================================================== -->
+
+    <!-- =====================================================
+         ERRAND AGENT REGISTRATION MODAL
+    ====================================================== -->
+
+    <div class="modal-overlay" id="errandAgentRegisterModal">
+
+        <div class="auth-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-id-card"></i>
+            </div>
+
+            <h2>Become an Errand Agent</h2>
+
+            <!-- STEP 1: phone number + send code -->
+
+            <div id="errandAgentPhoneStep">
+
+                <div id="errandAgentPhoneStatus" class="otp-status-message"></div>
+
+                <div class="form-group">
+                    <label for="errandAgentPhoneInput">Phone Number</label>
+                    <input type="tel" id="errandAgentPhoneInput" placeholder="e.g. 08012345678">
+                </div>
+
+                <div class="form-group">
+                    <label for="errandAgentAreaInput">Preferred Service Area (optional)</label>
+                    <input type="text" id="errandAgentAreaInput" placeholder="e.g. Main Campus, Hostels">
+                </div>
+
+                <button type="button" class="auth-button" id="errandAgentSendCodeBtn">
+                    Send Verification Code
+                </button>
+
+            </div>
+
+            <!-- STEP 2: enter code -->
+
+            <div id="errandAgentOtpStep" style="display: none;">
+
+                <p style="text-align:center; color:#6b7280; font-size:13px; margin-bottom:16px;">
+                    Enter the 6-digit code sent to your phone.
+                </p>
+
+                <div id="errandAgentOtpStatus" class="otp-status-message"></div>
+
+                <div class="form-group">
+                    <input type="text" id="errandAgentOtpInput" maxlength="6" inputmode="numeric" placeholder="000000" style="text-align:center; font-size:20px; letter-spacing:6px;">
+                </div>
+
+                <button type="button" class="auth-button" id="errandAgentVerifyCodeBtn">
+                    Verify Code
+                </button>
+
+            </div>
+
+            <!-- STEP 3: pay -->
+
+            <div id="errandAgentPayStep" style="display: none;">
+
+                <p style="text-align:center; color:#6b7280; font-size:13px; margin-bottom:16px;">
+                    Phone verified! Complete your registration with a one-time ₦500 fee.
+                </p>
+
+                <div id="errandAgentPayStatus" class="otp-status-message"></div>
+
+                <button type="button" id="errandAgentPayMonnifyBtn" class="auth-button" style="margin-bottom: 10px;">
+                    <i class="fa-solid fa-credit-card"></i>
+                    Pay with Monnify
+                </button>
+
+                <button type="button" id="errandAgentPayOpayBtn" class="auth-button opay-button" style="margin-bottom: 10px;">
+                    <i class="fa-solid fa-wallet"></i>
+                    Pay with OPay
+                </button>
+
+                <button type="button" id="errandAgentPayPaystackBtn" class="auth-button paystack-button">
+                    <i class="fa-solid fa-credit-card"></i>
+                    Pay with Paystack
+                </button>
+
+            </div>
+
+            <button type="button" class="modal-close-text-btn" id="errandAgentRegisterCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         CRAFT PROVIDER REGISTRATION MODAL
+    ====================================================== -->
+
+    <div class="modal-overlay" id="craftRegisterModal">
+
+        <div class="auth-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-scissors"></i>
+            </div>
+
+            <h2>Become a Craft Provider</h2>
+
+            <div id="craftRegisterStep">
+
+                <div id="craftRegisterStatus" class="otp-status-message"></div>
+
+                <div class="form-group">
+                    <label>Your Skills (select all that apply)</label>
+                    <div class="craft-skills-grid">
+                        <label class="craft-skill-checkbox"><input type="checkbox" value="Braiding"> Braiding</label>
+                        <label class="craft-skill-checkbox"><input type="checkbox" value="Barbing"> Barbing</label>
+                        <label class="craft-skill-checkbox"><input type="checkbox" value="Manicure"> Manicure</label>
+                        <label class="craft-skill-checkbox"><input type="checkbox" value="Pedicure"> Pedicure</label>
+                        <label class="craft-skill-checkbox"><input type="checkbox" value="Makeup"> Makeup</label>
+                        <label class="craft-skill-checkbox"><input type="checkbox" value="Hair Styling"> Hair Styling</label>
+                        <label class="craft-skill-checkbox"><input type="checkbox" value="Tailoring"> Tailoring</label>
+                        <label class="craft-skill-checkbox"><input type="checkbox" value="Other"> Other</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="craftBioInput">Tell students about your work (optional)</label>
+                    <textarea id="craftBioInput" rows="2" placeholder="e.g. 3 years experience, based near Hostel B"></textarea>
+                </div>
+
+                <button type="button" class="auth-button" id="craftRegisterContinueBtn">
+                    Continue to Payment
+                </button>
+
+            </div>
+
+            <div id="craftPayStep" style="display: none;">
+
+                <p style="text-align:center; color:#6b7280; font-size:13px; margin-bottom:16px;">
+                    Complete your registration with a one-time ₦2,000 fee.
+                </p>
+
+                <div id="craftPayStatus" class="otp-status-message"></div>
+
+                <button type="button" id="craftPayMonnifyBtn" class="auth-button" style="margin-bottom: 10px;">
+                    <i class="fa-solid fa-credit-card"></i>
+                    Pay with Monnify
+                </button>
+
+                <button type="button" id="craftPayOpayBtn" class="auth-button opay-button" style="margin-bottom: 10px;">
+                    <i class="fa-solid fa-wallet"></i>
+                    Pay with OPay
+                </button>
+
+                <button type="button" id="craftPayPaystackBtn" class="auth-button paystack-button">
+                    <i class="fa-solid fa-credit-card"></i>
+                    Pay with Paystack
+                </button>
+
+            </div>
+
+            <button type="button" class="modal-close-text-btn" id="craftRegisterCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
+
+
 
     <div class="modal-overlay" id="errandItemCostModal">
 
