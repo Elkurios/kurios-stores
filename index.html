@@ -60,6 +60,19 @@
 
 
     <!-- =====================================================
+         LEAFLET (live GPS map — no API key needed,
+         uses free OpenStreetMap tiles)
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+    <!-- =====================================================
          OUR CSS FILE
     ====================================================== -->
 
@@ -3457,6 +3470,7 @@
                 <div class="pool-sort-pills">
                     <button type="button" class="pool-sort-pill active" data-pool-sort="newest">Newest</button>
                     <button type="button" class="pool-sort-pill" data-pool-sort="fee">Highest Fee</button>
+                    <button type="button" class="pool-sort-pill" data-pool-sort="near">Near Me</button>
                 </div>
             </div>
 
@@ -4114,6 +4128,34 @@
     <!-- =====================================================
          RATE YOUR AGENT/PROVIDER MODAL (shared)
     ====================================================== -->
+
+    <!-- =====================================================
+         TRACK AGENT MODAL (live GPS map)
+    ====================================================== -->
+
+    <div class="modal-overlay" id="errandTrackingModal">
+
+        <div class="auth-modal tracking-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-location-crosshairs"></i>
+            </div>
+
+            <h2>Tracking Your Agent</h2>
+
+            <p id="errandTrackingStatus" class="reset-passcode-intro" style="text-align:center;">
+                Loading your agent's location...
+            </p>
+
+            <div id="errandTrackingMap"></div>
+
+            <button type="button" class="modal-close-text-btn" id="errandTrackingCloseBtn">Close</button>
+
+        </div>
+
+    </div>
+
+
 
     <div class="modal-overlay" id="errandRatingModal">
 
