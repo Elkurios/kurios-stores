@@ -9210,3 +9210,179 @@ img {
     background: #fee2e2;
     color: #dc2626;
 }
+
+
+/* =========================================================
+   ERRANDS
+   ========================================================= */
+
+.errand-mode-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+}
+
+.errand-mode-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.errand-mode-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #d1d5db;
+    flex-shrink: 0;
+}
+
+.errand-mode-dot.active {
+    background: #22c55e;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+}
+
+.errand-mode-status strong {
+    display: block;
+    font-size: 14px;
+}
+
+.errand-mode-status p {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.errand-mode-toggle-btn {
+    border: none;
+    background: var(--purple);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.errand-mode-toggle-btn.on {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.errand-duration-choice {
+    background: var(--purple-soft);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 10px;
+}
+
+.errand-duration-choice p {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--purple-dark);
+}
+
+.errand-duration-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.errand-duration-btn {
+    border: 1px solid var(--purple-light);
+    background: white;
+    color: var(--purple-dark);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.errand-duration-btn:hover {
+    background: var(--purple);
+    color: white;
+}
+
+.errand-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+
+.errand-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.errand-card-top h4 {
+    margin: 0 0 2px;
+    font-size: 14px;
+}
+
+.errand-card-top span {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.errand-card-fee {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--purple-dark);
+}
+
+.errand-card-route {
+    font-size: 12px;
+    color: #4b5563;
+    margin-bottom: 10px;
+}
+
+.errand-card-route i {
+    color: var(--purple);
+    width: 14px;
+}
+
+.errand-status-pill {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.errand-status-pill.available { background: #dbeafe; color: #1d4ed8; }
+.errand-status-pill.accepted,
+.errand-status-pill.in_progress { background: #fef3c7; color: #b45309; }
+.errand-status-pill.completed { background: #dcfce7; color: #15803d; }
+.errand-status-pill.cancelled,
+.errand-status-pill.failed { background: #fee2e2; color: #dc2626; }
+.errand-status-pill.pending { background: #f3f4f6; color: #6b7280; }
+
+.errand-accept-btn {
+    width: 100%;
+    border: none;
+    background: var(--purple);
+    color: white;
+    padding: 9px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.errand-accept-btn:hover {
+    background: var(--purple-dark);
+}
