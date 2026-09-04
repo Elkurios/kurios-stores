@@ -13937,6 +13937,19 @@ document.addEventListener("click", function (event) {
 
         window.location.hash = "profile";
 
+    } else if (action === "support") {
+
+        if (typeof switchToKChatView === "function") {
+            switchToKChatView();
+        }
+
+        const supportFilterPill =
+            document.querySelector('.chat-filter-pill[data-chat-filter="SUPPORT"]');
+
+        if (supportFilterPill) {
+            supportFilterPill.click();
+        }
+
     }
 
 });
