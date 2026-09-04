@@ -9490,3 +9490,53 @@ img {
     width: 14px;
     height: 14px;
 }
+
+
+/* Craft-themed wallet-topup-btn variant */
+
+.wallet-topup-btn.craft {
+    background: #db2777;
+    color: white;
+}
+
+.wallet-topup-btn.craft:hover {
+    background: #be185d;
+}
+
+.craft-offer-row {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.craft-offer-row-info strong {
+    display: block;
+    font-size: 13px;
+}
+
+.craft-offer-row-info span {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.craft-offer-approve-btn {
+    border: none;
+    background: #db2777;
+    color: white;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.craft-offer-approve-btn:hover {
+    background: #be185d;
+}
