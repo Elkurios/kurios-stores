@@ -3369,7 +3369,13 @@
 
         <div id="craftDashboardSection" style="display: none;">
 
-            <div class="form-section-label">Craft Errands Dashboard</div>
+            <div class="pool-sort-header">
+                <div class="form-section-label" style="margin: 0;">Craft Errands Dashboard</div>
+                <div class="pool-sort-pills">
+                    <button type="button" class="pool-sort-pill active" data-craft-sort="newest">Newest</button>
+                    <button type="button" class="pool-sort-pill" data-craft-sort="fee">Highest Fee</button>
+                </div>
+            </div>
 
             <p id="craftDashboardEmpty" class="reset-passcode-intro" style="display: none;">
                 No matching requests right now.
@@ -3446,7 +3452,13 @@
 
         <div id="errandPoolSection" style="display: none;">
 
-            <div class="form-section-label">Available Errands</div>
+            <div class="pool-sort-header">
+                <div class="form-section-label" style="margin: 0;">Available Errands</div>
+                <div class="pool-sort-pills">
+                    <button type="button" class="pool-sort-pill active" data-pool-sort="newest">Newest</button>
+                    <button type="button" class="pool-sort-pill" data-pool-sort="fee">Highest Fee</button>
+                </div>
+            </div>
 
             <p id="errandPoolEmpty" class="reset-passcode-intro" style="display: none;">
                 No available errands right now.
