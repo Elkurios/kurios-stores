@@ -3379,6 +3379,16 @@
 
             <div class="wallet-section-divider"></div>
 
+            <div class="form-section-label">My Craft Jobs</div>
+
+            <p id="myCraftJobsEmpty" class="reset-passcode-intro" style="display: none;">
+                No active craft jobs right now.
+            </p>
+
+            <div id="myCraftJobsList"></div>
+
+            <div class="wallet-section-divider"></div>
+
         </div>
 
 
@@ -4041,6 +4051,86 @@
     <!-- =====================================================
          CONFIRM DELIVERY MODAL (agent — enter OTP)
     ====================================================== -->
+
+    <!-- =====================================================
+         PAY FOR CRAFT SERVICE MODAL (student)
+    ====================================================== -->
+
+    <div class="modal-overlay" id="craftPayModal">
+
+        <div class="auth-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-receipt"></i>
+            </div>
+
+            <h2>Pay for Craft Service</h2>
+
+            <p id="craftPayAmount" style="text-align:center; font-size:20px; font-weight:800; color: var(--purple-dark); margin-bottom:16px;">
+                ₦0
+            </p>
+
+            <div id="craftPayModalStatus" class="otp-status-message"></div>
+
+            <button type="button" id="craftPayModalMonnifyBtn" class="auth-button" style="margin-bottom: 10px;">
+                <i class="fa-solid fa-credit-card"></i>
+                Pay with Monnify
+            </button>
+
+            <button type="button" id="craftPayModalOpayBtn" class="auth-button opay-button" style="margin-bottom: 10px;">
+                <i class="fa-solid fa-wallet"></i>
+                Pay with OPay
+            </button>
+
+            <button type="button" id="craftPayModalPaystackBtn" class="auth-button paystack-button">
+                <i class="fa-solid fa-credit-card"></i>
+                Pay with Paystack
+            </button>
+
+            <button type="button" class="modal-close-text-btn" id="craftPayModalCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         CONFIRM CRAFT COMPLETION MODAL (provider — enter OTP)
+    ====================================================== -->
+
+    <div class="modal-overlay" id="craftCompleteModal">
+
+        <div class="auth-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-key"></i>
+            </div>
+
+            <h2>Confirm Completion</h2>
+
+            <p style="text-align:center; color:#6b7280; font-size:13px; margin-bottom:16px;">
+                Ask the student for their 4-digit completion code.
+            </p>
+
+            <div id="craftCompleteStatus" class="otp-status-message"></div>
+
+            <div class="form-group">
+                <label for="craftCompleteOtpInput">Completion Code</label>
+                <input type="text" id="craftCompleteOtpInput" maxlength="4" inputmode="numeric" placeholder="0000" style="text-align:center; font-size:22px; letter-spacing:8px;">
+            </div>
+
+            <button type="button" class="auth-button" id="craftCompleteSubmitBtn">
+                Confirm Completion
+            </button>
+
+            <button type="button" class="modal-close-text-btn" id="craftCompleteCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
+
+
 
     <div class="modal-overlay" id="errandOtpModal">
 
