@@ -9540,3 +9540,26 @@ img {
 .craft-offer-approve-btn:hover {
     background: #be185d;
 }
+
+
+/* Rating stars */
+
+.rating-star-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 10px 0 18px;
+}
+
+.rating-star-btn {
+    border: none;
+    background: none;
+    font-size: 28px;
+    color: #e5e7eb;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.rating-star-btn.selected {
+    color: #f59e0b;
+}
