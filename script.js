@@ -6816,13 +6816,44 @@ showOtpVerificationScreen(
             const data =
                 await response.json();
 
-            if (data.success) {
+            let combined =
+                data.success ? data.notifications : [];
 
-                notifications = data.notifications;
+            const student =
+                typeof getLoggedInStudent === "function" ? getLoggedInStudent() : null;
 
-                renderNotifications();
+            if (student) {
+
+                try {
+
+                    const mineResponse =
+                        await fetch(API_URL + "/api/notifications/mine?studentId=" + student.id);
+
+                    const mineData =
+                        await mineResponse.json();
+
+                    if (mineData.success) {
+                        combined = combined.concat(mineData.notifications);
+                    }
+
+                } catch (personalError) {
+
+                    console.error(
+                        "Load personal notifications error:",
+                        personalError
+                    );
+
+                }
 
             }
+
+            combined.sort(function (a, b) {
+                return new Date(b.created_at) - new Date(a.created_at);
+            });
+
+            notifications = combined;
+
+            renderNotifications();
 
         } catch (error) {
 
@@ -17614,7 +17645,7 @@ async function setErrandMode(available, durationMinutes) {
 
 }
 
-async function loadErrandPool() {
+async function loadErrandPool(sort) {
 
     const student =
         getStoredStudent();
@@ -17628,8 +17659,11 @@ async function loadErrandPool() {
 
     try {
 
+        const sortParam =
+            sort === "fee" ? "&sort=fee" : "";
+
         const response =
-            await fetch(API_URL + "/api/errands/pool?studentId=" + student.id);
+            await fetch(API_URL + "/api/errands/pool?studentId=" + student.id + sortParam);
 
         const data = await response.json();
 
@@ -19743,7 +19777,7 @@ if (craftRequestSubmitBtn) {
 // CRAFT ERRANDS — PROVIDER DASHBOARD
 // =========================================================
 
-async function loadCraftDashboard() {
+async function loadCraftDashboard(sort) {
 
     const student =
         getStoredStudent();
@@ -19757,8 +19791,11 @@ async function loadCraftDashboard() {
 
     try {
 
+        const sortParam =
+            sort === "fee" ? "&sort=fee" : "";
+
         const response =
-            await fetch(API_URL + "/api/craft-requests/dashboard?studentId=" + student.id);
+            await fetch(API_URL + "/api/craft-requests/dashboard?studentId=" + student.id + sortParam);
 
         const data = await response.json();
 
@@ -21283,3 +21320,40 @@ if (errandRatingSubmitBtn) {
     });
 
 }
+
+
+// =========================================================
+// POOL SORT CONTROLS (errand pool + craft dashboard)
+// =========================================================
+
+document.querySelectorAll("[data-pool-sort]").forEach(function (pill) {
+
+    pill.addEventListener("click", function () {
+
+        document.querySelectorAll("[data-pool-sort]").forEach(function (p) {
+            p.classList.remove("active");
+        });
+
+        pill.classList.add("active");
+
+        loadErrandPool(pill.dataset.poolSort);
+
+    });
+
+});
+
+document.querySelectorAll("[data-craft-sort]").forEach(function (pill) {
+
+    pill.addEventListener("click", function () {
+
+        document.querySelectorAll("[data-craft-sort]").forEach(function (p) {
+            p.classList.remove("active");
+        });
+
+        pill.classList.add("active");
+
+        loadCraftDashboard(pill.dataset.craftSort);
+
+    });
+
+});
