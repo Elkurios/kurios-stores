@@ -6027,9 +6027,6 @@ showOtpVerificationScreen(
                         choiceEl.style.display = "block";
                     }
 
-                    const student =
-                        getStoredStudent();
-
                     if (student && typeof checkWalletBalanceForCheckout === "function") {
 
                         checkWalletBalanceForCheckout(
