@@ -398,7 +398,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 name: product.name,
 
-                price: Number(product.price),
+                price: Number(product.effective_price !== undefined ? product.effective_price : product.price),
 
                 quantity: 1
 
@@ -894,9 +894,22 @@ document.addEventListener("DOMContentLoaded", function () {
                     </span>` :
                     "";
 
+            const saleBadgeMarkup =
+                product.is_on_sale ?
+                    `<span class="product-sale-badge">SALE</span>` :
+                    "";
+
+            const priceMarkup =
+                product.is_on_sale ?
+                    `<span class="product-price-original">${formatMoney(product.price)}</span>
+                     <strong class="product-price-discounted">${formatMoney(product.effective_price)}</strong>` :
+                    `<strong>${formatMoney(product.price)}</strong>`;
+
             productCard.innerHTML = `
 
                 <div class="product-image">
+
+                    ${saleBadgeMarkup}
 
                     ${imageMarkup}
 
@@ -929,11 +942,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <div class="product-bottom">
 
 
-                        <strong>
-
-                            ${formatMoney(product.price)}
-
-                        </strong>
+                        ${priceMarkup}
 
 
                         <div style="display:flex; gap:6px;">
@@ -11274,6 +11283,25 @@ function openProductForm(product) {
     if (statusEl) statusEl.textContent = "";
     if (imageField) imageField.value = "";
 
+    const discountPriceField = document.getElementById("productDiscountPrice");
+    const discountStartField = document.getElementById("productDiscountStart");
+    const discountEndField = document.getElementById("productDiscountEnd");
+
+    function toDatetimeLocalValue(isoString) {
+
+        if (!isoString) return "";
+
+        const date = new Date(isoString);
+
+        if (isNaN(date.getTime())) return "";
+
+        const pad = function (n) { return String(n).padStart(2, "0"); };
+
+        return date.getFullYear() + "-" + pad(date.getMonth() + 1) + "-" + pad(date.getDate()) +
+            "T" + pad(date.getHours()) + ":" + pad(date.getMinutes());
+
+    }
+
     if (product) {
 
         if (formTitle) formTitle.textContent = "Edit product";
@@ -11283,6 +11311,9 @@ function openProductForm(product) {
         if (priceField) priceField.value = product.price || "";
         if (stockField) stockField.value = product.stock_quantity || 0;
         if (categoryField) categoryField.value = product.category || "";
+        if (discountPriceField) discountPriceField.value = product.discount_price || "";
+        if (discountStartField) discountStartField.value = toDatetimeLocalValue(product.discount_starts_at);
+        if (discountEndField) discountEndField.value = toDatetimeLocalValue(product.discount_ends_at);
 
     } else {
 
@@ -11293,6 +11324,9 @@ function openProductForm(product) {
         if (priceField) priceField.value = "";
         if (stockField) stockField.value = "";
         if (categoryField) categoryField.value = "";
+        if (discountPriceField) discountPriceField.value = "";
+        if (discountStartField) discountStartField.value = "";
+        if (discountEndField) discountEndField.value = "";
 
     }
 
@@ -11388,6 +11422,27 @@ if (saveProductButton) {
             formData.append(
                 "stockQuantity",
                 document.getElementById("productStock").value || "0"
+            );
+
+            const discountPrice =
+                document.getElementById("productDiscountPrice").value;
+
+            formData.append("discountPrice", discountPrice || "");
+
+            const discountStart =
+                document.getElementById("productDiscountStart").value;
+
+            formData.append(
+                "discountStartsAt",
+                discountStart ? new Date(discountStart).toISOString() : ""
+            );
+
+            const discountEnd =
+                document.getElementById("productDiscountEnd").value;
+
+            formData.append(
+                "discountEndsAt",
+                discountEnd ? new Date(discountEnd).toISOString() : ""
             );
 
             const imageInput = document.getElementById("productImageInput");
