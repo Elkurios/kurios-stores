@@ -17461,6 +17461,7 @@ async function loadErrandsPage() {
 
             if (craftData.success && craftData.isRegistered) {
                 loadCraftDashboard();
+                loadMyCraftJobs();
             }
 
         }
@@ -19863,6 +19864,7 @@ async function submitCraftOffer(requestId, price, btn) {
         }
 
         loadCraftDashboard();
+        loadMyCraftJobs();
 
     } catch (error) {
 
@@ -19996,6 +19998,21 @@ async function loadMyCraftRequests() {
                         </button>` :
                         "";
 
+                const payButton =
+                    request.status === "assigned" && request.payment_status !== "paid" ?
+                        `<button type="button" class="errand-accept-btn" data-craft-pay-id="${request.id}" data-craft-pay-amount="${request.agreed_price}">
+                            Pay ${priceLabel}
+                        </button>` :
+                        "";
+
+                const otpMarkup =
+                    request.assigned_provider_id && ["assigned", "in_progress"].includes(request.status) ?
+                        `<div class="errand-otp-display">
+                            <span>Completion code — give this to your provider</span>
+                            <strong>${request.delivery_otp}</strong>
+                        </div>` :
+                        "";
+
                 return `
                     <div class="errand-card">
                         <div class="errand-card-top">
@@ -20009,7 +20026,9 @@ async function loadMyCraftRequests() {
                             <div><i class="fa-solid fa-location-dot"></i> ${escapeChatTextGlobal(request.location)}</div>
                         </div>
                         <div class="errand-card-fee" style="margin-bottom:10px;">${priceLabel}</div>
+                        ${otpMarkup}
                         ${offersButton}
+                        ${payButton}
                     </div>
                 `;
 
@@ -20030,12 +20049,21 @@ if (myCraftRequestsListEl) {
 
     myCraftRequestsListEl.addEventListener("click", function (event) {
 
-        const btn =
+        const offersBtn =
             event.target.closest("[data-view-offers-id]");
 
-        if (!btn) return;
+        if (offersBtn) {
+            openCraftOffersModal(offersBtn.dataset.viewOffersId);
+            return;
+        }
 
-        openCraftOffersModal(btn.dataset.viewOffersId);
+        const payBtn =
+            event.target.closest("[data-craft-pay-id]");
+
+        if (payBtn) {
+            openCraftPayModal(payBtn.dataset.craftPayId, payBtn.dataset.craftPayAmount);
+            return;
+        }
 
     });
 
@@ -20315,3 +20343,514 @@ async function messageSellerAboutOrder(orderId) {
     }
 
 }
+
+
+// =========================================================
+// CRAFT ERRANDS — MY JOBS (as the assigned provider)
+// =========================================================
+
+let __kuriosCraftCompleteRequestId = null;
+
+async function loadMyCraftJobs() {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    const listEl = document.getElementById("myCraftJobsList");
+    const emptyEl = document.getElementById("myCraftJobsEmpty");
+
+    if (!listEl) return;
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/craft-requests/my-jobs?studentId=" + student.id);
+
+        const data = await response.json();
+
+        if (!data.success || data.requests.length === 0) {
+
+            listEl.innerHTML = "";
+            if (emptyEl) emptyEl.style.display = "block";
+            return;
+
+        }
+
+        if (emptyEl) emptyEl.style.display = "none";
+
+        listEl.innerHTML =
+            data.requests.map(function (request) {
+
+                const priceLabel =
+                    typeof formatMoney === "function" ? formatMoney(request.agreed_price) : "₦" + request.agreed_price;
+
+                let actionMarkup = "";
+
+                if (request.status === "assigned" && request.payment_status !== "paid") {
+
+                    actionMarkup = `<p class="errand-waiting-note">Waiting on the student to pay before you can start.</p>`;
+
+                } else if (request.status === "assigned" && request.payment_status === "paid") {
+
+                    actionMarkup = `<button type="button" class="errand-accept-btn" data-craft-start-id="${request.id}">Start Service</button>`;
+
+                } else if (request.status === "in_progress") {
+
+                    actionMarkup = `<button type="button" class="errand-accept-btn" data-craft-complete-id="${request.id}">Confirm Completion (Enter Code)</button>`;
+
+                }
+
+                return `
+                    <div class="errand-card">
+                        <div class="errand-card-top">
+                            <div>
+                                <h4>${escapeChatTextGlobal(request.skill)}</h4>
+                                <span>${request.request_code}</span>
+                            </div>
+                            <span class="errand-status-pill ${request.status}">${request.status.replace(/_/g, " ")}</span>
+                        </div>
+                        <div class="errand-card-route">
+                            <div><i class="fa-solid fa-location-dot"></i> ${escapeChatTextGlobal(request.location)}</div>
+                        </div>
+                        <div class="errand-card-fee" style="margin-bottom:10px;">${priceLabel}</div>
+                        ${actionMarkup}
+                    </div>
+                `;
+
+            }).join("");
+
+    } catch (error) {
+
+        console.error("Load my craft jobs error:", error);
+
+    }
+
+}
+
+const myCraftJobsListEl =
+    document.getElementById("myCraftJobsList");
+
+if (myCraftJobsListEl) {
+
+    myCraftJobsListEl.addEventListener("click", function (event) {
+
+        const startBtn = event.target.closest("[data-craft-start-id]");
+        const completeBtn = event.target.closest("[data-craft-complete-id]");
+
+        if (startBtn) {
+            startCraftService(startBtn.dataset.craftStartId, startBtn);
+            return;
+        }
+
+        if (completeBtn) {
+            openCraftCompleteModal(completeBtn.dataset.craftCompleteId);
+            return;
+        }
+
+    });
+
+}
+
+async function startCraftService(requestId, btn) {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Starting...";
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/craft-requests/" + requestId + "/start",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentId: student.id })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            if (typeof showMessage === "function") {
+                showMessage(data.message || "Could not start this service.", "error");
+            }
+
+        }
+
+        loadMyCraftJobs();
+
+    } catch (error) {
+
+        console.error("Start craft service error:", error);
+
+        if (typeof showMessage === "function") {
+            showMessage("Unable to connect to Kurios Stores server.", "error");
+        }
+
+    }
+
+}
+
+function openCraftCompleteModal(requestId) {
+
+    __kuriosCraftCompleteRequestId = requestId;
+
+    document.getElementById("craftCompleteOtpInput").value = "";
+
+    const statusEl = document.getElementById("craftCompleteStatus");
+    if (statusEl) statusEl.textContent = "";
+
+    const modal = document.getElementById("craftCompleteModal");
+    if (modal) modal.classList.add("open");
+
+}
+
+const craftCompleteCancelBtn =
+    document.getElementById("craftCompleteCancelBtn");
+
+if (craftCompleteCancelBtn) {
+
+    craftCompleteCancelBtn.addEventListener("click", function () {
+
+        const modal = document.getElementById("craftCompleteModal");
+        if (modal) modal.classList.remove("open");
+
+        __kuriosCraftCompleteRequestId = null;
+
+    });
+
+}
+
+const craftCompleteSubmitBtn =
+    document.getElementById("craftCompleteSubmitBtn");
+
+if (craftCompleteSubmitBtn) {
+
+    craftCompleteSubmitBtn.addEventListener("click", async function () {
+
+        const statusEl =
+            document.getElementById("craftCompleteStatus");
+
+        const otp =
+            document.getElementById("craftCompleteOtpInput").value.trim();
+
+        if (!otp || otp.length !== 4) {
+
+            if (statusEl) statusEl.textContent = "Please enter the 4-digit code.";
+            return;
+
+        }
+
+        const student =
+            getStoredStudent();
+
+        if (!student || !__kuriosCraftCompleteRequestId) return;
+
+        craftCompleteSubmitBtn.disabled = true;
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/craft-requests/" + __kuriosCraftCompleteRequestId + "/confirm-completion",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ studentId: student.id, otp: otp })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (statusEl) statusEl.textContent = data.message || "That code doesn't match.";
+                craftCompleteSubmitBtn.disabled = false;
+                return;
+
+            }
+
+            const modal = document.getElementById("craftCompleteModal");
+            if (modal) modal.classList.remove("open");
+
+            __kuriosCraftCompleteRequestId = null;
+
+            if (typeof showMessage === "function") {
+
+                showMessage(
+                    "Job completed! ₦" + Number(data.released).toLocaleString() + " has been added to your wallet."
+                );
+
+            }
+
+            loadMyCraftJobs();
+
+        } catch (error) {
+
+            console.error("Confirm craft completion error:", error);
+
+            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+        } finally {
+
+            craftCompleteSubmitBtn.disabled = false;
+
+        }
+
+    });
+
+}
+
+
+// =========================================================
+// CRAFT ERRANDS — PAY (student)
+// =========================================================
+
+let __kuriosCraftPayRequestId = null;
+
+function openCraftPayModal(requestId, amount) {
+
+    __kuriosCraftPayRequestId = requestId;
+
+    const amountEl =
+        document.getElementById("craftPayAmount");
+
+    if (amountEl) {
+
+        amountEl.textContent =
+            typeof formatMoney === "function" ? formatMoney(amount) : "₦" + amount;
+
+    }
+
+    const statusEl = document.getElementById("craftPayModalStatus");
+    if (statusEl) statusEl.textContent = "";
+
+    const modal = document.getElementById("craftPayModal");
+    if (modal) modal.classList.add("open");
+
+}
+
+const craftPayModalCancelBtn =
+    document.getElementById("craftPayModalCancelBtn");
+
+if (craftPayModalCancelBtn) {
+
+    craftPayModalCancelBtn.addEventListener("click", function () {
+
+        const modal = document.getElementById("craftPayModal");
+        if (modal) modal.classList.remove("open");
+
+        __kuriosCraftPayRequestId = null;
+
+    });
+
+}
+
+async function payCraftRequestWith(gateway) {
+
+    const statusEl =
+        document.getElementById("craftPayModalStatus");
+
+    if (!__kuriosCraftPayRequestId) return;
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    if (statusEl) statusEl.textContent = "Redirecting to " + gateway + "...";
+
+    const returnUrl =
+        window.location.origin + "/#errands";
+
+    try {
+
+        if (gateway === "monnify") {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/craft-requests/" + __kuriosCraftPayRequestId + "/pay/monnify",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ studentId: student.id })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success || typeof MonnifySDK === "undefined" || !data.apiKey) {
+
+                if (statusEl) {
+
+                    statusEl.textContent =
+                        (!data.success && data.message) ||
+                        "Monnify is not fully configured yet. Try OPay or Paystack instead.";
+
+                }
+
+                return;
+
+            }
+
+            const modal = document.getElementById("craftPayModal");
+            if (modal) modal.classList.remove("open");
+
+            MonnifySDK.initialize({
+
+                amount: data.amount,
+                currency: "NGN",
+                reference: data.paymentReference,
+                customerFullName: `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                customerEmail: student.email,
+                apiKey: data.apiKey,
+                contractCode: data.contractCode,
+                paymentDescription: "Kurios Stores Craft Errand payment",
+
+                onComplete: async function () {
+
+                    await fetch(
+                        API_URL + "/api/craft-requests/verify",
+                        {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ paymentReference: data.paymentReference })
+                        }
+                    );
+
+                    if (typeof showMessage === "function") {
+                        showMessage("Payment confirmed! Your provider can now start.");
+                    }
+
+                    loadMyCraftRequests();
+
+                },
+
+                onClose: function () {}
+
+            });
+
+            return;
+
+        }
+
+        const endpoint =
+            "/api/craft-requests/" + __kuriosCraftPayRequestId + "/pay/" + gateway;
+
+        const response =
+            await fetch(
+                API_URL + endpoint,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        studentId: student.id,
+                        returnUrl: returnUrl,
+                        customerName: `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                        customerEmail: student.email
+                    })
+                }
+            );
+
+        const data = await response.json();
+
+        const redirectUrl =
+            data.cashierUrl || data.authorizationUrl;
+
+        if (!data.success || !redirectUrl) {
+
+            if (statusEl) statusEl.textContent = data.message || ("Could not start " + gateway + " checkout.");
+            return;
+
+        }
+
+        localStorage.setItem("kuriosPendingCraftRequestRef", data.paymentReference || "");
+
+        window.location.href = redirectUrl;
+
+    } catch (error) {
+
+        console.error("Craft request payment error:", error);
+
+        if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+    }
+
+}
+
+["craftPayModalMonnifyBtn", "craftPayModalOpayBtn", "craftPayModalPaystackBtn"].forEach(function (id) {
+
+    const btn = document.getElementById(id);
+
+    if (btn) {
+
+        btn.addEventListener("click", function () {
+
+            const gateway =
+                id === "craftPayModalMonnifyBtn" ? "monnify" :
+                (id === "craftPayModalOpayBtn" ? "opay" : "paystack");
+
+            payCraftRequestWith(gateway);
+
+        });
+
+    }
+
+});
+
+// Resume verification if returning from OPay/Paystack's
+// hosted checkout page.
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const pendingCraftRequestRef =
+        localStorage.getItem("kuriosPendingCraftRequestRef");
+
+    if (pendingCraftRequestRef) {
+
+        localStorage.removeItem("kuriosPendingCraftRequestRef");
+
+        fetch(
+            API_URL + "/api/craft-requests/verify",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ paymentReference: pendingCraftRequestRef })
+            }
+        ).then(function (response) {
+
+            return response.json();
+
+        }).then(function (data) {
+
+            if (typeof showMessage === "function") {
+
+                showMessage(
+                    data.success ?
+                        "Payment confirmed! Your provider can now start." :
+                        (data.message || "We couldn't confirm that payment yet.")
+                );
+
+            }
+
+            if (typeof loadMyCraftRequests === "function") {
+                loadMyCraftRequests();
+            }
+
+        }).catch(function (error) {
+            console.error("Resume craft request verify error:", error);
+        });
+
+    }
+
+});
