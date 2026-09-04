@@ -6486,6 +6486,31 @@ img {
     margin: 2px 0;
 }
 
+.product-sale-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    z-index: 2;
+}
+
+.product-price-original {
+    display: block;
+    font-size: 11px;
+    color: #9ca3af;
+    text-decoration: line-through;
+}
+
+.product-price-discounted {
+    color: #ef4444;
+}
+
 .product-rating i {
     color: #f59e0b;
     font-size: 11px;
