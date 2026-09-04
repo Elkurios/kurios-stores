@@ -6831,7 +6831,7 @@ showOtpVerificationScreen(
 
     function hideAllFullPages() {
 
-        ["sellerPage", "storefrontPage", "wishlistPage", "walletPage", "chatPage", "shopPage"]
+        ["sellerPage", "storefrontPage", "wishlistPage", "walletPage", "chatPage", "shopPage", "errandsPage"]
             .forEach(function (id) {
 
                 const el = document.getElementById(id);
@@ -7057,6 +7057,18 @@ showOtpVerificationScreen(
 
             if (typeof loadWishlistPage === "function") {
                 loadWishlistPage();
+            }
+
+            return;
+
+        }
+
+        if (hash === "#errands") {
+
+            showSimplePage("errandsPage");
+
+            if (typeof loadErrandsPage === "function") {
+                loadErrandsPage();
             }
 
             return;
@@ -13925,6 +13937,10 @@ document.addEventListener("click", function (event) {
 
         window.location.hash = "orders";
 
+    } else if (action === "errands") {
+
+        window.location.hash = "errands";
+
     } else if (action === "rewards") {
 
         window.location.hash = "rewards";
@@ -17337,3 +17353,722 @@ if (reportSubmitBtn) {
     });
 
 }
+
+
+// =========================================================
+// ERRANDS
+// =========================================================
+
+let __kuriosErrandModeOn = false;
+let __kuriosErrandPaymentReference = null;
+
+async function loadErrandsPage() {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/students/errand-mode?studentId=" + student.id);
+
+        const data = await response.json();
+
+        if (data.success) {
+            updateErrandModeUI(data.available);
+        }
+
+    } catch (error) {
+
+        console.error("Load errand mode status error:", error);
+
+    }
+
+    loadMyErrands();
+
+}
+
+function updateErrandModeUI(isOn) {
+
+    __kuriosErrandModeOn = isOn;
+
+    const dot = document.getElementById("errandModeStatusDot");
+    const text = document.getElementById("errandModeStatusText");
+    const sub = document.getElementById("errandModeStatusSub");
+    const btn = document.getElementById("errandModeToggleBtn");
+    const poolSection = document.getElementById("errandPoolSection");
+    const durationChoice = document.getElementById("errandDurationChoice");
+
+    if (dot) dot.classList.toggle("active", isOn);
+
+    if (text) {
+        text.textContent = isOn ? "You're available" : "You're unavailable";
+    }
+
+    if (sub) {
+
+        sub.textContent = isOn ?
+            "You can see and accept available errands." :
+            "Turn on Errand Mode to see and accept errands.";
+
+    }
+
+    if (btn) {
+
+        btn.textContent = isOn ? "Go Unavailable" : "Go Available";
+        btn.classList.toggle("on", isOn);
+
+    }
+
+    if (poolSection) {
+        poolSection.style.display = isOn ? "block" : "none";
+    }
+
+    if (durationChoice && isOn) {
+        durationChoice.style.display = "none";
+    }
+
+}
+
+const errandModeToggleBtn =
+    document.getElementById("errandModeToggleBtn");
+
+if (errandModeToggleBtn) {
+
+    errandModeToggleBtn.addEventListener("click", async function () {
+
+        if (__kuriosErrandModeOn) {
+
+            await setErrandMode(false, null);
+            return;
+
+        }
+
+        const durationChoice =
+            document.getElementById("errandDurationChoice");
+
+        if (durationChoice) {
+
+            durationChoice.style.display =
+                durationChoice.style.display === "none" ? "block" : "none";
+
+        }
+
+    });
+
+}
+
+document.querySelectorAll(".errand-duration-btn").forEach(function (btn) {
+
+    btn.addEventListener("click", function () {
+
+        const minutes =
+            btn.dataset.minutes;
+
+        setErrandMode(true, minutes || null);
+
+    });
+
+});
+
+async function setErrandMode(available, durationMinutes) {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/students/errand-mode",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        studentId: student.id,
+                        available: available,
+                        durationMinutes: durationMinutes
+                    })
+                }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            if (typeof showMessage === "function") {
+                showMessage(data.message || "Could not update Errand Mode.", "error");
+            }
+
+            return;
+
+        }
+
+        updateErrandModeUI(available);
+
+        if (available) {
+            loadErrandPool();
+        }
+
+    } catch (error) {
+
+        console.error("Set errand mode error:", error);
+
+        if (typeof showMessage === "function") {
+            showMessage("Unable to connect to Kurios Stores server.", "error");
+        }
+
+    }
+
+}
+
+async function loadErrandPool() {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    const listEl = document.getElementById("errandPoolList");
+    const emptyEl = document.getElementById("errandPoolEmpty");
+
+    if (!listEl) return;
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/errands/pool?studentId=" + student.id);
+
+        const data = await response.json();
+
+        if (!data.success || data.errands.length === 0) {
+
+            listEl.innerHTML = "";
+            if (emptyEl) emptyEl.style.display = "block";
+            return;
+
+        }
+
+        if (emptyEl) emptyEl.style.display = "none";
+
+        listEl.innerHTML =
+            data.errands.map(function (errand) {
+
+                return `
+                    <div class="errand-card">
+                        <div class="errand-card-top">
+                            <div>
+                                <h4>${escapeChatTextGlobal(errand.title)}</h4>
+                                <span>${errand.errand_code}</span>
+                            </div>
+                            <div class="errand-card-fee">${typeof formatMoney === "function" ? formatMoney(errand.errand_fee) : "₦" + errand.errand_fee}</div>
+                        </div>
+                        <div class="errand-card-route">
+                            <div><i class="fa-solid fa-location-dot"></i> ${escapeChatTextGlobal(errand.pickup_location)}</div>
+                            <div><i class="fa-solid fa-flag-checkered"></i> ${escapeChatTextGlobal(errand.destination)}</div>
+                        </div>
+                        <button type="button" class="errand-accept-btn" data-errand-id="${errand.id}">Accept Errand</button>
+                    </div>
+                `;
+
+            }).join("");
+
+    } catch (error) {
+
+        console.error("Load errand pool error:", error);
+
+    }
+
+}
+
+const errandPoolListEl =
+    document.getElementById("errandPoolList");
+
+if (errandPoolListEl) {
+
+    errandPoolListEl.addEventListener("click", async function (event) {
+
+        const btn =
+            event.target.closest("[data-errand-id]");
+
+        if (!btn) return;
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        btn.disabled = true;
+        btn.textContent = "Accepting...";
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/errands/" + btn.dataset.errandId + "/accept",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ studentId: student.id })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (typeof showMessage === "function") {
+                    showMessage(data.message || "Could not accept this errand.", "error");
+                }
+
+                loadErrandPool();
+                return;
+
+            }
+
+            if (typeof showMessage === "function") {
+                showMessage("Errand accepted! Opening chat with the requester.");
+            }
+
+            loadErrandPool();
+            loadMyErrands();
+
+            if (data.errand.conversation_id && typeof openChatWith === "function") {
+
+                window.location.hash = "chat";
+
+                setTimeout(function () {
+
+                    openChatWith(
+                        data.errand.student_id,
+                        "Errand requester",
+                        data.errand.conversation_id,
+                        null
+                    );
+
+                }, 400);
+
+            }
+
+        } catch (error) {
+
+            console.error("Accept errand error:", error);
+
+            if (typeof showMessage === "function") {
+                showMessage("Unable to connect to Kurios Stores server.", "error");
+            }
+
+            btn.disabled = false;
+            btn.textContent = "Accept Errand";
+
+        }
+
+    });
+
+}
+
+async function loadMyErrands() {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    const listEl = document.getElementById("myErrandsList");
+    const emptyEl = document.getElementById("myErrandsEmpty");
+
+    if (!listEl) return;
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/errands/my?studentId=" + student.id);
+
+        const data = await response.json();
+
+        if (!data.success || data.errands.length === 0) {
+
+            listEl.innerHTML = "";
+            if (emptyEl) emptyEl.style.display = "block";
+            return;
+
+        }
+
+        if (emptyEl) emptyEl.style.display = "none";
+
+        listEl.innerHTML =
+            data.errands.map(function (errand) {
+
+                return `
+                    <div class="errand-card">
+                        <div class="errand-card-top">
+                            <div>
+                                <h4>${escapeChatTextGlobal(errand.title)}</h4>
+                                <span>${errand.errand_code}</span>
+                            </div>
+                            <span class="errand-status-pill ${errand.status}">${errand.status.replace(/_/g, " ")}</span>
+                        </div>
+                        <div class="errand-card-route">
+                            <div><i class="fa-solid fa-location-dot"></i> ${escapeChatTextGlobal(errand.pickup_location)}</div>
+                            <div><i class="fa-solid fa-flag-checkered"></i> ${escapeChatTextGlobal(errand.destination)}</div>
+                        </div>
+                    </div>
+                `;
+
+            }).join("");
+
+    } catch (error) {
+
+        console.error("Load my errands error:", error);
+
+    }
+
+}
+
+const openErrandRequestButton =
+    document.getElementById("openErrandRequestButton");
+
+if (openErrandRequestButton) {
+
+    openErrandRequestButton.addEventListener("click", function () {
+
+        document.getElementById("errandRequestStep").style.display = "block";
+        document.getElementById("errandPaymentStep").style.display = "none";
+
+        ["errandTitleInput", "errandPickupInput", "errandDestinationInput", "errandDescriptionInput", "errandItemCostInput", "errandFeeInput"].forEach(function (id) {
+
+            const el = document.getElementById(id);
+            if (el) el.value = "";
+
+        });
+
+        const statusEl = document.getElementById("errandRequestStatus");
+        if (statusEl) statusEl.textContent = "";
+
+        const modal = document.getElementById("errandRequestModal");
+        if (modal) modal.classList.add("open");
+
+    });
+
+}
+
+const errandRequestCancelBtn =
+    document.getElementById("errandRequestCancelBtn");
+
+if (errandRequestCancelBtn) {
+
+    errandRequestCancelBtn.addEventListener("click", function () {
+
+        const modal = document.getElementById("errandRequestModal");
+        if (modal) modal.classList.remove("open");
+
+        __kuriosErrandPaymentReference = null;
+
+    });
+
+}
+
+const errandRequestContinueBtn =
+    document.getElementById("errandRequestContinueBtn");
+
+if (errandRequestContinueBtn) {
+
+    errandRequestContinueBtn.addEventListener("click", async function () {
+
+        const statusEl =
+            document.getElementById("errandRequestStatus");
+
+        const title =
+            document.getElementById("errandTitleInput").value.trim();
+
+        const pickup =
+            document.getElementById("errandPickupInput").value.trim();
+
+        const destination =
+            document.getElementById("errandDestinationInput").value.trim();
+
+        const description =
+            document.getElementById("errandDescriptionInput").value.trim();
+
+        const itemCost =
+            document.getElementById("errandItemCostInput").value;
+
+        const errandFee =
+            document.getElementById("errandFeeInput").value;
+
+        if (!title || !pickup || !destination || !errandFee) {
+
+            if (statusEl) statusEl.textContent = "Please fill in all required fields.";
+            return;
+
+        }
+
+        if (Number(errandFee) < 100) {
+
+            if (statusEl) statusEl.textContent = "Errand fee must be at least ₦100.";
+            return;
+
+        }
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        errandRequestContinueBtn.disabled = true;
+
+        if (statusEl) statusEl.textContent = "";
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/errands/create",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            studentId: student.id,
+                            title: title,
+                            pickupLocation: pickup,
+                            destination: destination,
+                            description: description,
+                            itemCost: itemCost || 0,
+                            errandFee: errandFee
+                        })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (statusEl) statusEl.textContent = data.message || "Could not create your errand request.";
+                errandRequestContinueBtn.disabled = false;
+                return;
+
+            }
+
+            __kuriosErrandPaymentReference = data.errand.payment_reference;
+
+            document.getElementById("errandRequestStep").style.display = "none";
+            document.getElementById("errandPaymentStep").style.display = "block";
+
+        } catch (error) {
+
+            console.error("Create errand error:", error);
+
+            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+        } finally {
+
+            errandRequestContinueBtn.disabled = false;
+
+        }
+
+    });
+
+}
+
+async function payErrandWith(gateway) {
+
+    const statusEl =
+        document.getElementById("errandPaymentStatus");
+
+    if (!__kuriosErrandPaymentReference) return;
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    if (statusEl) statusEl.textContent = "Redirecting to " + gateway + "...";
+
+    const returnUrl =
+        window.location.origin + "/#errands";
+
+    try {
+
+        if (gateway === "monnify") {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/errands/pay/monnify",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ paymentReference: __kuriosErrandPaymentReference })
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success || typeof MonnifySDK === "undefined" || !data.apiKey) {
+
+                if (statusEl) {
+
+                    statusEl.textContent =
+                        (!data.success && data.message) ||
+                        "Monnify is not fully configured yet. Try OPay or Paystack instead.";
+
+                }
+
+                return;
+
+            }
+
+            const modal = document.getElementById("errandRequestModal");
+            if (modal) modal.classList.remove("open");
+
+            MonnifySDK.initialize({
+
+                amount: data.amount,
+                currency: "NGN",
+                reference: __kuriosErrandPaymentReference,
+                customerFullName: `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                customerEmail: student.email,
+                apiKey: data.apiKey,
+                contractCode: data.contractCode,
+                paymentDescription: "Kurios Stores errand",
+
+                onComplete: async function () {
+
+                    await fetch(
+                        API_URL + "/api/errands/verify",
+                        {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ paymentReference: __kuriosErrandPaymentReference })
+                        }
+                    );
+
+                    if (typeof showMessage === "function") {
+                        showMessage("Payment confirmed — your errand is now available to agents.");
+                    }
+
+                    loadMyErrands();
+
+                },
+
+                onClose: function () {}
+
+            });
+
+            return;
+
+        }
+
+        const endpoint =
+            gateway === "opay" ? "/api/errands/pay/opay" : "/api/errands/pay/paystack";
+
+        const response =
+            await fetch(
+                API_URL + endpoint,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        paymentReference: __kuriosErrandPaymentReference,
+                        returnUrl: returnUrl,
+                        customerName: `${student.first_name || ""} ${student.last_name || ""}`.trim(),
+                        customerEmail: student.email
+                    })
+                }
+            );
+
+        const data = await response.json();
+
+        const redirectUrl =
+            data.cashierUrl || data.authorizationUrl;
+
+        if (!data.success || !redirectUrl) {
+
+            if (statusEl) statusEl.textContent = data.message || ("Could not start " + gateway + " checkout.");
+            return;
+
+        }
+
+        localStorage.setItem("kuriosPendingErrandRef", __kuriosErrandPaymentReference);
+
+        window.location.href = redirectUrl;
+
+    } catch (error) {
+
+        console.error("Errand payment error:", error);
+
+        if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+    }
+
+}
+
+["errandPayMonnifyBtn", "errandPayOpayBtn", "errandPayPaystackBtn"].forEach(function (id) {
+
+    const btn = document.getElementById(id);
+
+    if (btn) {
+
+        btn.addEventListener("click", function () {
+
+            const gateway =
+                id === "errandPayMonnifyBtn" ? "monnify" :
+                (id === "errandPayOpayBtn" ? "opay" : "paystack");
+
+            payErrandWith(gateway);
+
+        });
+
+    }
+
+});
+
+// Resume errand payment verification if returning from
+// OPay/Paystack's hosted checkout page.
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const pendingErrandRef =
+        localStorage.getItem("kuriosPendingErrandRef");
+
+    if (pendingErrandRef) {
+
+        localStorage.removeItem("kuriosPendingErrandRef");
+
+        fetch(
+            API_URL + "/api/errands/verify",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ paymentReference: pendingErrandRef })
+            }
+        ).then(function (response) {
+
+            return response.json();
+
+        }).then(function (data) {
+
+            if (typeof showMessage === "function") {
+
+                showMessage(
+                    data.success ?
+                        "Payment confirmed — your errand is now available to agents." :
+                        (data.message || "We couldn't confirm that payment yet.")
+                );
+
+            }
+
+            if (typeof loadMyErrands === "function") {
+                loadMyErrands();
+            }
+
+        }).catch(function (error) {
+            console.error("Resume errand verify error:", error);
+        });
+
+    }
+
+});
