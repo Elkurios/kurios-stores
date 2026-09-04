@@ -4099,6 +4099,47 @@
          CONFIRM CRAFT COMPLETION MODAL (provider — enter OTP)
     ====================================================== -->
 
+    <!-- =====================================================
+         RATE YOUR AGENT/PROVIDER MODAL (shared)
+    ====================================================== -->
+
+    <div class="modal-overlay" id="errandRatingModal">
+
+        <div class="auth-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-star"></i>
+            </div>
+
+            <h2 id="errandRatingModalTitle">Rate Your Agent</h2>
+
+            <div id="errandRatingStatus" class="otp-status-message"></div>
+
+            <div class="rating-star-row" id="errandRatingStars">
+                <button type="button" class="rating-star-btn" data-rating-value="1"><i class="fa-solid fa-star"></i></button>
+                <button type="button" class="rating-star-btn" data-rating-value="2"><i class="fa-solid fa-star"></i></button>
+                <button type="button" class="rating-star-btn" data-rating-value="3"><i class="fa-solid fa-star"></i></button>
+                <button type="button" class="rating-star-btn" data-rating-value="4"><i class="fa-solid fa-star"></i></button>
+                <button type="button" class="rating-star-btn" data-rating-value="5"><i class="fa-solid fa-star"></i></button>
+            </div>
+
+            <div class="form-group">
+                <label for="errandRatingComment">Comment (optional)</label>
+                <textarea id="errandRatingComment" rows="2" placeholder="How was your experience?"></textarea>
+            </div>
+
+            <button type="button" class="auth-button" id="errandRatingSubmitBtn">
+                Submit Rating
+            </button>
+
+            <button type="button" class="modal-close-text-btn" id="errandRatingCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
+
+
+
     <div class="modal-overlay" id="craftCompleteModal">
 
         <div class="auth-modal">
