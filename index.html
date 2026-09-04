@@ -1181,10 +1181,9 @@
                             Orders
                         </button>
 
-                        <button type="button" class="chat-app-nav-item soon" data-chat-sidebar-action="soon">
+                        <button type="button" class="chat-app-nav-item" data-chat-sidebar-action="errands">
                             <i class="fa-solid fa-motorcycle"></i>
                             Errands
-                            <span class="soon-pill">Soon</span>
                         </button>
 
                         <button type="button" class="chat-app-nav-item soon" data-chat-sidebar-action="soon">
@@ -3306,6 +3305,97 @@
 
 
     <!-- =====================================================
+         ERRANDS — FULL PAGE
+    ====================================================== -->
+
+    <section
+        class="full-page-section"
+        id="errandsPage"
+        style="display: none;"
+    >
+
+        <div class="full-page-back-row">
+            <a href="#" class="full-page-back-link page-back-link">
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to Kurios Stores
+            </a>
+        </div>
+
+        <div class="profile-panel-header">
+            <div>
+                <h2>Errands</h2>
+                <p>Request a campus errand, or run one yourself</p>
+            </div>
+        </div>
+
+        <!-- ERRAND MODE -->
+
+        <div class="errand-mode-card" id="errandModeCard">
+
+            <div class="errand-mode-status">
+                <span id="errandModeStatusDot" class="errand-mode-dot"></span>
+                <div>
+                    <strong id="errandModeStatusText">You're unavailable</strong>
+                    <p id="errandModeStatusSub">Turn on Errand Mode to see and accept errands.</p>
+                </div>
+            </div>
+
+            <button type="button" id="errandModeToggleBtn" class="errand-mode-toggle-btn">
+                Go Available
+            </button>
+
+        </div>
+
+        <div id="errandDurationChoice" class="errand-duration-choice" style="display: none;">
+
+            <p>Available for:</p>
+
+            <div class="errand-duration-options">
+                <button type="button" class="errand-duration-btn" data-minutes="30">30 min</button>
+                <button type="button" class="errand-duration-btn" data-minutes="60">1 hour</button>
+                <button type="button" class="errand-duration-btn" data-minutes="120">2 hours</button>
+                <button type="button" class="errand-duration-btn" data-minutes="">Until I turn it off</button>
+            </div>
+
+        </div>
+
+
+        <button type="button" id="openErrandRequestButton" class="wallet-topup-btn" style="margin: 18px 0;">
+            <i class="fa-solid fa-plus"></i> Request an Errand
+        </button>
+
+
+        <!-- AVAILABLE POOL (only shown when Errand Mode is on) -->
+
+        <div id="errandPoolSection" style="display: none;">
+
+            <div class="form-section-label">Available Errands</div>
+
+            <p id="errandPoolEmpty" class="reset-passcode-intro" style="display: none;">
+                No available errands right now.
+            </p>
+
+            <div id="errandPoolList"></div>
+
+        </div>
+
+
+        <div class="wallet-section-divider"></div>
+
+
+        <div class="form-section-label">My Errand Requests</div>
+
+        <p id="myErrandsEmpty" class="reset-passcode-intro" style="display: none;">
+            You haven't requested an errand yet.
+        </p>
+
+        <div id="myErrandsList"></div>
+
+    </section>
+
+
+
+    <!-- =====================================================
          WALLET — FULL PAGE
     ====================================================== -->
 
@@ -3495,6 +3585,97 @@
     <!-- =====================================================
          REPORT STUDENT MODAL
     ====================================================== -->
+
+    <!-- =====================================================
+         REQUEST AN ERRAND MODAL
+    ====================================================== -->
+
+    <div class="modal-overlay" id="errandRequestModal">
+
+        <div class="auth-modal">
+
+            <div class="auth-icon">
+                <i class="fa-solid fa-motorcycle"></i>
+            </div>
+
+            <h2>Request an Errand</h2>
+
+            <div id="errandRequestStep">
+
+                <div id="errandRequestStatus" class="otp-status-message"></div>
+
+                <div class="form-group">
+                    <label for="errandTitleInput">What do you need done?</label>
+                    <input type="text" id="errandTitleInput" placeholder="e.g. Package Pickup">
+                </div>
+
+                <div class="form-group">
+                    <label for="errandPickupInput">Pickup Location</label>
+                    <input type="text" id="errandPickupInput" placeholder="e.g. Courier Office">
+                </div>
+
+                <div class="form-group">
+                    <label for="errandDestinationInput">Destination</label>
+                    <input type="text" id="errandDestinationInput" placeholder="e.g. Hostel Block A">
+                </div>
+
+                <div class="form-group">
+                    <label for="errandDescriptionInput">Description (optional)</label>
+                    <textarea id="errandDescriptionInput" rows="2" placeholder="Any extra details for the agent"></textarea>
+                </div>
+
+                <div class="form-row-2">
+
+                    <div class="form-group">
+                        <label for="errandItemCostInput">Item cost (₦) — if any</label>
+                        <input type="number" id="errandItemCostInput" min="0" step="50" placeholder="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="errandFeeInput">Errand Fee (₦)</label>
+                        <input type="number" id="errandFeeInput" min="100" step="50" placeholder="e.g. 1000">
+                    </div>
+
+                </div>
+
+                <button type="button" class="auth-button" id="errandRequestContinueBtn">
+                    Continue to Payment
+                </button>
+
+            </div>
+
+            <div id="errandPaymentStep" style="display: none;">
+
+                <p style="text-align:center; color:#6b7280; font-size:13px; margin-bottom:16px;">
+                    Choose how you'd like to pay.
+                </p>
+
+                <div id="errandPaymentStatus" class="otp-status-message"></div>
+
+                <button type="button" id="errandPayMonnifyBtn" class="auth-button" style="margin-bottom: 10px;">
+                    <i class="fa-solid fa-credit-card"></i>
+                    Pay with Monnify
+                </button>
+
+                <button type="button" id="errandPayOpayBtn" class="auth-button opay-button" style="margin-bottom: 10px;">
+                    <i class="fa-solid fa-wallet"></i>
+                    Pay with OPay
+                </button>
+
+                <button type="button" id="errandPayPaystackBtn" class="auth-button paystack-button">
+                    <i class="fa-solid fa-credit-card"></i>
+                    Pay with Paystack
+                </button>
+
+            </div>
+
+            <button type="button" class="modal-close-text-btn" id="errandRequestCancelBtn">Cancel</button>
+
+        </div>
+
+    </div>
+
+
 
     <div class="modal-overlay" id="reportStudentModal">
 
