@@ -17922,7 +17922,7 @@ async function loadMyErrands() {
 
                 const trackMarkup =
                     ["in_progress", "picked_up", "on_way", "arrived"].includes(errand.status) ?
-                        `<button type="button" class="errand-accept-btn secondary" data-track-errand-id="${errand.id}"><i class="fa-solid fa-location-crosshairs"></i> Track Agent</button>` :
+                        `<button type="button" class="errand-accept-btn secondary" data-track-errand-id="${errand.id}" data-track-agent-id="${errand.agent_id || ""}" data-track-started-at="${errand.started_at || ""}"><i class="fa-solid fa-location-crosshairs"></i> Track Agent</button>` :
                         "";
 
                 return `
@@ -18769,7 +18769,7 @@ if (myErrandsListEl) {
             event.target.closest("[data-track-errand-id]");
 
         if (trackBtn) {
-            openErrandTrackingModal(trackBtn.dataset.trackErrandId);
+            openErrandTrackingModal(trackBtn.dataset.trackErrandId, trackBtn.dataset.trackAgentId, trackBtn.dataset.trackStartedAt);
             return;
         }
 
@@ -20184,6 +20184,16 @@ async function loadMyCraftRequests() {
                         `<button type="button" class="errand-accept-btn secondary" data-delete-craft-id="${request.id}">Delete</button>` :
                         "";
 
+                const inProgressMarkup =
+                    request.status === "in_progress" ?
+                        `<div class="craft-in-progress-widget">
+                            <span class="craft-timer" data-craft-timer-started="${request.started_at || ""}">00:00</span>
+                            <button type="button" class="errand-accept-btn" data-message-provider-id="${request.assigned_provider_id || ""}" style="margin: 0;">
+                                <i class="fa-solid fa-comment"></i> Message Provider
+                            </button>
+                        </div>` :
+                        "";
+
                 return `
                     <div class="errand-card">
                         <div class="errand-card-top">
@@ -20198,6 +20208,7 @@ async function loadMyCraftRequests() {
                         </div>
                         <div class="errand-card-fee" style="margin-bottom:10px;">${priceLabel}</div>
                         ${otpMarkup}
+                        ${inProgressMarkup}
                         ${offersButton}
                         ${payButton}
                         ${rateMarkup}
@@ -21607,10 +21618,13 @@ let __kuriosTrackingMarker = null;
 let __kuriosTrackingDestMarker = null;
 let __kuriosTrackingInterval = null;
 let __kuriosTrackingErrandId = null;
+let __kuriosTrackingAgentId = null;
+let __kuriosElapsedTimerInterval = null;
 
-function openErrandTrackingModal(errandId) {
+function openErrandTrackingModal(errandId, agentId, startedAt) {
 
     __kuriosTrackingErrandId = errandId;
+    __kuriosTrackingAgentId = agentId || null;
 
     const statusEl =
         document.getElementById("errandTrackingStatus");
@@ -21619,6 +21633,23 @@ function openErrandTrackingModal(errandId) {
 
     const modal = document.getElementById("errandTrackingModal");
     if (modal) modal.classList.add("open");
+
+    const chatBtn =
+        document.getElementById("errandTrackingChatBtn");
+
+    if (chatBtn) {
+        chatBtn.style.display = __kuriosTrackingAgentId ? "block" : "none";
+    }
+
+    stopErrandElapsedTimer();
+
+    const startTime =
+        startedAt ? new Date(startedAt).getTime() : Date.now();
+
+    updateErrandElapsedTimer(startTime);
+
+    __kuriosElapsedTimerInterval =
+        setInterval(function () { updateErrandElapsedTimer(startTime); }, 1000);
 
     // Leaflet needs the map container to actually be
     // visible before it can size itself correctly, so
@@ -21634,6 +21665,39 @@ function openErrandTrackingModal(errandId) {
         __kuriosTrackingInterval = setInterval(fetchAgentLocation, 10000);
 
     }, 100);
+
+}
+
+function updateErrandElapsedTimer(startTime) {
+
+    const elapsedEl =
+        document.getElementById("errandTrackingElapsed");
+
+    if (!elapsedEl) return;
+
+    const elapsedSeconds =
+        Math.max(0, Math.floor((Date.now() - startTime) / 1000));
+
+    const hours = Math.floor(elapsedSeconds / 3600);
+    const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+    const seconds = elapsedSeconds % 60;
+
+    const pad =
+        function (n) { return String(n).padStart(2, "0"); };
+
+    elapsedEl.textContent =
+        hours > 0 ?
+            pad(hours) + ":" + pad(minutes) + ":" + pad(seconds) :
+            pad(minutes) + ":" + pad(seconds);
+
+}
+
+function stopErrandElapsedTimer() {
+
+    if (__kuriosElapsedTimerInterval) {
+        clearInterval(__kuriosElapsedTimerInterval);
+        __kuriosElapsedTimerInterval = null;
+    }
 
 }
 
@@ -21774,8 +21838,39 @@ if (errandTrackingCloseBtn) {
         if (modal) modal.classList.remove("open");
 
         stopErrandTracking();
+        stopErrandElapsedTimer();
 
         __kuriosTrackingErrandId = null;
+        __kuriosTrackingAgentId = null;
+
+    });
+
+}
+
+const errandTrackingChatBtn =
+    document.getElementById("errandTrackingChatBtn");
+
+if (errandTrackingChatBtn) {
+
+    errandTrackingChatBtn.addEventListener("click", function () {
+
+        if (!__kuriosTrackingAgentId) return;
+
+        const modal = document.getElementById("errandTrackingModal");
+        if (modal) modal.classList.remove("open");
+
+        stopErrandTracking();
+        stopErrandElapsedTimer();
+
+        window.location.hash = "chat";
+
+        setTimeout(function () {
+
+            if (typeof openChatWith === "function") {
+                openChatWith(parseInt(__kuriosTrackingAgentId, 10), "Your agent", null, null);
+            }
+
+        }, 300);
 
     });
 
@@ -22408,3 +22503,67 @@ function customAlert(message, options) {
     });
 
 }
+
+
+// =========================================================
+// CRAFT SERVICE — IN-PROGRESS TIMER + MESSAGE PROVIDER
+// =========================================================
+
+function updateAllCraftTimers() {
+
+    document.querySelectorAll(".craft-timer").forEach(function (el) {
+
+        const startedAt = el.dataset.craftTimerStarted;
+
+        if (!startedAt) {
+            el.textContent = "00:00";
+            return;
+        }
+
+        const startTime =
+            new Date(startedAt).getTime();
+
+        const elapsedSeconds =
+            Math.max(0, Math.floor((Date.now() - startTime) / 1000));
+
+        const hours = Math.floor(elapsedSeconds / 3600);
+        const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+        const seconds = elapsedSeconds % 60;
+
+        const pad =
+            function (n) { return String(n).padStart(2, "0"); };
+
+        el.textContent =
+            hours > 0 ?
+                pad(hours) + ":" + pad(minutes) + ":" + pad(seconds) :
+                pad(minutes) + ":" + pad(seconds);
+
+    });
+
+}
+
+setInterval(updateAllCraftTimers, 1000);
+
+document.addEventListener("click", function (event) {
+
+    const messageProviderBtn =
+        event.target.closest("[data-message-provider-id]");
+
+    if (!messageProviderBtn) return;
+
+    const providerId =
+        messageProviderBtn.dataset.messageProviderId;
+
+    if (!providerId) return;
+
+    window.location.hash = "chat";
+
+    setTimeout(function () {
+
+        if (typeof openChatWith === "function") {
+            openChatWith(parseInt(providerId, 10), "Your provider", null, null);
+        }
+
+    }, 300);
+
+});
