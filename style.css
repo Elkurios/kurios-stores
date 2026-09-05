@@ -9801,3 +9801,33 @@ img {
 .danger-button:hover {
     background: #b91c1c !important;
 }
+
+
+.errand-tracking-timer {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--purple);
+    font-variant-numeric: tabular-nums;
+    margin: 0 0 8px;
+    letter-spacing: 1px;
+}
+
+
+.craft-in-progress-widget {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--purple-soft);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+}
+
+.craft-timer {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--purple-dark);
+    font-variant-numeric: tabular-nums;
+}
