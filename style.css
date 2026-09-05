@@ -7194,11 +7194,11 @@ img {
 
     font-size: 12px;
 
-    white-space: nowrap;
+    white-space: normal;
 
-    overflow: hidden;
+    word-break: break-word;
 
-    text-overflow: ellipsis;
+    line-height: 1.4;
 }
 
 
