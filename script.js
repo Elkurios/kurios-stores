@@ -10449,6 +10449,10 @@ if (sellerApplyForm) {
                     choiceState.style.display = "block";
                 }
 
+                if (typeof checkAndShowWalletButton === "function") {
+                    checkAndShowWalletButton("payWithWalletButton", "payWithWalletBalanceLabel", data.amount);
+                }
+
             } catch (error) {
 
                 console.error(
@@ -15183,7 +15187,7 @@ if (ordersPanelBodyEl) {
         if (action === "delete") {
             deleteOrder(btn.dataset.orderId);
         } else if (action === "checkout") {
-            openOrderCheckoutModal(btn.dataset.orderRef);
+            openOrderCheckoutModal(btn.dataset.orderRef, orderData ? orderData.amount : null);
         } else if (action === "edit") {
             openEditOrderModal(orderData);
         } else if (action === "print") {
@@ -15251,7 +15255,7 @@ async function deleteOrder(orderId) {
 // CHECKOUT / RETRY PAYMENT MODAL
 // ========================================
 
-function openOrderCheckoutModal(paymentReference) {
+function openOrderCheckoutModal(paymentReference, amount) {
 
     __kuriosOrdersCheckoutRef = paymentReference;
 
@@ -15265,6 +15269,10 @@ function openOrderCheckoutModal(paymentReference) {
 
     if (modal) {
         modal.classList.add("open");
+    }
+
+    if (amount && typeof checkAndShowWalletButton === "function") {
+        checkAndShowWalletButton("orderCheckoutWalletBtn", "orderCheckoutWalletBalanceLabel", amount);
     }
 
 }
@@ -18081,6 +18089,8 @@ if (errandRequestContinueBtn) {
             document.getElementById("errandRequestStep").style.display = "none";
             document.getElementById("errandPaymentStep").style.display = "block";
 
+            checkAndShowWalletButton("errandPayWalletBtn", "errandPayWalletBalanceLabel", data.errand.errand_fee);
+
         } catch (error) {
 
             console.error("Create errand error:", error);
@@ -18745,6 +18755,8 @@ if (myErrandsListEl) {
             const modal = document.getElementById("errandPayItemCostModal");
             if (modal) modal.classList.add("open");
 
+            checkAndShowWalletButton("errandPayItemWalletBtn", "errandPayItemWalletBalanceLabel", payBtn.dataset.payItemCostAmount);
+
             return;
 
         }
@@ -19186,6 +19198,8 @@ if (errandAgentVerifyCodeBtn) {
             document.getElementById("errandAgentOtpStep").style.display = "none";
             document.getElementById("errandAgentPayStep").style.display = "block";
 
+            checkAndShowWalletButton("errandAgentPayWalletBtn", "errandAgentPayWalletBalanceLabel", 500);
+
         } catch (error) {
 
             console.error("Verify phone / start registration error:", error);
@@ -19465,6 +19479,8 @@ if (craftRegisterContinueBtn) {
 
             document.getElementById("craftRegisterStep").style.display = "none";
             document.getElementById("craftPayStep").style.display = "block";
+
+            checkAndShowWalletButton("craftPayWalletBtn", "craftPayWalletBalanceLabel", 2000);
 
         } catch (error) {
 
@@ -20825,6 +20841,8 @@ function openCraftPayModal(requestId, amount) {
     const modal = document.getElementById("craftPayModal");
     if (modal) modal.classList.add("open");
 
+    checkAndShowWalletButton("craftPayModalWalletBtn", "craftPayModalWalletBalanceLabel", amount);
+
 }
 
 const craftPayModalCancelBtn =
@@ -21867,3 +21885,298 @@ async function verifyPaymentWithRetry(endpoint, body, attempts) {
     };
 
 }
+
+
+// =========================================================
+// GENERIC WALLET-PAY HELPERS
+// (shared across every payment flow that offers Wallet as
+// a 4th option — Errand fee, Item cost, Errand Agent and
+// Craft Provider registration, Craft job payment, Seller
+// Application fee, and Order Retry)
+// =========================================================
+
+async function checkAndShowWalletButton(btnId, balanceLabelId, amount) {
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    const btn =
+        document.getElementById(btnId);
+
+    if (!btn) return;
+
+    try {
+
+        const response =
+            await fetch(API_URL + "/api/students/wallet?studentId=" + student.id);
+
+        const data = await response.json();
+
+        if (data.success && Number(data.balance) >= Number(amount)) {
+
+            btn.style.display = "flex";
+
+            const label =
+                document.getElementById(balanceLabelId);
+
+            if (label) {
+
+                label.textContent =
+                    typeof formatMoney === "function" ? formatMoney(data.balance) : "₦" + data.balance;
+
+            }
+
+        } else {
+
+            btn.style.display = "none";
+
+        }
+
+    } catch (error) {
+
+        console.error("Check wallet balance error:", error);
+
+    }
+
+}
+
+function wireWalletPayButton(btnId, statusElId, endpoint, getPayload, onSuccess) {
+
+    const btn =
+        document.getElementById(btnId);
+
+    if (!btn) return;
+
+    btn.addEventListener("click", async function () {
+
+        const student =
+            getStoredStudent();
+
+        if (!student) return;
+
+        const statusEl =
+            statusElId ? document.getElementById(statusElId) : null;
+
+        const resolvedEndpoint =
+            typeof endpoint === "function" ? endpoint() : endpoint;
+
+        if (!resolvedEndpoint) return;
+
+        btn.disabled = true;
+
+        if (statusEl) statusEl.textContent = "Paying from your wallet...";
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + resolvedEndpoint,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(getPayload(student))
+                    }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (statusEl) statusEl.textContent = data.message || "Payment failed.";
+                btn.disabled = false;
+                return;
+
+            }
+
+            onSuccess(data);
+
+        } catch (error) {
+
+            console.error("Wallet pay error:", error);
+
+            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+            btn.disabled = false;
+
+        }
+
+    });
+
+}
+
+
+// =========================================================
+// WIRE ALL 7 WALLET-PAY CLICK HANDLERS
+// =========================================================
+
+// 1. Errand fee
+
+wireWalletPayButton(
+    "errandPayWalletBtn",
+    "errandPaymentStatus",
+    "/api/errands/pay/wallet",
+    function (student) {
+        return { paymentReference: __kuriosErrandPaymentReference, studentId: student.id };
+    },
+    function (data) {
+
+        const modal = document.getElementById("errandRequestModal");
+        if (modal) modal.classList.remove("open");
+
+        if (typeof showMessage === "function") {
+            showMessage("Paid from wallet — your errand is now available to agents.");
+        }
+
+        if (typeof loadMyErrands === "function") loadMyErrands();
+
+    }
+);
+
+// 2. Errand item cost
+
+wireWalletPayButton(
+    "errandPayItemWalletBtn",
+    "errandPayItemCostStatus",
+    function () {
+        return __kuriosPayItemCostErrandId ?
+            "/api/errands/" + __kuriosPayItemCostErrandId + "/pay-item-cost-wallet" :
+            null;
+    },
+    function (student) {
+        return { studentId: student.id };
+    },
+    function (data) {
+
+        const modal = document.getElementById("errandPayItemCostModal");
+        if (modal) modal.classList.remove("open");
+
+        if (typeof showMessage === "function") {
+            showMessage("Item cost paid from wallet.");
+        }
+
+        if (typeof loadMyErrands === "function") loadMyErrands();
+
+    }
+);
+
+// 3. Errand Agent registration
+
+wireWalletPayButton(
+    "errandAgentPayWalletBtn",
+    "errandAgentPayStatus",
+    "/api/errand-agent/pay-wallet",
+    function (student) {
+        return { studentId: student.id };
+    },
+    function (data) {
+
+        const modal = document.getElementById("errandAgentRegisterModal");
+        if (modal) modal.classList.remove("open");
+
+        if (typeof showMessage === "function") {
+            showMessage("You're now a registered Errand Agent!");
+        }
+
+        if (typeof loadErrandsPage === "function") loadErrandsPage();
+
+    }
+);
+
+// 4. Craft Provider registration
+
+wireWalletPayButton(
+    "craftPayWalletBtn",
+    "craftPayStatus",
+    "/api/craft-providers/pay-wallet",
+    function (student) {
+        return { studentId: student.id };
+    },
+    function (data) {
+
+        const modal = document.getElementById("craftRegisterModal");
+        if (modal) modal.classList.remove("open");
+
+        if (typeof showMessage === "function") {
+            showMessage("You're now a registered Craft provider!");
+        }
+
+        if (typeof loadErrandsPage === "function") loadErrandsPage();
+
+    }
+);
+
+// 5. Craft job payment
+
+wireWalletPayButton(
+    "craftPayModalWalletBtn",
+    "craftPayModalStatus",
+    function () {
+        return __kuriosCraftPayRequestId ?
+            "/api/craft-requests/" + __kuriosCraftPayRequestId + "/pay-wallet" :
+            null;
+    },
+    function (student) {
+        return { studentId: student.id };
+    },
+    function (data) {
+
+        const modal = document.getElementById("craftPayModal");
+        if (modal) modal.classList.remove("open");
+
+        if (typeof showMessage === "function") {
+            showMessage("Paid from wallet — your provider can now start.");
+        }
+
+        if (typeof loadMyCraftRequests === "function") loadMyCraftRequests();
+
+    }
+);
+
+// 6. Seller Application fee
+
+wireWalletPayButton(
+    "payWithWalletButton",
+    "sellerPaymentChoiceStatus",
+    "/api/sellers/apply/pay-wallet",
+    function (student) {
+        return { studentId: student.id };
+    },
+    function (data) {
+
+        if (typeof hideAllSellerStates === "function") hideAllSellerStates();
+
+        const nameEl = document.getElementById("sellerPendingStoreName");
+        if (nameEl && data.seller) nameEl.textContent = data.seller.store_name;
+
+        const sellerPendingStateEl = document.getElementById("sellerPendingState");
+        if (sellerPendingStateEl) sellerPendingStateEl.style.display = "block";
+
+    }
+);
+
+// 7. Order Retry
+
+wireWalletPayButton(
+    "orderCheckoutWalletBtn",
+    "orderCheckoutStatus",
+    "/api/orders/pay/wallet",
+    function (student) {
+        return { paymentReference: __kuriosOrdersCheckoutRef, studentId: student.id };
+    },
+    function (data) {
+
+        if (typeof closeOrderCheckoutModal === "function") closeOrderCheckoutModal();
+
+        if (typeof showMessage === "function") {
+            showMessage("Paid from wallet!");
+        }
+
+        const student = getStoredStudent();
+
+        if (student && typeof loadOrdersIntoPanel === "function") {
+            loadOrdersIntoPanel(student.id);
+        }
+
+    }
+);
