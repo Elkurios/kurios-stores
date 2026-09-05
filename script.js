@@ -20909,7 +20909,18 @@ if (craftPayModalCheckNowBtn) {
                     { method: "POST" }
                 );
 
-            if (!response.ok) {
+            let data = null;
+
+            try {
+
+                data = await response.json();
+
+            } catch (parseError) {
+
+                // Response body wasn't JSON at all — a true
+                // raw failure (proxy error, gateway timeout
+                // page, etc.), not something our own backend
+                // produced.
 
                 if (statusEl) {
 
@@ -20924,15 +20935,16 @@ if (craftPayModalCheckNowBtn) {
 
             }
 
-            let data;
+            if (!response.ok) {
 
-            try {
+                if (statusEl) {
 
-                data = await response.json();
+                    statusEl.textContent =
+                        (data && data.message ? data.message : "Something went wrong.") +
+                        (data && data.debugError ? " (" + data.debugError + ")" : "");
 
-            } catch (parseError) {
+                }
 
-                if (statusEl) statusEl.textContent = "Got an unexpected response — please try again shortly.";
                 return;
 
             }
