@@ -1315,13 +1315,6 @@ function updateLoginState() {
     // SHOW LOGGED-OUT HERO
     // ========================================
 
-    const loggedOutHero =
-        document.getElementById("loggedOutHero");
-
-    const loggedInHero =
-        document.getElementById("loggedInHero");
-
-
     if (loggedOutHero) {
 
         loggedOutHero.style.display =
@@ -3515,11 +3508,6 @@ updateLoginState();
                 // ========================================
                 // CLOSE SIGN-IN MODAL
                 // ========================================
-
-                const signInModal =
-                    document.getElementById(
-                        "signInModal"
-                    );
 
                 if (signInModal) {
 
