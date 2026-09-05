@@ -5966,6 +5966,45 @@ showOtpVerificationScreen(
                 try {
 
                     // ========================================
+                    // DELIVERY METHOD
+                    // ========================================
+
+                    const selectedDeliveryMethod =
+                        document.querySelector('input[name="deliveryMethod"]:checked');
+
+                    const deliveryMethod =
+                        selectedDeliveryMethod ? selectedDeliveryMethod.value : "pickup";
+
+                    const deliveryLocationInput =
+                        document.getElementById("cartDeliveryLocationInput");
+
+                    const deliveryLocation =
+                        deliveryLocationInput ? deliveryLocationInput.value.trim() : "";
+
+                    if (deliveryMethod === "errand" && !deliveryLocation) {
+
+                        showMessage("Please enter a delivery location.");
+                        checkoutButton.disabled = false;
+                        checkoutButton.textContent = "Proceed to Checkout";
+                        return;
+
+                    }
+
+                    let deliveryLat = null;
+                    let deliveryLng = null;
+
+                    if (deliveryMethod === "errand" && typeof getCurrentGeolocation === "function") {
+
+                        const position = await getCurrentGeolocation();
+
+                        if (position) {
+                            deliveryLat = position.lat;
+                            deliveryLng = position.lng;
+                        }
+
+                    }
+
+                    // ========================================
                     // START THE ORDER ON OUR SERVER
                     // (server recalculates the real total —
                     // never trust prices from the browser)
@@ -5984,7 +6023,11 @@ showOtpVerificationScreen(
                                     items: cart,
                                     customerName:
                                         `${student.first_name || ""} ${student.last_name || ""}`.trim(),
-                                    customerEmail: student.email
+                                    customerEmail: student.email,
+                                    deliveryMethod: deliveryMethod,
+                                    deliveryLocation: deliveryLocation,
+                                    deliveryLat: deliveryLat,
+                                    deliveryLng: deliveryLng
                                 })
                             }
                         );
@@ -21664,3 +21707,29 @@ if (errandTrackingCloseBtn) {
     });
 
 }
+
+
+// =========================================================
+// CART — DELIVERY METHOD SELECTOR
+// =========================================================
+
+document.querySelectorAll('input[name="deliveryMethod"]').forEach(function (radio) {
+
+    radio.addEventListener("change", function () {
+
+        document.querySelectorAll(".delivery-method-option").forEach(function (label) {
+            label.classList.remove("active");
+        });
+
+        radio.closest(".delivery-method-option").classList.add("active");
+
+        const locationGroup =
+            document.getElementById("cartDeliveryLocationGroup");
+
+        if (locationGroup) {
+            locationGroup.style.display = radio.value === "errand" ? "block" : "none";
+        }
+
+    });
+
+});
