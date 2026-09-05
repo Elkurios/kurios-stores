@@ -20909,7 +20909,33 @@ if (craftPayModalCheckNowBtn) {
                     { method: "POST" }
                 );
 
-            const data = await response.json();
+            if (!response.ok) {
+
+                if (statusEl) {
+
+                    statusEl.textContent =
+                        response.status === 404 ?
+                            "This check isn't available yet — please try again in a moment." :
+                            "Server error (" + response.status + ") — please try again shortly.";
+
+                }
+
+                return;
+
+            }
+
+            let data;
+
+            try {
+
+                data = await response.json();
+
+            } catch (parseError) {
+
+                if (statusEl) statusEl.textContent = "Got an unexpected response — please try again shortly.";
+                return;
+
+            }
 
             if (!data.success) {
 
@@ -20936,7 +20962,7 @@ if (craftPayModalCheckNowBtn) {
 
             console.error("Check craft payment error:", error);
 
-            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+            if (statusEl) statusEl.textContent = "Couldn't reach the server — check your internet connection and try again.";
 
         } finally {
 
