@@ -963,6 +963,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <div style="display:flex; gap:6px;">
 
                             <button
+                                type="button"
                                 class="wishlist-toggle-btn"
                                 data-product-id="${product.id}"
                                 title="Save to wishlist"
