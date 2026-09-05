@@ -1466,9 +1466,74 @@
 
             actions.appendChild(supportBtn);
 
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "btn-reject";
+            deleteBtn.textContent = "Delete Account";
+
+            deleteBtn.addEventListener("click", function () {
+
+                const firstConfirm = confirm(
+                    "Permanently delete " + (fullName || "this student") + "? " +
+                    "This removes their account, orders, products, wallet history, messages, errands, and everything else tied to them. This cannot be undone."
+                );
+
+                if (!firstConfirm) return;
+
+                const typedName = prompt(
+                    "Type the student's full name exactly to confirm: " + (fullName || "")
+                );
+
+                if (typedName !== fullName) {
+
+                    alert("Name didn't match — deletion cancelled.");
+                    return;
+
+                }
+
+                deleteStudentCompletely(student.id);
+
+            });
+
+            actions.appendChild(deleteBtn);
+
             studentList.appendChild(card);
 
         });
+
+    }
+
+    async function deleteStudentCompletely(studentId) {
+
+        try {
+
+            const response = await fetch(
+                API_URL + "/api/admin/students/" + studentId,
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": "Bearer " + getAdminToken()
+                    }
+                }
+            );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                alert(data.message || "Could not delete this student.");
+                return;
+
+            }
+
+            alert("Student deleted.");
+            loadStudents();
+
+        } catch (error) {
+
+            console.error("Delete student error:", error);
+            alert("Unable to connect to Kurios Stores server.");
+
+        }
 
     }
 
