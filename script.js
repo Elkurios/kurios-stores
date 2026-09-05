@@ -20825,6 +20825,71 @@ if (craftPayModalCancelBtn) {
 
 }
 
+const craftPayModalCheckNowBtn =
+    document.getElementById("craftPayModalCheckNowBtn");
+
+if (craftPayModalCheckNowBtn) {
+
+    craftPayModalCheckNowBtn.addEventListener("click", async function () {
+
+        if (!__kuriosCraftPayRequestId) return;
+
+        const statusEl =
+            document.getElementById("craftPayModalStatus");
+
+        craftPayModalCheckNowBtn.disabled = true;
+        craftPayModalCheckNowBtn.textContent = "Checking...";
+
+        if (statusEl) statusEl.textContent = "Checking your payment status...";
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL + "/api/craft-requests/" + __kuriosCraftPayRequestId + "/check-payment",
+                    { method: "POST" }
+                );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                if (statusEl) statusEl.textContent = data.message || "We couldn't confirm a payment yet.";
+
+            } else {
+
+                const modal = document.getElementById("craftPayModal");
+                if (modal) modal.classList.remove("open");
+
+                if (typeof showMessage === "function") {
+                    showMessage("Payment confirmed! Your provider can now start.");
+                }
+
+                __kuriosCraftPayRequestId = null;
+
+                if (typeof loadMyCraftRequests === "function") {
+                    loadMyCraftRequests();
+                }
+
+            }
+
+        } catch (error) {
+
+            console.error("Check craft payment error:", error);
+
+            if (statusEl) statusEl.textContent = "Unable to connect to Kurios Stores server.";
+
+        } finally {
+
+            craftPayModalCheckNowBtn.disabled = false;
+            craftPayModalCheckNowBtn.innerHTML = '<i class="fa-solid fa-rotate"></i> I\'ve Paid — Check Now';
+
+        }
+
+    });
+
+}
+
 async function payCraftRequestWith(gateway) {
 
     const statusEl =
