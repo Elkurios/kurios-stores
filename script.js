@@ -11571,7 +11571,7 @@ async function toggleProductActive(product) {
 
 async function deleteProduct(product) {
 
-    if (!confirm("Delete \"" + product.name + "\"? This can't be undone.")) {
+    if (!(await customConfirm("Delete \"" + product.name + "\"? This can't be undone.", { danger: true, confirmText: "Delete" }))) {
         return;
     }
 
@@ -13509,7 +13509,7 @@ function autoLogoutFromPendingChoice() {
 
     } else {
 
-        alert(message);
+        customAlert(message);
 
     }
 
@@ -13790,7 +13790,7 @@ async function contactSupport() {
 
         if (!data.success) {
 
-            alert(data.message || "Could not start a chat with support.");
+            await customAlert(data.message || "Could not start a chat with support.");
             return;
 
         }
@@ -13811,7 +13811,7 @@ async function contactSupport() {
             error
         );
 
-        alert("Unable to connect to Kurios Stores server.");
+        await customAlert("Unable to connect to Kurios Stores server.");
 
     }
 
@@ -13865,7 +13865,7 @@ async function contactSellerAboutProduct(productId) {
 
         if (!data.success) {
 
-            alert(data.message || "Could not start a chat with this seller.");
+            await customAlert(data.message || "Could not start a chat with this seller.");
             return;
 
         }
@@ -13886,7 +13886,7 @@ async function contactSellerAboutProduct(productId) {
             error
         );
 
-        alert("Unable to connect to Kurios Stores server.");
+        await customAlert("Unable to connect to Kurios Stores server.");
 
     }
 
@@ -13914,7 +13914,7 @@ document.addEventListener("click", function (event) {
 
     } else {
 
-        alert("This feature isn't built yet — coming soon.");
+        customAlert("This feature isn't built yet — coming soon.");
 
     }
 
@@ -15197,7 +15197,7 @@ if (ordersPanelBodyEl) {
 
 async function deleteOrder(orderId) {
 
-    if (!confirm("Delete this order? This can't be undone.")) {
+    if (!(await customConfirm("Delete this order? This can't be undone.", { danger: true, confirmText: "Delete" }))) {
         return;
     }
 
@@ -15223,7 +15223,7 @@ async function deleteOrder(orderId) {
         const data = await response.json();
 
         if (!data.success) {
-            alert(data.message || "Could not delete this order.");
+            await customAlert(data.message || "Could not delete this order.");
             return;
         }
 
@@ -15234,7 +15234,7 @@ async function deleteOrder(orderId) {
     } catch (error) {
 
         console.error("Delete order error:", error);
-        alert("Unable to connect to Kurios Stores server.");
+        await customAlert("Unable to connect to Kurios Stores server.");
 
     }
 
@@ -16564,7 +16564,7 @@ if (supportPoolListEl) {
 
             if (!data.success) {
 
-                alert(data.message || "Could not update this ticket.");
+                await customAlert(data.message || "Could not update this ticket.");
                 btn.disabled = false;
                 btn.textContent = isReopen ? "Reopen" : "Pick Up";
                 loadSupportPool();
@@ -16594,7 +16594,7 @@ if (supportPoolListEl) {
         } catch (error) {
 
             console.error("Ticket pool action error:", error);
-            alert("Unable to connect to Kurios Stores server.");
+            await customAlert("Unable to connect to Kurios Stores server.");
             btn.disabled = false;
             btn.textContent = isReopen ? "Reopen" : "Pick Up";
 
@@ -16608,7 +16608,7 @@ async function handleTicketAction(action, confirmMessage) {
 
     if (!window.activeConversationId) return;
 
-    if (!confirm(confirmMessage)) {
+    if (!(await customConfirm(confirmMessage))) {
         return;
     }
 
@@ -16633,7 +16633,7 @@ async function handleTicketAction(action, confirmMessage) {
 
         if (!data.success) {
 
-            alert(data.message || "Could not update this ticket.");
+            await customAlert(data.message || "Could not update this ticket.");
             return;
 
         }
@@ -16668,7 +16668,7 @@ async function handleTicketAction(action, confirmMessage) {
     } catch (error) {
 
         console.error("Ticket action error:", error);
-        alert("Unable to connect to Kurios Stores server.");
+        await customAlert("Unable to connect to Kurios Stores server.");
 
     }
 
@@ -17192,7 +17192,7 @@ if (blockStudentBtn) {
 
         if (!window.activeChatPartnerId) return;
 
-        if (!confirm("Block this student? They won't be able to message you, and you won't be able to message them.")) {
+        if (!(await customConfirm("Block this student? They won't be able to message you, and you won't be able to message them.", { danger: true, confirmText: "Block" }))) {
             return;
         }
 
@@ -20269,7 +20269,7 @@ if (myCraftRequestsListEl) {
 
 async function deleteCraftRequest(requestId) {
 
-    if (!confirm("Delete this cancelled request? This can't be undone.")) return;
+    if (!(await customConfirm("Delete this cancelled request? This can't be undone.", { danger: true, confirmText: "Delete" }))) return;
 
     const student =
         getStoredStudent();
@@ -21176,7 +21176,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 async function cancelErrandRequest(errandId) {
 
-    if (!confirm("Cancel this errand? Any amount already paid will be refunded to your wallet.")) {
+    if (!(await customConfirm("Cancel this errand? Any amount already paid will be refunded to your wallet.", { danger: true, confirmText: "Cancel Errand" }))) {
         return;
     }
 
@@ -21240,7 +21240,7 @@ async function cancelErrandRequest(errandId) {
 
 async function agentCancelErrand(errandId) {
 
-    if (!confirm("Back out of this errand? It'll go back to the pool for another agent, and this counts against your reliability record.")) {
+    if (!(await customConfirm("Back out of this errand? It'll go back to the pool for another agent, and this counts against your reliability record.", { danger: true, confirmText: "Back Out" }))) {
         return;
     }
 
@@ -21298,7 +21298,7 @@ async function agentCancelErrand(errandId) {
 
 async function cancelCraftRequest(requestId) {
 
-    if (!confirm("Cancel this request? Any amount already paid will be refunded to your wallet.")) {
+    if (!(await customConfirm("Cancel this request? Any amount already paid will be refunded to your wallet.", { danger: true, confirmText: "Cancel Request" }))) {
         return;
     }
 
@@ -22286,3 +22286,113 @@ wireWalletPayButton(
 
     }
 );
+
+
+// =========================================================
+// CUSTOM CONFIRM / ALERT DIALOG
+// (replaces native browser confirm()/alert() everywhere —
+// promise-based so existing call sites just need `await`)
+// =========================================================
+
+function customConfirm(message, options) {
+
+    options = options || {};
+
+    return new Promise(function (resolve) {
+
+        const modal = document.getElementById("customDialogModal");
+        const titleEl = document.getElementById("customDialogTitle");
+        const messageEl = document.getElementById("customDialogMessage");
+        const iconEl = document.getElementById("customDialogIcon");
+        const cancelBtn = document.getElementById("customDialogCancelBtn");
+        const confirmBtn = document.getElementById("customDialogConfirmBtn");
+
+        if (!modal || !confirmBtn || !cancelBtn) {
+            resolve(window.confirm(message));
+            return;
+        }
+
+        titleEl.textContent = options.title || "Are you sure?";
+        messageEl.textContent = message;
+
+        iconEl.className =
+            "auth-icon custom-dialog-icon " + (options.danger ? "danger" : "info");
+
+        iconEl.innerHTML =
+            '<i class="fa-solid fa-' + (options.danger ? "triangle-exclamation" : "circle-question") + '"></i>';
+
+        confirmBtn.textContent = options.confirmText || "OK";
+        confirmBtn.className = options.danger ? "auth-button danger-button" : "auth-button";
+        cancelBtn.style.display = "";
+
+        modal.classList.add("open");
+
+        function cleanup(result) {
+
+            modal.classList.remove("open");
+            confirmBtn.removeEventListener("click", onConfirm);
+            cancelBtn.removeEventListener("click", onCancel);
+            resolve(result);
+
+        }
+
+        function onConfirm() { cleanup(true); }
+        function onCancel() { cleanup(false); }
+
+        confirmBtn.addEventListener("click", onConfirm);
+        cancelBtn.addEventListener("click", onCancel);
+
+    });
+
+}
+
+function customAlert(message, options) {
+
+    options = options || {};
+
+    return new Promise(function (resolve) {
+
+        const modal = document.getElementById("customDialogModal");
+        const titleEl = document.getElementById("customDialogTitle");
+        const messageEl = document.getElementById("customDialogMessage");
+        const iconEl = document.getElementById("customDialogIcon");
+        const cancelBtn = document.getElementById("customDialogCancelBtn");
+        const confirmBtn = document.getElementById("customDialogConfirmBtn");
+
+        if (!modal || !confirmBtn || !cancelBtn) {
+            window.alert(message);
+            resolve();
+            return;
+        }
+
+        titleEl.textContent = options.title || "Notice";
+        messageEl.textContent = message;
+
+        iconEl.className =
+            "auth-icon custom-dialog-icon " + (options.danger ? "danger" : "info");
+
+        iconEl.innerHTML =
+            '<i class="fa-solid fa-' + (options.danger ? "circle-exclamation" : "circle-info") + '"></i>';
+
+        confirmBtn.textContent = "OK";
+        confirmBtn.className = "auth-button";
+        cancelBtn.style.display = "none";
+
+        modal.classList.add("open");
+
+        function cleanup() {
+
+            modal.classList.remove("open");
+            confirmBtn.removeEventListener("click", onConfirm);
+            cancelBtn.style.display = "";
+            resolve();
+
+        }
+
+        function onConfirm() { cleanup(); }
+
+        confirmBtn.addEventListener("click", onConfirm);
+
+    });
+
+}
