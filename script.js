@@ -20179,6 +20179,11 @@ async function loadMyCraftRequests() {
                         `<button type="button" class="errand-accept-btn" data-rate-craft-id="${request.id}">Rate Your Provider</button>` :
                         "";
 
+                const deleteMarkup =
+                    request.status === "cancelled" ?
+                        `<button type="button" class="errand-accept-btn secondary" data-delete-craft-id="${request.id}">Delete</button>` :
+                        "";
+
                 return `
                     <div class="errand-card">
                         <div class="errand-card-top">
@@ -20197,6 +20202,7 @@ async function loadMyCraftRequests() {
                         ${payButton}
                         ${rateMarkup}
                         ${cancelMarkup}
+                        ${deleteMarkup}
                     </div>
                 `;
 
@@ -20249,7 +20255,60 @@ if (myCraftRequestsListEl) {
             return;
         }
 
+        const deleteBtn =
+            event.target.closest("[data-delete-craft-id]");
+
+        if (deleteBtn) {
+            deleteCraftRequest(deleteBtn.dataset.deleteCraftId);
+            return;
+        }
+
     });
+
+}
+
+async function deleteCraftRequest(requestId) {
+
+    if (!confirm("Delete this cancelled request? This can't be undone.")) return;
+
+    const student =
+        getStoredStudent();
+
+    if (!student) return;
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/api/craft-requests/" + requestId + "?studentId=" + student.id,
+                { method: "DELETE" }
+            );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            if (typeof showMessage === "function") {
+                showMessage(data.message || "Could not delete this request.");
+            }
+
+            return;
+
+        }
+
+        if (typeof loadMyCraftRequests === "function") {
+            loadMyCraftRequests();
+        }
+
+    } catch (error) {
+
+        console.error("Delete craft request error:", error);
+
+        if (typeof showMessage === "function") {
+            showMessage("Unable to connect to Kurios Stores server.");
+        }
+
+    }
 
 }
 
