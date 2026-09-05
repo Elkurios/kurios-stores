@@ -705,9 +705,113 @@
         margin-left: auto;
     }
 
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .admin-dialog-box {
+        background: white;
+        border-radius: 14px;
+        padding: 28px;
+        width: 380px;
+        max-width: calc(100% - 40px);
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .admin-dialog-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        margin: 0 auto 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        background: #fee2e2;
+        color: var(--red);
+    }
+
+    .admin-dialog-icon.info {
+        background: var(--purple-soft);
+        color: var(--purple);
+    }
+
+    .admin-dialog-box h3 {
+        font-size: 17px;
+        margin-bottom: 8px;
+    }
+
+    .admin-dialog-box p {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+        margin-bottom: 16px;
+    }
+
+    #adminDialogInput {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 13px;
+        margin-bottom: 16px;
+    }
+
+    .admin-dialog-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .admin-dialog-actions button {
+        flex: 1;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
 </style>
 </head>
 <body>
+
+<!-- CUSTOM CONFIRM / ALERT / PROMPT DIALOG -->
+
+<div class="modal-overlay" id="adminDialogOverlay" style="display: none;">
+
+    <div class="admin-dialog-box">
+
+        <div class="admin-dialog-icon" id="adminDialogIcon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+
+        <h3 id="adminDialogTitle">Are you sure?</h3>
+
+        <p id="adminDialogMessage"></p>
+
+        <input type="text" id="adminDialogInput" style="display: none;" placeholder="">
+
+        <div class="admin-dialog-actions">
+            <button type="button" id="adminDialogCancelBtn" class="btn-reject">Cancel</button>
+            <button type="button" id="adminDialogConfirmBtn" class="btn-approve">OK</button>
+        </div>
+
+    </div>
+
+</div>
+
 
 <!-- ADMIN LOGIN -->
 
@@ -921,6 +1025,105 @@
 
     const API_URL = "https://kurios-stores-backend.onrender.com";
 
+    // =========================================================
+    // CUSTOM CONFIRM / ALERT / PROMPT DIALOG
+    // (replaces native browser dialogs everywhere in admin)
+    // =========================================================
+
+    function showAdminDialog(mode, message, options) {
+
+        options = options || {};
+
+        return new Promise(function (resolve) {
+
+            const overlay = document.getElementById("adminDialogOverlay");
+            const titleEl = document.getElementById("adminDialogTitle");
+            const messageEl = document.getElementById("adminDialogMessage");
+            const iconEl = document.getElementById("adminDialogIcon");
+            const inputEl = document.getElementById("adminDialogInput");
+            const cancelBtn = document.getElementById("adminDialogCancelBtn");
+            const confirmBtn = document.getElementById("adminDialogConfirmBtn");
+
+            if (!overlay) {
+
+                if (mode === "prompt") resolve(window.prompt(message) || "");
+                else if (mode === "confirm") resolve(window.confirm(message));
+                else { window.alert(message); resolve(); }
+                return;
+
+            }
+
+            titleEl.textContent = options.title || (mode === "alert" ? "Notice" : "Are you sure?");
+            messageEl.textContent = message;
+
+            iconEl.className =
+                "admin-dialog-icon " + (options.danger === false ? "info" : "");
+
+            iconEl.innerHTML =
+                '<i class="fa-solid fa-' + (options.danger === false ? "circle-info" : "triangle-exclamation") + '"></i>';
+
+            confirmBtn.textContent = options.confirmText || "OK";
+            cancelBtn.style.display = mode === "alert" ? "none" : "";
+
+            inputEl.style.display = mode === "prompt" ? "block" : "none";
+            inputEl.value = "";
+            inputEl.placeholder = options.placeholder || "";
+
+            overlay.style.display = "flex";
+
+            if (mode === "prompt") {
+                setTimeout(function () { inputEl.focus(); }, 50);
+            }
+
+            function cleanup(result) {
+
+                overlay.style.display = "none";
+                confirmBtn.removeEventListener("click", onConfirm);
+                cancelBtn.removeEventListener("click", onCancel);
+                inputEl.removeEventListener("keydown", onKeydown);
+                resolve(result);
+
+            }
+
+            function onConfirm() {
+
+                if (mode === "prompt") cleanup(inputEl.value);
+                else if (mode === "confirm") cleanup(true);
+                else cleanup();
+
+            }
+
+            function onCancel() {
+
+                if (mode === "prompt") cleanup(null);
+                else cleanup(false);
+
+            }
+
+            function onKeydown(event) {
+                if (event.key === "Enter") onConfirm();
+            }
+
+            confirmBtn.addEventListener("click", onConfirm);
+            cancelBtn.addEventListener("click", onCancel);
+            inputEl.addEventListener("keydown", onKeydown);
+
+        });
+
+    }
+
+    function customConfirm(message, options) {
+        return showAdminDialog("confirm", message, options);
+    }
+
+    function customAlert(message, options) {
+        return showAdminDialog("alert", message, options);
+    }
+
+    function customPrompt(message, options) {
+        return showAdminDialog("prompt", message, options);
+    }
+
     const keyGate = document.getElementById("keyGate");
     const adminView = document.getElementById("adminView");
     const adminUsernameInput = document.getElementById("adminUsernameInput");
@@ -1096,8 +1299,8 @@
                 const rejectBtn = document.createElement("button");
                 rejectBtn.className = "btn-reject";
                 rejectBtn.textContent = "Reject";
-                rejectBtn.addEventListener("click", function () {
-                    const reason = prompt("Reason for rejecting this application (optional):") || "";
+                rejectBtn.addEventListener("click", async function () {
+                    const reason = (await customPrompt("Reason for rejecting this application (optional):")) || "";
                     updateStatus(seller.id, "reject", reason);
                 });
 
@@ -1109,8 +1312,8 @@
                 const suspendBtn = document.createElement("button");
                 suspendBtn.className = "btn-suspend";
                 suspendBtn.textContent = "Suspend";
-                suspendBtn.addEventListener("click", function () {
-                    if (confirm("Suspend " + seller.store_name + "?")) {
+                suspendBtn.addEventListener("click", async function () {
+                    if (await customConfirm("Suspend " + seller.store_name + "?", { confirmText: "Suspend" })) {
                         updateStatus(seller.id, "suspend");
                     }
                 });
@@ -1232,7 +1435,7 @@
             const data = await response.json();
 
             if (!data.success) {
-                alert(data.message || "Could not update seller status.");
+                await customAlert(data.message || "Could not update seller status.");
                 return;
             }
 
@@ -1240,7 +1443,7 @@
 
         } catch (error) {
 
-            alert("Could not connect to Kurios Stores server.");
+            await customAlert("Could not connect to Kurios Stores server.");
 
         }
 
@@ -1424,9 +1627,9 @@
 
                 toggleBtn.className = "btn-reject";
                 toggleBtn.textContent = "Suspend";
-                toggleBtn.addEventListener("click", function () {
+                toggleBtn.addEventListener("click", async function () {
 
-                    if (confirm("Suspend " + (fullName || "this student") + "? They won't be able to sign in.")) {
+                    if (await customConfirm("Suspend " + (fullName || "this student") + "? They won't be able to sign in.", { confirmText: "Suspend" })) {
                         updateStudentSuspension(student.id, true);
                     }
 
@@ -1442,9 +1645,9 @@
 
                 supportBtn.className = "btn-support-remove";
                 supportBtn.textContent = "Remove KSupport";
-                supportBtn.addEventListener("click", function () {
+                supportBtn.addEventListener("click", async function () {
 
-                    if (confirm("Remove KSupport access from " + (fullName || "this student") + "?")) {
+                    if (await customConfirm("Remove KSupport access from " + (fullName || "this student") + "?", { confirmText: "Remove" })) {
                         updateStudentSupportStatus(student.id, false);
                     }
 
@@ -1454,9 +1657,9 @@
 
                 supportBtn.className = "btn-support-add";
                 supportBtn.textContent = "Make KSupport";
-                supportBtn.addEventListener("click", function () {
+                supportBtn.addEventListener("click", async function () {
 
-                    if (confirm("Make " + (fullName || "this student") + " a KSupport staff member? They'll start receiving customer support conversations.")) {
+                    if (await customConfirm("Make " + (fullName || "this student") + " a KSupport staff member? They'll start receiving customer support conversations.", { danger: false, confirmText: "Make Staff" })) {
                         updateStudentSupportStatus(student.id, true);
                     }
 
@@ -1470,22 +1673,24 @@
             deleteBtn.className = "btn-reject";
             deleteBtn.textContent = "Delete Account";
 
-            deleteBtn.addEventListener("click", function () {
+            deleteBtn.addEventListener("click", async function () {
 
-                const firstConfirm = confirm(
+                const firstConfirm = await customConfirm(
                     "Permanently delete " + (fullName || "this student") + "? " +
-                    "This removes their account, orders, products, wallet history, messages, errands, and everything else tied to them. This cannot be undone."
+                    "This removes their account, orders, products, wallet history, messages, errands, and everything else tied to them. This cannot be undone.",
+                    { confirmText: "Delete" }
                 );
 
                 if (!firstConfirm) return;
 
-                const typedName = prompt(
-                    "Type the student's full name exactly to confirm: " + (fullName || "")
+                const typedName = await customPrompt(
+                    "Type the student's full name exactly to confirm: " + (fullName || ""),
+                    { placeholder: fullName || "" }
                 );
 
                 if (typedName !== fullName) {
 
-                    alert("Name didn't match — deletion cancelled.");
+                    await customAlert("Name didn't match — deletion cancelled.");
                     return;
 
                 }
@@ -1520,18 +1725,18 @@
 
             if (!data.success) {
 
-                alert(data.message || "Could not delete this student.");
+                await customAlert(data.message || "Could not delete this student.");
                 return;
 
             }
 
-            alert("Student deleted.");
+            await customAlert("Student deleted.", { danger: false });
             loadStudents();
 
         } catch (error) {
 
             console.error("Delete student error:", error);
-            alert("Unable to connect to Kurios Stores server.");
+            await customAlert("Unable to connect to Kurios Stores server.");
 
         }
 
@@ -1554,7 +1759,7 @@
             const data = await response.json();
 
             if (!data.success) {
-                alert(data.message || "Could not update this student's KSupport status.");
+                await customAlert(data.message || "Could not update this student's KSupport status.");
                 return;
             }
 
@@ -1563,7 +1768,7 @@
         } catch (error) {
 
             console.error("Update student support status error:", error);
-            alert("Unable to connect to Kurios Stores server.");
+            await customAlert("Unable to connect to Kurios Stores server.");
 
         }
 
@@ -1586,7 +1791,7 @@
             const data = await response.json();
 
             if (!data.success) {
-                alert(data.message || "Could not update this student's account.");
+                await customAlert(data.message || "Could not update this student's account.");
                 return;
             }
 
@@ -1594,7 +1799,7 @@
 
         } catch (error) {
 
-            alert("Could not connect to Kurios Stores server.");
+            await customAlert("Could not connect to Kurios Stores server.");
 
         }
 
@@ -2057,9 +2262,9 @@
                 const rejectBtn = document.createElement("button");
                 rejectBtn.className = "btn-reject";
                 rejectBtn.textContent = "Reject";
-                rejectBtn.addEventListener("click", function () {
+                rejectBtn.addEventListener("click", async function () {
 
-                    const note = prompt("Reason for rejecting this payout (the seller's balance will be refunded):");
+                    const note = await customPrompt("Reason for rejecting this payout (the seller's balance will be refunded):");
                     if (note === null) return;
 
                     updatePayoutStatus(payout.id, "reject", { adminNote: note });
@@ -2074,9 +2279,9 @@
                 const paidBtn = document.createElement("button");
                 paidBtn.className = "btn-approve";
                 paidBtn.textContent = "Mark as Paid";
-                paidBtn.addEventListener("click", function () {
+                paidBtn.addEventListener("click", async function () {
 
-                    const ref = prompt("Transaction reference for this transfer (optional):") || "";
+                    const ref = (await customPrompt("Transaction reference for this transfer (optional):")) || "";
                     updatePayoutStatus(payout.id, "mark-paid", { payoutReference: ref });
 
                 });
@@ -2084,9 +2289,9 @@
                 const rejectBtn = document.createElement("button");
                 rejectBtn.className = "btn-reject";
                 rejectBtn.textContent = "Reject";
-                rejectBtn.addEventListener("click", function () {
+                rejectBtn.addEventListener("click", async function () {
 
-                    const note = prompt("Reason for rejecting this payout (the seller's balance will be refunded):");
+                    const note = await customPrompt("Reason for rejecting this payout (the seller's balance will be refunded):");
                     if (note === null) return;
 
                     updatePayoutStatus(payout.id, "reject", { adminNote: note });
@@ -2127,7 +2332,7 @@
             const data = await response.json();
 
             if (!data.success) {
-                alert(data.message || "Could not update this payout.");
+                await customAlert(data.message || "Could not update this payout.");
                 return;
             }
 
@@ -2137,7 +2342,7 @@
         } catch (error) {
 
             console.error("Update payout status error:", error);
-            alert("Unable to connect to Kurios Stores server.");
+            await customAlert("Unable to connect to Kurios Stores server.");
 
         }
 
@@ -2287,7 +2492,7 @@
             const data = await response.json();
 
             if (!data.success) {
-                alert(data.message || "Could not update this report.");
+                await customAlert(data.message || "Could not update this report.");
                 return;
             }
 
@@ -2297,7 +2502,7 @@
         } catch (error) {
 
             console.error("Resolve report error:", error);
-            alert("Unable to connect to Kurios Stores server.");
+            await customAlert("Unable to connect to Kurios Stores server.");
 
         }
 
@@ -2483,7 +2688,7 @@
 
             if (!data.success) {
 
-                alert(data.message || "Could not save this setting.");
+                await customAlert(data.message || "Could not save this setting.");
 
             } else {
 
@@ -2495,7 +2700,7 @@
         } catch (error) {
 
             console.error("Save commission setting error:", error);
-            alert("Unable to connect to Kurios Stores server.");
+            await customAlert("Unable to connect to Kurios Stores server.");
 
         } finally {
 
