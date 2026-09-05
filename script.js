@@ -10831,21 +10831,11 @@ async function verifySellerApplicationPayment(paymentReference) {
 
     try {
 
-        const response =
-            await fetch(
-                API_URL + "/api/sellers/apply/verify-payment",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        paymentReference: paymentReference
-                    })
-                }
+        const data =
+            await verifyPaymentWithRetry(
+                "/api/sellers/apply/verify-payment",
+                { paymentReference: paymentReference }
             );
-
-        const data = await response.json();
 
         if (!data.success) {
 
@@ -16149,14 +16139,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
         localStorage.removeItem("kuriosPendingTopUpRef");
 
-        fetch(
-            API_URL + "/api/wallet/topup/verify",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ paymentReference: pendingTopUpRef })
+        verifyPaymentWithRetry(
+            "/api/wallet/topup/verify",
+            { paymentReference: pendingTopUpRef }
+        ).then(function (data) {
+
+            if (typeof showMessage === "function") {
+
+                showMessage(
+                    data.success ?
+                        "Wallet top-up confirmed." :
+                        data.message
+                );
+
             }
-        ).then(function () {
 
             const student = getStoredStudent();
 
@@ -18274,25 +18270,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         localStorage.removeItem("kuriosPendingErrandRef");
 
-        fetch(
-            API_URL + "/api/errands/verify",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ paymentReference: pendingErrandRef })
-            }
-        ).then(function (response) {
-
-            return response.json();
-
-        }).then(function (data) {
+        verifyPaymentWithRetry(
+            "/api/errands/verify",
+            { paymentReference: pendingErrandRef }
+        ).then(function (data) {
 
             if (typeof showMessage === "function") {
 
                 showMessage(
                     data.success ?
                         "Payment confirmed — your errand is now available to agents." :
-                        (data.message || "We couldn't confirm that payment yet.")
+                        data.message
                 );
 
             }
@@ -18968,25 +18956,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         localStorage.removeItem("kuriosPendingErrandItemCostRef");
 
-        fetch(
-            API_URL + "/api/errands/item-cost/verify",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ paymentReference: pendingItemCostRef })
-            }
-        ).then(function (response) {
-
-            return response.json();
-
-        }).then(function (data) {
+        verifyPaymentWithRetry(
+            "/api/errands/item-cost/verify",
+            { paymentReference: pendingItemCostRef }
+        ).then(function (data) {
 
             if (typeof showMessage === "function") {
 
                 showMessage(
                     data.success ?
                         "Item cost payment confirmed." :
-                        (data.message || "We couldn't confirm that payment yet.")
+                        data.message
                 );
 
             }
@@ -19665,25 +19645,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         localStorage.removeItem("kuriosPendingErrandAgentRef");
 
-        fetch(
-            API_URL + "/api/errand-agent/verify",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ paymentReference: pendingErrandAgentRef })
-            }
-        ).then(function (response) {
-
-            return response.json();
-
-        }).then(function (data) {
+        verifyPaymentWithRetry(
+            "/api/errand-agent/verify",
+            { paymentReference: pendingErrandAgentRef }
+        ).then(function (data) {
 
             if (typeof showMessage === "function") {
 
                 showMessage(
                     data.success ?
                         "You're now a registered Errand Agent!" :
-                        (data.message || "We couldn't confirm that payment yet.")
+                        data.message
                 );
 
             }
@@ -19705,25 +19677,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         localStorage.removeItem("kuriosPendingCraftRef");
 
-        fetch(
-            API_URL + "/api/craft-providers/verify",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ paymentReference: pendingCraftRef })
-            }
-        ).then(function (response) {
-
-            return response.json();
-
-        }).then(function (data) {
+        verifyPaymentWithRetry(
+            "/api/craft-providers/verify",
+            { paymentReference: pendingCraftRef }
+        ).then(function (data) {
 
             if (typeof showMessage === "function") {
 
                 showMessage(
                     data.success ?
                         "You're now a registered Craft provider!" :
-                        (data.message || "We couldn't confirm that payment yet.")
+                        data.message
                 );
 
             }
@@ -21028,25 +20992,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         localStorage.removeItem("kuriosPendingCraftRequestRef");
 
-        fetch(
-            API_URL + "/api/craft-requests/verify",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ paymentReference: pendingCraftRequestRef })
-            }
-        ).then(function (response) {
-
-            return response.json();
-
-        }).then(function (data) {
+        verifyPaymentWithRetry(
+            "/api/craft-requests/verify",
+            { paymentReference: pendingCraftRequestRef }
+        ).then(function (data) {
 
             if (typeof showMessage === "function") {
 
                 showMessage(
                     data.success ?
                         "Payment confirmed! Your provider can now start." :
-                        (data.message || "We couldn't confirm that payment yet.")
+                        data.message
                 );
 
             }
