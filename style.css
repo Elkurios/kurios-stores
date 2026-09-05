@@ -9746,3 +9746,58 @@ img {
     gap: 14px;
     margin-top: 6px;
 }
+
+
+/* Custom confirm/alert dialog — replaces native browser dialogs */
+
+.custom-dialog {
+    text-align: center;
+}
+
+.custom-dialog-icon.danger {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.custom-dialog-icon.info {
+    background: var(--purple-soft);
+    color: var(--purple);
+}
+
+.custom-dialog-message {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 4px 0 20px;
+}
+
+.custom-dialog-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.custom-dialog-actions .modal-close-text-btn {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin: 0;
+}
+
+.custom-dialog-actions .auth-button {
+    flex: 1;
+    margin: 0;
+}
+
+.custom-dialog-actions.alert-only .auth-button {
+    flex: 1;
+}
+
+
+.danger-button {
+    background: #dc2626 !important;
+}
+
+.danger-button:hover {
+    background: #b91c1c !important;
+}
