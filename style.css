@@ -9682,3 +9682,67 @@ img {
     font-size: 11px;
     color: #6b7280;
 }
+
+
+/* Shop search + filters */
+
+.shop-search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.shop-search-input-wrap {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.shop-search-input-wrap i {
+    position: absolute;
+    left: 14px;
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+.shop-search-input-wrap input {
+    width: 100%;
+    padding: 12px 14px 12px 38px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.shop-filter-toggle-btn {
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--text);
+    padding: 0 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.shop-filter-toggle-btn.active {
+    background: var(--purple);
+    color: white;
+    border-color: var(--purple);
+}
+
+.shop-filters-panel {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 18px;
+}
+
+.shop-filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 6px;
+}
