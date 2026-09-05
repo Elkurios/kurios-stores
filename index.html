@@ -4271,13 +4271,19 @@
                 <i class="fa-solid fa-location-crosshairs"></i>
             </div>
 
-            <h2>Tracking Your Agent</h2>
+            <h2 style="text-align: center;">Tracking Your Agent</h2>
+
+            <p id="errandTrackingElapsed" class="errand-tracking-timer">00:00</p>
 
             <p id="errandTrackingStatus" class="reset-passcode-intro" style="text-align:center;">
                 Loading your agent's location...
             </p>
 
             <div id="errandTrackingMap"></div>
+
+            <button type="button" id="errandTrackingChatBtn" class="auth-button" style="margin-top: 12px; display: none;">
+                <i class="fa-solid fa-comment"></i> Message Agent
+            </button>
 
             <button type="button" class="modal-close-text-btn" id="errandTrackingCloseBtn">Close</button>
 
