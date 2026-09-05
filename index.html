@@ -4236,6 +4236,33 @@
          TRACK AGENT MODAL (live GPS map)
     ====================================================== -->
 
+    <!-- =====================================================
+         CUSTOM CONFIRM / ALERT DIALOG (replaces native
+         browser confirm()/alert() everywhere on the site)
+    ====================================================== -->
+
+    <div class="modal-overlay" id="customDialogModal">
+
+        <div class="auth-modal custom-dialog">
+
+            <div class="auth-icon custom-dialog-icon" id="customDialogIcon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+
+            <h2 id="customDialogTitle" style="text-align: center;">Are you sure?</h2>
+
+            <p id="customDialogMessage" class="custom-dialog-message"></p>
+
+            <div class="custom-dialog-actions">
+                <button type="button" id="customDialogCancelBtn" class="modal-close-text-btn">Cancel</button>
+                <button type="button" id="customDialogConfirmBtn" class="auth-button">OK</button>
+            </div>
+
+        </div>
+
+    </div>
+
+
     <div class="modal-overlay" id="errandTrackingModal">
 
         <div class="auth-modal tracking-modal">
