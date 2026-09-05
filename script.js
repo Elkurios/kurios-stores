@@ -621,7 +621,7 @@ document.addEventListener("DOMContentLoaded", function () {
        ===================================================== */
 
 
-    async function loadProducts() {
+    async function loadProducts(filters) {
 
 
         /*
@@ -633,10 +633,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
 
+            const params =
+                new URLSearchParams();
+
+            if (filters) {
+
+                if (filters.search) params.set("search", filters.search);
+                if (filters.category) params.set("category", filters.category);
+                if (filters.minPrice) params.set("minPrice", filters.minPrice);
+                if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
+                if (filters.sort) params.set("sort", filters.sort);
+
+            }
+
+            const queryString =
+                params.toString();
 
             const response =
                 await fetch(
-                    API_URL + "/api/products"
+                    API_URL + "/api/products" + (queryString ? "?" + queryString : "")
                 );
 
 
@@ -1111,108 +1126,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
-       10. PRODUCT FILTERS
+       10. PRODUCT FILTERS (now handled server-side —
+       see the Shop search bar wiring further down)
        ===================================================== */
-
-
-    const filterButtons =
-        document.querySelectorAll(
-            ".filter-button"
-        );
-
-
-
-    filterButtons.forEach(
-        function (button) {
-
-
-            button.addEventListener(
-                "click",
-                function () {
-
-
-                    /*
-                        Remove active state
-                        from all buttons.
-                    */
-
-                    filterButtons.forEach(
-                        function (item) {
-
-                            item.classList.remove(
-                                "active"
-                            );
-
-                        }
-                    );
-
-
-
-                    /*
-                        Activate clicked button.
-                    */
-
-                    button.classList.add(
-                        "active"
-                    );
-
-
-
-                    const selectedCategory =
-                        button.dataset.filter;
-
-
-
-                    const productCards =
-                        document.querySelectorAll(
-                            ".product-card"
-                        );
-
-
-
-                    productCards.forEach(
-                        function (card) {
-
-
-                            if (
-                                selectedCategory ===
-                                "all"
-                            ) {
-
-                                card.style.display =
-                                    "";
-
-                                return;
-
-                            }
-
-
-
-                            if (
-                                card.dataset.category ===
-                                selectedCategory
-                            ) {
-
-                                card.style.display =
-                                    "";
-
-                            }
-
-                            else {
-
-                                card.style.display =
-                                    "none";
-
-                            }
-
-                        }
-                    );
-
-                }
-            );
-
-        }
-    );
 
 
 
@@ -7178,10 +7094,6 @@ showOtpVerificationScreen(
 
             showSimplePage("shopPage");
 
-            if (typeof loadProducts === "function") {
-                loadProducts();
-            }
-
             if (window.__kuriosPendingShopFilter) {
 
                 const pendingCategory =
@@ -7189,21 +7101,20 @@ showOtpVerificationScreen(
 
                 window.__kuriosPendingShopFilter = null;
 
-                setTimeout(
-                    function () {
+                const categorySelect =
+                    document.getElementById("shopCategorySelect");
 
-                        const filterBtn =
-                            document.querySelector(
-                                '.filter-button[data-filter="' + pendingCategory + '"]'
-                            );
+                if (categorySelect) {
+                    categorySelect.value = pendingCategory;
+                }
 
-                        if (filterBtn) {
-                            filterBtn.click();
-                        }
+                if (typeof loadProducts === "function") {
+                    loadProducts({ category: pendingCategory });
+                }
 
-                    },
-                    100
-                );
+            } else if (typeof loadProducts === "function") {
+
+                loadProducts();
 
             }
 
@@ -21733,3 +21644,139 @@ document.querySelectorAll('input[name="deliveryMethod"]').forEach(function (radi
     });
 
 });
+
+
+// =========================================================
+// SHOP SEARCH + FILTERS
+// =========================================================
+
+function getCurrentShopFilters() {
+
+    const search =
+        document.getElementById("shopSearchInput");
+
+    const category =
+        document.getElementById("shopCategorySelect");
+
+    const minPrice =
+        document.getElementById("shopMinPriceInput");
+
+    const maxPrice =
+        document.getElementById("shopMaxPriceInput");
+
+    const sort =
+        document.getElementById("shopSortSelect");
+
+    return {
+        search: search ? search.value.trim() : "",
+        category: category ? category.value : "",
+        minPrice: minPrice ? minPrice.value : "",
+        maxPrice: maxPrice ? maxPrice.value : "",
+        sort: sort ? sort.value : "newest"
+    };
+
+}
+
+let __kuriosShopSearchDebounce = null;
+
+const shopSearchInput =
+    document.getElementById("shopSearchInput");
+
+if (shopSearchInput) {
+
+    shopSearchInput.addEventListener("input", function () {
+
+        if (__kuriosShopSearchDebounce) {
+            clearTimeout(__kuriosShopSearchDebounce);
+        }
+
+        __kuriosShopSearchDebounce = setTimeout(function () {
+
+            if (typeof loadProducts === "function") {
+                loadProducts(getCurrentShopFilters());
+            }
+
+        }, 400);
+
+    });
+
+}
+
+const shopFilterToggleBtn =
+    document.getElementById("shopFilterToggleBtn");
+
+if (shopFilterToggleBtn) {
+
+    shopFilterToggleBtn.addEventListener("click", function () {
+
+        const panel =
+            document.getElementById("shopFiltersPanel");
+
+        if (!panel) return;
+
+        const isOpen =
+            panel.style.display === "block";
+
+        panel.style.display = isOpen ? "none" : "block";
+        shopFilterToggleBtn.classList.toggle("active", !isOpen);
+
+    });
+
+}
+
+const shopApplyFiltersBtn =
+    document.getElementById("shopApplyFiltersBtn");
+
+if (shopApplyFiltersBtn) {
+
+    shopApplyFiltersBtn.addEventListener("click", function () {
+
+        if (typeof loadProducts === "function") {
+            loadProducts(getCurrentShopFilters());
+        }
+
+    });
+
+}
+
+const shopClearFiltersBtn =
+    document.getElementById("shopClearFiltersBtn");
+
+if (shopClearFiltersBtn) {
+
+    shopClearFiltersBtn.addEventListener("click", function () {
+
+        const categorySelect = document.getElementById("shopCategorySelect");
+        const minPriceInput = document.getElementById("shopMinPriceInput");
+        const maxPriceInput = document.getElementById("shopMaxPriceInput");
+        const sortSelect = document.getElementById("shopSortSelect");
+        const searchInput = document.getElementById("shopSearchInput");
+
+        if (categorySelect) categorySelect.value = "";
+        if (minPriceInput) minPriceInput.value = "";
+        if (maxPriceInput) maxPriceInput.value = "";
+        if (sortSelect) sortSelect.value = "newest";
+        if (searchInput) searchInput.value = "";
+
+        if (typeof loadProducts === "function") {
+            loadProducts();
+        }
+
+    });
+
+}
+
+const shopSortSelectEl =
+    document.getElementById("shopSortSelect");
+
+if (shopSortSelectEl) {
+
+    shopSortSelectEl.addEventListener("change", function () {
+
+        if (typeof loadProducts === "function") {
+            loadProducts(getCurrentShopFilters());
+        }
+
+    });
+
+}
