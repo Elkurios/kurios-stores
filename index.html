@@ -268,7 +268,7 @@
         <i class="fa-solid fa-grid-2"></i>
 
         <span>
-            🏠 Dashboard
+            Dashboard
         </span>
 
     </a>
@@ -2940,6 +2940,16 @@
                         Pay with Paystack
                     </button>
 
+                    <button
+                        type="button"
+                        id="payWithWalletButton"
+                        class="auth-button wallet-pay-button"
+                        style="margin-top: 10px; display: none;"
+                    >
+                        <i class="fa-solid fa-wallet"></i>
+                        Pay with Wallet (<span id="payWithWalletBalanceLabel">₦0</span>)
+                    </button>
+
                 </div>
 
             </div>
@@ -3847,9 +3857,14 @@
                     Pay with OPay
                 </button>
 
-                <button type="button" id="errandAgentPayPaystackBtn" class="auth-button paystack-button">
+                <button type="button" id="errandAgentPayPaystackBtn" class="auth-button paystack-button" style="margin-bottom: 10px;">
                     <i class="fa-solid fa-credit-card"></i>
                     Pay with Paystack
+                </button>
+
+                <button type="button" id="errandAgentPayWalletBtn" class="auth-button wallet-pay-button" style="display: none;">
+                    <i class="fa-solid fa-wallet"></i>
+                    Pay with Wallet (<span id="errandAgentPayWalletBalanceLabel">₦0</span>)
                 </button>
 
             </div>
@@ -4046,9 +4061,14 @@
                     Pay with OPay
                 </button>
 
-                <button type="button" id="craftPayPaystackBtn" class="auth-button paystack-button">
+                <button type="button" id="craftPayPaystackBtn" class="auth-button paystack-button" style="margin-bottom: 10px;">
                     <i class="fa-solid fa-credit-card"></i>
                     Pay with Paystack
+                </button>
+
+                <button type="button" id="craftPayWalletBtn" class="auth-button wallet-pay-button" style="display: none;">
+                    <i class="fa-solid fa-wallet"></i>
+                    Pay with Wallet (<span id="craftPayWalletBalanceLabel">₦0</span>)
                 </button>
 
             </div>
@@ -4124,9 +4144,14 @@
                 Pay with OPay
             </button>
 
-            <button type="button" id="errandPayItemPaystackBtn" class="auth-button paystack-button">
+            <button type="button" id="errandPayItemPaystackBtn" class="auth-button paystack-button" style="margin-bottom: 10px;">
                 <i class="fa-solid fa-credit-card"></i>
                 Pay with Paystack
+            </button>
+
+            <button type="button" id="errandPayItemWalletBtn" class="auth-button wallet-pay-button" style="display: none;">
+                <i class="fa-solid fa-wallet"></i>
+                Pay with Wallet (<span id="errandPayItemWalletBalanceLabel">₦0</span>)
             </button>
 
             <button type="button" class="modal-close-text-btn" id="errandPayItemCancelBtn">Cancel</button>
@@ -4171,9 +4196,14 @@
                 Pay with OPay
             </button>
 
-            <button type="button" id="craftPayModalPaystackBtn" class="auth-button paystack-button">
+            <button type="button" id="craftPayModalPaystackBtn" class="auth-button paystack-button" style="margin-bottom: 10px;">
                 <i class="fa-solid fa-credit-card"></i>
                 Pay with Paystack
+            </button>
+
+            <button type="button" id="craftPayModalWalletBtn" class="auth-button wallet-pay-button" style="display: none;">
+                <i class="fa-solid fa-wallet"></i>
+                Pay with Wallet (<span id="craftPayModalWalletBalanceLabel">₦0</span>)
             </button>
 
             <button type="button" class="modal-close-text-btn" id="craftPayModalCancelBtn">Cancel</button>
@@ -4395,9 +4425,14 @@
                     Pay with OPay
                 </button>
 
-                <button type="button" id="errandPayPaystackBtn" class="auth-button paystack-button">
+                <button type="button" id="errandPayPaystackBtn" class="auth-button paystack-button" style="margin-bottom: 10px;">
                     <i class="fa-solid fa-credit-card"></i>
                     Pay with Paystack
+                </button>
+
+                <button type="button" id="errandPayWalletBtn" class="auth-button wallet-pay-button" style="display: none;">
+                    <i class="fa-solid fa-wallet"></i>
+                    Pay with Wallet (<span id="errandPayWalletBalanceLabel">₦0</span>)
                 </button>
 
             </div>
@@ -4587,9 +4622,14 @@
                 Pay with OPay
             </button>
 
-            <button type="button" id="orderCheckoutPaystackBtn" class="auth-button paystack-button">
+            <button type="button" id="orderCheckoutPaystackBtn" class="auth-button paystack-button" style="margin-bottom: 10px;">
                 <i class="fa-solid fa-credit-card"></i>
                 Pay with Paystack
+            </button>
+
+            <button type="button" id="orderCheckoutWalletBtn" class="auth-button wallet-pay-button" style="display: none;">
+                <i class="fa-solid fa-wallet"></i>
+                Pay with Wallet (<span id="orderCheckoutWalletBalanceLabel">₦0</span>)
             </button>
 
             <button type="button" class="modal-close-text-btn" id="orderCheckoutCancelBtn">Cancel</button>
